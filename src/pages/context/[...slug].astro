@@ -1,0 +1,50 @@
+---
+import ContextPaneWrapper from "@components/ContextPaneWrapper.astro";
+import ImpressionWrapper from "@components/ImpressionWrapper";
+import Layout from "@layouts/Layout.astro";
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import { getContextPaneBySlug } from "../../api/turso";
+import type { StylesVersion, Current } from "../../types";
+
+const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
+const requestStyles = await fetch(stylesVerUrl);
+const stylesVer: StylesVersion =
+  requestStyles.status === 404 ? 0 : await requestStyles.json();
+const stylesUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/frontend.css?v=${stylesVer?.v || 0}`;
+
+const { slug } = Astro.params;
+if (!slug) return Astro.redirect("/404");
+const pane = await getContextPaneBySlug(slug);
+if (!pane || !pane.panePayload) return Astro.redirect("/404");
+
+// id for this context pane
+const current: Current = {
+  id: pane.id,
+  slug: pane.slug,
+  title: pane.title,
+};
+---
+
+<Layout
+  title={pane.title}
+  pubDatetime={pane.created}
+  modDatetime={pane.changed}
+  stylesUrl={stylesUrl}
+>
+  <Header title={pane.title} slug="context" impressions={pane.impressions} />
+  <main id="main-content">
+    <ContextPaneWrapper
+      pane={pane.panePayload}
+      resources={pane.resourcesPayload}
+      codeHookOptions={pane.codeHookOptions}
+      current={current}
+    />
+  </main>
+  {
+    pane.impressions?.length ? (
+      <ImpressionWrapper payload={pane.impressions} client:load />
+    ) : null
+  }
+  <Footer created={pane.created} />
+</Layout>

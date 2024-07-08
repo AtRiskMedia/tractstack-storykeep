@@ -1,0 +1,97 @@
+---
+import { Home } from "./icons/Home";
+import Menu from "./Menu";
+import { StorySteps } from "./other/StorySteps";
+import { RememberMe } from "./other/RememberMe";
+import ImpressionWrapper from "@components/ImpressionWrapper";
+import { CartIcon } from "./other/CartIcon";
+import { WORDMARK_MODE } from "../constants";
+import type { MenuDatum, ImpressionDatum } from "../types";
+
+export interface Props {
+  title: string;
+  slug: string;
+  menu?: MenuDatum | null;
+  impressions?: ImpressionDatum[];
+}
+
+const { title, slug, menu, impressions } = Astro.props;
+const isHome = slug === import.meta.env.PUBLIC_HOME;
+const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
+---
+
+<header class="relative bg-white shadow-inner">
+  <div
+    class="flex flex-row flex-nowrap items-center justify-between py-3 px-4 md:px-8"
+  >
+    <a href="/" title="Home page">
+      <div class="flex flex-row flex-nowrap items-center h-auto">
+        {
+          [`default`, `logo`].includes(WORDMARK_MODE) ? (
+            <>
+              <object
+                type="image/svg+xml"
+                data="/custom/logo.svg"
+                class="h-8 w-auto pointer-events-none"
+                aria-label="Logo"
+              >
+                Logo
+              </object>
+              <span class="w-2" />
+            </>
+          ) : null
+        }
+        {
+          [`default`, `wordmark`].includes(WORDMARK_MODE) ? (
+            <object
+              type="image/svg+xml"
+              data="/custom/wordmark.svg"
+              aria-label="Wordmark"
+              class="h-14 w-auto max-w-48 md:max-w-72 pointer-events-none"
+            >
+              Wordmark
+            </object>
+          ) : null
+        }
+      </div>
+    </a>
+    {!!menu ? <Menu payload={menu} client:load /> : null}
+  </div>
+  <div
+    class="flex flex-row flex-nowrap justify-between pt-4 pb-3
+px-4 md:px-8 bg-mywhite shadow-inner"
+  >
+    <h1 class="text-mydarkgrey truncate text-xl" title={title}>{title}</h1>
+    <div class="flex flex-row flex-nowrap">
+      {
+        !isHome ? (
+          <a
+            href="/"
+            class="text-myblue/80 hover:text-myblue hover:rotate-6"
+            title="Go to home page"
+          >
+            <Home classes="w-6 h-6 mx-2" />
+          </a>
+        ) : null
+      }
+      {
+        !disableFastTravel ? (
+          <a
+            href="/concierge/graph"
+            class="text-myblue/80 hover:text-myblue hover:rotate-6"
+            title="Your Content Journey"
+          >
+            <StorySteps client:load />
+          </a>
+        ) : null
+      }
+      <RememberMe client:load />
+      <CartIcon client:load />
+      {
+        impressions?.length ? (
+          <ImpressionWrapper payload={impressions} icon={true} client:load />
+        ) : null
+      }
+    </div>
+  </div>
+</header>

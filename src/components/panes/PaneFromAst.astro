@@ -1,0 +1,246 @@
+---
+import { YouTubeWrapper } from "@components/other/YouTubeWrapper";
+import { BunnyVideo } from "@components/other/BunnyVideo";
+import { Belief } from "@components/widgets/Belief";
+import { IdentifyAs } from "@components/widgets/IdentifyAs";
+import { ToggleBelief } from "@components/widgets/ToggleBelief";
+import { AstToButton } from "@components/panes/AstToButton";
+import { classNames } from "../../utils/helpers";
+import { lispLexer } from "../../utils/concierge/lispLexer";
+import { preParseAction } from "../../utils/concierge/preParseAction";
+import type { ButtonData, FileNode } from "../../types";
+
+interface Props {
+  payload: {
+    ast: any[];
+    imageData: FileNode[];
+    buttonData: { [key: string]: ButtonData };
+  };
+  thisClassNames: any;
+  memory: any;
+  paneId: string;
+  slug: string;
+  idx: number;
+  outerIdx: number;
+}
+
+const { payload, thisClassNames, paneId, slug, idx, outerIdx } = Astro.props;
+
+let memory = { ...Astro.props.memory };
+
+const thisAst = payload.ast.at(0);
+
+const Tag = thisAst?.tagName || thisAst?.type;
+
+// if string[], use idx to select correct nth style to inject
+// must increment memory index
+if (thisAst?.tagName && typeof thisClassNames[thisAst?.tagName] === `object`) {
+  if (typeof memory[thisAst.tagName] !== `undefined`)
+    memory[thisAst.tagName] = memory[thisAst.tagName] + 1;
+  else memory[thisAst.tagName] = 0;
+}
+const injectClassNames =
+  typeof thisAst?.tagName === `undefined`
+    ? ``
+    : typeof thisClassNames[thisAst?.tagName] === `string`
+      ? thisClassNames[thisAst?.tagName]
+      : typeof thisClassNames[thisAst?.tagName] !== `undefined` &&
+          typeof thisClassNames[thisAst?.tagName][memory[thisAst.tagName]] !==
+            `undefined`
+        ? thisClassNames[thisAst?.tagName][memory[thisAst.tagName]]
+        : ``;
+
+// applies only when Tag === `a`
+// Tag === `a` and has buttonPayload is rendered in an island
+const buttonPayload =
+  typeof thisAst.properties?.href === `string` &&
+  thisAst.children[0]?.type === `text` &&
+  typeof thisAst.children[0]?.value === `string` &&
+  typeof payload?.buttonData === `object` &&
+  Object.keys(payload?.buttonData).length &&
+  thisAst.properties?.href &&
+  typeof payload?.buttonData[thisAst.properties.href] !== `undefined`
+    ? payload.buttonData[thisAst.properties.href]
+    : undefined;
+const callbackPayload =
+  buttonPayload?.callbackPayload && lispLexer(buttonPayload?.callbackPayload);
+const targetUrl = callbackPayload && preParseAction(callbackPayload);
+const isExternalUrl =
+  (typeof targetUrl === `string` && targetUrl.substring(0, 8) === `https://`) ||
+  (typeof thisAst.properties?.href === `string` &&
+    thisAst.properties.href.substring(0, 8) === `https://`);
+
+// applies only when Tag === `img`
+const altText =
+  thisAst.properties?.alt ||
+  `This should be descriptive text of an image | We apologize the alt text is missing.`;
+const injectClassNamesImgWrapper =
+  thisAst.tagName &&
+  typeof thisClassNames.imgWrapper !== `undefined` &&
+  typeof thisClassNames.imgWrapper === `string`
+    ? thisClassNames.imgWrapper
+    : thisAst.tagName &&
+        typeof thisClassNames.imgWrapper !== `undefined` &&
+        typeof thisClassNames.imgWrapper === `object`
+      ? thisClassNames.imgWrapper[
+          thisAst.tagName && typeof memory.imgWrapper !== `undefined`
+            ? memory.imgWrapper + 1
+            : 0
+        ]
+      : ``;
+const injectClassNamesImg =
+  thisAst.tagName &&
+  typeof thisClassNames.img !== `undefined` &&
+  typeof thisClassNames.img === `string`
+    ? thisClassNames.img
+    : thisAst.tagName &&
+        typeof thisClassNames.img !== `undefined` &&
+        typeof thisClassNames.img === `object`
+      ? thisClassNames.img[
+          thisAst.tagName && typeof memory.img !== `undefined`
+            ? memory.img + 1
+            : 0
+        ]
+      : ``;
+const thisImage = payload?.imageData?.filter(
+  (image: any) => image.filename === thisAst.properties?.src
+)[0];
+const imageSrc = thisImage?.optimizedSrc || thisImage?.src || null;
+
+// applies only when Tag === `code`
+// currently supported: YouTube, Bunny, toggle, belief, *resource not implemented
+const regexpHook = /(identifyAs|youtube|bunny|toggle|resource|belief)\((.*?)\)/;
+const regexpValues = /((?:[^\\|]+|\\\|?)+)/g;
+const thisHookRaw =
+  thisAst?.children?.length && thisAst.children[0].value?.match(regexpHook);
+const hook =
+  thisHookRaw && typeof thisHookRaw[1] === `string` ? thisHookRaw[1] : null;
+const thisHookPayload =
+  thisHookRaw && typeof thisHookRaw[2] === `string` ? thisHookRaw[2] : null;
+const thisHookValuesRaw =
+  thisHookPayload && thisHookPayload.match(regexpValues);
+const value1 =
+  thisHookValuesRaw && thisHookValuesRaw.length ? thisHookValuesRaw[0] : null;
+const value2 =
+  thisHookValuesRaw && thisHookValuesRaw.length > 1
+    ? thisHookValuesRaw[1]
+    : null;
+const value3 =
+  thisHookValuesRaw && thisHookValuesRaw.length > 2 ? thisHookValuesRaw[2] : ``;
+---
+
+{Tag === `text` ? thisAst.value : null}
+{Tag === `br` ? <br /> : null}
+{
+  [
+    `p`,
+    `em`,
+    `strong`,
+    `ol`,
+    `ul`,
+    `li`,
+    `h1`,
+    `h2`,
+    `h3`,
+    `h4`,
+    `h5`,
+    `h6`,
+  ].includes(Tag) ? (
+    <Tag class={classNames(injectClassNames)}>
+      {thisAst?.children?.map((p: any) => (
+        <Astro.self
+          payload={{ ...payload, ast: [p] }}
+          thisClassNames={thisClassNames}
+          memory={memory}
+          paneId={paneId}
+          slug={slug}
+          idx={idx + 1}
+          outerIdx={outerIdx}
+        />
+      ))}
+    </Tag>
+  ) : null
+}
+{
+  Tag === `a` && isExternalUrl ? (
+    <a
+      target="_blank"
+      rel="noreferrer"
+      class={buttonPayload?.className || injectClassNames}
+      href={targetUrl || thisAst.properties.href}
+    >
+      {thisAst.children[0].value}
+    </a>
+  ) : null
+}
+{
+  Tag === `a` &&
+  !isExternalUrl &&
+  buttonPayload &&
+  thisAst.children[0].type === `text` &&
+  thisAst.children[0].value ? (
+    <AstToButton
+      client:visible
+      className={buttonPayload.className || ``}
+      callbackPayload={callbackPayload}
+      targetUrl={targetUrl}
+      slug={slug}
+      paneId={paneId}
+      text={thisAst.children[0].value}
+    />
+  ) : null
+}
+{
+  Tag === `img` && imageSrc ? (
+    <img
+      class={classNames(
+        injectClassNames,
+        injectClassNamesImgWrapper,
+        injectClassNamesImg
+      )}
+      src={imageSrc}
+      alt={altText}
+    />
+  ) : null
+}
+{
+  Tag === `code` && hook === `youtube` && value1 ? (
+    <div class={injectClassNames}>
+      <YouTubeWrapper client:visible title={value1} />
+    </div>
+  ) : null
+}
+{
+  Tag === `code` && hook === `bunny` && value1 && value2 ? (
+    <div class={injectClassNames}>
+      <BunnyVideo client:load videoUrl={value1} title={value2} slug={slug} />
+    </div>
+  ) : null
+}
+{
+  Tag === `code` && hook === `belief` && value1 && value2 ? (
+    <div class={injectClassNames}>
+      <Belief
+        client:visible
+        value={{ slug: value1, scale: value2, extra: value3 }}
+      />
+    </div>
+  ) : null
+}
+{
+  Tag === `code` && hook === `identifyAs` && value1 && value2 ? (
+    <div class={injectClassNames}>
+      <IdentifyAs
+        client:visible
+        value={{ slug: value1, target: value2, extra: value3 }}
+      />
+    </div>
+  ) : null
+}
+{
+  Tag === `code` && hook === `toggle` && value1 && value2 ? (
+    <div class={injectClassNames}>
+      <ToggleBelief client:visible belief={value1} prompt={value2} />
+    </div>
+  ) : null
+}

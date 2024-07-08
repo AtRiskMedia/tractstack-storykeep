@@ -1,0 +1,15 @@
+import type { Site } from "./types";
+
+export const SITE: Site = {
+  website: "https://tractstack.com/", // replace this with your domain
+  author: "At Risk Media",
+  desc: "Story Keeper Analytics + Web Press",
+  title: "TractStack",
+  ogImage: "og.png",
+  ogLogo: "logo.png",
+};
+
+export const LOCALE = {
+  lang: "en",
+  langTag: ["en-EN"],
+} as const;

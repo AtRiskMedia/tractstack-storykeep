@@ -1,0 +1,24 @@
+---
+//import Branding from "./Branding";
+//import Hero from "./Hero.astro";
+import type { ResourceDatum } from "../types";
+
+interface Props {
+  target: string;
+  resources: ResourceDatum[] | null;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  options: any | null;
+}
+
+const { target, options, /* resources */ } = Astro.props;
+
+/* copy below fences:
+{
+  target === `Branding` ? (
+    <Branding client:idle payload={resources || []} />
+  ) : target === `Hero` ? (
+    <Hero />
+  ) : null
+}
+*/
+---

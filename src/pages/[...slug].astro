@@ -1,0 +1,78 @@
+---
+import StoryFragmentWrapper from "@components/StoryFragmentWrapper.astro";
+import ImpressionWrapper from "@components/ImpressionWrapper";
+import Layout from "@layouts/Layout.astro";
+import Header from "@components/Header.astro";
+import HeaderWidget from "../custom/HeaderWidget.astro";
+import Footer from "@components/Footer.astro";
+import { getStoryFragmentBySlug } from "../api/turso";
+import { ENABLE_HEADER_WIDGET } from "../constants";
+import type { Current, StylesVersion } from "../types";
+
+// get styles offset
+const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
+const requestStyles = await fetch(stylesVerUrl);
+const stylesVer: StylesVersion =
+  requestStyles.status === 404 ? 0 : await requestStyles.json();
+const stylesUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/frontend.css?v=${stylesVer?.v || 0}`;
+
+// which storyfragment?
+const { slug } = Astro.params;
+const lookup = slug || import.meta.env.PUBLIC_HOME;
+if (slug === import.meta.env.PUBLIC_HOME) return Astro.redirect("/");
+if (!lookup) return Astro.redirect("/404");
+
+// get storyfragment datum
+const storyfragment = await getStoryFragmentBySlug(lookup);
+if (!storyfragment) {
+  return Astro.redirect("/404");
+}
+
+// id for this storyfragment
+const current: Current = {
+  id: storyfragment.id,
+  slug: storyfragment.slug,
+  title: storyfragment.title,
+  parentId: storyfragment.tractStackId,
+  parentSlug: storyfragment.tractStackSlug,
+  parentTitle: storyfragment.tractStackTitle,
+};
+---
+
+<Layout
+  title={storyfragment.title}
+  pubDatetime={storyfragment.created}
+  modDatetime={storyfragment.changed}
+  ogImage={storyfragment.socialImagePath}
+  stylesUrl={stylesUrl}
+>
+  {
+    ENABLE_HEADER_WIDGET ? (
+      <HeaderWidget resources={storyfragment.resourcesPayload.headerWidget} />
+    ) : null
+  }
+  <Header
+    title={storyfragment.title}
+    menu={storyfragment.menuPayload}
+    slug={lookup}
+    impressions={storyfragment.impressions}
+  />
+  <main id="main-content">
+    <StoryFragmentWrapper
+      tailwindBgColour={storyfragment.tailwindBgColour}
+      panesPayload={storyfragment.panesPayload}
+      current={current}
+      resourcesPayload={storyfragment.resourcesPayload}
+    />
+  </main>
+  {
+    storyfragment.impressions?.length ? (
+      <ImpressionWrapper payload={storyfragment.impressions} client:idle />
+    ) : null
+  }
+  <Footer
+    created={storyfragment.created}
+    menu={storyfragment.menuPayload}
+    backToTop={true}
+  />
+</Layout>

@@ -19,7 +19,6 @@ const makeShopifyRequest = async (
 ) => {
   const isSSR = import.meta.env.SSR;
   const apiUrl = `https://${config.shopifyShop}/api/${config.apiVersion}/graphql.json`;
-
   function getOptions() {
     // If the request is made from the server, we need to pass the private access token and the buyer IP
     isSSR &&

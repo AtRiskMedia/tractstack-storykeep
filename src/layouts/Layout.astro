@@ -105,12 +105,9 @@ const contentMap: ContentMap[] = await getContentMap();
     <script async is:inline define:vars={{ gtagUrl }} src={gtagUrl}></script>
     <script is:inline>
       window.dataLayer = window.dataLayer || [];
-      const googleSiteVerification = import.meta.env
-        .PUBLIC_GOOGLE_SITE_VERIFICATION;
-      googleSiteVerification &&
-        function gtag() {
-          dataLayer.push(arguments);
-        };
+      function gtag() {
+        dataLayer.push(arguments);
+      }
     </script>
 
     <!-- Tract Stack Concierge -->

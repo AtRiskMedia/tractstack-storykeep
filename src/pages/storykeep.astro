@@ -8,8 +8,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Website Builder Edit-in-Place</title>
   </head>
-  <body class="min-h-screen flex flex-col">
-    <div id="website-content" class="flex-grow overflow-y-auto relative">
+  <body class="bg-slate-50">
+    <div class="p-4">
+      <button class="viewport-button" data-viewport="auto">Auto</button>
+      <button class="viewport-button" data-viewport="mobile">Mobile</button>
+      <button class="viewport-button" data-viewport="tablet">Tablet</button>
+      <button class="viewport-button" data-viewport="desktop">Desktop</button>
+    </div>
+    <div
+      id="website-content"
+      class="flex-grow overflow-y-auto relative bg-white max-w-[1920px]"
+    >
       <div>
         <h1 class="text-2xl font-bold p-4">Website Content</h1>
         <!-- Add your content here -->
@@ -171,6 +180,33 @@
       </div>
       <div class="flex-grow overflow-y-auto p-4">
         <p id="element-info-desktop"></p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
         <!-- Add your edit mode content here -->
       </div>
     </div>
@@ -199,6 +235,24 @@
         flex-grow: 1;
         overflow-y: auto;
       }
+      #edit-modal-desktop {
+        transition:
+          transform 0.3s,
+          right 0.3s;
+      }
+
+      .viewport-button {
+        padding: 0.5rem 1rem;
+        background-color: #e2e8f0;
+        border: 1px solid #cbd5e0;
+        border-radius: 0.25rem;
+        cursor: pointer;
+      }
+
+      .viewport-button.active {
+        background-color: #4299e1;
+        color: white;
+      }
     </style>
 
     <script>
@@ -215,8 +269,42 @@
         const elementInfoDesktop = document.getElementById(
           "element-info-desktop"
         );
+        const viewportButtons = document.querySelectorAll(".viewport-button");
 
         const SHORT_SCREEN_THRESHOLD = 800; // Adjust this value as needed
+
+        function setViewport(viewport) {
+          websiteContent.classList.remove(
+            "min-w-[600px]",
+            "max-w-[800px]",
+            "min-w-[1024px]",
+            "max-w-[1367px]",
+            "min-w-[1400px]",
+            "max-w-[1920px]"
+          );
+
+          switch (viewport) {
+            case "mobile":
+              websiteContent.classList.add("min-w-[600px]", "max-w-[800px]");
+              break;
+            case "tablet":
+              websiteContent.classList.add("min-w-[1024px]", "max-w-[1367px]");
+              break;
+            case "desktop":
+              websiteContent.classList.add("min-w-[1400px]", "max-w-[1920px]");
+              break;
+            case "auto":
+              websiteContent.classList.add("max-w-[1920px]");
+              break;
+          }
+
+          viewportButtons.forEach(button => {
+            button.classList.toggle(
+              "active",
+              button.dataset.viewport === viewport
+            );
+          });
+        }
 
         function centerEditableElement(element) {
           const isDesktop = window.innerWidth >= 1367; // xl breakpoint
@@ -249,15 +337,26 @@
         function openEditMode(element) {
           isEditModeOpening = true;
           const isDesktop = window.innerWidth >= 1367;
-          const editPaneHeight = isDesktop ? 0 : window.innerHeight / 3;
+          const isShortScreen = window.innerHeight < SHORT_SCREEN_THRESHOLD;
+          let editPaneHeight;
 
           if (isDesktop) {
             websiteContent.classList.add("edit-mode");
             editModalDesktop.classList.remove("translate-x-full");
             editModalMobile.classList.add("translate-y-full");
+            editPaneHeight = 0;
           } else {
             editModalMobile.classList.remove("translate-y-full");
             editModalDesktop.classList.add("translate-x-full");
+
+            if (isShortScreen) {
+              editModalMobile.classList.add("full-height");
+              editPaneHeight = window.innerHeight;
+            } else {
+              editModalMobile.classList.remove("full-height");
+              editPaneHeight = window.innerHeight / 3;
+            }
+
             websiteContent.style.paddingBottom = `${editPaneHeight}px`;
           }
 
@@ -274,8 +373,14 @@
             const windowHeight = window.innerHeight;
             const visibleHeight = windowHeight - editPaneHeight;
 
-            const targetScrollTop =
-              scrollTop + rect.top - visibleHeight / 2 + rect.height / 2;
+            let targetScrollTop;
+            if (isShortScreen && !isDesktop) {
+              // For short screens on mobile, don't scroll
+              targetScrollTop = scrollTop;
+            } else {
+              targetScrollTop =
+                scrollTop + rect.top - visibleHeight / 2 + rect.height / 2;
+            }
 
             window.scrollTo({
               top: Math.max(0, targetScrollTop),
@@ -294,6 +399,7 @@
           websiteContent.classList.remove("edit-mode");
           editModalDesktop.classList.add("translate-x-full");
           editModalMobile.classList.add("translate-y-full");
+          editModalMobile.classList.remove("full-height");
           websiteContent.style.paddingBottom = "0";
 
           elementInfo.textContent = "";
@@ -334,19 +440,61 @@
           const activeElement = document.querySelector(
             ".editable-element.active"
           );
+          const currentViewport = getCurrentViewport();
+
+          // Adjust edit panel positioning for wide screens
+          if (
+            window.innerWidth > 1920 &&
+            (currentViewport === "desktop" || currentViewport === "auto")
+          ) {
+            const contentWidth = 1920;
+            const rightOffset = (window.innerWidth - contentWidth) / 2;
+            editModalDesktop.style.right = `${rightOffset}px`;
+          } else {
+            editModalDesktop.style.right = "0";
+          }
 
           if (activeElement) {
-            // Close current edit mode
             closeEditMode();
-
-            // Reopen edit mode with correct positioning
             setTimeout(() => {
               openEditMode(activeElement);
             }, 0);
           } else {
-            // If no active element, just ensure everything is closed
             closeEditMode();
           }
+
+          // Ensure the edit pane is fully hidden when not in use
+          if (!isDesktop) {
+            editModalDesktop.classList.add("translate-x-full");
+          } else {
+            editModalMobile.classList.add("translate-y-full");
+          }
+        }
+
+        function getCurrentViewport() {
+          if (websiteContent.classList.contains("min-w-[600px]"))
+            return "mobile";
+          if (websiteContent.classList.contains("min-w-[1024px]"))
+            return "tablet";
+          if (websiteContent.classList.contains("min-w-[1400px]"))
+            return "desktop";
+          return "auto";
+        }
+
+        function closeEditMode() {
+          const isDesktop = window.innerWidth >= 1367;
+
+          websiteContent.classList.remove("edit-mode");
+          editModalDesktop.classList.add("translate-x-full");
+          editModalMobile.classList.add("translate-y-full");
+          editModalMobile.classList.remove("full-height");
+          websiteContent.style.paddingBottom = "0";
+
+          elementInfo.textContent = "";
+          elementInfoDesktop.textContent = "";
+
+          // Remove the active class from all editable elements
+          editableElements.forEach(el => el.classList.remove("active"));
         }
 
         // Debounce function (keep this as is)
@@ -362,11 +510,11 @@
           };
         }
 
-        // Add scroll event listener
-        window.addEventListener(
-          "scroll",
-          debounce(checkElementVisibility, 100)
-        );
+        viewportButtons.forEach(button => {
+          button.addEventListener("click", () => {
+            setViewport(button.dataset.viewport);
+          });
+        });
 
         editableElements.forEach(element => {
           element.addEventListener("click", () => {
@@ -390,6 +538,8 @@
 
         closeModalMobile.addEventListener("click", closeEditMode);
         closeModalDesktop.addEventListener("click", closeEditMode);
+
+        setViewport("auto");
       }
 
       // Ensure the script runs after the DOM is fully loaded

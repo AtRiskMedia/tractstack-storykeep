@@ -166,6 +166,30 @@
       <h3 class="text-lg font-semibold mb-2">Edit Mode (Mobile/Tablet)</h3>
       <p id="edit-info-mobile"></p>
       <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
+      <p>lorem ipsum</p>
     </div>
 
     <script>
@@ -194,20 +218,22 @@
           currentViewport = viewport;
           websiteContent.classList.remove(
             "w-full",
-            "max-w-[600px]",
-            "max-w-[1024px]",
-            "max-w-[1920px]",
-            "w-[1500px]"
+            "max-w-[800px]",
+            "min-w-[600px]",
+            "min-w-[1024px]",
+            "max-w-[1367px]",
+            "min-w-[1500px]",
+            "max-w-[1920px]"
           );
 
           if (viewport === "auto") {
             websiteContent.classList.add("w-full", "max-w-[1920px]");
           } else if (viewport === "xs") {
-            websiteContent.classList.add("max-w-[600px]");
+            websiteContent.classList.add("min-w-[600px]", "max-w-[800px]");
           } else if (viewport === "md") {
-            websiteContent.classList.add("max-w-[1024px]");
+            websiteContent.classList.add("min-w-[1024px]", "max-w-[1366px]");
           } else if (viewport === "xl") {
-            websiteContent.classList.add("max-w-[1920px]", "w-[1500px]");
+            websiteContent.classList.add("min-w-[1500px]", "max-w-[1920px]");
           }
 
           viewportButtons.forEach(button => {

@@ -1,0 +1,399 @@
+---
+
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Builder Edit-in-Place</title>
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <div id="website-content" class="flex-grow overflow-y-auto relative">
+      <div>
+        <h1 class="text-2xl font-bold p-4">Website Content</h1>
+        <!-- Add your content here -->
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <div class="editable-element p-4 bg-gray-100 m-4" data-element-id="1">
+          <p>This is an editable element at the top. Click to edit.</p>
+        </div>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <div class="editable-element p-4 bg-gray-100 m-4" data-element-id="2">
+          <p>This is an editable element in the middle. Click to edit.</p>
+        </div>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <div class="editable-element p-4 bg-gray-100 m-4" data-element-id="3">
+          <p>This is an editable element at the bottom. Click to edit.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit modal for mobile and tablet (xs to xl) -->
+    <div
+      id="edit-modal-mobile"
+      class="fixed inset-x-0 bottom-0 bg-white shadow-lg transform translate-y-full transition-transform duration-300 xl:hidden z-10 flex flex-col"
+    >
+      <div class="p-4 border-b">
+        <button
+          id="close-modal-mobile"
+          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <h2 class="text-xl font-semibold">Edit Mode (Mobile/Tablet)</h2>
+      </div>
+      <div class="flex-grow overflow-y-auto p-4">
+        <p id="element-info"></p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+      </div>
+    </div>
+
+    <!-- Edit modal for desktop (xl and above) -->
+    <div
+      id="edit-modal-desktop"
+      class="fixed top-0 right-0 w-1/5 h-screen bg-white shadow-lg transform translate-x-full transition-transform duration-300 xl:block z-10 flex flex-col"
+    >
+      <div class="p-4 border-b">
+        <button
+          id="close-modal-desktop"
+          class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+        <h2 class="text-xl font-semibold">Edit Mode (Desktop)</h2>
+      </div>
+      <div class="flex-grow overflow-y-auto p-4">
+        <p id="element-info-desktop"></p>
+        <!-- Add your edit mode content here -->
+      </div>
+    </div>
+
+    <style>
+      #edit-modal-mobile {
+        height: 33.333vh;
+      }
+      @media (min-width: 1367px) {
+        #website-content.edit-mode {
+          width: 80%;
+        }
+      }
+      #edit-modal-mobile.full-height {
+        height: 100vh;
+      }
+
+      /* New styles for scrollable content */
+      #edit-modal-mobile,
+      #edit-modal-desktop {
+        display: flex;
+        flex-direction: column;
+      }
+      #edit-modal-mobile > div:last-child,
+      #edit-modal-desktop > div:last-child {
+        flex-grow: 1;
+        overflow-y: auto;
+      }
+    </style>
+
+    <script>
+      function initializeEditor() {
+        const websiteContent = document.getElementById("website-content");
+        const editModalMobile = document.getElementById("edit-modal-mobile");
+        const editModalDesktop = document.getElementById("edit-modal-desktop");
+        const closeModalMobile = document.getElementById("close-modal-mobile");
+        const closeModalDesktop = document.getElementById(
+          "close-modal-desktop"
+        );
+        const editableElements = document.querySelectorAll(".editable-element");
+        const elementInfo = document.getElementById("element-info");
+        const elementInfoDesktop = document.getElementById(
+          "element-info-desktop"
+        );
+
+        const SHORT_SCREEN_THRESHOLD = 800; // Adjust this value as needed
+
+        function centerEditableElement(element) {
+          const isDesktop = window.innerWidth >= 1367; // xl breakpoint
+          const isShortScreen = window.innerHeight < SHORT_SCREEN_THRESHOLD;
+
+          if (isShortScreen && !isDesktop) return; // Don't scroll on short screens
+
+          const rect = element.getBoundingClientRect();
+          const scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+
+          let targetScrollTop;
+          if (isDesktop) {
+            targetScrollTop =
+              scrollTop + rect.top - (window.innerHeight - rect.height) / 2;
+          } else {
+            const availableHeight = window.innerHeight * (2 / 3);
+            targetScrollTop =
+              scrollTop + rect.top - (availableHeight - rect.height) / 2;
+          }
+
+          window.scrollTo({
+            top: targetScrollTop,
+            behavior: "smooth",
+          });
+        }
+
+        let isEditModeOpening = false;
+
+        function openEditMode(element) {
+          isEditModeOpening = true;
+          const isDesktop = window.innerWidth >= 1367;
+          const editPaneHeight = isDesktop ? 0 : window.innerHeight / 3;
+
+          if (isDesktop) {
+            websiteContent.classList.add("edit-mode");
+            editModalDesktop.classList.remove("translate-x-full");
+            editModalMobile.classList.add("translate-y-full");
+          } else {
+            editModalMobile.classList.remove("translate-y-full");
+            editModalDesktop.classList.add("translate-x-full");
+            websiteContent.style.paddingBottom = `${editPaneHeight}px`;
+          }
+
+          const elementIndex =
+            Array.from(editableElements).indexOf(element) + 1;
+          const infoText = `Editing element ${elementIndex} of ${editableElements.length}`;
+          elementInfo.textContent = infoText;
+          elementInfoDesktop.textContent = infoText;
+
+          setTimeout(() => {
+            const rect = element.getBoundingClientRect();
+            const scrollTop =
+              window.pageYOffset || document.documentElement.scrollTop;
+            const windowHeight = window.innerHeight;
+            const visibleHeight = windowHeight - editPaneHeight;
+
+            const targetScrollTop =
+              scrollTop + rect.top - visibleHeight / 2 + rect.height / 2;
+
+            window.scrollTo({
+              top: Math.max(0, targetScrollTop),
+              behavior: "smooth",
+            });
+
+            setTimeout(() => {
+              isEditModeOpening = false;
+            }, 300);
+          }, 50);
+        }
+
+        function closeEditMode() {
+          const isDesktop = window.innerWidth >= 1367;
+
+          websiteContent.classList.remove("edit-mode");
+          editModalDesktop.classList.add("translate-x-full");
+          editModalMobile.classList.add("translate-y-full");
+          websiteContent.style.paddingBottom = "0";
+
+          elementInfo.textContent = "";
+          elementInfoDesktop.textContent = "";
+        }
+
+        function checkElementVisibility() {
+          if (isEditModeOpening) return; // Don't check visibility while opening edit mode
+
+          const isDesktop = window.innerWidth >= 1367;
+          const activeElement = document.querySelector(
+            ".editable-element.active"
+          );
+          if (!activeElement) return;
+
+          const rect = activeElement.getBoundingClientRect();
+          const windowHeight = window.innerHeight;
+          const editPaneHeight = isDesktop ? 0 : windowHeight / 3;
+
+          let isVisible;
+          if (isDesktop) {
+            // For desktop, consider the element visible if it's anywhere in the viewport
+            isVisible = rect.top < windowHeight && rect.bottom > 0;
+          } else {
+            // For mobile, consider the element visible if it's above the edit pane
+            isVisible =
+              rect.top < windowHeight - editPaneHeight && rect.bottom > 0;
+          }
+
+          if (!isVisible) {
+            closeEditMode();
+            activeElement.classList.remove("active");
+          }
+        }
+
+        function handleResize() {
+          const isDesktop = window.innerWidth >= 1367;
+          const activeElement = document.querySelector(
+            ".editable-element.active"
+          );
+
+          if (activeElement) {
+            // Close current edit mode
+            closeEditMode();
+
+            // Reopen edit mode with correct positioning
+            setTimeout(() => {
+              openEditMode(activeElement);
+            }, 0);
+          } else {
+            // If no active element, just ensure everything is closed
+            closeEditMode();
+          }
+        }
+
+        // Debounce function (keep this as is)
+        function debounce(func, wait) {
+          let timeout;
+          return function executedFunction(...args) {
+            const later = () => {
+              clearTimeout(timeout);
+              func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+          };
+        }
+
+        // Add scroll event listener
+        window.addEventListener(
+          "scroll",
+          debounce(checkElementVisibility, 100)
+        );
+
+        editableElements.forEach(element => {
+          element.addEventListener("click", () => {
+            editableElements.forEach(el => el.classList.remove("active"));
+            element.classList.add("active");
+            openEditMode(element);
+          });
+        });
+
+        window.addEventListener(
+          "scroll",
+          debounce(checkElementVisibility, 100)
+        );
+        window.addEventListener("resize", debounce(handleResize, 250));
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape") {
+            closeEditMode();
+          }
+        });
+
+        closeModalMobile.addEventListener("click", closeEditMode);
+        closeModalDesktop.addEventListener("click", closeEditMode);
+      }
+
+      // Ensure the script runs after the DOM is fully loaded
+      document.addEventListener("DOMContentLoaded", initializeEditor);
+    </script>
+  </body>
+</html>

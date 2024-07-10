@@ -14,7 +14,8 @@
   </head>
   <body class="m-0 p-0 flex flex-col bg-slate-50">
     <header
-      class="sticky top-0 z-10 bg-white shadow-md p-4 flex justify-between items-center"
+      class="z-10 bg-white shadow-md p-4 flex justify-between items-center"
+      id="main-header"
     >
       <h1 class="text-2xl font-bold">StoryKeep</h1>
       <div class="flex space-x-2">
@@ -41,6 +42,12 @@
       <main class="website-content flex-1 overflow-y-auto p-4 bg-white">
         <h2 class="text-xl font-semibold mb-4">Website Content</h2>
         <p>lorem ipsum</p>
+        <div
+          class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
+          data-element-id="1"
+        >
+          <p>This is an editable element. Click to edit.</p>
+        </div>
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
@@ -63,7 +70,7 @@
         <p>lorem ipsum</p>
         <div
           class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
-          data-element-id="1"
+          data-element-id="2"
         >
           <p>This is an editable element. Click to edit.</p>
         </div>
@@ -97,6 +104,12 @@
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
+        <div
+          class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
+          data-element-id="3"
+        >
+          <p>This is an editable element. Click to edit.</p>
+        </div>
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
@@ -161,35 +174,37 @@
     </div>
 
     <div
-      class="edit-modal-mobile hidden fixed bottom-0 left-0 right-0 bg-white shadow-md p-4 z-5 transition-all duration-300"
+      class="edit-modal-mobile hidden fixed bg-white shadow-md z-5 transition-all duration-300 flex flex-col w-full"
     >
       <h3 class="text-lg font-semibold mb-2">Edit Mode (Mobile/Tablet)</h3>
-      <p id="edit-info-mobile"></p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
-      <p>lorem ipsum</p>
+      <div class="overflow-y-auto p-4 flex-grow">
+        <p id="edit-info-mobile"></p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+      </div>
     </div>
 
     <script>
@@ -213,6 +228,100 @@
         let currentViewport = "auto";
         let isEditMode = false;
         let activeElement = null;
+
+        function closeEditMode() {
+          if (isEditMode) {
+            toggleEditMode(activeElement);
+          }
+        }
+
+        function handleEditModeLayout() {
+          const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+          const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
+          const header = document.getElementById("main-header");
+          const headerHeight = header.offsetHeight;
+          const isHeaderSticky = header.classList.contains("sticky");
+
+          mainContent.classList.toggle("xl:pr-1/5", isEditMode && isDesktop);
+
+          if (isDesktop) {
+            editPane.classList.toggle("hidden", !isEditMode);
+            editModalMobile.classList.add("hidden");
+            if (isEditMode) {
+              websiteContent.classList.add("xl:w-4/5");
+              editPane.classList.add("xl:w-1/5");
+
+              editPane.style.top = "0";
+              editPane.style.height = "100vh";
+              editPane.style.paddingTop = "0";
+
+              // Always scroll the header out of view when entering edit mode
+              if (!isHeaderSticky) {
+                scrollHeaderOutOfView();
+              }
+            } else {
+              websiteContent.classList.remove("xl:w-4/5");
+              editPane.classList.remove("xl:w-1/5");
+            }
+          } else {
+            // Mobile layout
+            editPane.classList.add("hidden");
+            editModalMobile.classList.toggle("hidden", !isEditMode);
+
+            if (isEditMode) {
+              if (isShortScreen && !isHeaderSticky) {
+                editModalMobile.classList.add("top-0");
+                editModalMobile.classList.remove("bottom-0");
+                editModalMobile.style.top = "0";
+                editModalMobile.style.height = "100%";
+                websiteContent.classList.remove("pb-1/3");
+              } else {
+                editModalMobile.classList.remove("top-0");
+                editModalMobile.classList.add("bottom-0");
+                editModalMobile.style.top = "auto";
+                editModalMobile.style.height = `${window.innerHeight / 3}px`;
+                websiteContent.classList.add("pb-1/3");
+              }
+              // Always scroll the header out of view when entering edit mode
+              if (!isHeaderSticky) {
+                scrollHeaderOutOfView();
+              }
+            } else {
+              websiteContent.classList.remove("pb-1/3");
+            }
+          }
+        }
+
+        function toggleEditMode(element) {
+          if (isEditMode && element !== activeElement) {
+            closeEditMode();
+          }
+          isEditMode = !isEditMode;
+          activeElement = isEditMode ? element : null;
+
+          if (isEditMode) {
+            const elementIndex =
+              Array.from(editableElements).indexOf(element) + 1;
+            const infoText = `Editing element ${elementIndex} of ${editableElements.length}`;
+            editInfo.textContent = infoText;
+            editInfoMobile.textContent = infoText;
+
+            // Only scroll header out of view if the element is behind it
+            if (isElementBehindHeader(element)) {
+              scrollHeaderOutOfView();
+              // Wait for scrolling to complete before centering
+              setTimeout(centerActiveElement, 300);
+            } else {
+              centerActiveElement();
+            }
+
+            handleEditModeLayout();
+          } else {
+            editInfo.textContent = "";
+            editInfoMobile.textContent = "";
+            handleEditModeLayout();
+          }
+        }
 
         function setViewport(viewport) {
           currentViewport = viewport;
@@ -254,109 +363,110 @@
           handleEditModeLayout();
         }
 
-        function toggleEditMode(element) {
-          isEditMode = !isEditMode;
-          activeElement = isEditMode ? element : null;
-
-          if (isEditMode) {
-            const elementIndex =
-              Array.from(editableElements).indexOf(element) + 1;
-            const infoText = `Editing element ${elementIndex} of ${editableElements.length}`;
-            editInfo.textContent = infoText;
-            editInfoMobile.textContent = infoText;
-          } else {
-            editInfo.textContent = "";
-            editInfoMobile.textContent = "";
-          }
-
-          handleEditModeLayout();
-          if (isEditMode) centerActiveElement();
+        function isElementBehindHeader(element) {
+          const header = document.getElementById("main-header");
+          const headerBottom = header.getBoundingClientRect().bottom;
+          const elementTop = element.getBoundingClientRect().top;
+          return elementTop < headerBottom;
         }
 
-        function handleEditModeLayout() {
-          const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-          const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
-
-          mainContent.classList.toggle("xl:pr-1/5", isEditMode);
-
-          if (isDesktop) {
-            editPane.classList.toggle("hidden", !isEditMode);
-            editModalMobile.classList.add("hidden");
-            if (isEditMode) {
-              websiteContent.classList.add("xl:w-4/5");
-              editPane.classList.add("xl:w-1/5");
-              editPane.style.top = `${document.querySelector("header").offsetHeight}px`;
-            } else {
-              websiteContent.classList.remove("xl:w-4/5");
-              editPane.classList.remove("xl:w-1/5");
-            }
-          } else {
-            editPane.classList.add("hidden");
-            editModalMobile.classList.toggle("hidden", !isEditMode);
-
-            if (isEditMode) {
-              const headerHeight =
-                document.querySelector("header").offsetHeight;
-              if (isShortScreen) {
-                editModalMobile.classList.add("top-0", "h-full");
-                editModalMobile.classList.remove("bottom-0");
-                editModalMobile.style.top = `${headerHeight}px`;
-                websiteContent.classList.remove("pb-1/3");
-              } else {
-                editModalMobile.classList.remove("top-0", "h-full");
-                editModalMobile.classList.add("bottom-0");
-                editModalMobile.style.height = `${window.innerHeight / 3}px`;
-                websiteContent.classList.add("pb-1/3");
-              }
-            } else {
-              websiteContent.classList.remove("pb-1/3");
-            }
-          }
+        function scrollHeaderOutOfView() {
+          const header = document.getElementById("main-header");
+          const headerHeight = header.offsetHeight;
+          window.scrollTo({
+            top: window.pageYOffset + headerHeight,
+            behavior: "smooth",
+          });
         }
 
         function centerActiveElement() {
           if (!activeElement) return;
 
           const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-          const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
+          const header = document.getElementById("main-header");
+          const headerHeight = header.offsetHeight;
+          const isHeaderSticky = header.classList.contains("sticky");
           const rect = activeElement.getBoundingClientRect();
           const scrollTop =
             window.pageYOffset || document.documentElement.scrollTop;
-          const headerHeight = document.querySelector("header").offsetHeight;
 
           let targetScrollTop;
           if (isDesktop) {
+            const editPaneHeight =
+              window.innerHeight - (isHeaderSticky ? headerHeight : 0);
             targetScrollTop =
-              scrollTop +
-              rect.top -
-              (window.innerHeight - headerHeight - rect.height) / 2;
+              scrollTop + rect.top - (editPaneHeight - rect.height) / 2;
           } else {
-            const editModalHeight = isShortScreen ? 0 : window.innerHeight / 3;
+            const editModalHeight = window.innerHeight / 3;
             const availableHeight =
-              window.innerHeight - headerHeight - editModalHeight;
+              window.innerHeight -
+              (isHeaderSticky ? headerHeight : 0) -
+              editModalHeight;
             targetScrollTop =
               scrollTop + rect.top - (availableHeight - rect.height) / 2;
           }
 
-          window.scrollTo({
-            top: Math.max(0, targetScrollTop),
-            behavior: "smooth",
-          });
+          // Only adjust for header if the element is behind it
+          if (isElementBehindHeader(activeElement)) {
+            targetScrollTop = Math.max(
+              targetScrollTop,
+              scrollTop + headerHeight
+            );
+          }
+
+          if (targetScrollTop !== scrollTop) {
+            window.scrollTo({
+              top: targetScrollTop,
+              behavior: "smooth",
+            });
+          }
+        }
+
+        function handleHeaderBehavior() {
+          const header = document.getElementById("main-header");
+          const viewportHeight = window.innerHeight;
+
+          if (viewportHeight > 1200) {
+            header.classList.add("sticky", "top-0");
+          } else {
+            header.classList.remove("sticky", "top-0");
+          }
+
+          handleEditModeLayout();
         }
 
         function checkElementVisibility() {
           if (!isEditMode || !activeElement) return;
 
           const rect = activeElement.getBoundingClientRect();
-          const headerHeight = document.querySelector("header").offsetHeight;
+          const header = document.getElementById("main-header");
+          const headerHeight = header.offsetHeight;
+          const isHeaderSticky = header.classList.contains("sticky");
           const editModalHeight =
             window.innerWidth >= BREAKPOINTS.xl ? 0 : window.innerHeight / 3;
           const visibleHeight =
-            window.innerHeight - headerHeight - editModalHeight;
+            window.innerHeight -
+            (isHeaderSticky ? headerHeight : 0) -
+            editModalHeight;
 
-          if (rect.top > visibleHeight || rect.bottom < headerHeight) {
+          if (
+            rect.top > visibleHeight ||
+            rect.bottom < (isHeaderSticky ? headerHeight : 0)
+          ) {
             toggleEditMode(activeElement);
           }
+        }
+
+        function debounce(func, wait) {
+          let timeout;
+          return function executedFunction(...args) {
+            const later = () => {
+              clearTimeout(timeout);
+              func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+          };
         }
 
         function handleResize() {
@@ -381,21 +491,17 @@
         );
         window.addEventListener("resize", debounce(handleResize, 250));
 
-        // Utility function
-        function debounce(func, wait) {
-          let timeout;
-          return function executedFunction(...args) {
-            const later = () => {
-              clearTimeout(timeout);
-              func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-          };
-        }
+        document.addEventListener("keydown", event => {
+          if (event.key === "Escape" && isEditMode) {
+            closeEditMode();
+          }
+        });
+
+        window.addEventListener("resize", debounce(handleHeaderBehavior, 250));
 
         // Initialize
         setViewport("auto");
+        handleHeaderBehavior();
       });
     </script>
   </body>

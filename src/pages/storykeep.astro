@@ -91,6 +91,16 @@
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
         <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
         <div
           class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
           data-element-id="3"
@@ -214,6 +224,10 @@
               editPane.style.height = isHeaderSticky
                 ? `calc(100vh - ${headerHeight}px)`
                 : "100vh";
+              if (isShortScreen) {
+                websiteContent.classList.remove("hidden");
+                scrollHeaderOutOfView();
+              }
             } else {
               editPane.classList.add("invisible", "opacity-0");
               editPane.classList.remove("visible", "opacity-100");
@@ -365,7 +379,9 @@
 
         function toggleOff(element) {
           const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
-          if (!isShortScreen && isEditMode && activeElement === element)
+          const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+          const hide = isDesktop || !isShortScreen;
+          if (hide && isEditMode && activeElement === element)
             toggleEditMode(element);
         }
 
@@ -379,6 +395,27 @@
               func.apply(context, args);
             }, delay);
           };
+        }
+
+        // helper fns to pass to react island
+        function toggleEditPane(isVisible) {
+          const editPane = document.querySelector(".edit-pane");
+          const editModalMobile = document.querySelector(".edit-modal-mobile");
+          const mainContent = document.querySelector(".website-content");
+
+          if (isVisible) {
+            editPane.classList.remove("invisible", "opacity-0");
+            editPane.classList.add("visible", "opacity-100");
+            editModalMobile.classList.remove("invisible", "opacity-0");
+            editModalMobile.classList.add("visible", "opacity-100");
+            mainContent.classList.add("xl:w-4/5");
+          } else {
+            editPane.classList.add("invisible", "opacity-0");
+            editPane.classList.remove("visible", "opacity-100");
+            editModalMobile.classList.add("invisible", "opacity-0");
+            editModalMobile.classList.remove("visible", "opacity-100");
+            mainContent.classList.remove("xl:w-4/5");
+          }
         }
 
         // Event Listeners
@@ -396,10 +433,16 @@
           "scroll",
           debounce(function () {
             const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+            const isHeaderSticky = header.classList.contains("sticky");
             const headerHeight = header.offsetHeight;
             const currentScrollTop =
               window.pageYOffset || document.documentElement.scrollTop;
-            if (isEditMode && isDesktop && currentScrollTop < headerHeight) {
+            if (
+              !isHeaderSticky &&
+              isEditMode &&
+              isDesktop &&
+              currentScrollTop < headerHeight
+            ) {
               editPane.style.marginTop = `${headerHeight - currentScrollTop}px`;
             } else {
               editPane.style.marginTop = "0px";
@@ -418,7 +461,7 @@
         const observer = new IntersectionObserver(entries => {
           entries.forEach(entry => {
             if (!entry.isIntersecting) {
-              // no longer in view
+              //const elementId = entry.target.dataset.elementId;
               toggleOff(entry.target);
             }
           });

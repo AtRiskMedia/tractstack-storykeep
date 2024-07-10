@@ -103,19 +103,61 @@
       </main>
 
       <aside
-        class="edit-pane hidden w-0 transition-all duration-300 bg-yellow-300 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0"
+        class="edit-pane invisible opacity-0 w-0 transition-all duration-300 ease-in-out bg-yellow-300 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0"
       >
         <h3 class="text-lg font-semibold mb-2">Edit Mode</h3>
         <p id="edit-info"></p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
       </aside>
     </div>
 
     <div
-      class="edit-modal-mobile hidden fixed bg-yellow-300 shadow-md z-20 transition-all duration-300 flex flex-col w-full"
+      class="edit-modal-mobile invisible opacity-0 fixed bg-yellow-300 shadow-md z-20 transition-all duration-300 ease-in-out flex flex-col w-full"
     >
       <h3 class="text-lg font-semibold mb-2">Edit Mode (Mobile/Tablet)</h3>
       <div class="overflow-y-auto p-4 flex-grow">
         <p id="edit-info-mobile"></p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
+        <p>lorem ipsum</p>
       </div>
     </div>
 
@@ -161,9 +203,11 @@
           mainContent.classList.toggle("xl:pr-1/5", isEditMode && isDesktop);
 
           if (isDesktop) {
-            editPane.classList.toggle("hidden", !isEditMode);
-            editModalMobile.classList.add("hidden");
             if (isEditMode) {
+              editPane.classList.remove("invisible", "opacity-0");
+              editPane.classList.add("visible", "opacity-100");
+              editModalMobile.classList.add("invisible", "opacity-0");
+              editModalMobile.classList.remove("visible", "opacity-100");
               websiteContent.classList.add("xl:w-4/5");
               editPane.classList.add("xl:w-1/5");
               editPane.style.top = isHeaderSticky ? `${headerHeight}px` : "0";
@@ -171,14 +215,19 @@
                 ? `calc(100vh - ${headerHeight}px)`
                 : "100vh";
             } else {
+              editPane.classList.add("invisible", "opacity-0");
+              editPane.classList.remove("visible", "opacity-100");
+              editModalMobile.classList.add("invisible", "opacity-0");
+              editModalMobile.classList.remove("visible", "opacity-100");
               websiteContent.classList.remove("xl:w-4/5");
               editPane.classList.remove("xl:w-1/5");
             }
           } else {
-            editPane.classList.add("hidden");
-            editModalMobile.classList.toggle("hidden", !isEditMode);
-
             if (isEditMode) {
+              editPane.classList.remove("visible", "opacity-100");
+              editPane.classList.add("invisible", "opacity-0");
+              editModalMobile.classList.remove("invisible", "opacity-0");
+              editModalMobile.classList.add("visible", "opacity-100");
               if (isShortScreen) {
                 editModalMobile.style.top = "0";
                 editModalMobile.style.bottom = "0";
@@ -200,6 +249,10 @@
                 scrollElementIntoView();
               }
             } else {
+              editPane.classList.remove("visible", "opacity-100");
+              editPane.classList.add("invisible", "opacity-0");
+              editModalMobile.classList.remove("visible", "opacity-100");
+              editModalMobile.classList.add("invisible", "opacity-0");
               websiteContent.style.paddingBottom = "0";
               websiteContent.classList.remove("hidden");
             }
@@ -304,9 +357,28 @@
         function handleResize() {
           handleHeaderBehavior();
           handleEditModeLayout();
-          if (!isEditMode) {
+          const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+          if (!isEditMode || isDesktop) {
             websiteContent.style.paddingBottom = "0";
           }
+        }
+
+        function toggleOff(element) {
+          const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
+          if (!isShortScreen && isEditMode && activeElement === element)
+            toggleEditMode(element);
+        }
+
+        function debounce(func, delay) {
+          let timer;
+          return function () {
+            let context = this;
+            let args = arguments;
+            clearTimeout(timer);
+            timer = setTimeout(function () {
+              func.apply(context, args);
+            }, delay);
+          };
         }
 
         // Event Listeners
@@ -320,6 +392,21 @@
           element.addEventListener("click", () => toggleEditMode(element));
         });
 
+        window.addEventListener(
+          "scroll",
+          debounce(function () {
+            const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+            const headerHeight = header.offsetHeight;
+            const currentScrollTop =
+              window.pageYOffset || document.documentElement.scrollTop;
+            if (isEditMode && isDesktop && currentScrollTop < headerHeight) {
+              editPane.style.marginTop = `${headerHeight - currentScrollTop}px`;
+            } else {
+              editPane.style.marginTop = "0px";
+            }
+          }, 100)
+        );
+
         window.addEventListener("resize", handleResize);
 
         document.addEventListener("keydown", event => {
@@ -327,6 +414,17 @@
             toggleEditMode(activeElement);
           }
         });
+
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) {
+              // no longer in view
+              toggleOff(entry.target);
+            }
+          });
+        });
+
+        editableElements.forEach(el => observer.observe(el));
 
         // Initialize
         handleHeaderBehavior();

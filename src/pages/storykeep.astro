@@ -497,7 +497,21 @@
         window.addEventListener(
           "scroll",
           debounce(() => {
-            // ...
+            const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+            const isHeaderSticky = header.classList.contains("sticky");
+            const headerHeight = header.offsetHeight;
+            const currentScrollTop =
+              window.pageYOffset || document.documentElement.scrollTop;
+            if (
+              !isHeaderSticky &&
+              isEditMode &&
+              isDesktop &&
+              currentScrollTop < headerHeight
+            ) {
+              editPane.style.marginTop = `${headerHeight - currentScrollTop}px`;
+            } else {
+              editPane.style.marginTop = "0px";
+            }
           }, 100)
         );
 

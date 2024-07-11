@@ -1,0 +1,119 @@
+---
+import Layout from "@layouts/StoryKeep.astro";
+import { getStoryFragmentBySlug } from "../../api/turso";
+
+// which storyfragment?
+const { slug } = Astro.params;
+const lookup = slug || import.meta.env.PUBLIC_HOME;
+if (slug === import.meta.env.PUBLIC_HOME) return Astro.redirect("/");
+if (!lookup) return Astro.redirect("/404");
+
+// set the canonicalUrl to the actual storyfragment
+const baseUrl = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(`/${lookup !== slug ? slug : ``}`, baseUrl).href;
+
+// get storyfragment datum
+const storyfragment = await getStoryFragmentBySlug(lookup);
+if (!storyfragment) {
+  return Astro.redirect("/404");
+}
+
+// id for this storyfragment
+const current: Current = {
+  id: storyfragment.id,
+  slug: storyfragment.slug,
+  title: storyfragment.title,
+  parentId: storyfragment.tractStackId,
+  parentSlug: storyfragment.tractStackSlug,
+  parentTitle: storyfragment.tractStackTitle,
+};
+---
+
+<Layout
+  title={storyfragment.title}
+  pubDatetime={storyfragment.created}
+  modDatetime={storyfragment.changed}
+  ogImage={storyfragment.socialImagePath}
+  canonicalURL={canonicalURL}
+>
+  <div class="m-0 p-0 flex flex-col bg-slate-50">
+    <header
+      class="z-10 bg-white shadow-md p-4 flex justify-between items-center"
+      id="main-header"
+    >
+      <h1 class="text-2xl font-bold">StoryKeep</h1>
+      <div class="flex space-x-2">
+        <button
+          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+          data-viewport="auto">Auto</button
+        >
+        <button
+          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+          data-viewport="xs">XS</button
+        >
+        <button
+          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+          data-viewport="md">MD</button
+        >
+        <button
+          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
+          data-viewport="xl">XL</button
+        >
+      </div>
+    </header>
+
+    <div class="flex-1 flex">
+      <main class="website-content flex-1 overflow-y-auto p-4 bg-white">
+        <h2 class="text-xl font-semibold mb-4">Website Content</h2>
+        <p>lorem ipsum</p>
+        <div
+          class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
+          data-element-id="1"
+        >
+          <p>This is an editable element. Click to edit.</p>
+        </div>
+        <p>lorem ipsum</p>
+        <div
+          class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
+          data-element-id="2"
+        >
+          <p>This is an editable element. Click to edit.</p>
+        </div>
+        <p>lorem ipsum</p>
+        <div
+          class="editable-element mt-4 p-2 border border-gray-300 rounded-md cursor-pointer"
+          data-element-id="3"
+        >
+          <p>This is an editable element. Click to edit.</p>
+        </div>
+        <p>lorem ipsum</p>
+      </main>
+
+      <aside
+        class="edit-pane invisible opacity-0 w-0 transition-all duration-300 ease-in-out bg-yellow-300 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0"
+      >
+        <h3 class="text-lg font-semibold mb-2">Edit Mode</h3>
+        <p id="edit-info"></p>
+        <p>lorem ipsum</p>
+      </aside>
+    </div>
+
+    <div
+      class="edit-modal-mobile invisible opacity-0 fixed bg-yellow-300 shadow-md z-20 transition-all duration-300 ease-in-out flex flex-col w-full"
+    >
+      <h3 class="text-lg font-semibold mb-2">Edit Mode (Mobile/Tablet)</h3>
+      <div class="overflow-y-auto p-4 flex-grow">
+        <p id="edit-info-mobile"></p>
+        <p>lorem ipsum</p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { initStoryKeep } from "../../utils/storykeep";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initStoryKeep();
+  });
+</script>

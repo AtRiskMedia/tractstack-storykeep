@@ -432,11 +432,6 @@ export type PanesVisible = {
   [key: string]: number | null;
 };
 
-export type BunnyWatch = {
-  slug: string;
-  t: number;
-};
-
 export interface TursoFileNode {
   filename: string;
   url: string;

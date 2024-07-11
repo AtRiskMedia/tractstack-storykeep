@@ -1,6 +1,6 @@
 ---
 import { YouTubeWrapper } from "@components/other/YouTubeWrapper";
-import { BunnyVideo } from "@components/other/BunnyVideo";
+import BunnyVideo from "@components/other/BunnyVideo.astro";
 import { Belief } from "@components/widgets/Belief";
 import { IdentifyAs } from "@components/widgets/IdentifyAs";
 import { ToggleBelief } from "@components/widgets/ToggleBelief";
@@ -213,7 +213,7 @@ const value3 =
 {
   Tag === `code` && hook === `bunny` && value1 && value2 ? (
     <div class={injectClassNames}>
-      <BunnyVideo client:load videoUrl={value1} title={value2} slug={slug} />
+      <BunnyVideo videoUrl={value1} title={value2} />
     </div>
   ) : null
 }

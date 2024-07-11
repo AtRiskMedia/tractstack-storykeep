@@ -1,10 +1,6 @@
 import { preParseClicked } from "../../utils/concierge/preParseClicked";
 import { preParseBunny } from "../../utils/concierge/preParseBunny";
-import {
-  events,
-  storyFragmentBunnyWatch,
-  contextBunnyWatch,
-} from "../../store/events";
+import { events } from "../../store/events";
 
 export const PlayButton = ({ className = "" }) => {
   return (
@@ -45,15 +41,17 @@ export function AstToButton({
   const event = preParseClicked(paneId, callbackPayload);
   const pushEvent = function (): void {
     if (bunny) {
-      if (bunny.isContext)
-        contextBunnyWatch.set({ slug, t: parseInt(bunny.t) || 0 });
-      else storyFragmentBunnyWatch.set({ slug, t: parseInt(bunny.t) || 0 });
-      const targetDiv = document.getElementById(`bunny`);
-      if (targetDiv) {
-        targetDiv.scrollIntoView({ behavior: "smooth" });
+      const videoContainer = document.getElementById("video-container");
+      if (videoContainer) {
+        videoContainer.scrollIntoView({ behavior: "smooth" });
+        // Dispatch custom event to update video start time
+        const event = new CustomEvent("updateVideo", {
+          detail: { startTime: `${bunny.t}s` },
+        });
+        document.dispatchEvent(event);
       }
+      if (event) events.set([...events.get(), event]);
     }
-    if (event) events.set([...events.get(), event]);
   };
   // if this is a bunny video event, check if same page
   if (bunny && bunny.slug === slug) {

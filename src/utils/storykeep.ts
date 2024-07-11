@@ -66,8 +66,7 @@ export async function initStoryKeep() {
     const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
     const headerHeight = header.offsetHeight;
     const isHeaderSticky = header.classList.contains("sticky");
-    const isHeaderBlocking = window.scrollY < headerHeight
-    console.log(isHeaderBlocking,headerHeight,window.scrollY,window.innerHeight)
+    const isHeaderBlocking = window.scrollY < headerHeight;
 
     mainContent.classList.toggle("xl:pr-1/3", isEditMode && isDesktop);
 
@@ -79,7 +78,8 @@ export async function initStoryKeep() {
         editModalMobile.classList.remove("visible", "opacity-100");
         websiteContent.classList.add("xl:w-2/3");
         editPane.classList.add("xl:w-1/3");
-        editPane.style.top = isHeaderSticky || isHeaderBlocking ? `${headerHeight}px` : "0";
+        editPane.style.top =
+          isHeaderSticky || isHeaderBlocking ? `${headerHeight}px` : "0";
         editPane.style.height = isHeaderSticky
           ? `calc(100vh - ${headerHeight}px)`
           : "100vh";

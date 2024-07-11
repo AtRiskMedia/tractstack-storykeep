@@ -1,5 +1,5 @@
 ---
-// Any Astro-specific imports or frontmatter can go here
+
 ---
 
 <html lang="en">
@@ -172,18 +172,49 @@
     </div>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const mainContent = document.querySelector(".flex-1.flex");
-        const websiteContent = document.querySelector(".website-content");
-        const editPane = document.querySelector(".edit-pane");
-        const editModalMobile = document.querySelector(".edit-modal-mobile");
-        const viewportButtons = document.querySelectorAll(".viewport-button");
-        const editableElements = document.querySelectorAll(".editable-element");
-        const editInfo = document.getElementById("edit-info");
-        const editInfoMobile = document.getElementById("edit-info-mobile");
-        const header = document.getElementById("main-header");
+      interface Breakpoints {
+        xs: number;
+        md: number;
+        xl: number;
+      }
+      interface EditableElement extends HTMLElement {
+        dataset: {
+          elementId: string;
+        };
+      }
 
-        const BREAKPOINTS = {
+      type Viewport = "auto" | "xs" | "md" | "xl";
+
+      interface EditableElement extends HTMLElement {
+        dataset: {
+          elementId: string;
+        };
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const mainContent = document.querySelector(
+          ".flex-1.flex"
+        ) as HTMLElement;
+        const websiteContent = document.querySelector(
+          ".website-content"
+        ) as HTMLElement;
+        const editPane = document.querySelector(".edit-pane") as HTMLElement;
+        const editModalMobile = document.querySelector(
+          ".edit-modal-mobile"
+        ) as HTMLElement;
+        const viewportButtons = document.querySelectorAll(
+          ".viewport-button"
+        ) as NodeListOf<Element>;
+        const editableElements = document.querySelectorAll(
+          ".editable-element"
+        ) as NodeListOf<Element>;
+        const editInfo = document.getElementById("edit-info") as HTMLElement;
+        const editInfoMobile = document.getElementById(
+          "edit-info-mobile"
+        ) as HTMLElement;
+        const header = document.getElementById("main-header") as HTMLElement;
+
+        const BREAKPOINTS: Breakpoints = {
           xs: 600,
           md: 800,
           xl: 1367,
@@ -191,11 +222,13 @@
         const SHORT_SCREEN_THRESHOLD = 600;
         const STICKY_HEADER_THRESHOLD = 1200;
 
-        let currentViewport = "auto";
+        // ONLY NEEDED until we pass this to react island!
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        let currentViewport: Viewport = "auto";
         let isEditMode = false;
-        let activeElement = null;
+        let activeElement: EditableElement | null = null;
 
-        function handleHeaderBehavior() {
+        function handleHeaderBehavior(): void {
           const viewportHeight = window.innerHeight;
           if (viewportHeight > STICKY_HEADER_THRESHOLD) {
             header.classList.add("sticky", "top-0");
@@ -204,7 +237,7 @@
           }
         }
 
-        function handleEditModeLayout() {
+        function handleEditModeLayout(): void {
           const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
           const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
           const headerHeight = header.offsetHeight;
@@ -273,7 +306,7 @@
           }
         }
 
-        function setViewport(viewport) {
+        function setViewport(viewport: Viewport): void {
           currentViewport = viewport;
           websiteContent.className =
             "website-content flex-1 overflow-y-auto p-4 bg-white";
@@ -289,31 +322,39 @@
           }
 
           viewportButtons.forEach(button => {
-            button.classList.toggle(
-              "bg-blue-500",
-              button.dataset.viewport === viewport
-            );
-            button.classList.toggle(
-              "text-white",
-              button.dataset.viewport === viewport
-            );
-            button.classList.toggle(
-              "bg-gray-200",
-              button.dataset.viewport !== viewport
-            );
+            if (
+              button instanceof HTMLButtonElement &&
+              button.dataset.viewport
+            ) {
+              button.classList.toggle(
+                "bg-blue-500",
+                button.dataset.viewport === viewport
+              );
+              button.classList.toggle(
+                "text-white",
+                button.dataset.viewport === viewport
+              );
+              button.classList.toggle(
+                "bg-gray-200",
+                button.dataset.viewport !== viewport
+              );
+            }
           });
 
           handleEditModeLayout();
         }
 
-        function toggleEditMode(element) {
+        function toggleEditMode(element: HTMLElement): void {
+          if (!(element instanceof HTMLElement)) return;
+
           if (isEditMode && element === activeElement) {
             isEditMode = false;
             activeElement = null;
-          } else if (isEditMode) activeElement = element;
-          else {
+          } else if (isEditMode) {
+            activeElement = element as EditableElement;
+          } else {
             isEditMode = true;
-            activeElement = element;
+            activeElement = element as EditableElement;
           }
 
           if (isEditMode) {
@@ -333,7 +374,7 @@
           handleEditModeLayout();
         }
 
-        function scrollElementIntoView() {
+        function scrollElementIntoView(): void {
           if (!activeElement) return;
 
           const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
@@ -357,10 +398,10 @@
           }
         }
 
-        function scrollHeaderOutOfView() {
+        function scrollHeaderOutOfView(): void {
           const headerHeight = header.offsetHeight;
           const currentScrollTop =
-            window.pageYOffset || document.documentElement.scrollTop;
+            window.scrollY || document.documentElement.scrollTop;
 
           window.scrollTo({
             top: Math.max(currentScrollTop, headerHeight),
@@ -368,7 +409,7 @@
           });
         }
 
-        function handleResize() {
+        function handleResize(): void {
           handleHeaderBehavior();
           handleEditModeLayout();
           const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
@@ -377,7 +418,7 @@
           }
         }
 
-        function toggleOff(element) {
+        function toggleOff(element: HTMLElement): void {
           const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
           const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
           const hide = isDesktop || !isShortScreen;
@@ -385,89 +426,88 @@
             toggleEditMode(element);
         }
 
-        function debounce(func, delay) {
-          let timer;
-          return function () {
-            let context = this;
-            let args = arguments;
+        function debounce<T extends (...args: any[]) => void>(
+          func: T,
+          delay: number
+        ): (...args: Parameters<T>) => void {
+          let timer: ReturnType<typeof setTimeout>;
+          return function (this: any, ...args: Parameters<T>) {
+            const context = this;
             clearTimeout(timer);
-            timer = setTimeout(function () {
-              func.apply(context, args);
-            }, delay);
+            timer = setTimeout(() => func.apply(context, args), delay);
           };
         }
 
         // helper fns to pass to react island
-        function toggleEditPane(isVisible) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        function toggleEditPane(isVisible: boolean): void {
           const editPane = document.querySelector(".edit-pane");
           const editModalMobile = document.querySelector(".edit-modal-mobile");
           const mainContent = document.querySelector(".website-content");
 
           if (isVisible) {
-            editPane.classList.remove("invisible", "opacity-0");
-            editPane.classList.add("visible", "opacity-100");
-            editModalMobile.classList.remove("invisible", "opacity-0");
-            editModalMobile.classList.add("visible", "opacity-100");
-            mainContent.classList.add("xl:w-4/5");
+            editPane?.classList.remove("invisible", "opacity-0");
+            editPane?.classList.add("visible", "opacity-100");
+            editModalMobile?.classList.remove("invisible", "opacity-0");
+            editModalMobile?.classList.add("visible", "opacity-100");
+            mainContent?.classList.add("xl:w-4/5");
           } else {
-            editPane.classList.add("invisible", "opacity-0");
-            editPane.classList.remove("visible", "opacity-100");
-            editModalMobile.classList.add("invisible", "opacity-0");
-            editModalMobile.classList.remove("visible", "opacity-100");
-            mainContent.classList.remove("xl:w-4/5");
+            editPane?.classList.add("invisible", "opacity-0");
+            editPane?.classList.remove("visible", "opacity-100");
+            editModalMobile?.classList.add("invisible", "opacity-0");
+            editModalMobile?.classList.remove("visible", "opacity-100");
+            mainContent?.classList.remove("xl:w-4/5");
           }
         }
 
         // Event Listeners
-        viewportButtons.forEach(button => {
-          button.addEventListener("click", () =>
-            setViewport(button.dataset.viewport)
-          );
+
+        viewportButtons.forEach((button: Element) => {
+          if (button instanceof HTMLButtonElement && button.dataset.viewport) {
+            button.addEventListener("click", () =>
+              setViewport(button.dataset.viewport as Viewport)
+            );
+          }
         });
 
-        editableElements.forEach(element => {
-          element.addEventListener("click", () => toggleEditMode(element));
+        editableElements.forEach((element: Element) => {
+          if (element instanceof HTMLElement) {
+            element.addEventListener("click", () =>
+              toggleEditMode(element as EditableElement)
+            );
+          }
+        });
+
+        const observer = new IntersectionObserver(
+          (entries: IntersectionObserverEntry[]) => {
+            entries.forEach(entry => {
+              if (!entry.isIntersecting) {
+                toggleOff(entry.target as EditableElement);
+              }
+            });
+          }
+        );
+
+        editableElements.forEach((el: Element) => {
+          if (el instanceof HTMLElement) {
+            observer.observe(el);
+          }
         });
 
         window.addEventListener(
           "scroll",
-          debounce(function () {
-            const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-            const isHeaderSticky = header.classList.contains("sticky");
-            const headerHeight = header.offsetHeight;
-            const currentScrollTop =
-              window.pageYOffset || document.documentElement.scrollTop;
-            if (
-              !isHeaderSticky &&
-              isEditMode &&
-              isDesktop &&
-              currentScrollTop < headerHeight
-            ) {
-              editPane.style.marginTop = `${headerHeight - currentScrollTop}px`;
-            } else {
-              editPane.style.marginTop = "0px";
-            }
+          debounce(() => {
+            // ...
           }, 100)
         );
 
         window.addEventListener("resize", handleResize);
 
-        document.addEventListener("keydown", event => {
-          if (event.key === "Escape" && isEditMode) {
+        document.addEventListener("keydown", (event: KeyboardEvent) => {
+          if (event.key === "Escape" && isEditMode && activeElement) {
             toggleEditMode(activeElement);
           }
         });
-
-        const observer = new IntersectionObserver(entries => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-              //const elementId = entry.target.dataset.elementId;
-              toggleOff(entry.target);
-            }
-          });
-        });
-
-        editableElements.forEach(el => observer.observe(el));
 
         // Initialize
         handleHeaderBehavior();

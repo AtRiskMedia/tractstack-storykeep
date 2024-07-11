@@ -7,22 +7,19 @@ interface Props {
   id: string;
 }
 
-const {
-  shapeName,
-  viewportKey,
-  id,
-} = Astro.props;
+const { shapeName, viewportKey, id } = Astro.props;
 
-  const shapeData =
-    typeof SvgPanes[shapeName] !== `undefined` &&
-    typeof SvgPanes[shapeName][viewportKey] !== `undefined`
-      ? SvgPanes[shapeName][viewportKey]
-      : typeof SvgBreaks[shapeName] !== `undefined`
-        ? SvgBreaks[shapeName]
-        : null;
+const shapeData =
+  typeof SvgPanes[shapeName] !== `undefined` &&
+  typeof SvgPanes[shapeName][viewportKey] !== `undefined`
+    ? SvgPanes[shapeName][viewportKey]
+    : typeof SvgBreaks[shapeName] !== `undefined`
+      ? SvgBreaks[shapeName]
+      : null;
 ---
 
-{shapeData &&
+{
+  shapeData && (
     <svg
       id={`svg__${id}`}
       data-name={`svg__${shapeName}--${viewportKey}`}
@@ -34,5 +31,6 @@ const {
         <path d={shapeData.path} />
       </g>
     </svg>
+  )
 }
 }

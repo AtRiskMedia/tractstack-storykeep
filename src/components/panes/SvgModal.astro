@@ -18,7 +18,10 @@ const shapeData =
   typeof SvgModals[shapeName] !== `undefined` ? SvgModals[shapeName] : null;
 
 const multiplier = modalPayload.zoomFactor;
-const width = shapeData?.viewBox && shapeData?.viewBox[0] && shapeData.viewBox[0] * multiplier;
+const width =
+  shapeData?.viewBox &&
+  shapeData?.viewBox[0] &&
+  shapeData.viewBox[0] * multiplier;
 const paddingTop = modalPayload.paddingTop * multiplier;
 const paddingLeft = modalPayload.paddingLeft * multiplier;
 

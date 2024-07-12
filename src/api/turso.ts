@@ -104,6 +104,7 @@ export async function getStoryFragmentBySlug(
                          JOIN pane p ON sp.pane_id = p.id
                          LEFT JOIN markdown md ON p.markdown_id = md.id
                          WHERE sp.storyfragment_id = sf.id
+                         ORDER BY sp.weight ASC
                      ) AS panes
                  FROM storyfragment sf
                  LEFT JOIN menu m ON sf.menu_id = m.id

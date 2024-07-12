@@ -10,7 +10,7 @@ export async function initStoryKeep() {
     };
   }
 
-  type Viewport = "auto" | "xs" | "md" | "xl";
+//  type Viewport = "auto" | "xs" | "md" | "xl";
 
   interface EditableElement extends HTMLElement {
     dataset: {
@@ -26,9 +26,9 @@ export async function initStoryKeep() {
   const editModalMobile = document.getElementById(
     "edit-modal-mobile"
   ) as HTMLElement;
-  const viewportButtons = document.querySelectorAll(
-    ".viewport-button"
-  ) as NodeListOf<Element>;
+  //const viewportButtons = document.querySelectorAll(
+  //  ".viewport-button"
+  //) as NodeListOf<Element>;
   const editableElements = document.querySelectorAll(
     ".editable-element"
   ) as NodeListOf<Element>;
@@ -48,7 +48,7 @@ export async function initStoryKeep() {
 
   // ONLY NEEDED until we pass this to react island!
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  let currentViewport: Viewport = "auto";
+  //let currentViewport: Viewport = "auto";
   let isEditMode = false;
   let activeElement: EditableElement | null = null;
 
@@ -137,40 +137,40 @@ export async function initStoryKeep() {
     }
   }
 
-  function setViewport(viewport: Viewport): void {
-    currentViewport = viewport;
-    websiteContent.className =
-      "website-content flex-1 overflow-y-auto p-4 bg-white";
+  //function setViewport(viewport: Viewport): void {
+  //  currentViewport = viewport;
+  //  websiteContent.className =
+  //    "website-content flex-1 overflow-y-auto p-4 bg-white";
 
-    if (viewport === "auto") {
-      websiteContent.classList.add("w-full", "max-w-[1920px]");
-    } else if (viewport === "xs") {
-      websiteContent.classList.add("min-w-[600px]", "max-w-[800px]");
-    } else if (viewport === "md") {
-      websiteContent.classList.add("min-w-[1024px]", "max-w-[1366px]");
-    } else if (viewport === "xl") {
-      websiteContent.classList.add("min-w-[1500px]", "max-w-[1920px]");
-    }
+  //  if (viewport === "auto") {
+  //    websiteContent.classList.add("w-full", "max-w-[1920px]");
+  //  } else if (viewport === "xs") {
+  //    websiteContent.classList.add("min-w-[600px]", "max-w-[800px]");
+  //  } else if (viewport === "md") {
+  //    websiteContent.classList.add("min-w-[1024px]", "max-w-[1366px]");
+  //  } else if (viewport === "xl") {
+  //    websiteContent.classList.add("min-w-[1500px]", "max-w-[1920px]");
+  //  }
 
-    viewportButtons.forEach(button => {
-      if (button instanceof HTMLButtonElement && button.dataset.viewport) {
-        button.classList.toggle(
-          "bg-blue-500",
-          button.dataset.viewport === viewport
-        );
-        button.classList.toggle(
-          "text-white",
-          button.dataset.viewport === viewport
-        );
-        button.classList.toggle(
-          "bg-gray-200",
-          button.dataset.viewport !== viewport
-        );
-      }
-    });
+  //  viewportButtons.forEach(button => {
+  //    if (button instanceof HTMLButtonElement && button.dataset.viewport) {
+  //      button.classList.toggle(
+  //        "bg-blue-500",
+  //        button.dataset.viewport === viewport
+  //      );
+  //      button.classList.toggle(
+  //        "text-white",
+  //        button.dataset.viewport === viewport
+  //      );
+  //      button.classList.toggle(
+  //        "bg-gray-200",
+  //        button.dataset.viewport !== viewport
+  //      );
+  //    }
+  //  });
 
-    handleEditModeLayout();
-  }
+  //  handleEditModeLayout();
+  //}
 
   function toggleEditMode(element: HTMLElement): void {
     if (!(element instanceof HTMLElement)) return;
@@ -267,49 +267,45 @@ export async function initStoryKeep() {
       toggleEditMode(element);
   }
 
+  // helper fns for react
+  function toggleOnEditModal(): void {
+    isEditMode = true;
+    handleEditModeLayout();
+  }
+  function toggleOffEditModal(): void {
+    isEditMode = false;
+    handleEditModeLayout();
+  }
+  document.addEventListener("toggle-on-edit-modal", () => {
+    toggleOnEditModal();
+  });
+  document.addEventListener("toggle-off-edit-modal", () => {
+    toggleOffEditModal();
+  });
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   function debounce<T extends (...args: any[]) => void>(
     func: T,
     delay: number
   ): (...args: Parameters<T>) => void {
     let timer: ReturnType<typeof setTimeout>;
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     return function (this: any, ...args: Parameters<T>) {
-      const context = this;
       clearTimeout(timer);
-      timer = setTimeout(() => func.apply(context, args), delay);
+      timer = setTimeout(() => func.apply(this, args), delay);
     };
-  }
-
-  // helper fns to pass to react island
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function toggleEditPane(isVisible: boolean): void {
-    const editPane = document.querySelector(".edit-pane");
-    const editModalMobile = document.querySelector(".edit-modal-mobile");
-    const mainContent = document.querySelector(".website-content");
-
-    if (isVisible) {
-      editPane?.classList.remove("invisible", "opacity-0");
-      editPane?.classList.add("visible", "opacity-100");
-      editModalMobile?.classList.remove("invisible", "opacity-0");
-      editModalMobile?.classList.add("visible", "opacity-100");
-      mainContent?.classList.add("xl:w-2/3");
-    } else {
-      editPane?.classList.add("invisible", "opacity-0");
-      editPane?.classList.remove("visible", "opacity-100");
-      editModalMobile?.classList.add("invisible", "opacity-0");
-      editModalMobile?.classList.remove("visible", "opacity-100");
-      mainContent?.classList.remove("xl:w-2/3");
-    }
   }
 
   // Event Listeners
 
-  viewportButtons.forEach((button: Element) => {
-    if (button instanceof HTMLButtonElement && button.dataset.viewport) {
-      button.addEventListener("click", () =>
-        setViewport(button.dataset.viewport as Viewport)
-      );
-    }
-  });
+  //viewportButtons.forEach((button: Element) => {
+  //  if (button instanceof HTMLButtonElement && button.dataset.viewport) {
+  //    button.addEventListener("click", () =>
+  //      setViewport(button.dataset.viewport as Viewport)
+  //    );
+  //  }
+  //});
 
   editableElements.forEach((element: Element) => {
     if (element instanceof HTMLElement) {
@@ -352,5 +348,5 @@ export async function initStoryKeep() {
 
   // Initialize
   handleHeaderBehavior();
-  setViewport("auto");
+  //setViewport("auto");
 }

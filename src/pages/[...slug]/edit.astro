@@ -1,7 +1,9 @@
 ---
 import Layout from "@layouts/StoryKeep.astro";
 import { getStoryFragmentBySlug } from "../../api/turso";
-import type { Current } from "../../types";
+import { EditModal } from "@components/storykeep/EditModal";
+import { StoryFragment } from "@components/storykeep/StoryFragment";
+import { StoryFragmentHeader } from "@components/storykeep/StoryFragmentHeader";
 
 // which storyfragment?
 const { slug } = Astro.params;
@@ -18,16 +20,6 @@ const storyfragment = await getStoryFragmentBySlug(lookup);
 if (!storyfragment) {
   return Astro.redirect("/404");
 }
-
-// id for this storyfragment
-const current: Current = {
-  id: storyfragment.id,
-  slug: storyfragment.slug,
-  title: storyfragment.title,
-  parentId: storyfragment.tractStackId,
-  parentSlug: storyfragment.tractStackSlug,
-  parentTitle: storyfragment.tractStackTitle,
-};
 ---
 
 <Layout
@@ -42,6 +34,8 @@ const current: Current = {
       class="z-10 bg-white shadow-md p-4 flex justify-between items-center"
       id="main-header"
     >
+      <StoryFragmentHeader client:load id={storyfragment.id} />
+      <!--
       <h1 class="text-2xl font-bold">StoryKeep</h1>
       <div class="flex space-x-2">
         <button
@@ -61,10 +55,13 @@ const current: Current = {
           data-viewport="xl">XL</button
         >
       </div>
+      -->
     </header>
 
     <div id="main-content" class="flex-1 flex">
       <main id="website-content" class="flex-1 overflow-y-auto p-4 bg-white">
+        <StoryFragment storyfragment={storyfragment} client:load />
+        <!--
         <h2 class="text-xl font-semibold mb-4">Website Content</h2>
         <p>lorem ipsum</p>
         <div
@@ -88,15 +85,19 @@ const current: Current = {
           <p>This is an editable element. Click to edit.</p>
         </div>
         <p>lorem ipsum</p>
+        -->
       </main>
 
       <aside
         id="edit-pane"
         class="invisible opacity-0 w-0 transition-all duration-300 ease-in-out bg-yellow-300 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0"
       >
+        <EditModal client:load />
+        <!--
         <h3 class="text-lg font-semibold mb-2">Edit Mode</h3>
         <p id="edit-info"></p>
         <p>lorem ipsum</p>
+        -->
       </aside>
     </div>
 
@@ -104,11 +105,14 @@ const current: Current = {
       id="edit-modal-mobile"
       class="invisible opacity-0 fixed bg-yellow-300 shadow-md z-20 transition-all duration-300 ease-in-out flex flex-col w-full"
     >
+      <EditModal client:load />
+      <!--
       <h3 class="text-lg font-semibold mb-2">Edit Mode (Mobile/Tablet)</h3>
       <div class="overflow-y-auto p-4 flex-grow">
         <p id="edit-info-mobile"></p>
         <p>lorem ipsum</p>
       </div>
+        -->
     </div>
   </div>
 </Layout>

@@ -18,13 +18,13 @@ export async function initStoryKeep() {
     };
   }
 
-  const mainContent = document.querySelector(".flex-1.flex") as HTMLElement;
-  const websiteContent = document.querySelector(
-    ".website-content"
+  const mainContent = document.getElementById("main-content") as HTMLElement;
+  const websiteContent = document.getElementById(
+    "website-content"
   ) as HTMLElement;
-  const editPane = document.querySelector(".edit-pane") as HTMLElement;
-  const editModalMobile = document.querySelector(
-    ".edit-modal-mobile"
+  const editPane = document.getElementById("edit-pane") as HTMLElement;
+  const editModalMobile = document.getElementById(
+    "edit-modal-mobile"
   ) as HTMLElement;
   const viewportButtons = document.querySelectorAll(
     ".viewport-button"
@@ -66,7 +66,8 @@ export async function initStoryKeep() {
     const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
     const headerHeight = header.offsetHeight;
     const isHeaderSticky = header.classList.contains("sticky");
-    const isHeaderBlocking = window.scrollY < headerHeight;
+    const hasVerticalScroll = document.documentElement.scrollHeight > window.innerHeight
+    const isHeaderBlocking = window.scrollY < headerHeight && !hasVerticalScroll;
 
     mainContent.classList.toggle("xl:pr-1/3", isEditMode && isDesktop);
 
@@ -80,6 +81,7 @@ export async function initStoryKeep() {
         editPane.classList.add("xl:w-1/3");
         editPane.style.top =
           isHeaderSticky || isHeaderBlocking ? `${headerHeight}px` : "0";
+        editPane.style.marginTop = `0`
         editPane.style.height = isHeaderSticky
           ? `calc(100vh - ${headerHeight}px)`
           : "100vh";
@@ -237,6 +239,23 @@ export async function initStoryKeep() {
       websiteContent.style.paddingBottom = "0";
     }
   }
+  function handleScroll(): void {
+      const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+      const isHeaderSticky = header.classList.contains("sticky");
+      const headerHeight = header.offsetHeight;
+      const currentScrollTop =
+        window.scrollY || document.documentElement.scrollTop;
+      if (
+        !isHeaderSticky &&
+        isEditMode &&
+        isDesktop &&
+        currentScrollTop < headerHeight
+      ) {
+        editPane.style.marginTop = `${headerHeight - currentScrollTop}px`;
+      } else {
+        editPane.style.marginTop = "0px";
+      }
+  }
 
   function toggleOff(element: HTMLElement): void {
     const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
@@ -317,21 +336,7 @@ export async function initStoryKeep() {
   window.addEventListener(
     "scroll",
     debounce(() => {
-      const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-      const isHeaderSticky = header.classList.contains("sticky");
-      const headerHeight = header.offsetHeight;
-      const currentScrollTop =
-        window.scrollY || document.documentElement.scrollTop;
-      if (
-        !isHeaderSticky &&
-        isEditMode &&
-        isDesktop &&
-        currentScrollTop < headerHeight
-      ) {
-        editPane.style.marginTop = `${headerHeight - currentScrollTop}px`;
-      } else {
-        editPane.style.marginTop = "0px";
-      }
+      handleScroll();
     }, 100)
   );
 

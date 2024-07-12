@@ -63,8 +63,8 @@ const current: Current = {
       </div>
     </header>
 
-    <div class="flex-1 flex">
-      <main class="website-content flex-1 overflow-y-auto p-4 bg-white">
+    <div id="main-content" class="flex-1 flex">
+      <main id="website-content" class="flex-1 overflow-y-auto p-4 bg-white">
         <h2 class="text-xl font-semibold mb-4">Website Content</h2>
         <p>lorem ipsum</p>
         <div
@@ -91,7 +91,7 @@ const current: Current = {
       </main>
 
       <aside
-        class="edit-pane invisible opacity-0 w-0 transition-all duration-300 ease-in-out bg-yellow-300 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0"
+        id="edit-pane" class="invisible opacity-0 w-0 transition-all duration-300 ease-in-out bg-yellow-300 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0"
       >
         <h3 class="text-lg font-semibold mb-2">Edit Mode</h3>
         <p id="edit-info"></p>
@@ -100,7 +100,7 @@ const current: Current = {
     </div>
 
     <div
-      class="edit-modal-mobile invisible opacity-0 fixed bg-yellow-300 shadow-md z-20 transition-all duration-300 ease-in-out flex flex-col w-full"
+      id="edit-modal-mobile" class="invisible opacity-0 fixed bg-yellow-300 shadow-md z-20 transition-all duration-300 ease-in-out flex flex-col w-full"
     >
       <h3 class="text-lg font-semibold mb-2">Edit Mode (Mobile/Tablet)</h3>
       <div class="overflow-y-auto p-4 flex-grow">

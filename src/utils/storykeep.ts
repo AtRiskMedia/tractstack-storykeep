@@ -1,3 +1,5 @@
+import { debounce } from "./helpers";
+
 export async function initStoryKeep() {
   interface Breakpoints {
     xs: number;
@@ -10,7 +12,7 @@ export async function initStoryKeep() {
     };
   }
 
-//  type Viewport = "auto" | "xs" | "md" | "xl";
+  //  type Viewport = "auto" | "xs" | "md" | "xl";
 
   interface EditableElement extends HTMLElement {
     dataset: {
@@ -282,20 +284,6 @@ export async function initStoryKeep() {
   document.addEventListener("toggle-off-edit-modal", () => {
     toggleOffEditModal();
   });
-
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  function debounce<T extends (...args: any[]) => void>(
-    func: T,
-    delay: number
-  ): (...args: Parameters<T>) => void {
-    let timer: ReturnType<typeof setTimeout>;
-
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    return function (this: any, ...args: Parameters<T>) {
-      clearTimeout(timer);
-      timer = setTimeout(() => func.apply(this, args), delay);
-    };
-  }
 
   // Event Listeners
 

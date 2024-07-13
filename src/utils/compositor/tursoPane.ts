@@ -13,6 +13,7 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
     if (match && typeof match[1] === `string`) altText = match[1];
     return {
       ...f,
+      id: f.id,
       index: idx,
       altText:
         altText ||

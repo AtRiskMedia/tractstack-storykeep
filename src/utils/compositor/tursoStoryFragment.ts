@@ -55,6 +55,7 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
                 ).length
               )
                 optimizedImagesPre.push({
+                  id: f.id,
                   filename: f.filename,
                   url: f.url,
                 });
@@ -65,6 +66,7 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
               const src = `${import.meta.env.PUBLIC_IMAGE_URL}${i.url}`;
               const optimizedSrc = await getOptimizedImage(src);
               return {
+                id: i.id,
                 filename: i.filename,
                 optimizedSrc: optimizedSrc || undefined,
                 src,
@@ -185,6 +187,7 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
                 r.tailwind_background_colour) ||
               null,
             hasMenu: !!r.menu_title,
+            menuId: (typeof r?.menu_id === `string` && r.menu_id) || null,
             menuPayload:
               (typeof r?.menu_title === `string` &&
                 typeof r?.menu_theme === `string` && {

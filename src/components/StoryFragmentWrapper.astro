@@ -74,8 +74,8 @@ const maxHScreen: { [key: string]: boolean } = panesPayload.reduce(function (
             <Filter
               client:load
               id={pane.id}
-              heldBeliefsFilter={pane.optionsPayload?.heldBeliefs}
-              withheldBeliefsFilter={pane.optionsPayload?.withheldBeliefs}
+              heldBeliefsFilter={pane.optionsPayload?.heldBeliefs || []}
+              withheldBeliefsFilter={pane.optionsPayload?.withheldBeliefs || []}
             />
           ) : null}
           {resourcesPayload?.perCodeHookPayload[idx] ? (

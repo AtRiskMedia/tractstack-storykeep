@@ -202,3 +202,68 @@ export function formatDateToYYYYMMDD(date: Date): string {
 export function dateToUnixTimestamp(date: Date): number {
   return Math.floor(date.getTime() / 1000);
 }
+
+// Loading indicator and animation logic
+let progressInterval: NodeJS.Timeout | null = null;
+
+export function startLoadingAnimation() {
+  const loadingIndicator = document.getElementById(
+    "loading-indicator"
+  ) as HTMLElement;
+  const content = document.getElementById("content") as HTMLElement;
+
+  if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    loadingIndicator.style.transform = "scaleX(0)";
+    loadingIndicator.style.display = "block";
+    content.style.opacity = "0.7";
+
+    let progress = 0;
+    progressInterval = setInterval(() => {
+      progress += 2;
+      if (progress > 90) {
+        if (progressInterval !== null) {
+          clearInterval(progressInterval);
+        }
+      }
+      loadingIndicator.style.transform = `scaleX(${progress / 100})`;
+    }, 20);
+  }
+}
+
+export function stopLoadingAnimation() {
+  const loadingIndicator = document.getElementById(
+    "loading-indicator"
+  ) as HTMLElement;
+  const content = document.getElementById("content") as HTMLElement;
+
+  if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    if (progressInterval !== null) {
+      clearInterval(progressInterval);
+    }
+    loadingIndicator.style.transform = "scaleX(1)";
+    content.style.opacity = "1";
+
+    setTimeout(() => {
+      loadingIndicator.style.display = "none";
+      loadingIndicator.style.transform = "scaleX(0)";
+    }, 300);
+  }
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export function debounce<T extends (...args: any[]) => void>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+  return (...args: Parameters<T>) => {
+    const later = () => {
+      timeout = null;
+      func(...args);
+    };
+    if (timeout !== null) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(later, wait);
+  };
+}

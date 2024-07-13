@@ -60,8 +60,9 @@ export async function getStoryFragmentBySlug(
                      sf.slug AS slug,
                      sf.created AS created,
                      sf.changed AS changed,
-                     sf.social_image_path,
+                     COALESCE(sf.social_image_path, ts.social_image_path) AS social_image_path,
                      sf.tailwind_background_colour,
+                     m.id as menu_id,
                      m.title AS menu_title,
                      m.options_payload AS menu_options_payload,
                      m.theme AS menu_theme,
@@ -85,6 +86,7 @@ export async function getStoryFragmentBySlug(
                              'markdown_body', md.body,
                              'files', (
                                  SELECT json_group_array(json_object(
+                                     'id', f.id,
                                      'filename', f.filename,
                                      'url', f.url
                                  ))

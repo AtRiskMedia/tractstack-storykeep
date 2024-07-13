@@ -1,5 +1,25 @@
 import type { Root } from "hast";
 
+export interface EventStreamController {
+  stop: () => void;
+}
+
+export type ValidationFunction = (value: string) => boolean;
+
+export type HistoryEntry<T> = {
+  value: T;
+  timestamp: number;
+};
+
+export type FieldWithHistory<T> = {
+  current: T;
+  history: HistoryEntry<T>[];
+};
+
+export interface IsInit {
+  [key: string]: { init: boolean };
+}
+
 export interface Referrer {
   httpReferrer?: string;
   utmSource?: string;
@@ -150,14 +170,14 @@ export interface MarkdownPaneDatum extends PaneFragmentDatum {
 
 export interface PaneOptionsPayload {
   id: string;
-  paneFragmentsPayload: BgPaneDatum[] | BgColourDatum[] | MarkdownPaneDatum[];
-  impressions: ImpressionDatum[];
-  codeHook: CodeHookDatum;
-  hiddenPane: boolean;
-  overflowHidden: boolean;
-  maxHScreen: boolean;
-  heldBeliefs: BeliefDatum[];
-  withheldBeliefs: BeliefDatum[];
+  paneFragmentsPayload?: BgPaneDatum[] | BgColourDatum[] | MarkdownPaneDatum[];
+  impressions?: ImpressionDatum[];
+  codeHook?: CodeHookDatum;
+  hiddenPane?: boolean;
+  overflowHidden?: boolean;
+  maxHScreen?: boolean;
+  heldBeliefs?: BeliefDatum[];
+  withheldBeliefs?: BeliefDatum[];
 }
 
 export interface PaneDatum {
@@ -267,6 +287,13 @@ export interface ResourcePayloadDatum {
   headerWidget: ResourceDatum[];
 }
 
+export interface TractStackDatum {
+  id: string;
+  title: string;
+  slug: string;
+  socialImagePath: string;
+}
+
 export interface StoryFragmentDatum {
   id: string;
   title: string;
@@ -279,6 +306,7 @@ export interface StoryFragmentDatum {
   socialImagePath: string | null;
   tailwindBgColour: string | null;
   hasMenu: boolean;
+  menuId: string | null;
   menuPayload: MenuDatum | null;
   panesPayload: PaneDatum[];
   impressions: ImpressionDatum[];
@@ -433,11 +461,13 @@ export type PanesVisible = {
 };
 
 export interface TursoFileNode {
+  id: string;
   filename: string;
   url: string;
 }
 
 export interface FileNode {
+  id: string;
   filename: string;
   src: string;
   optimizedSrc?: string;
@@ -449,10 +479,17 @@ export interface PaneFileNode {
 }
 
 export interface FileDatum {
+  id: string;
   filename: string;
   altText: string;
   src: string;
   optimizedSrc?: string;
+}
+
+export interface StoryKeepFileDatum {
+  filename: string;
+  altText: string;
+  b64: string;
 }
 
 export type GraphNode = {

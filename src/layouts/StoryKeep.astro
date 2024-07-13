@@ -1,5 +1,6 @@
 ---
 import { LOCALE, SITE } from "@config";
+import { ViewTransitions } from "astro:transitions";
 import SetContentMap from "../components/SetContentMap";
 import { getContentMap } from "../api/turso";
 import type { ContentMap } from "../types";
@@ -94,34 +95,36 @@ const contentMap: ContentMap[] = await getContentMap();
 
     <!-- Tract Stack Concierge -->
     <script>
-      import { handleResize, handleScroll } from "../utils/helpers";
-      import { scrollToTop } from "../utils/helpers";
+      import {
+        scrollToTop,
+        handleResize,
+        handleScroll,
+        startLoadingAnimation,
+        stopLoadingAnimation,
+        debounce,
+      } from "../utils/helpers";
       import { init } from "../utils/init";
-
-      function debounce<T extends (...args: any[]) => void>(
-        func: T,
-        wait: number
-      ): (...args: Parameters<T>) => void {
-        let timeout: ReturnType<typeof setTimeout> | null = null;
-        return (...args: Parameters<T>) => {
-          const later = () => {
-            timeout = null;
-            func(...args);
-          };
-          if (timeout !== null) {
-            clearTimeout(timeout);
-          }
-          timeout = setTimeout(later, wait);
-        };
-      }
 
       const debouncedHandleResize = debounce(handleResize, 250);
       const debouncedHandleScroll = debounce(handleScroll, 250);
 
       // always run first load
-      handleResize();
+      //handleResize();
+
+      function setupEventHandlers() {
+        // Set up animation event listeners
+        document.addEventListener(
+          "astro:before-preparation",
+          startLoadingAnimation
+        );
+        document.addEventListener("astro:after-swap", stopLoadingAnimation);
+      }
+
+      // Initial setup
+      setupEventHandlers();
 
       document.addEventListener("astro:page-load", () => {
+        setupEventHandlers();
         init();
         handleScroll();
         handleResize();
@@ -129,10 +132,23 @@ const contentMap: ContentMap[] = await getContentMap();
         window.addEventListener(`resize`, debouncedHandleResize);
         document.addEventListener("scroll", debouncedHandleScroll);
       });
+      document.addEventListener("astro:before-preparation", () => {
+        window.removeEventListener(`resize`, debouncedHandleResize);
+        document.removeEventListener("scroll", debouncedHandleScroll);
+      });
     </script>
+
+    <ViewTransitions />
   </head>
   <body>
+    <div
+      id="loading-indicator"
+      class="fixed top-0 left-0 w-full h-1 bg-myorange transform scale-x-0 transition-transform duration-300 ease-out z-50"
+    >
+    </div>
     <SetContentMap payload={contentMap} client:load />
-    <slot />
+    <div id="content" class="transition-opacity duration-300">
+      <slot />
+    </div>
   </body>
 </html>

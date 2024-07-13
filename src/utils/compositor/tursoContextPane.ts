@@ -47,6 +47,7 @@ export async function cleanTursoContextPane(rows: Row[]) {
               ).length
             )
               optimizedImagesPre.push({
+                id: f.id,
                 filename: f.filename,
                 url: f.url,
               });
@@ -58,7 +59,7 @@ export async function cleanTursoContextPane(rows: Row[]) {
               const optimizedSrc =
                 (typeof _optimizedSrc === `string` && _optimizedSrc) ||
                 undefined;
-              return { filename: i.filename, optimizedSrc, src };
+              return { id: i.id, filename: i.filename, optimizedSrc, src };
             })
           );
           const paneFileNodes: PaneFileNode[] = [];

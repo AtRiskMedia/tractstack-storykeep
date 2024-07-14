@@ -1,10 +1,9 @@
-// ContentEditableField.tsx
-import React, { useRef, useCallback, useEffect } from "react";
+import React, { useRef, useCallback, useEffect, useState } from "react";
 
 interface ContentEditableFieldProps {
   value: string;
-  onChange: (value: string) => void;
-  onRevert?: (value: string) => void;
+  className?: string;
+  onChange: (value: string) => boolean;
   placeholder?: string;
   style?: React.CSSProperties;
 }
@@ -12,12 +11,13 @@ interface ContentEditableFieldProps {
 export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
   value,
   onChange,
-  onRevert,
+  className,
   placeholder = "",
   style = {},
 }) => {
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const cursorPositionRef = useRef<number>(0);
+  const [internalValue, setInternalValue] = useState(value);
 
   const setCursorPosition = useCallback(
     (element: HTMLElement, position: number) => {
@@ -43,11 +43,20 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
         const range = selection.getRangeAt(0);
         cursorPositionRef.current = range.startOffset;
       }
-
       const newValue = contentEditableRef.current.textContent || "";
-      onChange(newValue);
+      const isValid = onChange(newValue);
+      if (isValid) {
+        setInternalValue(newValue);
+      } else {
+        // Revert to the previous valid state
+        contentEditableRef.current.textContent = internalValue;
+        setCursorPosition(
+          contentEditableRef.current,
+          cursorPositionRef.current
+        );
+      }
     }
-  }, [onChange]);
+  }, [onChange, internalValue, setCursorPosition]);
 
   useEffect(() => {
     if (
@@ -56,11 +65,9 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
     ) {
       contentEditableRef.current.textContent = value;
       setCursorPosition(contentEditableRef.current, cursorPositionRef.current);
-      if (onRevert) {
-        onRevert(value);
-      }
     }
-  }, [value, setCursorPosition, onRevert]);
+    setInternalValue(value);
+  }, [value, setCursorPosition]);
 
   return (
     <div
@@ -72,6 +79,7 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
         ...style,
         minHeight: "1em",
       }}
+      className={className || ``}
       data-placeholder={placeholder}
     />
   );

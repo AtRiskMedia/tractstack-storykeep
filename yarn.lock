@@ -1970,6 +1970,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tailwindcss/forms@npm:^0.5.7":
+  version: 0.5.7
+  resolution: "@tailwindcss/forms@npm:0.5.7"
+  dependencies:
+    mini-svg-data-uri: "npm:^1.2.3"
+  peerDependencies:
+    tailwindcss: ">=3.0.0 || >= 3.0.0-alpha.1"
+  checksum: 10c0/cd29e0c978402ae87a923ae802dcff43f7b050595666cb067321cac2e37a52f61b9d73385cb0a10455548581ddd0d3886815bd6c64a1da06247c0057fa9f4601
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-virtual@npm:^3.0.0-beta.60":
   version: 3.1.3
   resolution: "@tanstack/react-virtual@npm:3.1.3"
@@ -7204,7 +7215,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mini-svg-data-uri@npm:^1.4.4":
+"mini-svg-data-uri@npm:^1.2.3, mini-svg-data-uri@npm:^1.4.4":
   version: 1.4.4
   resolution: "mini-svg-data-uri@npm:1.4.4"
   bin:
@@ -9799,6 +9810,7 @@ __metadata:
     "@nanostores/persistent": "npm:^0.10.1"
     "@nanostores/react": "npm:^0.7.2"
     "@opuu/inview": "npm:^2.0.1"
+    "@tailwindcss/forms": "npm:^0.5.7"
     "@types/hast": "npm:^3.0.4"
     "@types/react": "npm:^18.3.3"
     "@types/react-dom": "npm:^18.3.0"

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
 import {
   storyFragmentTitle,
   storyFragmentSlug /* other stores */,
@@ -101,9 +102,9 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   ]);
 
   const handleChange = useCallback(
-    (storeKey: StoreKey, newValue: string) => {
+    (storeKey: StoreKey, newValue: string): boolean => {
       const store = storeMap[storeKey];
-      if (!store) return;
+      if (!store) return false;
 
       const validationFunction = validationFunctions[storeKey];
       if (validationFunction && !validationFunction(newValue)) {
@@ -111,7 +112,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           ...prev,
           [storeKey]: getErrorMessage(storeKey, newValue),
         }));
-        return;
+        return false;
       }
 
       setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
@@ -148,6 +149,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           });
         }
       }
+      return true;
     },
     [id]
   );
@@ -174,57 +176,83 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     [id]
   );
 
-  const handleRevert = useCallback(
-    (storeKey: StoreKey) => {
-      const store = storeMap[storeKey];
-      if (!store) return;
-
-      const currentStoreValue = store.get();
-      const currentField = currentStoreValue[id];
-      if (currentField && currentField.history.length > 0) {
-        const originalValue =
-          currentField.history[currentField.history.length - 1].value;
-        store.set({
-          ...currentStoreValue,
-          [id]: {
-            current: originalValue,
-            history: [],
-          },
-        });
-        setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
-      }
-    },
-    [id]
-  );
-
   if (!isClient || Object.values(initialValues).some(v => v === null)) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="w-full">
-      <div className="w-full">
+      <div className="w-full my-2">
+        <div className="flex flex-wrap items-center justify-end">
+          <object
+            type="image/svg+xml"
+            data="/custom/logo.svg"
+            className="h-5 w-auto pointer-events-none mr-2"
+            aria-label="Logo"
+          >
+            Logo
+          </object>
+          <h1 className="font-2xl font-bold font-action mr-auto">
+            <span className="xs:hidden md:inline-block">Welcome to your</span>{" "}
+            Story Keep
+          </h1>
+          <button
+            type="button"
+            className="my-1 rounded bg-myblack px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+          >
+            Settings
+          </button>
+          <button
+            type="button"
+            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+
+      <div className="md:flex md:items-center">
+        <label
+          htmlFor="title"
+          className="block text-md leading-6 text-mydarkgrey md:mr-4 md:flex-shrink-0"
+        >
+          Descriptive title for this web page
+        </label>
+        <div className="relative mt-2 md:mt-0 md:flex-grow">
+          <ContentEditableField
+            value={$storyFragmentTitle[id]?.current || ""}
+            onChange={newValue => handleChange("title", newValue)}
+            placeholder="Enter title here"
+            className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+            style={{
+              border: "1px solid black",
+              padding: "5px 30px 5px 5px",
+              marginBottom: "10px",
+              width: "100%",
+            }}
+          />
+          {errorMessages.title && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
+              <ExclamationCircleIcon
+                aria-hidden="true"
+                className="h-5 w-5 text-red-500"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+      <div id="title-error" className="mt-2 text-sm text-red-600">
         {errorMessages.title && (
           <div className="text-red-500 mb-2">{errorMessages.title}</div>
         )}
-        <ContentEditableField
-          value={$storyFragmentTitle[id]?.current || ""}
-          onChange={newValue => handleChange("title", newValue)}
-          onRevert={() => handleRevert("title")}
-          placeholder="Enter title here"
-          style={{
-            border: "1px solid black",
-            padding: "5px",
-            marginBottom: "10px",
-          }}
-        />
-        <button
-          onClick={() => handleUndo("title")}
-          disabled={$storyFragmentTitle[id]?.history.length === 0}
-        >
-          Undo Title
-        </button>
       </div>
+
       <div className="w-full">
         {errorMessages.slug && (
           <div className="text-red-500 mb-2">{errorMessages.slug}</div>
@@ -232,7 +260,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         <ContentEditableField
           value={$storyFragmentSlug[id]?.current || ""}
           onChange={newValue => handleChange("slug", newValue)}
-          onRevert={() => handleRevert("slug")}
           placeholder="enter-slug-here"
           style={{
             border: "1px solid black",

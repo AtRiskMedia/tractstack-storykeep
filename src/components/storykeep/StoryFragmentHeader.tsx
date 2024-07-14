@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
-import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import { ExclamationCircleIcon,ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import {
   storyFragmentTitle,
   storyFragmentSlug /* other stores */,
@@ -238,6 +238,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         >
           Descriptive title for this web page
         </label>
+        <div className="inline-flex flex-nowrap w-full">
         <div className="relative mt-2 md:mt-0 md:flex-grow">
           <ContentEditableField
             value={$storyFragmentTitle[id]?.current || ""}
@@ -259,6 +260,17 @@ export const StoryFragmentHeader = (props: { id: string }) => {
               />
             </div>
           )}
+        </div>
+        <button
+          onClick={() => handleUndo("title")}
+            className="disabled:hidden"
+          disabled={$storyFragmentTitle[id]?.history.length === 0}
+        >
+          <ChevronDoubleLeftIcon
+          className="h-8 w-8 text-myorange rounded bg-slate-200 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+              title="Undo"
+          />
+        </button>
         </div>
       </div>
       <div id="title-error" className="mt-2 text-sm text-red-600">

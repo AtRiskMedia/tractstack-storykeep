@@ -24,7 +24,7 @@ const storeMap: StoreMapType = {
 
 const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   title: (value: string) => value.length <= 80,
-  slug: (value: string) => /^[a-z0-9-]+$/.test(value) && value.length <= 50,
+  slug: (value: string) => value.length <= 50 && /^[a-z0-9-]*$/.test(value),
   // Add more validation functions for other fields
 };
 
@@ -116,6 +116,16 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       }
 
       setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
+
+      // Set error message if the field is empty, but allow the update
+      if (newValue.length === 0) {
+        setErrorMessages(prev => ({
+          ...prev,
+          [storeKey]: `${storeKey.charAt(0).toUpperCase() + storeKey.slice(1)} cannot be empty.`,
+        }));
+      } else {
+        setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
+      }
 
       const currentStoreValue = store.get();
       const currentField = currentStoreValue[id];
@@ -210,7 +220,11 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </button>
           <button
             type="button"
-            className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2"
+            className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+            disabled={
+              Object.values(errorMessages).filter(value => value !== undefined)
+                .length > 0
+            }
           >
             Save
           </button>

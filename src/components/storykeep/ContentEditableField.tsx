@@ -36,7 +36,7 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
     []
   );
 
-  const handleChange = useCallback(() => {
+  const handleContentChange = useCallback(() => {
     if (contentEditableRef.current) {
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
@@ -73,8 +73,8 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
     <div
       ref={contentEditableRef}
       contentEditable
-      onInput={handleChange}
-      onBlur={handleChange}
+      onInput={handleContentChange}
+      onBlur={handleContentChange}
       style={{
         ...style,
         minHeight: "1em",

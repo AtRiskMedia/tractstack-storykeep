@@ -101,7 +101,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     $storyFragmentSlug /* add other store variables */,
   ]);
 
-  const handleChange = useCallback(
+  const updateStoreField = useCallback(
     (storeKey: StoreKey, newValue: string): boolean => {
       const store = storeMap[storeKey];
       if (!store) return false;
@@ -227,7 +227,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         <div className="relative mt-2 md:mt-0 md:flex-grow">
           <ContentEditableField
             value={$storyFragmentTitle[id]?.current || ""}
-            onChange={newValue => handleChange("title", newValue)}
+            onChange={newValue => updateStoreField("title", newValue)}
             placeholder="Enter title here"
             className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
             style={{
@@ -259,7 +259,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         )}
         <ContentEditableField
           value={$storyFragmentSlug[id]?.current || ""}
-          onChange={newValue => handleChange("slug", newValue)}
+          onChange={newValue => updateStoreField("slug", newValue)}
           placeholder="enter-slug-here"
           style={{
             border: "1px solid black",

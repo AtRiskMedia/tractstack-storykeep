@@ -5,6 +5,9 @@ import {
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
 import {
+  unsavedChangesStore,
+  uncleanDataStore,
+  temporaryErrorsStore,
   storyFragmentInit,
   storyFragmentTitle,
   storyFragmentSlug,
@@ -12,16 +15,12 @@ import {
   //
 } from "../../store/storykeep";
 import { ContentEditableField } from "./ContentEditableField";
-import type { FieldWithHistory, ValidationFunction } from "../../types";
-import type { MapStore } from "nanostores";
-
-type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
-// Add other stores here
-//
-
-type StoreMapType = {
-  [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
-};
+import type {
+  StoreKey,
+  StoreMapType,
+  FieldWithHistory,
+  ValidationFunction,
+} from "../../types";
 
 const storeMap: StoreMapType = {
   storyFragmentTitle: storyFragmentTitle,
@@ -33,19 +32,25 @@ const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   // temporaryErrors will catch length === 0
   storyFragmentTitle: (value: string) => value.length <= 80,
   storyFragmentSlug: (value: string) =>
-   value.length===0 || ( value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,48}[a-z0-9])?$/.test(value)),
+    value.length === 0 ||
+    (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,48}[a-z0-9])?$/.test(value)),
   // Add more validation functions for other fields
   //
 };
 
 export const StoryFragmentHeader = (props: { id: string }) => {
+  const { id } = props;
+
+  // required stores
+  const $unsavedChanges = useStore(unsavedChangesStore);
+  const $uncleanData = useStore(uncleanDataStore);
+  const $temporaryErrors = useStore(temporaryErrorsStore);
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $storyFragmentTitle = useStore(storyFragmentTitle);
   const $storyFragmentSlug = useStore(storyFragmentSlug);
   // Add other useStore hooks as needed
   //
 
-  const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const [isEditing, setIsEditing] = useState<
     Partial<Record<StoreKey, boolean>>
@@ -54,15 +59,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     storyFragmentTitle: 0,
     storyFragmentSlug: 0,
   });
-  const [temporaryErrors, setTemporaryErrors] = useState<
-    Partial<Record<StoreKey, boolean>>
-  >({});
-  const [unsavedChanges, setUnsavedChanges] = useState<
-    Partial<Record<StoreKey, boolean>>
-  >({});
-  const [uncleanData, setUncleanData] = useState<
-    Partial<Record<StoreKey, boolean>>
-  >({});
 
   // global fn to toggle layout
   const handleToggleOn = () => {
@@ -78,16 +74,24 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     if ($storyFragmentInit[id]?.init) {
       setIsClient(true);
 
-      // Initialize UncleanData
-      // Initialize unsavedChanges
-      const initialUnsavedChanges: Partial<Record<StoreKey, boolean>> = {};
-      const initialUncleanData: Partial<Record<StoreKey, boolean>> = {};
+      // Initialize unsavedChanges and uncleanData
+      const initialUnsavedChanges: Record<StoreKey, boolean> = {
+        storyFragmentTitle: false,
+        storyFragmentSlug: false,
+      };
+      const initialUncleanData: Record<StoreKey, boolean> = {
+        storyFragmentTitle: false,
+        storyFragmentSlug: false,
+      };
       (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
         const store = storeMap[storeKey];
         if (store) {
           const field = store.get()[id];
           const validationFunction = validationFunctions[storeKey];
-          if (validationFunction && !validationFunction(field.current))
+          if (
+            field.current.length === 0 ||
+            (validationFunction && !validationFunction(field.current))
+          )
             initialUncleanData[storeKey] = true;
           else initialUncleanData[storeKey] = false;
           initialUnsavedChanges[storeKey] = field
@@ -95,17 +99,30 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             : false;
         }
       });
-      setUnsavedChanges(initialUnsavedChanges);
-      setUncleanData(initialUncleanData);
+      unsavedChangesStore.setKey(id, initialUnsavedChanges);
+      uncleanDataStore.setKey(id, initialUncleanData);
+      temporaryErrorsStore.setKey(id, {
+        storyFragmentTitle: false,
+        storyFragmentSlug: false,
+      });
     }
   }, [id, $storyFragmentInit]);
 
-  const setTemporaryError = useCallback((storeKey: StoreKey) => {
-    setTemporaryErrors(prev => ({ ...prev, [storeKey]: true }));
-    setTimeout(() => {
-      setTemporaryErrors(prev => ({ ...prev, [storeKey]: false }));
-    }, 2000);
-  }, []);
+  const setTemporaryError = useCallback(
+    (storeKey: StoreKey) => {
+      temporaryErrorsStore.setKey(id, {
+        ...($temporaryErrors[id] || {}),
+        [storeKey]: true,
+      });
+      setTimeout(() => {
+        temporaryErrorsStore.setKey(id, {
+          ...($temporaryErrors[id] || {}),
+          [storeKey]: false,
+        });
+      }, 2000);
+    },
+    [id, $temporaryErrors]
+  );
 
   const updateStoreField = useCallback(
     (storeKey: StoreKey, newValue: string): boolean => {
@@ -141,16 +158,15 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
         // Set unclean data on empty field, but allow the update
         if (newValue.length === 0) {
-          setUncleanData(prev => ({
-            ...prev,
+          uncleanDataStore.setKey(id, {
+            ...($uncleanData[id] || {}),
             [storeKey]: true,
-          }));
+          });
         } else {
-          // validation already passed, so we can set true
-          setUncleanData(prev => ({
-            ...prev,
+          uncleanDataStore.setKey(id, {
+            ...($uncleanData[id] || {}),
             [storeKey]: false,
-          }));
+          });
         }
 
         // Update the store once
@@ -161,17 +177,17 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
         // Update unsaved changes
         const isUnsaved = newValue !== currentField.original;
-        setUnsavedChanges(prev => ({
-          ...prev,
+        unsavedChangesStore.setKey(id, {
+          ...($unsavedChanges[id] || {}),
           [storeKey]: isUnsaved,
-        }));
+        });
 
         return true;
       }
 
       return false;
     },
-    [id]
+    [id, $uncleanData, $unsavedChanges]
   );
 
   const handleUndo = useCallback(
@@ -205,22 +221,22 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
         // Update unsaved changes
         const isUnsaved = lastEntry.value !== currentField.original;
-        setUnsavedChanges(prev => ({
-          ...prev,
+        unsavedChangesStore.setKey(id, {
+          ...($unsavedChanges[id] || {}),
           [storeKey]: isUnsaved,
-        }));
+        });
 
         // Clear unclean data flag if it was set
-        setUncleanData(prev => ({
-          ...prev,
+        uncleanDataStore.setKey(id, {
+          ...($uncleanData[id] || {}),
           [storeKey]: false,
-        }));
+        });
 
         // Trigger the onChange function to ensure all side effects are handled
         updateStoreField(storeKey, lastEntry.value);
       }
     },
-    [id, setTemporaryError, updateStoreField]
+    [id, $unsavedChanges, $uncleanData, setTemporaryError, updateStoreField]
   );
 
   const handleEditingChange = useCallback(
@@ -254,31 +270,31 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           >
             Settings
           </button>
-          {
-              Object.values(unsavedChanges).some(Boolean) ? (
-          <button
-            type="button"
-            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-          >
-            Cancel
-          </button>
-          )
-          :
-          (
-          <button
-            type="button"
-            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-          >
-            Close
-          </button>
+
+          {Object.values($unsavedChanges[id] || {}).some(Boolean) ? (
+            <a
+              data-astro-reload
+              href={`/${$storyFragmentSlug[id]?.original}/edit`}
+              className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+            >
+              Cancel
+            </a>
+          ) : (
+            <a
+              href={`/${$storyFragmentSlug[id]?.original}`}
+              className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+            >
+              Close
+            </a>
           )}
+
           <button
             type="button"
             className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
             disabled={
-              !Object.values(unsavedChanges).some(Boolean) ||
-              Object.values(uncleanData).some(Boolean) ||
-              Object.values(temporaryErrors).some(Boolean)
+              !Object.values($unsavedChanges[id] || {}).some(Boolean) ||
+              Object.values($uncleanData[id] || {}).some(Boolean) ||
+              Object.values($temporaryErrors[id] || {}).some(Boolean)
             }
           >
             Save
@@ -312,8 +328,8 @@ export const StoryFragmentHeader = (props: { id: string }) => {
                 width: "100%",
               }}
             />
-            {(uncleanData[`storyFragmentTitle`] ||
-              temporaryErrors[`storyFragmentTitle`]) && (
+            {($uncleanData[id]?.storyFragmentTitle ||
+              $temporaryErrors[id]?.storyFragmentTitle) && (
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
                 <ExclamationCircleIcon
                   aria-hidden="true"
@@ -334,7 +350,9 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </button>
         </div>
       </div>
-      {(isEditing.storyFragmentTitle || uncleanData[`storyFragmentTitle`]) && (
+
+      {(isEditing.storyFragmentTitle ||
+        $uncleanData[id]?.storyFragmentTitle) && (
         <ul className="text-black bg-mygreen/20 rounded mb-2 font-lg flex flex-wrap px-4 py-2">
           <li className="pr-6 py-2">Short and sweet: max 50-60 characters.</li>
           <li className="pr-6 py-2">Be descriptive and make it unique.</li>
@@ -369,8 +387,8 @@ export const StoryFragmentHeader = (props: { id: string }) => {
                 width: "100%",
               }}
             />
-            {(uncleanData[`storyFragmentSlug`] ||
-              temporaryErrors[`storyFragmentSlug`]) && (
+            {($uncleanData[id]?.storyFragmentSlug ||
+              $temporaryErrors[id]?.storyFragmentSlug) && (
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
                 <ExclamationCircleIcon
                   aria-hidden="true"
@@ -391,7 +409,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </button>
         </div>
       </div>
-      {(isEditing.storyFragmentSlug || uncleanData[`storyFragmentSlug`]) && (
+      {(isEditing.storyFragmentSlug || $uncleanData[id]?.storyFragmentSlug) && (
         <ul className="text-black bg-mygreen/20 rounded mb-2 font-lg flex flex-wrap px-4 py-2">
           <li className="pr-6 py-2">All lowercase. No special characters.</li>
           <li className="pr-6 py-2">use-hyphens-to-separate-words</li>

@@ -13,10 +13,24 @@ import type {
   CodeHookDatum,
   ImpressionDatum,
   IsInit,
+  StoreKey,
 } from "../types";
 
 // all look-ups by ulid
 //
+
+// storykeep state
+export const unsavedChangesStore = map<
+  Record<string, Record<StoreKey, boolean>>
+>({});
+export const uncleanDataStore = map<Record<string, Record<StoreKey, boolean>>>(
+  {}
+);
+export const temporaryErrorsStore = map<
+  Record<string, Record<StoreKey, boolean>>
+>({});
+
+// datums from turso
 export const menu = map<Record<string, FieldWithHistory<MenuDatum>>>();
 export const file = map<Record<string, FieldWithHistory<StoryKeepFileDatum>>>();
 export const resource = map<Record<string, FieldWithHistory<ResourceDatum>>>();

@@ -1,4 +1,13 @@
 import type { Root } from "hast";
+import type { MapStore } from "nanostores";
+
+export type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
+// Add other stores here
+//
+
+export type StoreMapType = {
+  [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
+};
 
 export interface EventStreamController {
   stop: () => void;

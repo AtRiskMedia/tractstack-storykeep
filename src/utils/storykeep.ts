@@ -1,4 +1,193 @@
 import { debounce } from "./helpers";
+import { useCallback, useState, useRef } from "react";
+import {
+  unsavedChangesStore,
+  uncleanDataStore,
+  temporaryErrorsStore,
+} from "../store/storykeep";
+import type {
+  StoreKey,
+  StoreMapType,
+  FieldWithHistory,
+  ValidationFunction,
+} from "../types";
+
+// global fn to toggle layout
+export const handleToggleOn = () => {
+  const event = new CustomEvent("toggle-on-edit-modal");
+  document.dispatchEvent(event);
+};
+export const handleToggleOff = () => {
+  const event = new CustomEvent("toggle-off-edit-modal");
+  document.dispatchEvent(event);
+};
+
+const initializeLastUpdateTime = (
+  storeMap: StoreMapType
+): Record<StoreKey, number> => {
+  return Object.keys(storeMap).reduce(
+    (acc, key) => {
+      acc[key as StoreKey] = 0;
+      return acc;
+    },
+    {} as Record<StoreKey, number>
+  );
+};
+
+export const useStoryKeepUtils = (
+  id: string,
+  storeMap: StoreMapType,
+  validationFunctions: Partial<Record<StoreKey, ValidationFunction>>
+) => {
+  const [isEditing, setIsEditing] = useState<
+    Partial<Record<StoreKey, boolean>>
+  >({});
+  const lastUpdateTimeRef = useRef<Record<StoreKey, number>>(
+    initializeLastUpdateTime(storeMap)
+  );
+
+  const setTemporaryError = useCallback(
+    (storeKey: StoreKey) => {
+      temporaryErrorsStore.setKey(id, {
+        ...(temporaryErrorsStore.get()[id] || {}),
+        [storeKey]: true,
+      });
+      setTimeout(() => {
+        temporaryErrorsStore.setKey(id, {
+          ...(temporaryErrorsStore.get()[id] || {}),
+          [storeKey]: false,
+        });
+      }, 2000);
+    },
+    [id]
+  );
+
+  const updateStoreField = useCallback(
+    (storeKey: StoreKey, newValue: string): boolean => {
+      const store = storeMap[storeKey];
+      if (!store) return false;
+
+      const validationFunction = validationFunctions[storeKey];
+      if (validationFunction && !validationFunction(newValue)) {
+        setTemporaryError(storeKey);
+        return false;
+      }
+
+      const currentStoreValue = store.get();
+      const currentField = currentStoreValue[id];
+      const now = Date.now();
+
+      if (currentField && newValue !== currentField.current) {
+        const timeSinceLastUpdate =
+          now - (lastUpdateTimeRef.current[storeKey] || 0);
+        const newField: FieldWithHistory<string> = {
+          current: newValue,
+          original: currentField.original,
+          history: currentField.history,
+        };
+
+        if (currentField.history.length === 0 || timeSinceLastUpdate > 5000) {
+          newField.history = [
+            { value: currentField.current, timestamp: now },
+            ...currentField.history,
+          ].slice(0, 10);
+          lastUpdateTimeRef.current[storeKey] = now;
+        }
+
+        if (newValue.length === 0) {
+          uncleanDataStore.setKey(id, {
+            ...(uncleanDataStore.get()[id] || {}),
+            [storeKey]: true,
+          });
+        } else {
+          uncleanDataStore.setKey(id, {
+            ...(uncleanDataStore.get()[id] || {}),
+            [storeKey]: false,
+          });
+        }
+
+        store.set({
+          ...currentStoreValue,
+          [id]: newField,
+        });
+
+        const isUnsaved = newValue !== currentField.original;
+        unsavedChangesStore.setKey(id, {
+          ...(unsavedChangesStore.get()[id] || {}),
+          [storeKey]: isUnsaved,
+        });
+
+        return true;
+      }
+
+      return false;
+    },
+    [id, storeMap, validationFunctions, setTemporaryError]
+  );
+
+  const handleUndo = useCallback(
+    (storeKey: StoreKey) => {
+      const store = storeMap[storeKey];
+      if (!store) return;
+
+      const currentStoreValue = store.get();
+      const currentField = currentStoreValue[id];
+      if (currentField && currentField.history.length > 0) {
+        const [lastEntry, ...newHistory] = currentField.history;
+
+        const validationFunction = validationFunctions[storeKey];
+        if (validationFunction && !validationFunction(lastEntry.value)) {
+          setTemporaryError(storeKey);
+          return;
+        }
+
+        store.set({
+          ...currentStoreValue,
+          [id]: {
+            current: lastEntry.value,
+            original: currentField.original,
+            history: newHistory,
+          },
+        });
+        lastUpdateTimeRef.current[storeKey] = Date.now();
+
+        const isUnsaved = lastEntry.value !== currentField.original;
+        unsavedChangesStore.setKey(id, {
+          ...(unsavedChangesStore.get()[id] || {}),
+          [storeKey]: isUnsaved,
+        });
+
+        uncleanDataStore.setKey(id, {
+          ...(uncleanDataStore.get()[id] || {}),
+          [storeKey]: false,
+        });
+
+        updateStoreField(storeKey, lastEntry.value);
+      }
+    },
+    [id, storeMap, validationFunctions, setTemporaryError, updateStoreField]
+  );
+
+  const handleEditingChange = useCallback(
+    (storeKey: StoreKey, editing: boolean) => {
+      if (editing) {
+        setIsEditing(prev => ({ ...prev, [storeKey]: true }));
+      } else {
+        setTimeout(() => {
+          setIsEditing(prev => ({ ...prev, [storeKey]: false }));
+        }, 100);
+      }
+    },
+    []
+  );
+
+  return {
+    isEditing,
+    updateStoreField,
+    handleUndo,
+    handleEditingChange,
+  };
+};
 
 export async function initStoryKeep() {
   interface Breakpoints {

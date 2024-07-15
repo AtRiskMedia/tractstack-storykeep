@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, } from "react";
 import { useStore } from "@nanostores/react";
 import {
   ExclamationCircleIcon,
@@ -14,13 +14,13 @@ import {
   // Add other stores here
   //
 } from "../../store/storykeep";
+import {
+  useStoryKeepUtils,
+  handleToggleOn,
+  handleToggleOff,
+} from "../../utils/storykeep";
 import { ContentEditableField } from "./ContentEditableField";
-import type {
-  StoreKey,
-  StoreMapType,
-  FieldWithHistory,
-  ValidationFunction,
-} from "../../types";
+import type { StoreKey, StoreMapType, ValidationFunction } from "../../types";
 
 const storeMap: StoreMapType = {
   storyFragmentTitle: storyFragmentTitle,
@@ -33,13 +33,17 @@ const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   storyFragmentTitle: (value: string) => value.length <= 80,
   storyFragmentSlug: (value: string) =>
     value.length === 0 ||
-    (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,48}[a-z0-9])?$/.test(value)),
+    (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
   // Add more validation functions for other fields
   //
 };
 
 export const StoryFragmentHeader = (props: { id: string }) => {
   const { id } = props;
+
+  // helpers
+  const { isEditing, updateStoreField, handleUndo, handleEditingChange } =
+    useStoryKeepUtils(id, storeMap, validationFunctions);
 
   // required stores
   const $unsavedChanges = useStore(unsavedChangesStore);
@@ -52,23 +56,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   //
 
   const [isClient, setIsClient] = useState(false);
-  const [isEditing, setIsEditing] = useState<
-    Partial<Record<StoreKey, boolean>>
-  >({});
-  const lastUpdateTimeRef = useRef<Record<StoreKey, number>>({
-    storyFragmentTitle: 0,
-    storyFragmentSlug: 0,
-  });
-
-  // global fn to toggle layout
-  const handleToggleOn = () => {
-    const event = new CustomEvent("toggle-on-edit-modal");
-    document.dispatchEvent(event);
-  };
-  const handleToggleOff = () => {
-    const event = new CustomEvent("toggle-off-edit-modal");
-    document.dispatchEvent(event);
-  };
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) {
@@ -107,151 +94,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       });
     }
   }, [id, $storyFragmentInit]);
-
-  const setTemporaryError = useCallback(
-    (storeKey: StoreKey) => {
-      temporaryErrorsStore.setKey(id, {
-        ...($temporaryErrors[id] || {}),
-        [storeKey]: true,
-      });
-      setTimeout(() => {
-        temporaryErrorsStore.setKey(id, {
-          ...($temporaryErrors[id] || {}),
-          [storeKey]: false,
-        });
-      }, 2000);
-    },
-    [id, $temporaryErrors]
-  );
-
-  const updateStoreField = useCallback(
-    (storeKey: StoreKey, newValue: string): boolean => {
-      const store = storeMap[storeKey];
-      if (!store) return false;
-
-      const validationFunction = validationFunctions[storeKey];
-      if (validationFunction && !validationFunction(newValue)) {
-        setTemporaryError(storeKey);
-        return false;
-      }
-
-      const currentStoreValue = store.get();
-      const currentField = currentStoreValue[id];
-      const now = Date.now();
-
-      if (currentField && newValue !== currentField.current) {
-        const timeSinceLastUpdate = now - lastUpdateTimeRef.current[storeKey];
-        const newField: FieldWithHistory<string> = {
-          current: newValue,
-          original: currentField.original,
-          history: currentField.history,
-        };
-
-        // Update history if necessary
-        if (currentField.history.length === 0 || timeSinceLastUpdate > 5000) {
-          newField.history = [
-            { value: currentField.current, timestamp: now },
-            ...currentField.history,
-          ].slice(0, 10);
-          lastUpdateTimeRef.current[storeKey] = now;
-        }
-
-        // Set unclean data on empty field, but allow the update
-        if (newValue.length === 0) {
-          uncleanDataStore.setKey(id, {
-            ...($uncleanData[id] || {}),
-            [storeKey]: true,
-          });
-        } else {
-          uncleanDataStore.setKey(id, {
-            ...($uncleanData[id] || {}),
-            [storeKey]: false,
-          });
-        }
-
-        // Update the store once
-        store.set({
-          ...currentStoreValue,
-          [id]: newField,
-        });
-
-        // Update unsaved changes
-        const isUnsaved = newValue !== currentField.original;
-        unsavedChangesStore.setKey(id, {
-          ...($unsavedChanges[id] || {}),
-          [storeKey]: isUnsaved,
-        });
-
-        return true;
-      }
-
-      return false;
-    },
-    [id, $uncleanData, $unsavedChanges]
-  );
-
-  const handleUndo = useCallback(
-    (storeKey: StoreKey) => {
-      const store = storeMap[storeKey];
-      if (!store) return;
-
-      const currentStoreValue = store.get();
-      const currentField = currentStoreValue[id];
-      if (currentField && currentField.history.length > 0) {
-        const [lastEntry, ...newHistory] = currentField.history;
-
-        // Validate the value from history
-        const validationFunction = validationFunctions[storeKey];
-        if (validationFunction && !validationFunction(lastEntry.value)) {
-          // If validation fails, set temporary error
-          setTemporaryError(storeKey);
-          return; // Exit without updating the store
-        }
-
-        // If validation passes, update the store
-        store.set({
-          ...currentStoreValue,
-          [id]: {
-            current: lastEntry.value,
-            original: currentField.original,
-            history: newHistory,
-          },
-        });
-        lastUpdateTimeRef.current[storeKey] = Date.now();
-
-        // Update unsaved changes
-        const isUnsaved = lastEntry.value !== currentField.original;
-        unsavedChangesStore.setKey(id, {
-          ...($unsavedChanges[id] || {}),
-          [storeKey]: isUnsaved,
-        });
-
-        // Clear unclean data flag if it was set
-        uncleanDataStore.setKey(id, {
-          ...($uncleanData[id] || {}),
-          [storeKey]: false,
-        });
-
-        // Trigger the onChange function to ensure all side effects are handled
-        updateStoreField(storeKey, lastEntry.value);
-      }
-    },
-    [id, $unsavedChanges, $uncleanData, setTemporaryError, updateStoreField]
-  );
-
-  const handleEditingChange = useCallback(
-    (storeKey: StoreKey, editing: boolean) => {
-      if (editing) {
-        setIsEditing(prev => ({ ...prev, [storeKey]: true }));
-      } else {
-        // Delay setting isEditing to false
-        setTimeout(() => {
-          setIsEditing(prev => ({ ...prev, [storeKey]: false }));
-        }, 100);
-      }
-    },
-    []
-  );
 
   if (!isClient) return <div>Loading...</div>;
 
@@ -300,8 +142,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
             disabled={
               !Object.values($unsavedChanges[id] || {}).some(Boolean) ||
-              Object.values($uncleanData[id] || {}).some(Boolean) ||
-              Object.values($temporaryErrors[id] || {}).some(Boolean)
+              Object.values($uncleanData[id] || {}).some(Boolean)
             }
           >
             Save

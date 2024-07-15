@@ -6,6 +6,7 @@ interface ContentEditableFieldProps {
   onChange: (value: string) => boolean;
   placeholder?: string;
   style?: React.CSSProperties;
+  onEditingChange?: (isEditing: boolean) => void;
 }
 
 export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
@@ -14,6 +15,7 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
   className,
   placeholder = "",
   style = {},
+  onEditingChange,
 }) => {
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const cursorPositionRef = useRef<number>(0);
@@ -58,6 +60,14 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
     }
   }, [onChange, internalValue, setCursorPosition]);
 
+  const handleFocus = useCallback(() => {
+    onEditingChange?.(true);
+  }, [onEditingChange]);
+
+  const handleBlur = useCallback(() => {
+    onEditingChange?.(false);
+  }, [onEditingChange]);
+
   useEffect(() => {
     if (
       contentEditableRef.current &&
@@ -74,7 +84,8 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
       ref={contentEditableRef}
       contentEditable
       onInput={handleContentChange}
-      onBlur={handleContentChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
       style={{
         ...style,
         minHeight: "1em",

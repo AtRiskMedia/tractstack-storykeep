@@ -48,6 +48,9 @@ const getErrorMessage = (storeKey: StoreKey, value: string): string => {
 export const StoryFragmentHeader = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
+  const [isEditing, setIsEditing] = useState<
+    Partial<Record<StoreKey, boolean>>
+  >({});
   const lastUpdateTimeRef = useRef<Record<StoreKey, number>>({
     title: 0,
     slug: 0,
@@ -184,6 +187,13 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     [id]
   );
 
+  const handleEditingChange = useCallback(
+    (storeKey: StoreKey, editing: boolean) => {
+      setIsEditing(prev => ({ ...prev, [storeKey]: editing }));
+    },
+    []
+  );
+
   if (!isClient) return <div>Loading...</div>;
 
   return (
@@ -239,6 +249,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             <ContentEditableField
               value={$storyFragmentTitle[id]?.current || ""}
               onChange={newValue => updateStoreField("title", newValue)}
+              onEditingChange={editing => handleEditingChange("title", editing)}
               placeholder="Enter title here"
               className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
               style={{
@@ -269,11 +280,12 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </button>
         </div>
       </div>
-      <div id="title-error" className="mt-2 text-sm text-red-600">
-        {errorMessages.title && (
-          <div className="text-red-500 mb-2">{errorMessages.title}</div>
-        )}
-      </div>
+      {errorMessages.title && (
+        <div className="text-red-500 mb-2">{errorMessages.title}</div>
+      )}
+      {isEditing.title && (
+        <div className="text-blue-500 mb-2">Editing title...</div>
+      )}
 
       <div className="w-full">
         {errorMessages.slug && (
@@ -282,6 +294,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         <ContentEditableField
           value={$storyFragmentSlug[id]?.current || ""}
           onChange={newValue => updateStoreField("slug", newValue)}
+          onEditingChange={editing => handleEditingChange("slug", editing)}
           placeholder="enter-slug-here"
           style={{
             border: "1px solid black",

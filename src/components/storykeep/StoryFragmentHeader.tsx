@@ -4,6 +4,7 @@ import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
+import ViewportSelector from "./ViewportSelector";
 import {
   unsavedChangesStore,
   uncleanDataStore,
@@ -279,6 +280,8 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       )}
 
       <br />
+      <ViewportSelector viewport={viewport} setViewport={setViewport} />
+      <br />
       <button className="mx-2" onClick={handleToggleOn}>
         Edit Pane On
       </button>
@@ -291,32 +294,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       <a className="mx-2" href="/next-chapter-in-analytics/edit">
         next
       </a>
-      <div>
-        <button
-          onClick={() => setViewport("auto")}
-          className={viewport === "auto" ? "active" : ""}
-        >
-          Auto
-        </button>
-        <button
-          onClick={() => setViewport("mobile")}
-          className={viewport === "mobile" ? "active" : ""}
-        >
-          Mobile
-        </button>
-        <button
-          onClick={() => setViewport("tablet")}
-          className={viewport === "tablet" ? "active" : ""}
-        >
-          Tablet
-        </button>
-        <button
-          onClick={() => setViewport("desktop")}
-          className={viewport === "desktop" ? "active" : ""}
-        >
-          Desktop
-        </button>
-      </div>
       <div>
         <button
           onClick={() => setMode("text")}

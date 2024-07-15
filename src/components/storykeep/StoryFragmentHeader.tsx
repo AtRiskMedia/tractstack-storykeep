@@ -48,18 +48,14 @@ const getErrorMessage = (storeKey: StoreKey, value: string): string => {
 export const StoryFragmentHeader = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
-  const [initialValues, setInitialValues] = useState<
-    Record<StoreKey, string | null>
-  >({
-    title: null,
-    slug: null,
-    // Initialize other fields here
-  });
   const lastUpdateTimeRef = useRef<Record<StoreKey, number>>({
     title: 0,
     slug: 0,
   });
   const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
+  const [unsavedChanges, setUnsavedChanges] = useState<
+    Partial<Record<StoreKey, boolean>>
+  >({});
 
   // global fn to toggle layout
   const handleToggleOn = () => {
@@ -77,7 +73,21 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   // Add other useStore hooks as needed
 
   useEffect(() => {
-    if ($storyFragmentInit[id]?.init) setIsClient(true);
+    if ($storyFragmentInit[id]?.init) {
+      setIsClient(true);
+      // Initialize unsavedChanges
+      const initialUnsavedChanges: Partial<Record<StoreKey, boolean>> = {};
+      (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
+        const store = storeMap[storeKey];
+        if (store) {
+          const field = store.get()[id];
+          initialUnsavedChanges[storeKey] = field
+            ? field.current !== field.original
+            : false;
+        }
+      });
+      setUnsavedChanges(initialUnsavedChanges);
+    }
   }, [id, $storyFragmentInit]);
 
   const updateStoreField = useCallback(
@@ -94,18 +104,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         return false;
       }
 
-      setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
-
-      // Set error message if the field is empty, but allow the update
-      if (newValue.length === 0) {
-        setErrorMessages(prev => ({
-          ...prev,
-          [storeKey]: `${storeKey.charAt(0).toUpperCase() + storeKey.slice(1)} cannot be empty.`,
-        }));
-      } else {
-        setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
-      }
-
       const currentStoreValue = store.get();
       const currentField = currentStoreValue[id];
       const now = Date.now();
@@ -118,25 +116,42 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           history: currentField.history,
         };
 
-        store.set({
-          ...currentStoreValue,
-          [id]: newField,
-        });
-
+        // Update history if necessary
         if (currentField.history.length === 0 || timeSinceLastUpdate > 5000) {
           newField.history = [
             { value: currentField.current, timestamp: now },
             ...currentField.history,
           ].slice(0, 10);
           lastUpdateTimeRef.current[storeKey] = now;
-
-          store.set({
-            ...currentStoreValue,
-            [id]: newField,
-          });
         }
+
+        // Set error message if the field is empty, but allow the update
+        if (newValue.length === 0) {
+          setErrorMessages(prev => ({
+            ...prev,
+            [storeKey]: `${storeKey.charAt(0).toUpperCase() + storeKey.slice(1)} cannot be empty.`,
+          }));
+        } else {
+          setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
+        }
+
+        // Update the store once
+        store.set({
+          ...currentStoreValue,
+          [id]: newField,
+        });
+
+        // Update unsaved changes
+        const isUnsaved = newValue !== currentField.original;
+        setUnsavedChanges(prev => ({
+          ...prev,
+          [storeKey]: isUnsaved,
+        }));
+
+        return true;
       }
-      return true;
+
+      return false;
     },
     [id]
   );
@@ -154,10 +169,16 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           ...currentStoreValue,
           [id]: {
             current: lastEntry.value,
+            original: currentField.original,
             history: newHistory,
           },
         });
         lastUpdateTimeRef.current[storeKey] = Date.now();
+
+        setUnsavedChanges(prev => ({
+          ...prev,
+          [storeKey]: lastEntry.value !== currentField.original,
+        }));
       }
     },
     [id]
@@ -183,22 +204,22 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </h1>
           <button
             type="button"
-            className="my-1 rounded bg-myblack px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+            className="my-1 rounded bg-myblack px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
           >
             Settings
           </button>
           <button
             type="button"
-            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
           >
             Cancel
           </button>
           <button
             type="button"
-            className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+            className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
             disabled={
               Object.values(errorMessages).filter(value => value !== undefined)
-                .length > 0
+                .length > 0 || !Object.values(unsavedChanges).some(Boolean)
             }
           >
             Save

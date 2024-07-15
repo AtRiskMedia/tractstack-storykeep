@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import {
+  storyFragmentInit,
   storyFragmentTitle,
   storyFragmentSlug,
   storyFragmentTractStackId,
@@ -14,11 +15,8 @@ export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   // Use the useStore hook to subscribe to the stores
+  const $storyFragmentInit = useStore(storyFragmentInit);
   const $storyFragmentTitle = useStore(storyFragmentTitle);
   const $storyFragmentSlug = useStore(storyFragmentSlug);
   const $storyFragmentTractStackId = useStore(storyFragmentTractStackId);
@@ -38,10 +36,12 @@ export const StoryFragment = (props: { id: string }) => {
   const socialImagePath = $storyFragmentSocialImagePath[id]?.current;
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
 
+  useEffect(() => {
+    if ($storyFragmentInit[id]?.init) setIsClient(true);
+  }, [id, $storyFragmentInit]);
+
   // If we're on the server or the data isn't loaded yet, show a loading state
-  if (!isClient || !title) {
-    return <div>Loading...</div>;
-  }
+  if (!isClient) return <div>Loading...</div>;
 
   return (
     <div>
@@ -53,13 +53,6 @@ export const StoryFragment = (props: { id: string }) => {
       <p>Pane IDs: {paneIds?.join(", ")}</p>
       <p>Social Image Path: {socialImagePath}</p>
       <p>Tailwind Background Colour: {tailwindBgColour}</p>
-      <button
-        onClick={() =>
-          storyFragmentTitle.setKey(id, { current: "New Title", history: [] })
-        }
-      >
-        Update Title
-      </button>
     </div>
   );
 };

@@ -58,7 +58,6 @@ export const StoryKeepStore = (props: {
         };
       }
       if (!storyFragmentInit.get()[fragment.id]?.init) {
-        console.log(`populating`);
         storyFragmentInit.set({
           ...storyFragmentInit.get(),
           [fragment.id]: { init: true },
@@ -155,7 +154,6 @@ export const StoryKeepStore = (props: {
               ...paneIsContextPane.get(),
               [payload.id]: createFieldWithHistory(payload.isContextPane),
             });
-            console.log(thisPaneFragmentIds);
             paneFragmentIds.set({
               ...paneFragmentIds.get(),
               [payload.id]: createFieldWithHistory(thisPaneFragmentIds),
@@ -239,9 +237,7 @@ export const StoryKeepStore = (props: {
               });
           }
         });
-      } else console.log(`re-populating`);
-      console.log(storyFragmentTitle.get());
-      console.log(paneTitle.get());
+      }
     };
 
     populateStores(storyfragment);

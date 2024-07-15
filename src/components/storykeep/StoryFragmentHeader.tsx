@@ -1,7 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
-import { ExclamationCircleIcon,ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import {
+  ExclamationCircleIcon,
+  ChevronDoubleLeftIcon,
+} from "@heroicons/react/24/outline";
+import {
+  storyFragmentInit,
   storyFragmentTitle,
   storyFragmentSlug /* other stores */,
 } from "../../store/storykeep";
@@ -67,39 +71,35 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     document.dispatchEvent(event);
   };
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
+  const $storyFragmentInit = useStore(storyFragmentInit);
   const $storyFragmentTitle = useStore(storyFragmentTitle);
   const $storyFragmentSlug = useStore(storyFragmentSlug);
   // Add other useStore hooks as needed
 
   useEffect(() => {
-    // Check if the values are already set in the stores
-    setInitialValues({
-      title: $storyFragmentTitle[id]?.current ?? "Enter title here",
-      slug: $storyFragmentSlug[id]?.current ?? "enter-slug-here",
-      // Set initial values for other fields
-    });
+    // don't init until storyfragment is loaded
+    if ($storyFragmentInit[id]?.init) {
+      setInitialValues({
+        title: $storyFragmentTitle[id]?.current ?? "Enter title here",
+        slug: $storyFragmentSlug[id]?.current ?? "enter-slug-here",
+        // Set initial values for other fields
+      });
 
-    // Initialize stores if needed
-    Object.entries(storeMap).forEach(([key, store]) => {
-      if (store && store.get()[id] === undefined) {
-        store.set({
-          ...store.get(),
-          [id]: {
-            current: initialValues[key as StoreKey] ?? "",
-            history: [],
-          },
-        });
-      }
-    });
-  }, [
-    id,
-    $storyFragmentTitle,
-    $storyFragmentSlug /* add other store variables */,
-  ]);
+      // Initialize stores if needed
+      Object.entries(storeMap).forEach(([key, store]) => {
+        if (store && store.get()[id] === undefined) {
+          store.set({
+            ...store.get(),
+            [id]: {
+              current: initialValues[key as StoreKey] ?? "",
+              history: [],
+            },
+          });
+        }
+      });
+      setIsClient(true);
+    }
+  }, [id, $storyFragmentInit]);
 
   const updateStoreField = useCallback(
     (storeKey: StoreKey, newValue: string): boolean => {
@@ -239,38 +239,38 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           Descriptive title for this web page
         </label>
         <div className="inline-flex flex-nowrap w-full">
-        <div className="relative mt-2 md:mt-0 md:flex-grow">
-          <ContentEditableField
-            value={$storyFragmentTitle[id]?.current || ""}
-            onChange={newValue => updateStoreField("title", newValue)}
-            placeholder="Enter title here"
-            className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
-            style={{
-              border: "1px solid black",
-              padding: "5px 30px 5px 5px",
-              marginBottom: "10px",
-              width: "100%",
-            }}
-          />
-          {errorMessages.title && (
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
-              <ExclamationCircleIcon
-                aria-hidden="true"
-                className="h-5 w-5 text-red-500"
-              />
-            </div>
-          )}
-        </div>
-        <button
-          onClick={() => handleUndo("title")}
+          <div className="relative mt-2 md:mt-0 md:flex-grow">
+            <ContentEditableField
+              value={$storyFragmentTitle[id]?.current || ""}
+              onChange={newValue => updateStoreField("title", newValue)}
+              placeholder="Enter title here"
+              className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+              style={{
+                border: "1px solid black",
+                padding: "5px 30px 5px 5px",
+                marginBottom: "10px",
+                width: "100%",
+              }}
+            />
+            {errorMessages.title && (
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
+                <ExclamationCircleIcon
+                  aria-hidden="true"
+                  className="h-5 w-5 text-red-500"
+                />
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => handleUndo("title")}
             className="disabled:hidden"
-          disabled={$storyFragmentTitle[id]?.history.length === 0}
-        >
-          <ChevronDoubleLeftIcon
-          className="h-8 w-8 text-myorange rounded bg-slate-200 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+            disabled={$storyFragmentTitle[id]?.history.length === 0}
+          >
+            <ChevronDoubleLeftIcon
+              className="h-8 w-8 text-myorange rounded bg-slate-200 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
               title="Undo"
-          />
-        </button>
+            />
+          </button>
         </div>
       </div>
       <div id="title-error" className="mt-2 text-sm text-red-600">

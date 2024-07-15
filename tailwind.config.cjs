@@ -54,6 +54,7 @@ module.exports = {
         r9xl: 'calc(var(--scale) * 8rem)',
       },
       animation: {
+        fadeOut: 'fadeOut 1s forwards',
         fadeIn: 'fadeIn 1s ease-in',
         fadeInUp: 'fadeInUp 1s ease-in',
         fadeInRight: 'fadeInRight 1s ease-in',
@@ -62,6 +63,10 @@ module.exports = {
         wig: 'wiggle 1s ease-in-out infinite',
       },
       keyframes: {
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
+        },
         fadeIn: {
           '0%': { opacity: '.25' },
           '100%': { opacity: '1' },

@@ -7,56 +7,59 @@ import {
 import {
   storyFragmentInit,
   storyFragmentTitle,
-  storyFragmentSlug /* other stores */,
+  storyFragmentSlug,
+  // Add other stores here
+  //
 } from "../../store/storykeep";
 import { ContentEditableField } from "./ContentEditableField";
 import type { FieldWithHistory, ValidationFunction } from "../../types";
 import type { MapStore } from "nanostores";
 
-type ErrorMessages = Partial<Record<StoreKey, string>>;
-type StoreKey = "title" | "slug" /* add other store keys as needed */;
+type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
+// Add other stores here
+//
 
 type StoreMapType = {
   [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
 };
 
 const storeMap: StoreMapType = {
-  title: storyFragmentTitle,
-  slug: storyFragmentSlug,
+  storyFragmentTitle: storyFragmentTitle,
+  storyFragmentSlug: storyFragmentSlug,
   // Add other stores here
 };
 
 const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
-  title: (value: string) => value.length <= 80,
-  slug: (value: string) => value.length <= 50 && /^[a-z0-9-]*$/.test(value),
+  storyFragmentTitle: (value: string) => value.length <= 80,
+  storyFragmentSlug: (value: string) =>
+    value.length <= 50 && /^[a-z0-9-]*$/.test(value),
   // Add more validation functions for other fields
-};
-
-const getErrorMessage = (storeKey: StoreKey, value: string): string => {
-  switch (storeKey) {
-    case "title":
-      return "Title must be 80 characters or less.";
-    case "slug":
-      return "Slug should be descriptive and 15-20 letters if possible. Must be 50 characters or less and contain only lowercase letters, numbers, and hyphens.";
-    // Add more cases for other fields
-    default:
-      console.log(`Invalid input: ${value}`);
-      return "Invalid input.";
-  }
+  //
 };
 
 export const StoryFragmentHeader = (props: { id: string }) => {
+  const $storyFragmentInit = useStore(storyFragmentInit);
+  const $storyFragmentTitle = useStore(storyFragmentTitle);
+  const $storyFragmentSlug = useStore(storyFragmentSlug);
+  // Add other useStore hooks as needed
+  //
+
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const [isEditing, setIsEditing] = useState<
     Partial<Record<StoreKey, boolean>>
   >({});
   const lastUpdateTimeRef = useRef<Record<StoreKey, number>>({
-    title: 0,
-    slug: 0,
+    storyFragmentTitle: 0,
+    storyFragmentSlug: 0,
   });
-  const [errorMessages, setErrorMessages] = useState<ErrorMessages>({});
+  const [temporaryErrors, setTemporaryErrors] = useState<
+    Partial<Record<StoreKey, boolean>>
+  >({});
   const [unsavedChanges, setUnsavedChanges] = useState<
+    Partial<Record<StoreKey, boolean>>
+  >({});
+  const [uncleanData, setUncleanData] = useState<
     Partial<Record<StoreKey, boolean>>
   >({});
 
@@ -70,28 +73,38 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     document.dispatchEvent(event);
   };
 
-  const $storyFragmentInit = useStore(storyFragmentInit);
-  const $storyFragmentTitle = useStore(storyFragmentTitle);
-  const $storyFragmentSlug = useStore(storyFragmentSlug);
-  // Add other useStore hooks as needed
-
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) {
       setIsClient(true);
+
+      // Initialize UncleanData
       // Initialize unsavedChanges
       const initialUnsavedChanges: Partial<Record<StoreKey, boolean>> = {};
+      const initialUncleanData: Partial<Record<StoreKey, boolean>> = {};
       (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
         const store = storeMap[storeKey];
         if (store) {
           const field = store.get()[id];
+          const validationFunction = validationFunctions[storeKey];
+          if (validationFunction && !validationFunction(field.current))
+            initialUncleanData[storeKey] = true;
+          else initialUncleanData[storeKey] = false;
           initialUnsavedChanges[storeKey] = field
             ? field.current !== field.original
             : false;
         }
       });
       setUnsavedChanges(initialUnsavedChanges);
+      setUncleanData(initialUncleanData);
     }
   }, [id, $storyFragmentInit]);
+
+  const setTemporaryError = useCallback((storeKey: StoreKey) => {
+    setTemporaryErrors(prev => ({ ...prev, [storeKey]: true }));
+    setTimeout(() => {
+      setTemporaryErrors(prev => ({ ...prev, [storeKey]: false }));
+    }, 2000);
+  }, []);
 
   const updateStoreField = useCallback(
     (storeKey: StoreKey, newValue: string): boolean => {
@@ -100,10 +113,11 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
       const validationFunction = validationFunctions[storeKey];
       if (validationFunction && !validationFunction(newValue)) {
-        setErrorMessages(prev => ({
-          ...prev,
-          [storeKey]: getErrorMessage(storeKey, newValue),
-        }));
+        setTemporaryError(storeKey);
+        //setUncleanData(prev => ({
+        //  ...prev,
+        //  [storeKey]: true,
+        //}));
         return false;
       }
 
@@ -128,14 +142,18 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           lastUpdateTimeRef.current[storeKey] = now;
         }
 
-        // Set error message if the field is empty, but allow the update
+        // Set unclean data on empty field, but allow the update
         if (newValue.length === 0) {
-          setErrorMessages(prev => ({
+          setUncleanData(prev => ({
             ...prev,
-            [storeKey]: `${storeKey.charAt(0).toUpperCase() + storeKey.slice(1)} cannot be empty.`,
+            [storeKey]: true,
           }));
         } else {
-          setErrorMessages(prev => ({ ...prev, [storeKey]: undefined }));
+          // validation already passed, so we can set true
+          setUncleanData(prev => ({
+            ...prev,
+            [storeKey]: false,
+          }));
         }
 
         // Update the store once
@@ -168,6 +186,16 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       const currentField = currentStoreValue[id];
       if (currentField && currentField.history.length > 0) {
         const [lastEntry, ...newHistory] = currentField.history;
+
+        // Validate the value from history
+        const validationFunction = validationFunctions[storeKey];
+        if (validationFunction && !validationFunction(lastEntry.value)) {
+          // If validation fails, set temporary error
+          setTemporaryError(storeKey);
+          return; // Exit without updating the store
+        }
+
+        // If validation passes, update the store
         store.set({
           ...currentStoreValue,
           [id]: {
@@ -178,13 +206,24 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         });
         lastUpdateTimeRef.current[storeKey] = Date.now();
 
+        // Update unsaved changes
+        const isUnsaved = lastEntry.value !== currentField.original;
         setUnsavedChanges(prev => ({
           ...prev,
-          [storeKey]: lastEntry.value !== currentField.original,
+          [storeKey]: isUnsaved,
         }));
+
+        // Clear unclean data flag if it was set
+        setUncleanData(prev => ({
+          ...prev,
+          [storeKey]: false,
+        }));
+
+        // Trigger the onChange function to ensure all side effects are handled
+        updateStoreField(storeKey, lastEntry.value);
       }
     },
-    [id]
+    [id, setTemporaryError, updateStoreField]
   );
 
   const handleEditingChange = useCallback(
@@ -228,8 +267,9 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             type="button"
             className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
             disabled={
-              Object.values(errorMessages).filter(value => value !== undefined)
-                .length > 0 || !Object.values(unsavedChanges).some(Boolean)
+              !Object.values(unsavedChanges).some(Boolean) ||
+              Object.values(uncleanData).some(Boolean) ||
+              Object.values(temporaryErrors).some(Boolean)
             }
           >
             Save
@@ -239,7 +279,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
       <div className="md:flex md:items-center">
         <label
-          htmlFor="title"
+          htmlFor="storyFragmentTitle"
           className="block text-md leading-6 text-mydarkgrey md:mr-4 md:flex-shrink-0"
         >
           Descriptive title for this web page
@@ -248,8 +288,12 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           <div className="relative mt-2 md:mt-0 md:flex-grow">
             <ContentEditableField
               value={$storyFragmentTitle[id]?.current || ""}
-              onChange={newValue => updateStoreField("title", newValue)}
-              onEditingChange={editing => handleEditingChange("title", editing)}
+              onChange={newValue =>
+                updateStoreField("storyFragmentTitle", newValue)
+              }
+              onEditingChange={editing =>
+                handleEditingChange("storyFragmentTitle", editing)
+              }
               placeholder="Enter title here"
               className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
               style={{
@@ -259,7 +303,8 @@ export const StoryFragmentHeader = (props: { id: string }) => {
                 width: "100%",
               }}
             />
-            {errorMessages.title && (
+            {(uncleanData[`storyFragmentTitle`] ||
+              temporaryErrors[`storyFragmentTitle`]) && (
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
                 <ExclamationCircleIcon
                   aria-hidden="true"
@@ -269,7 +314,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             )}
           </div>
           <button
-            onClick={() => handleUndo("title")}
+            onClick={() => handleUndo("storyFragmentTitle")}
             className="disabled:hidden"
             disabled={$storyFragmentTitle[id]?.history.length === 0}
           >
@@ -280,36 +325,76 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </button>
         </div>
       </div>
-      {errorMessages.title && (
-        <div className="text-red-500 mb-2">{errorMessages.title}</div>
-      )}
-      {isEditing.title && (
-        <div className="text-blue-500 mb-2">Editing title...</div>
+      {(isEditing.storyFragmentTitle || uncleanData[`storyFragmentTitle`]) && (
+        <ul className="text-black bg-mygreen/20 rounded mb-2 font-lg flex flex-wrap px-4 py-2">
+          <li className="pr-6 py-2">Short and sweet: max 50-60 characters.</li>
+          <li className="pr-6 py-2">Be descriptive and make it unique.</li>
+          <li className="pr-6 py-2">Include your most important keyword.</li>
+          <li className="pr-6 py-2">Include your brand name.</li>
+        </ul>
       )}
 
-      <div className="w-full">
-        {errorMessages.slug && (
-          <div className="text-red-500 mb-2">{errorMessages.slug}</div>
-        )}
-        <ContentEditableField
-          value={$storyFragmentSlug[id]?.current || ""}
-          onChange={newValue => updateStoreField("slug", newValue)}
-          onEditingChange={editing => handleEditingChange("slug", editing)}
-          placeholder="enter-slug-here"
-          style={{
-            border: "1px solid black",
-            padding: "5px",
-            marginBottom: "10px",
-          }}
-        />
-        <button
-          onClick={() => handleUndo("slug")}
-          disabled={$storyFragmentSlug[id]?.history.length === 0}
+      <div className="md:flex md:items-center">
+        <label
+          htmlFor="storyFragmentSlug"
+          className="block text-md leading-6 text-mydarkgrey md:mr-4 md:flex-shrink-0"
         >
-          Undo Slug
-        </button>
+          Slug (path) for this page
+        </label>
+        <div className="inline-flex flex-nowrap w-full">
+          <div className="relative mt-2 md:mt-0 md:flex-grow">
+            <ContentEditableField
+              value={$storyFragmentSlug[id]?.current || ""}
+              onChange={newValue =>
+                updateStoreField("storyFragmentSlug", newValue)
+              }
+              onEditingChange={editing =>
+                handleEditingChange("storyFragmentSlug", editing)
+              }
+              placeholder="Enter slug here"
+              className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+              style={{
+                border: "1px solid black",
+                padding: "5px 30px 5px 5px",
+                marginBottom: "10px",
+                width: "100%",
+              }}
+            />
+            {(uncleanData[`storyFragmentSlug`] ||
+              temporaryErrors[`storyFragmentSlug`]) && (
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
+                <ExclamationCircleIcon
+                  aria-hidden="true"
+                  className="h-5 w-5 text-red-500"
+                />
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => handleUndo("storyFragmentSlug")}
+            className="disabled:hidden"
+            disabled={$storyFragmentSlug[id]?.history.length === 0}
+          >
+            <ChevronDoubleLeftIcon
+              className="h-8 w-8 text-myorange rounded bg-slate-200 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+              title="Undo"
+            />
+          </button>
+        </div>
       </div>
-      {/* Add more editable fields as needed */}
+      {(isEditing.storyFragmentSlug || uncleanData[`storyFragmentSlug`]) && (
+        <ul className="text-black bg-mygreen/20 rounded mb-2 font-lg flex flex-wrap px-4 py-2">
+          <li className="pr-6 py-2">All lowercase. No special characters.</li>
+          <li className="pr-6 py-2">use-hyphens-to-separate-words</li>
+          <li className="pr-6 py-2">3-5 words max!</li>
+          <li className="pr-6 py-2">Be descriptive!</li>
+          <li className="pr-6 py-2">Include your most important keyword.</li>
+          <li className="pr-6 py-2">
+            Avoid numbers and dates unless necessary.
+          </li>
+        </ul>
+      )}
+
       <br />
       <button className="mx-2" onClick={handleToggleOn}>
         Edit Pane On

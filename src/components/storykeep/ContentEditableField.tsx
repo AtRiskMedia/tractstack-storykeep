@@ -20,6 +20,7 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const cursorPositionRef = useRef<number>(0);
   const [internalValue, setInternalValue] = useState(value);
+  const isInitialMount = useRef(true);
 
   const setCursorPosition = useCallback(
     (element: HTMLElement, position: number) => {
@@ -69,7 +70,12 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
   }, [onEditingChange]);
 
   useEffect(() => {
-    if (
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      if (contentEditableRef.current) {
+        contentEditableRef.current.textContent = value;
+      }
+    } else if (
       contentEditableRef.current &&
       value !== contentEditableRef.current.textContent
     ) {

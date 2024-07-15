@@ -137,6 +137,7 @@ export async function initStoryKeep() {
         websiteContent.classList.remove("hidden");
       }
     }
+    handleScroll();
   }
 
   //function setViewport(viewport: Viewport): void {

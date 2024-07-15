@@ -30,9 +30,10 @@ const storeMap: StoreMapType = {
 };
 
 const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
+  // temporaryErrors will catch length === 0
   storyFragmentTitle: (value: string) => value.length <= 80,
   storyFragmentSlug: (value: string) =>
-    value.length <= 50 && /^[a-z0-9-]*$/.test(value),
+   value.length===0 || ( value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,48}[a-z0-9])?$/.test(value)),
   // Add more validation functions for other fields
   //
 };
@@ -114,10 +115,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       const validationFunction = validationFunctions[storeKey];
       if (validationFunction && !validationFunction(newValue)) {
         setTemporaryError(storeKey);
-        //setUncleanData(prev => ({
-        //  ...prev,
-        //  [storeKey]: true,
-        //}));
         return false;
       }
 
@@ -253,16 +250,28 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </h1>
           <button
             type="button"
-            className="my-1 rounded bg-myblack px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+            className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
           >
             Settings
           </button>
+          {
+              Object.values(unsavedChanges).some(Boolean) ? (
           <button
             type="button"
             className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
           >
             Cancel
           </button>
+          )
+          :
+          (
+          <button
+            type="button"
+            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+          >
+            Close
+          </button>
+          )}
           <button
             type="button"
             className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
@@ -319,7 +328,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             disabled={$storyFragmentTitle[id]?.history.length === 0}
           >
             <ChevronDoubleLeftIcon
-              className="h-8 w-8 text-myorange rounded bg-slate-200 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
               title="Undo"
             />
           </button>
@@ -376,7 +385,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             disabled={$storyFragmentSlug[id]?.history.length === 0}
           >
             <ChevronDoubleLeftIcon
-              className="h-8 w-8 text-myorange rounded bg-slate-200 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
               title="Undo"
             />
           </button>

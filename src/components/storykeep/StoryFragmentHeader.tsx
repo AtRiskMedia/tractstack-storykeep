@@ -77,28 +77,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   // Add other useStore hooks as needed
 
   useEffect(() => {
-    // don't init until storyfragment is loaded
-    if ($storyFragmentInit[id]?.init) {
-      setInitialValues({
-        title: $storyFragmentTitle[id]?.current ?? "Enter title here",
-        slug: $storyFragmentSlug[id]?.current ?? "enter-slug-here",
-        // Set initial values for other fields
-      });
-
-      // Initialize stores if needed
-      Object.entries(storeMap).forEach(([key, store]) => {
-        if (store && store.get()[id] === undefined) {
-          store.set({
-            ...store.get(),
-            [id]: {
-              current: initialValues[key as StoreKey] ?? "",
-              history: [],
-            },
-          });
-        }
-      });
-      setIsClient(true);
-    }
+    if ($storyFragmentInit[id]?.init) setIsClient(true);
   }, [id, $storyFragmentInit]);
 
   const updateStoreField = useCallback(
@@ -135,15 +114,13 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         const timeSinceLastUpdate = now - lastUpdateTimeRef.current[storeKey];
         const newField: FieldWithHistory<string> = {
           current: newValue,
+          original: currentField.original,
           history: currentField.history,
         };
 
         store.set({
           ...currentStoreValue,
-          [id]: {
-            ...newField,
-            current: newValue,
-          },
+          [id]: newField,
         });
 
         if (currentField.history.length === 0 || timeSinceLastUpdate > 5000) {
@@ -186,9 +163,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     [id]
   );
 
-  if (!isClient || Object.values(initialValues).some(v => v === null)) {
-    return <div>Loading...</div>;
-  }
+  if (!isClient) return <div>Loading...</div>;
 
   return (
     <div className="w-full">

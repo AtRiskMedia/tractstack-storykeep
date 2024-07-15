@@ -13,6 +13,7 @@ export type HistoryEntry<T> = {
 
 export type FieldWithHistory<T> = {
   current: T;
+  original: T;
   history: HistoryEntry<T>[];
 };
 

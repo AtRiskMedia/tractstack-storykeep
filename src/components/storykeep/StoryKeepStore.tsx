@@ -54,6 +54,7 @@ export const StoryKeepStore = (props: {
       function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
         return {
           current: value,
+          original: value,
           history: [],
         };
       }

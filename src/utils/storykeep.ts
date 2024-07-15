@@ -1,9 +1,12 @@
+import { useStore } from "@nanostores/react";
 import { debounce } from "./helpers";
 import { useCallback, useState, useRef } from "react";
 import {
   unsavedChangesStore,
   uncleanDataStore,
   temporaryErrorsStore,
+  viewportStore,
+  modeStore,
 } from "../store/storykeep";
 import type {
   StoreKey,
@@ -45,6 +48,19 @@ export const useStoryKeepUtils = (
   const lastUpdateTimeRef = useRef<Record<StoreKey, number>>(
     initializeLastUpdateTime(storeMap)
   );
+
+  const { value: viewport } = useStore(viewportStore);
+  const { value: mode } = useStore(modeStore);
+
+  const setViewport = (
+    newViewport: "auto" | "mobile" | "tablet" | "desktop"
+  ) => {
+    viewportStore.set({ value: newViewport });
+  };
+
+  const setMode = (newMode: "text" | "styles" | "settings") => {
+    modeStore.set({ value: newMode });
+  };
 
   const setTemporaryError = useCallback(
     (storeKey: StoreKey) => {
@@ -186,6 +202,10 @@ export const useStoryKeepUtils = (
     updateStoreField,
     handleUndo,
     handleEditingChange,
+    viewport,
+    mode,
+    setViewport,
+    setMode,
   };
 };
 

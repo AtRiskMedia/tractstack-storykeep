@@ -29,6 +29,12 @@ export const uncleanDataStore = map<Record<string, Record<StoreKey, boolean>>>(
 export const temporaryErrorsStore = map<
   Record<string, Record<StoreKey, boolean>>
 >({});
+export const viewportStore = map<{
+  value: "auto" | "mobile" | "tablet" | "desktop";
+}>({ value: "auto" });
+export const modeStore = map<{ value: "text" | "styles" | "settings" }>({
+  value: "text",
+});
 
 // datums from turso
 export const menu = map<Record<string, FieldWithHistory<MenuDatum>>>();

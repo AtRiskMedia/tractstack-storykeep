@@ -1,4 +1,4 @@
-import { useState, useEffect, } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import {
   ExclamationCircleIcon,
@@ -42,8 +42,16 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   const { id } = props;
 
   // helpers
-  const { isEditing, updateStoreField, handleUndo, handleEditingChange } =
-    useStoryKeepUtils(id, storeMap, validationFunctions);
+  const {
+    isEditing,
+    updateStoreField,
+    handleUndo,
+    handleEditingChange,
+    viewport,
+    mode,
+    setViewport,
+    setMode,
+  } = useStoryKeepUtils(id, storeMap, validationFunctions);
 
   // required stores
   const $unsavedChanges = useStore(unsavedChangesStore);
@@ -283,6 +291,52 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       <a className="mx-2" href="/next-chapter-in-analytics/edit">
         next
       </a>
+      <div>
+        <button
+          onClick={() => setViewport("auto")}
+          className={viewport === "auto" ? "active" : ""}
+        >
+          Auto
+        </button>
+        <button
+          onClick={() => setViewport("mobile")}
+          className={viewport === "mobile" ? "active" : ""}
+        >
+          Mobile
+        </button>
+        <button
+          onClick={() => setViewport("tablet")}
+          className={viewport === "tablet" ? "active" : ""}
+        >
+          Tablet
+        </button>
+        <button
+          onClick={() => setViewport("desktop")}
+          className={viewport === "desktop" ? "active" : ""}
+        >
+          Desktop
+        </button>
+      </div>
+      <div>
+        <button
+          onClick={() => setMode("text")}
+          className={mode === "text" ? "active" : ""}
+        >
+          Text
+        </button>
+        <button
+          onClick={() => setMode("styles")}
+          className={mode === "styles" ? "active" : ""}
+        >
+          Styles
+        </button>
+        <button
+          onClick={() => setMode("settings")}
+          className={mode === "settings" ? "active" : ""}
+        >
+          Settings
+        </button>
+      </div>
     </div>
   );
 };

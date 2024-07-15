@@ -241,7 +241,14 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
   const handleEditingChange = useCallback(
     (storeKey: StoreKey, editing: boolean) => {
-      setIsEditing(prev => ({ ...prev, [storeKey]: editing }));
+      if (editing) {
+        setIsEditing(prev => ({ ...prev, [storeKey]: true }));
+      } else {
+        // Delay setting isEditing to false
+        setTimeout(() => {
+          setIsEditing(prev => ({ ...prev, [storeKey]: false }));
+        }, 100);
+      }
     },
     []
   );

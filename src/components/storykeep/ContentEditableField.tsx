@@ -4,23 +4,24 @@ interface ContentEditableFieldProps {
   value: string;
   className?: string;
   onChange: (value: string) => boolean;
+  onEditingChange: (editing: boolean) => void;
   placeholder?: string;
   style?: React.CSSProperties;
-  onEditingChange?: (isEditing: boolean) => void;
 }
 
 export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
   value,
   onChange,
+  onEditingChange,
   className,
   placeholder = "",
   style = {},
-  onEditingChange,
 }) => {
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const cursorPositionRef = useRef<number>(0);
   const [internalValue, setInternalValue] = useState(value);
   const isInitialMount = useRef(true);
+  const [editing, setEditing] = useState(false);
 
   const setCursorPosition = useCallback(
     (element: HTMLElement, position: number) => {
@@ -85,6 +86,26 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
     setInternalValue(value);
   }, [value, setCursorPosition]);
 
+  useEffect(() => {
+    const handleBlur = () => {
+      setTimeout(() => {
+        setEditing(false);
+        onEditingChange(false);
+      }, 100); // 100ms delay
+    };
+
+    const element = contentEditableRef.current;
+    if (element) {
+      element.addEventListener("blur", handleBlur);
+    }
+
+    return () => {
+      if (element) {
+        element.removeEventListener("blur", handleBlur);
+      }
+    };
+  }, [onEditingChange]);
+
   return (
     <div
       ref={contentEditableRef}
@@ -95,6 +116,7 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
       style={{
         ...style,
         minHeight: "1em",
+        pointerEvents: editing ? "none" : "auto",
       }}
       className={className || ``}
       data-placeholder={placeholder}

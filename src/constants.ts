@@ -1,5 +1,5 @@
 import {
-  PencilSquareIcon,
+  PencilIcon,
   PaintBrushIcon,
   Cog8ToothIcon,
   TrashIcon,
@@ -60,7 +60,7 @@ export const toolModeButtons = [
   },
   {
     key: "text" as const,
-    Icon: PencilSquareIcon,
+    Icon: PencilIcon,
     title: "Edit text",
   },
   {
@@ -69,13 +69,13 @@ export const toolModeButtons = [
     title: "Edit styles",
   },
   {
-    key: "settings" as const,
-    Icon: Cog8ToothIcon,
-    title: "Edit settings",
-  },
-  {
     key: "eraser" as const,
     Icon: TrashIcon,
     title: "Erase element",
+  },
+  {
+    key: "settings" as const,
+    Icon: Cog8ToothIcon,
+    title: "Edit settings",
   },
 ] as const;

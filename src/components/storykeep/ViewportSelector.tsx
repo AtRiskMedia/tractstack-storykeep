@@ -47,7 +47,6 @@ const ViewportSelector: React.FC<ViewportSelectorProps> = ({
       const mainContent = document.getElementById(
         "main-content"
       ) as HTMLElement;
-      console.log(mainContent, mainContent.offsetWidth);
       setWidth(mainContent.offsetWidth);
     }, 100);
 
@@ -57,11 +56,20 @@ const ViewportSelector: React.FC<ViewportSelectorProps> = ({
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  console.log(width);
+
   return (
     <div>
       <div className="flex items-center">
-        <span className="mr-2 text-sm text-mydarkgrey">Set Viewport:</span>
+        <span className="mr-2 text-sm text-mydarkgrey">Designing for:</span>
+        <span className="font-bold text-xl text-myblue pr-4">
+          {viewport !== `auto`
+            ? viewport
+            : width < 800
+              ? `mobile`
+              : width <= 1367
+                ? `tablet`
+                : `desktop`}
+        </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">
           {viewportButtons.map(({ key, Icon, title }, index) => (
             <button
@@ -71,7 +79,7 @@ const ViewportSelector: React.FC<ViewportSelectorProps> = ({
               className={classNames(
                 "hover:bg-myorange hover:text-white",
                 viewport === key
-                  ? "bg-white text-allblack"
+                  ? "bg-mywhite text-myblue"
                   : "bg-mylightgrey/50 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",
                 "relative inline-flex items-center px-3 py-2",
                 index === 0 ? "rounded-l-md" : "",
@@ -85,14 +93,6 @@ const ViewportSelector: React.FC<ViewportSelectorProps> = ({
               <Icon className="h-5 w-5" aria-hidden="true" />
             </button>
           ))}
-        </span>
-      </div>
-      <div className="mt-2 flex items-center">
-        <span className="mr-2 text-sm text-mydarkgrey">
-          Currently designing for:
-        </span>
-        <span className="font-bold text-xl text-myblue">
-          {width < 800 ? `mobile` : width <= 1367 ? `tablet` : `desktop`}
         </span>
       </div>
     </div>

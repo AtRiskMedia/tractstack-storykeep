@@ -5,6 +5,12 @@ export type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
 // Add other stores here
 //
 
+export interface ToggleEditModalEvent extends Event {
+  detail: {
+    preventHeaderScroll: boolean;
+  };
+}
+
 export type StoreMapType = {
   [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
 };

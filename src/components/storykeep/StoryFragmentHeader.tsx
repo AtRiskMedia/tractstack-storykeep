@@ -125,6 +125,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           <button
             type="button"
             className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+            onClick={() => handleToggleOn(true)}
           >
             Settings
           </button>
@@ -159,15 +160,16 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         </div>
       </div>
 
-      <div className="md:flex md:items-center">
+      <div className="flex items-center space-x-4 space-y-2">
         <label
           htmlFor="storyFragmentTitle"
-          className="block text-md leading-6 text-mydarkgrey md:mr-4 md:flex-shrink-0"
+          className="text-md leading-6 text-mydarkgrey flex-shrink-0"
         >
-          Descriptive title for this web page
+          Descriptive title{" "}
+          <span className="hidden md:inline-block">for this web page</span>
         </label>
-        <div className="inline-flex flex-nowrap w-full">
-          <div className="relative mt-2 md:mt-0 md:flex-grow">
+        <div className="flex flex-grow items-center">
+          <div className="relative flex-grow">
             <ContentEditableField
               value={$storyFragmentTitle[id]?.current || ""}
               onChange={newValue =>
@@ -181,13 +183,12 @@ export const StoryFragmentHeader = (props: { id: string }) => {
               style={{
                 border: "1px solid black",
                 padding: "5px 30px 5px 5px",
-                marginBottom: "10px",
                 width: "100%",
               }}
             />
             {($uncleanData[id]?.storyFragmentTitle ||
               $temporaryErrors[id]?.storyFragmentTitle) && (
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <ExclamationCircleIcon
                   aria-hidden="true"
                   className="h-5 w-5 text-red-500"
@@ -197,20 +198,19 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </div>
           <button
             onClick={() => handleUndo("storyFragmentTitle")}
-            className="disabled:hidden"
+            className="disabled:hidden ml-2"
             disabled={$storyFragmentTitle[id]?.history.length === 0}
           >
             <ChevronDoubleLeftIcon
-              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
               title="Undo"
             />
           </button>
         </div>
       </div>
-
       {(isEditing.storyFragmentTitle ||
         $uncleanData[id]?.storyFragmentTitle) && (
-        <ul className="text-black bg-mygreen/20 rounded mb-2 font-lg flex flex-wrap px-4 py-2">
+        <ul className="text-black bg-mygreen/20 rounded mt-2 font-lg flex flex-wrap px-4 py-2">
           <li className="pr-6 py-2">Short and sweet: max 50-60 characters.</li>
           <li className="pr-6 py-2">Be descriptive and make it unique.</li>
           <li className="pr-6 py-2">Include your most important keyword.</li>
@@ -218,15 +218,16 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         </ul>
       )}
 
-      <div className="md:flex md:items-center">
+      <div className="flex items-center space-x-4 space-y-2">
         <label
           htmlFor="storyFragmentSlug"
-          className="block text-md leading-6 text-mydarkgrey md:mr-4 md:flex-shrink-0"
+          className="text-md leading-6 text-mydarkgrey flex-shrink-0"
         >
-          Slug (path) for this page
+          Slug{" "}
+          <span className="hidden md:inline-block">(path) for this page</span>
         </label>
-        <div className="inline-flex flex-nowrap w-full">
-          <div className="relative mt-2 md:mt-0 md:flex-grow">
+        <div className="flex flex-grow items-center">
+          <div className="relative flex-grow">
             <ContentEditableField
               value={$storyFragmentSlug[id]?.current || ""}
               onChange={newValue =>
@@ -240,13 +241,12 @@ export const StoryFragmentHeader = (props: { id: string }) => {
               style={{
                 border: "1px solid black",
                 padding: "5px 30px 5px 5px",
-                marginBottom: "10px",
                 width: "100%",
               }}
             />
             {($uncleanData[id]?.storyFragmentSlug ||
               $temporaryErrors[id]?.storyFragmentSlug) && (
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 pb-2">
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <ExclamationCircleIcon
                   aria-hidden="true"
                   className="h-5 w-5 text-red-500"
@@ -256,18 +256,18 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </div>
           <button
             onClick={() => handleUndo("storyFragmentSlug")}
-            className="disabled:hidden"
+            className="disabled:hidden ml-2"
             disabled={$storyFragmentSlug[id]?.history.length === 0}
           >
             <ChevronDoubleLeftIcon
-              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 mb-2.5 ml-1 hover:bg-myorange hover:text-white"
+              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
               title="Undo"
             />
           </button>
         </div>
       </div>
       {(isEditing.storyFragmentSlug || $uncleanData[id]?.storyFragmentSlug) && (
-        <ul className="text-black bg-mygreen/20 rounded mb-2 font-lg flex flex-wrap px-4 py-2">
+        <ul className="text-black bg-mygreen/20 rounded mt-2 font-lg flex flex-wrap px-4 py-2">
           <li className="pr-6 py-2">All lowercase. No special characters.</li>
           <li className="pr-6 py-2">use-hyphens-to-separate-words</li>
           <li className="pr-6 py-2">3-5 words max!</li>
@@ -282,10 +282,10 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       <br />
       <ViewportSelector viewport={viewport} setViewport={setViewport} />
       <br />
-      <button className="mx-2" onClick={handleToggleOn}>
+      <button className="mx-2" onClick={() => handleToggleOn(true)}>
         Edit Pane On
       </button>
-      <button className="mx-2" onClick={handleToggleOff}>
+      <button className="mx-2" onClick={() => handleToggleOff(true)}>
         Edit Pane Off
       </button>
       <a className="mx-2" href="/hello/edit">

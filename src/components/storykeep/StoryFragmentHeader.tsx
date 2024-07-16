@@ -302,7 +302,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         <div className="flex-shrink-0 basis-auto">
           <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} />
         </div>
-        {toolMode === `add` ? (
+        {toolMode === `insert` ? (
           <div className="flex-shrink-0 basis-auto">
             <ToolAddModeSelector
               toolAddMode={toolAddMode}

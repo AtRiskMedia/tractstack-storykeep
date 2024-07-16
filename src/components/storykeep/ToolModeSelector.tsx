@@ -22,7 +22,7 @@ const ToolModeSelector = ({ toolMode, setToolMode }: ToolModeSelectorProps) => {
               type="button"
               title={title}
               className={classNames(
-                "hover:bg-myorange hover:text-white",
+                "hover:bg-myorange/50 hover:text-black",
                 toolMode === key
                   ? "bg-myblue text-white"
                   : "bg-mylightgrey/20 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",

@@ -45,7 +45,7 @@ export const toolAddModeTitles: Record<ToolAddMode, string> = {
 };
 
 export const toolModes: ToolMode[] = [
-  "add",
+  "insert",
   "text",
   "styles",
   "settings",
@@ -54,14 +54,14 @@ export const toolModes: ToolMode[] = [
 
 export const toolModeButtons = [
   {
-    key: "add" as const,
+    key: "insert" as const,
     Icon: PlusCircleIcon,
-    title: "Add element",
+    title: "Insert element",
   },
   {
     key: "text" as const,
     Icon: PencilSquareIcon,
-    title: "Edit text content",
+    title: "Edit text",
   },
   {
     key: "styles" as const,

@@ -6,7 +6,8 @@ import {
   uncleanDataStore,
   temporaryErrorsStore,
   viewportStore,
-  modeStore,
+  editModeStore,
+  toolModeStore,
 } from "../store/storykeep";
 import type {
   StoreKey,
@@ -56,7 +57,8 @@ export const useStoryKeepUtils = (
   );
 
   const { value: viewport } = useStore(viewportStore);
-  const { value: mode } = useStore(modeStore);
+  const { value: editMode } = useStore(editModeStore);
+  const { value: toolMode } = useStore(toolModeStore);
 
   const setViewport = (
     newViewport: "auto" | "mobile" | "tablet" | "desktop"
@@ -64,8 +66,12 @@ export const useStoryKeepUtils = (
     viewportStore.set({ value: newViewport });
   };
 
-  const setMode = (newMode: "text" | "styles" | "settings") => {
-    modeStore.set({ value: newMode });
+  const setEditMode = (newEditMode: string) => {
+    editModeStore.setKey(id, newEditMode);
+  };
+
+  const setToolMode = (newToolMode: "text" | "styles" | "settings") => {
+    toolModeStore.set({ value: newToolMode });
   };
 
   const setTemporaryError = useCallback(
@@ -209,9 +215,11 @@ export const useStoryKeepUtils = (
     handleUndo,
     handleEditingChange,
     viewport,
-    mode,
     setViewport,
-    setMode,
+    editMode,
+    setEditMode,
+    toolMode,
+    setToolMode,
   };
 };
 
@@ -277,7 +285,7 @@ export async function initStoryKeep() {
     const isHeaderSticky = header.classList.contains("sticky");
     const hasVerticalScroll =
       document.documentElement.scrollHeight > window.innerHeight;
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
     mainContent.classList.toggle("xl:pr-1/3", isEditMode && isDesktop);
 
@@ -427,7 +435,7 @@ export async function initStoryKeep() {
     const isHeaderSticky = header.classList.contains("sticky");
     const headerHeight = header.offsetHeight;
     const currentScrollTop =
-      window.pageYOffset || document.documentElement.scrollTop;
+      window.scrollY || document.documentElement.scrollTop;
 
     if (!isHeaderSticky && isEditMode && isDesktop) {
       if (currentScrollTop < headerHeight) {

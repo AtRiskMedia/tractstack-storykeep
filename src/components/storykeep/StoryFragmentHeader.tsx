@@ -5,7 +5,9 @@ import {
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
 import ViewportSelector from "./ViewportSelector";
+import ToolModeSelector from "./ToolModeSelector";
 import {
+  editModeStore,
   unsavedChangesStore,
   uncleanDataStore,
   temporaryErrorsStore,
@@ -49,12 +51,13 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     handleUndo,
     handleEditingChange,
     viewport,
-    mode,
     setViewport,
-    setMode,
+    toolMode,
+    setToolMode,
   } = useStoryKeepUtils(id, storeMap, validationFunctions);
 
   // required stores
+  const $editMode = useStore(editModeStore);
   const $unsavedChanges = useStore(unsavedChangesStore);
   const $uncleanData = useStore(uncleanDataStore);
   const $temporaryErrors = useStore(temporaryErrorsStore);
@@ -65,6 +68,17 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   //
 
   const [isClient, setIsClient] = useState(false);
+
+  const handleEditModeToggle = () => {
+    const currentEditMode = $editMode[id] || ``;
+    if (currentEditMode === `settings`) {
+      editModeStore.setKey(id, ``);
+      handleToggleOff(true);
+    } else {
+      editModeStore.setKey(id, "settings");
+      handleToggleOn(true);
+    }
+  };
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) {
@@ -125,7 +139,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           <button
             type="button"
             className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-            onClick={() => handleToggleOn(true)}
+            onClick={handleEditModeToggle}
           >
             Settings
           </button>
@@ -278,41 +292,13 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </li>
         </ul>
       )}
-
-      <br />
-      <ViewportSelector viewport={viewport} setViewport={setViewport} />
-      <br />
-      <button className="mx-2" onClick={() => handleToggleOn(true)}>
-        Edit Pane On
-      </button>
-      <button className="mx-2" onClick={() => handleToggleOff(true)}>
-        Edit Pane Off
-      </button>
-      <a className="mx-2" href="/hello/edit">
-        hello
-      </a>
-      <a className="mx-2" href="/next-chapter-in-analytics/edit">
-        next
-      </a>
-      <div>
-        <button
-          onClick={() => setMode("text")}
-          className={mode === "text" ? "active" : ""}
-        >
-          Text
-        </button>
-        <button
-          onClick={() => setMode("styles")}
-          className={mode === "styles" ? "active" : ""}
-        >
-          Styles
-        </button>
-        <button
-          onClick={() => setMode("settings")}
-          className={mode === "settings" ? "active" : ""}
-        >
-          Settings
-        </button>
+      <div className="flex flex-wrap justify-between items-start gap-2 py-3">
+        <div className="flex-grow flex-shrink-0 basis-auto min-w-[300px]">
+          <ViewportSelector viewport={viewport} setViewport={setViewport} />
+        </div>
+        <div className="flex-grow flex-shrink-0 basis-auto min-w-[300px]">
+          <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} />
+        </div>
       </div>
     </div>
   );

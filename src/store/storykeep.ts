@@ -31,10 +31,13 @@ export const temporaryErrorsStore = map<
 >({});
 export const viewportStore = map<{
   value: "auto" | "mobile" | "tablet" | "desktop";
-}>({ value: "auto" });
-export const modeStore = map<{ value: "text" | "styles" | "settings" }>({
+}>({
+  value: "auto",
+});
+export const toolModeStore = map<{ value: "text" | "styles" | "settings" }>({
   value: "text",
 });
+export const editModeStore = map<Record<string, string>>({});
 
 // datums from turso
 export const menu = map<Record<string, FieldWithHistory<MenuDatum>>>();

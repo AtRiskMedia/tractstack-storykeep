@@ -104,7 +104,10 @@ export const StoryKeepStore = (props: {
 
         fragment.panesPayload.forEach((payload: PaneDatum) => {
           if (!paneInit.get()[payload.id]?.init) {
-            paneInit.set({ [payload.id]: { init: true } });
+            paneInit.set({
+              ...paneInit.get(),
+              [payload.id]: { init: true },
+            });
             const thisPaneFragmentIds =
               payload.optionsPayload?.paneFragmentsPayload?.map(
                 (

@@ -4,8 +4,10 @@ import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
+import ContentEditableField from "./ContentEditableField";
 import ViewportSelector from "./ViewportSelector";
 import ToolModeSelector from "./ToolModeSelector";
+import ToolAddModeSelector from "./ToolAddModeSelector";
 import {
   editModeStore,
   unsavedChangesStore,
@@ -22,7 +24,6 @@ import {
   handleToggleOn,
   handleToggleOff,
 } from "../../utils/storykeep";
-import { ContentEditableField } from "./ContentEditableField";
 import type { StoreKey, StoreMapType, ValidationFunction } from "../../types";
 
 const storeMap: StoreMapType = {
@@ -54,6 +55,8 @@ export const StoryFragmentHeader = (props: { id: string }) => {
     setViewport,
     toolMode,
     setToolMode,
+    toolAddMode,
+    setToolAddMode,
   } = useStoryKeepUtils(id, storeMap, validationFunctions);
 
   // required stores
@@ -292,13 +295,21 @@ export const StoryFragmentHeader = (props: { id: string }) => {
           </li>
         </ul>
       )}
-      <div className="flex flex-wrap justify-between items-start gap-2 py-3">
-        <div className="flex-grow flex-shrink-0 basis-auto min-w-[300px]">
+      <div className="flex flex-wrap items-start gap-y-3 gap-x-12 md:gap-x-16 py-3">
+        <div className="flex-shrink-0 basis-auto">
           <ViewportSelector viewport={viewport} setViewport={setViewport} />
         </div>
-        <div className="flex-grow flex-shrink-0 basis-auto min-w-[300px]">
+        <div className="flex-shrink-0 basis-auto">
           <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} />
         </div>
+        {toolMode === `add` ? (
+          <div className="flex-shrink-0 basis-auto">
+            <ToolAddModeSelector
+              toolAddMode={toolAddMode}
+              setToolAddMode={setToolAddMode}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -19,7 +19,7 @@ export const PaneWrapper = (props: { id: string }) => {
   }, [id, $paneInit]);
 
   if (!isClient) return <div>Loading...</div>;
-console.log($paneTitle[id].current)
+  console.log($paneTitle[id].current);
   if (isCodeHook) return <CodeHook id={id} />;
   return <Pane id={id} />;
 };

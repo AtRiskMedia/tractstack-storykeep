@@ -1,39 +1,14 @@
-import React from "react";
-import {
-  PencilSquareIcon,
-  PaintBrushIcon,
-  Cog8ToothIcon,
-} from "@heroicons/react/24/outline";
+import type { ToolMode } from "../../types";
+import { toolModeButtons } from "../../constants";
 
 interface ToolModeSelectorProps {
-  toolMode: "text" | "styles" | "settings";
-  setToolMode: (toolMode: "text" | "styles" | "settings") => void;
+  toolMode: ToolMode;
+  setToolMode: (toolMode: ToolMode) => void;
 }
 
-const ToolModeSelector: React.FC<ToolModeSelectorProps> = ({
-  toolMode,
-  setToolMode,
-}) => {
+const ToolModeSelector = ({ toolMode, setToolMode }: ToolModeSelectorProps) => {
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
-
-  const toolModeButtons = [
-    {
-      key: "text" as const,
-      Icon: PencilSquareIcon,
-      title: "Edit text content",
-    },
-    {
-      key: "styles" as const,
-      Icon: PaintBrushIcon,
-      title: "Edit styles",
-    },
-    {
-      key: "settings" as const,
-      Icon: Cog8ToothIcon,
-      title: "Edit settings",
-    },
-  ];
 
   return (
     <div>
@@ -55,9 +30,7 @@ const ToolModeSelector: React.FC<ToolModeSelectorProps> = ({
                 index === 0 ? "rounded-l-md" : "",
                 index === toolModeButtons.length - 1 ? "rounded-r-md" : ""
               )}
-              onClick={() => {
-                setToolMode(key);
-              }}
+              onClick={() => setToolMode(key)}
             >
               <span className="sr-only">{key}</span>
               <Icon className="h-5 w-5" aria-hidden="true" />

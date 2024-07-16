@@ -8,6 +8,7 @@ import {
   viewportStore,
   editModeStore,
   toolModeStore,
+  toolAddModeStore,
 } from "../store/storykeep";
 import type {
   StoreKey,
@@ -15,6 +16,7 @@ import type {
   FieldWithHistory,
   ValidationFunction,
   ToggleEditModalEvent,
+  ToolAddMode,
 } from "../types";
 
 // global fn to toggle layout
@@ -59,6 +61,7 @@ export const useStoryKeepUtils = (
   const { value: viewport } = useStore(viewportStore);
   const { value: editMode } = useStore(editModeStore);
   const { value: toolMode } = useStore(toolModeStore);
+  const { value: toolAddMode } = useStore(toolAddModeStore);
 
   const setViewport = (
     newViewport: "auto" | "mobile" | "tablet" | "desktop"
@@ -70,8 +73,14 @@ export const useStoryKeepUtils = (
     editModeStore.setKey(id, newEditMode);
   };
 
-  const setToolMode = (newToolMode: "text" | "styles" | "settings") => {
+  const setToolMode = (
+    newToolMode: "text" | "add" | "styles" | "settings" | "eraser"
+  ) => {
     toolModeStore.set({ value: newToolMode });
+  };
+
+  const setToolAddMode = (newToolAddMode: ToolAddMode) => {
+    toolAddModeStore.set({ value: newToolAddMode });
   };
 
   const setTemporaryError = useCallback(
@@ -220,6 +229,8 @@ export const useStoryKeepUtils = (
     setEditMode,
     toolMode,
     setToolMode,
+    toolAddMode,
+    setToolAddMode,
   };
 };
 

@@ -1,4 +1,5 @@
-import React, { useRef, useCallback, useEffect, useState } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
+import type { CSSProperties } from "react";
 
 interface ContentEditableFieldProps {
   value: string;
@@ -6,17 +7,17 @@ interface ContentEditableFieldProps {
   onChange: (value: string) => boolean;
   onEditingChange: (editing: boolean) => void;
   placeholder?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
-export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
+const ContentEditableField = ({
   value,
   onChange,
   onEditingChange,
   className,
   placeholder = "",
   style = {},
-}) => {
+}: ContentEditableFieldProps) => {
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const cursorPositionRef = useRef<number>(0);
   const [internalValue, setInternalValue] = useState(value);
@@ -123,3 +124,5 @@ export const ContentEditableField: React.FC<ContentEditableFieldProps> = ({
     />
   );
 };
+
+export default ContentEditableField;

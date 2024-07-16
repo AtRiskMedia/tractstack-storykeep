@@ -14,7 +14,10 @@ import type {
   ImpressionDatum,
   IsInit,
   StoreKey,
+  ToolMode,
+  ToolAddMode,
 } from "../types";
+import { toolAddModes } from "../constants";
 
 // all look-ups by ulid
 //
@@ -34,8 +37,11 @@ export const viewportStore = map<{
 }>({
   value: "auto",
 });
-export const toolModeStore = map<{ value: "text" | "styles" | "settings" }>({
+export const toolModeStore = map<{ value: ToolMode }>({
   value: "text",
+});
+export const toolAddModeStore = map<{ value: ToolAddMode }>({
+  value: toolAddModes[0], // Default to the first mode
 });
 export const editModeStore = map<Record<string, string>>({});
 

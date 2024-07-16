@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { paneInit,  paneCodeHook } from "../../store/storykeep";
+import { paneInit, paneCodeHook } from "../../store/storykeep";
 
 export const CodeHook = (props: { id: string }) => {
   const { id } = props;

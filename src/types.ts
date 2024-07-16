@@ -1,9 +1,13 @@
+import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+export type ToolMode = "add" | "text" | "styles" | "settings" | "eraser";
 export type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
 // Add other stores here
 //
+
+export type ToolAddMode = (typeof toolAddModes)[number];
 
 export interface ToggleEditModalEvent extends Event {
   detail: {

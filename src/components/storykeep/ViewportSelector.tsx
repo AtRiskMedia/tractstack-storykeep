@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
@@ -12,10 +12,7 @@ interface ViewportSelectorProps {
   setViewport: (viewport: "auto" | "mobile" | "tablet" | "desktop") => void;
 }
 
-const ViewportSelector: React.FC<ViewportSelectorProps> = ({
-  viewport,
-  setViewport,
-}) => {
+const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
   const [width, setWidth] = useState(0);
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");

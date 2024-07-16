@@ -17,6 +17,7 @@ import type {
   ValidationFunction,
   ToggleEditModalEvent,
   ToolAddMode,
+  ToolMode,
 } from "../types";
 
 // global fn to toggle layout
@@ -73,9 +74,7 @@ export const useStoryKeepUtils = (
     editModeStore.setKey(id, newEditMode);
   };
 
-  const setToolMode = (
-    newToolMode: "text" | "add" | "styles" | "settings" | "eraser"
-  ) => {
+  const setToolMode = (newToolMode: ToolMode) => {
     toolModeStore.set({ value: newToolMode });
   };
 

@@ -2,7 +2,7 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
-export type ToolMode = "add" | "text" | "styles" | "settings" | "eraser";
+export type ToolMode = "insert" | "text" | "styles" | "settings" | "eraser";
 export type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
 // Add other stores here
 //

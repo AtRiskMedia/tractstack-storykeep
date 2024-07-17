@@ -96,11 +96,12 @@ export const StoryKeepStore = (props: {
             ...storyFragmentSocialImagePath.get(),
             [fragment.id]: createFieldWithHistory(fragment.socialImagePath),
           });
-        if (fragment?.tailwindBgColour)
-          storyFragmentTailwindBgColour.set({
-            ...storyFragmentTailwindBgColour.get(),
-            [fragment.id]: createFieldWithHistory(fragment.tailwindBgColour),
-          });
+        storyFragmentTailwindBgColour.set({
+          ...storyFragmentTailwindBgColour.get(),
+          [fragment.id]: createFieldWithHistory(
+            fragment.tailwindBgColour || ``
+          ),
+        });
 
         fragment.panesPayload.forEach((payload: PaneDatum) => {
           if (!paneInit.get()[payload.id]?.init) {

@@ -3,7 +3,10 @@ import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
 export type ToolMode = "insert" | "text" | "styles" | "settings" | "eraser";
-export type StoreKey = "storyFragmentTitle" | "storyFragmentSlug";
+export type StoreKey =
+  | "storyFragmentTitle"
+  | "storyFragmentSlug"
+  | "storyFragmentTailwindBgColour";
 // Add other stores here
 //
 

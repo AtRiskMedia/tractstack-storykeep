@@ -11,7 +11,6 @@ import {
   uncleanDataStore,
   temporaryErrorsStore,
   storyFragmentInit,
-  storyFragmentTitle,
   storyFragmentSlug,
   // Add other stores here
   //
@@ -20,24 +19,10 @@ import {
   useStoryKeepUtils,
   handleToggleOn,
   handleToggleOff,
+  storeMap,
+  validationFunctions,
 } from "../../utils/storykeep";
-import type { StoreKey, StoreMapType, ValidationFunction } from "../../types";
-
-const storeMap: StoreMapType = {
-  storyFragmentTitle: storyFragmentTitle,
-  storyFragmentSlug: storyFragmentSlug,
-  // Add other stores here
-};
-
-const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
-  // temporaryErrors will catch length === 0
-  storyFragmentTitle: (value: string) => value.length <= 80,
-  storyFragmentSlug: (value: string) =>
-    value.length === 0 ||
-    (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
-  // Add more validation functions for other fields
-  //
-};
+import type { StoreKey } from "../../types";
 
 export const StoryFragmentHeader = (props: { id: string }) => {
   const { id } = props;
@@ -86,10 +71,12 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       const initialUnsavedChanges: Record<StoreKey, boolean> = {
         storyFragmentTitle: false,
         storyFragmentSlug: false,
+        storyFragmentTailwindBgColour: false,
       };
       const initialUncleanData: Record<StoreKey, boolean> = {
         storyFragmentTitle: false,
         storyFragmentSlug: false,
+        storyFragmentTailwindBgColour: false,
       };
       (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
         const store = storeMap[storeKey];
@@ -112,6 +99,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       temporaryErrorsStore.setKey(id, {
         storyFragmentTitle: false,
         storyFragmentSlug: false,
+        storyFragmentTailwindBgColour: false,
       });
     }
   }, [id, $storyFragmentInit]);

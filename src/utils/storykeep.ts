@@ -9,6 +9,9 @@ import {
   editModeStore,
   toolModeStore,
   toolAddModeStore,
+  storyFragmentTitle,
+  storyFragmentSlug,
+  storyFragmentTailwindBgColour,
 } from "../store/storykeep";
 import type {
   StoreKey,
@@ -20,19 +23,24 @@ import type {
   ToolMode,
 } from "../types";
 
-// global fn to toggle layout
-export const handleToggleOn = (preventHeaderScroll = false) => {
-  const event = new CustomEvent("toggle-on-edit-modal", {
-    detail: { preventHeaderScroll },
-  });
-  document.dispatchEvent(event);
+export const storeMap: StoreMapType = {
+  storyFragmentTitle: storyFragmentTitle,
+  storyFragmentSlug: storyFragmentSlug,
+  storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
+  // Add other stores here
 };
 
-export const handleToggleOff = (preventHeaderScroll = false) => {
-  const event = new CustomEvent("toggle-off-edit-modal", {
-    detail: { preventHeaderScroll },
-  });
-  document.dispatchEvent(event);
+export const validationFunctions: Partial<
+  Record<StoreKey, ValidationFunction>
+> = {
+  // temporaryErrors will catch length === 0
+  storyFragmentTailwindBgColour: (value: string) => value.length <= 80,
+  storyFragmentTitle: (value: string) => value.length <= 80,
+  storyFragmentSlug: (value: string) =>
+    value.length === 0 ||
+    (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
+  // Add more validation functions for other fields
+  //
 };
 
 const initializeLastUpdateTime = (
@@ -536,3 +544,18 @@ export async function initStoryKeep() {
   // Initialize
   handleHeaderBehavior();
 }
+
+// global fn to toggle layout
+export const handleToggleOn = (preventHeaderScroll = false) => {
+  const event = new CustomEvent("toggle-on-edit-modal", {
+    detail: { preventHeaderScroll },
+  });
+  document.dispatchEvent(event);
+};
+
+export const handleToggleOff = (preventHeaderScroll = false) => {
+  const event = new CustomEvent("toggle-off-edit-modal", {
+    detail: { preventHeaderScroll },
+  });
+  document.dispatchEvent(event);
+};

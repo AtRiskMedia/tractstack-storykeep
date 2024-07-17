@@ -2,6 +2,7 @@ import { useRef, useCallback, useEffect, useState } from "react";
 import type { CSSProperties } from "react";
 
 interface ContentEditableFieldProps {
+  id: string;
   value: string;
   className?: string;
   onChange: (value: string) => boolean;
@@ -11,6 +12,7 @@ interface ContentEditableFieldProps {
 }
 
 const ContentEditableField = ({
+  id,
   value,
   onChange,
   onEditingChange,
@@ -109,6 +111,7 @@ const ContentEditableField = ({
 
   return (
     <div
+      id={id}
       ref={contentEditableRef}
       contentEditable
       onInput={handleContentChange}
@@ -121,6 +124,8 @@ const ContentEditableField = ({
       }}
       className={className || ``}
       data-placeholder={placeholder}
+      role="textbox"
+      aria-labelledby={`${id}-label`}
     />
   );
 };

@@ -5,6 +5,7 @@ import ToolModeSelector from "./ToolModeSelector";
 import ToolAddModeSelector from "./ToolAddModeSelector";
 import StoryFragmentTitle from "./fields/StoryFragmentTitle";
 import StoryFragmentSlug from "./fields/StoryFragmentSlug";
+import StoryFragmentTailwindBgColour from "./fields/StoryFragmentTailwindBgColour";
 import {
   editModeStore,
   unsavedChangesStore,
@@ -167,13 +168,20 @@ export const StoryFragmentHeader = (props: { id: string }) => {
         updateStoreField={updateStoreField}
         handleUndo={handleUndo}
       />
-      <StoryFragmentSlug
-        id={id}
-        isEditing={isEditing}
-        handleEditingChange={handleEditingChange}
-        updateStoreField={updateStoreField}
-        handleUndo={handleUndo}
-      />
+      <div className="flex flex-wrap gap-x-12">
+        <StoryFragmentSlug
+          id={id}
+          isEditing={isEditing}
+          handleEditingChange={handleEditingChange}
+          updateStoreField={updateStoreField}
+          handleUndo={handleUndo}
+        />
+        <StoryFragmentTailwindBgColour
+          id={id}
+          updateStoreField={updateStoreField}
+          handleUndo={handleUndo}
+        />
+      </div>
 
       <div className="flex flex-wrap items-start gap-y-3 gap-x-12 md:gap-x-16 py-3">
         <div className="flex-shrink-0 basis-auto">

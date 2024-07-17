@@ -13,6 +13,7 @@ import {
   storyFragmentSlug,
   storyFragmentTailwindBgColour,
 } from "../store/storykeep";
+import { MAX_HISTORY_LENGTH } from "../constants";
 import type {
   StoreKey,
   StoreMapType,
@@ -124,19 +125,29 @@ export const useStoryKeepUtils = (
       if (currentField && newValue !== currentField.current) {
         const timeSinceLastUpdate =
           now - (lastUpdateTimeRef.current[storeKey] || 0);
+
+        const newHistory = [...currentField.history];
+
+        // Add new entry if history is not full AND enough time has passed
+        if (
+          newHistory.length < MAX_HISTORY_LENGTH &&
+          timeSinceLastUpdate > 4000
+        ) {
+          newHistory.unshift({ value: currentField.current, timestamp: now });
+
+          // If history exceeds max length, remove the second entry (keeping original)
+          if (newHistory.length > MAX_HISTORY_LENGTH) {
+            newHistory.splice(1, 1);
+          }
+
+          lastUpdateTimeRef.current[storeKey] = now;
+        }
+
         const newField: FieldWithHistory<string> = {
           current: newValue,
           original: currentField.original,
-          history: currentField.history,
+          history: newHistory,
         };
-
-        if (currentField.history.length === 0 || timeSinceLastUpdate > 5000) {
-          newField.history = [
-            { value: currentField.current, timestamp: now },
-            ...currentField.history,
-          ].slice(0, 10);
-          lastUpdateTimeRef.current[storeKey] = now;
-        }
 
         if (newValue.length === 0) {
           uncleanDataStore.setKey(id, {

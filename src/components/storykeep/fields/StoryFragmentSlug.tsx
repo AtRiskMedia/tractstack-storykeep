@@ -33,16 +33,17 @@ const StoryFragmentSlug = ({
   return (
     <>
       <div className="flex items-center space-x-4 space-y-2">
-        <label
-          htmlFor="storyFragmentSlug"
+        <span
+          id="storyFragmentSlug-label"
           className="text-md leading-6 text-mydarkgrey flex-shrink-0"
         >
           Descriptive title{" "}
           <span className="hidden md:inline-block">for this web page</span>
-        </label>
+        </span>
         <div className="flex flex-grow items-center">
           <div className="relative flex-grow">
             <ContentEditableField
+              id="storyFragmentSlug"
               value={$storyFragmentSlug[id]?.current || ""}
               onChange={newValue =>
                 updateStoreField("storyFragmentSlug", newValue)

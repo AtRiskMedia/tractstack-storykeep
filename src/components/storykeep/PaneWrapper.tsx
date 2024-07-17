@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { paneInit, paneTitle, paneCodeHook } from "../../store/storykeep";
+import { paneInit,  paneCodeHook } from "../../store/storykeep";
 import { Pane } from "./Pane";
 import { CodeHook } from "./CodeHook";
 
@@ -8,7 +8,7 @@ export const PaneWrapper = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit);
-  const $paneTitle = useStore(paneTitle);
+  //const $paneTitle = useStore(paneTitle);
   const $paneCodeHook = useStore(paneCodeHook);
   const isCodeHook = typeof $paneCodeHook[id] === `object`;
 

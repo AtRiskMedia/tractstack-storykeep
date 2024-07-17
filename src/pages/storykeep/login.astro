@@ -1,0 +1,48 @@
+---
+import { setAuthenticated, isAuthenticated } from "../../utils/session";
+
+let loginError = false;
+let redirectPath = "/";
+
+const url = new URL(Astro.request.url);
+redirectPath = url.searchParams.get("redirect") || "/";
+
+const authenticated = await isAuthenticated(Astro);
+
+if (authenticated) {
+  return Astro.redirect(redirectPath);
+}
+
+if (Astro.request.method === "POST") {
+  const data = await Astro.request.formData();
+  const password = data.get("password");
+  if (password === import.meta.env.PRIVATE_AUTH_SECRET) {
+    setAuthenticated(Astro, true);
+    return Astro.redirect(redirectPath);
+  } else {
+    loginError = true;
+  }
+}
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+  </head>
+  <body>
+    <h1>Login</h1>
+    {
+      loginError && (
+        <p style="color: red;">Invalid password. Please try again.</p>
+      )
+    }
+    <form method="POST">
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required />
+      <input type="hidden" name="redirect" value={redirectPath} />
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>

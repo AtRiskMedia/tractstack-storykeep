@@ -57,6 +57,8 @@ const StoryFragmentTailwindBgColour = ({
         id="storyFragmentTailwindBgColour-label"
         className="text-md leading-6 text-mydarkgrey flex-shrink-0"
       >
+        <span className="hidden md:inline-block">Tailwind</span>
+        {` `}
         Bg Color
       </span>
       <ColorPickerWrapper

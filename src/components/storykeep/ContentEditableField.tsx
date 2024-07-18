@@ -95,6 +95,7 @@ const ContentEditableField = ({
         setEditing(false);
         onEditingChange(false);
       }, 100); // 100ms delay
+      // this is needed for the isEditing helpful info pop-ups
     };
 
     const element = contentEditableRef.current;

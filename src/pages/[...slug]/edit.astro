@@ -93,7 +93,7 @@ if (!storyfragment) {
         id="edit-pane"
         class="invisible opacity-0 w-0 transition-all duration-300 ease-in-out bg-slate-100 border-l border-gray-300 p-4 overflow-y-auto fixed right-0 top-0 bottom-0 h-full"
       >
-        <EditModal client:load />
+        <EditModal client:load type="desktop" />
       </aside>
     </div>
 
@@ -101,7 +101,7 @@ if (!storyfragment) {
       id="edit-modal-mobile"
       class="invisible opacity-0 fixed bg-slate-100 shadow-md z-20 transition-all duration-300 ease-in-out flex flex-col w-full overflow-y-auto"
     >
-      <EditModal client:load />
+      <EditModal client:load type="mobile" />
     </div>
   </div>
 </Layout>

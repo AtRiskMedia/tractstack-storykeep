@@ -7,6 +7,11 @@ import {
 } from "../../store/storykeep";
 import { PaneWrapper } from "./PaneWrapper";
 import { classNames } from "../../utils/helpers";
+import {
+  storeMap,
+  useStoryKeepUtils,
+  validationFunctions,
+} from "../../utils/storykeep";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
@@ -19,6 +24,9 @@ export const StoryFragment = (props: { id: string }) => {
   const paneIds = $storyFragmentPaneIds[id]?.current;
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
 
+  // helpers
+  const { viewport } = useStoryKeepUtils(id, storeMap, validationFunctions);
+
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) setIsClient(true);
   }, [id, $storyFragmentInit]);
@@ -26,15 +34,22 @@ export const StoryFragment = (props: { id: string }) => {
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div
-      className={classNames(
-        tailwindBgColour ? tailwindBgColour : ``,
-        `overflow-hidden`
-      )}
-    >
-      {paneIds.map((paneId: string) => (
-        <PaneWrapper key={paneId} id={paneId} />
-      ))}
+    <div className="bg-mydarkgrey/20">
+      <div
+        className={classNames(
+          tailwindBgColour ? tailwindBgColour : `bg-white`,
+          `overflow-hidden`,
+          viewport === `mobile`
+            ? `max-w-[800px]`
+            : viewport === `tablet`
+              ? `max-w-[1367px]`
+              : `max-w-[1920px]`
+        )}
+      >
+        {paneIds.map((paneId: string) => (
+          <PaneWrapper key={paneId} id={paneId} />
+        ))}
+      </div>
     </div>
   );
 };

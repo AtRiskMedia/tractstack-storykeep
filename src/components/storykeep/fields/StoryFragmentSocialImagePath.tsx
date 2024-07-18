@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
@@ -5,13 +6,13 @@ import {
 import ContentEditableField from "../ContentEditableField";
 import { useStore } from "@nanostores/react";
 import {
-  storyFragmentSlug,
+  storyFragmentSocialImagePath,
   uncleanDataStore,
   temporaryErrorsStore,
 } from "../../../store/storykeep";
 import type { StoreKey } from "../../../types";
 
-interface StoryFragmentSlugProps {
+interface StoryFragmentSocialImagePathProps {
   id: string;
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
@@ -19,37 +20,49 @@ interface StoryFragmentSlugProps {
   handleUndo: (storeKey: StoreKey) => void;
 }
 
-const StoryFragmentSlug = ({
+const StoryFragmentSocialImagePath = ({
   id,
   isEditing,
   handleEditingChange,
   updateStoreField,
   handleUndo,
-}: StoryFragmentSlugProps) => {
-  const $storyFragmentSlug = useStore(storyFragmentSlug);
+}: StoryFragmentSocialImagePathProps) => {
+  const $storyFragmentSocialImagePath = useStore(storyFragmentSocialImagePath);
   const $uncleanData = useStore(uncleanDataStore);
   const $temporaryErrors = useStore(temporaryErrorsStore);
+
+  const handleChange = useCallback(
+    (newValue: string) => {
+      updateStoreField("storyFragmentSocialImagePath", newValue);
+      return true;
+    },
+    [updateStoreField]
+  );
+
+  const handleEditChange = useCallback(
+    (editing: boolean) => {
+      handleEditingChange("storyFragmentSocialImagePath", editing);
+    },
+    [handleEditingChange]
+  );
 
   return (
     <>
       <div className="flex items-center space-x-4 space-y-2">
         <span
-          id="storyFragmentSlug-label"
+          id="storyFragmentSocialImagePath-label"
           className="text-md leading-6 text-mydarkgrey flex-shrink-0"
         >
-          Slug <span className="hidden md:inline-block">(url path)</span>
+          Descriptive title{" "}
+          <span className="hidden md:inline-block">for this web page</span>
         </span>
         <div className="flex flex-grow items-center">
           <div className="relative flex-grow">
             <ContentEditableField
-              id="storyFragmentSlug"
-              value={$storyFragmentSlug[id]?.current || ""}
-              onChange={newValue =>
-                updateStoreField("storyFragmentSlug", newValue)
-              }
-              onEditingChange={editing =>
-                handleEditingChange("storyFragmentSlug", editing)
-              }
+              id="storyFragmentSocialImagePath"
+              value={$storyFragmentSocialImagePath[id]?.current || ""}
+              onChange={handleChange}
+              onEditingChange={editing => handleEditChange(editing)}
               placeholder="Enter title here"
               className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
               style={{
@@ -58,8 +71,8 @@ const StoryFragmentSlug = ({
                 width: "100%",
               }}
             />
-            {($uncleanData[id]?.storyFragmentSlug ||
-              $temporaryErrors[id]?.storyFragmentSlug) && (
+            {($uncleanData[id]?.storyFragmentSocialImagePath ||
+              $temporaryErrors[id]?.storyFragmentSocialImagePath) && (
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
                 <ExclamationCircleIcon
                   aria-hidden="true"
@@ -69,9 +82,9 @@ const StoryFragmentSlug = ({
             )}
           </div>
           <button
-            onClick={() => handleUndo("storyFragmentSlug")}
+            onClick={() => handleUndo("storyFragmentSocialImagePath")}
             className="disabled:hidden ml-2"
-            disabled={$storyFragmentSlug[id]?.history.length === 0}
+            disabled={$storyFragmentSocialImagePath[id]?.history.length === 0}
           >
             <ChevronDoubleLeftIcon
               className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
@@ -80,15 +93,13 @@ const StoryFragmentSlug = ({
           </button>
         </div>
       </div>
-      {(isEditing.storyFragmentSlug || $uncleanData[id]?.storyFragmentSlug) && (
+      {(isEditing.storyFragmentSocialImagePath ||
+        $uncleanData[id]?.storyFragmentSocialImagePath) && (
         <ul className="text-black bg-mygreen/20 rounded mt-2 font-lg flex flex-wrap px-4 py-2">
-          <li className="pr-6 py-2">All lowercase. No special characters.</li>
-          <li className="pr-6 py-2">use-hyphens-to-separate-words</li>
-          <li className="pr-6 py-2">3-5 words max!</li>
-          <li className="pr-6 py-2">Be descriptive!</li>
-          <li className="pr-6 py-2">Include your most important keyword.</li>
           <li className="pr-6 py-2">
-            Avoid numbers and dates unless necessary.
+            <strong>LIMITATION</strong>: currently this is just a path and file
+            must be added to public/custom manually. Soon you'll be able to
+            upload an image and have it auto-magically work.
           </li>
         </ul>
       )}
@@ -96,4 +107,4 @@ const StoryFragmentSlug = ({
   );
 };
 
-export default StoryFragmentSlug;
+export default StoryFragmentSocialImagePath;

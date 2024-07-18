@@ -1,8 +1,34 @@
 //import { useStore } from "@nanostores/react";
-//import { } from "../../../store/storykeep";
+import {
+  useStoryKeepUtils,
+  storeMap,
+  validationFunctions,
+} from "../../../utils/storykeep";
+//import {
+//  unsavedChangesStore,
+//  uncleanDataStore,
+//} from "../../../store/storykeep";
+
+import StoryFragmentSocialImagePath from "../fields/StoryFragmentSocialImagePath";
 
 export const StoryFragmentSettings = (props: { id: string }) => {
   const { id } = props;
 
-  return <p>StoryFragment: {id}</p>;
+  // helpers
+  const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
+    useStoryKeepUtils(id, storeMap, validationFunctions);
+
+  return (
+    <>
+      <p>StoryFragment: {id}</p>
+
+      <StoryFragmentSocialImagePath
+        id={id}
+        isEditing={isEditing}
+        handleEditingChange={handleEditingChange}
+        updateStoreField={updateStoreField}
+        handleUndo={handleUndo}
+      />
+    </>
+  );
 };

@@ -45,7 +45,7 @@ export const validationFunctions: Partial<
     (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
   storyFragmentSocialImagePath: (value: string) =>
     value.length === 0 ||
-    (value.length <= 80 && /^\/?([\w-.]+(\/[\w-.]+)*)?$/.test(value)),
+    (value.length <= 80 && /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?$/.test(value)),
   storyFragmentMenuId: (value: string) => value.length <= 32,
   // Add more validation functions for other fields
   //

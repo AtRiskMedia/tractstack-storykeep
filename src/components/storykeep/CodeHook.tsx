@@ -27,6 +27,7 @@ export const CodeHook = (props: { id: string }) => {
         type: `pane`,
       });
       handleToggleOn(true);
+      console.log($paneCodeHook[id].current);
     }
   };
 
@@ -34,7 +35,7 @@ export const CodeHook = (props: { id: string }) => {
 
   return (
     <p>
-      Code Hook: {id} {JSON.stringify($paneCodeHook)}
+      Code Hook: {id}
       <button
         type="button"
         className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"

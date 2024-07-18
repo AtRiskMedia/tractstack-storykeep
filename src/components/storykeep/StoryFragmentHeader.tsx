@@ -10,7 +10,6 @@ import {
   editModeStore,
   unsavedChangesStore,
   uncleanDataStore,
-  temporaryErrorsStore,
   storyFragmentInit,
   storyFragmentSlug,
   // Add other stores here
@@ -23,7 +22,6 @@ import {
   storeMap,
   validationFunctions,
 } from "../../utils/storykeep";
-import type { StoreKey } from "../../types";
 
 export const StoryFragmentHeader = (props: { id: string }) => {
   const { id } = props;
@@ -74,41 +72,6 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) {
       setIsClient(true);
-
-      // Initialize unsavedChanges and uncleanData
-      const initialUnsavedChanges: Record<StoreKey, boolean> = {
-        storyFragmentTitle: false,
-        storyFragmentSlug: false,
-        storyFragmentTailwindBgColour: false,
-      };
-      const initialUncleanData: Record<StoreKey, boolean> = {
-        storyFragmentTitle: false,
-        storyFragmentSlug: false,
-        storyFragmentTailwindBgColour: false,
-      };
-      (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
-        const store = storeMap[storeKey];
-        if (store) {
-          const field = store.get()[id];
-          const validationFunction = validationFunctions[storeKey];
-          if (
-            field.current.length === 0 ||
-            (validationFunction && !validationFunction(field.current))
-          )
-            initialUncleanData[storeKey] = true;
-          else initialUncleanData[storeKey] = false;
-          initialUnsavedChanges[storeKey] = field
-            ? field.current !== field.original
-            : false;
-        }
-      });
-      unsavedChangesStore.setKey(id, initialUnsavedChanges);
-      uncleanDataStore.setKey(id, initialUncleanData);
-      temporaryErrorsStore.setKey(id, {
-        storyFragmentTitle: false,
-        storyFragmentSlug: false,
-        storyFragmentTailwindBgColour: false,
-      });
     }
   }, [id, $storyFragmentInit]);
 

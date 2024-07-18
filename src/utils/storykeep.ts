@@ -11,6 +11,8 @@ import {
   storyFragmentTitle,
   storyFragmentSlug,
   storyFragmentTailwindBgColour,
+  storyFragmentMenuId,
+  storyFragmentSocialImagePath,
 } from "../store/storykeep";
 import { MAX_HISTORY_LENGTH } from "../constants";
 import type {
@@ -27,6 +29,8 @@ export const storeMap: StoreMapType = {
   storyFragmentTitle: storyFragmentTitle,
   storyFragmentSlug: storyFragmentSlug,
   storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
+  storyFragmentSocialImagePath: storyFragmentSocialImagePath,
+  storyFragmentMenuId: storyFragmentMenuId,
   // Add other stores here
 };
 
@@ -34,11 +38,15 @@ export const validationFunctions: Partial<
   Record<StoreKey, ValidationFunction>
 > = {
   // temporaryErrors will catch length === 0
-  storyFragmentTailwindBgColour: (value: string) => value.length <= 80,
+  storyFragmentTailwindBgColour: (value: string) => value.length <= 20,
   storyFragmentTitle: (value: string) => value.length <= 80,
   storyFragmentSlug: (value: string) =>
     value.length === 0 ||
     (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
+  storyFragmentSocialImagePath: (value: string) =>
+    value.length === 0 ||
+    (value.length <= 80 && /^\/?([\w-.]+(\/[\w-.]+)*)?$/.test(value)),
+  storyFragmentMenuId: (value: string) => value.length <= 32,
   // Add more validation functions for other fields
   //
 };

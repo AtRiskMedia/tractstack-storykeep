@@ -33,8 +33,13 @@ import {
   paneImpression,
   paneHeldBeliefs,
   paneWithheldBeliefs,
+  unsavedChangesStore,
+  uncleanDataStore,
+  temporaryErrorsStore,
 } from "../../store/storykeep";
+import { storeMap, validationFunctions } from "../../utils/storykeep";
 import type {
+  StoreKey,
   StoryFragmentDatum,
   PaneDatum,
   FieldWithHistory,
@@ -51,6 +56,7 @@ export const StoryKeepStore = (props: {
 
   useEffect(() => {
     const populateStores = (fragment: StoryFragmentDatum) => {
+      console.log(`populating store`);
       function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
         return {
           current: value,
@@ -75,11 +81,10 @@ export const StoryKeepStore = (props: {
           ...storyFragmentTractStackId.get(),
           [fragment.id]: createFieldWithHistory(fragment.tractStackId),
         });
-        if (fragment?.menuId && typeof fragment.menuId === `string`)
-          storyFragmentMenuId.set({
-            ...storyFragmentMenuId.get(),
-            [fragment.id]: createFieldWithHistory(fragment.menuId),
-          });
+        storyFragmentMenuId.set({
+          ...storyFragmentMenuId.get(),
+          [fragment.id]: createFieldWithHistory(fragment.menuId || ``),
+        });
         if (fragment?.menuPayload)
           storyFragmentMenu.set({
             ...storyFragmentMenu.get(),
@@ -91,11 +96,10 @@ export const StoryKeepStore = (props: {
             fragment.panesPayload.map((payload: PaneDatum) => payload.id)
           ),
         });
-        if (fragment?.socialImagePath)
-          storyFragmentSocialImagePath.set({
-            ...storyFragmentSocialImagePath.get(),
-            [fragment.id]: createFieldWithHistory(fragment.socialImagePath),
-          });
+        storyFragmentSocialImagePath.set({
+          ...storyFragmentSocialImagePath.get(),
+          [fragment.id]: createFieldWithHistory(fragment.socialImagePath || ``),
+        });
         storyFragmentTailwindBgColour.set({
           ...storyFragmentTailwindBgColour.get(),
           [fragment.id]: createFieldWithHistory(
@@ -242,6 +246,38 @@ export const StoryKeepStore = (props: {
               });
           }
         });
+
+        // Initialize unsavedChanges and uncleanData
+        const empty = {
+          storyFragmentTitle: false,
+          storyFragmentSlug: false,
+          storyFragmentTailwindBgColour: false,
+          storyFragmentSocialImagePath: false,
+          storyFragmentMenuId: false,
+        };
+        const initialUnsavedChanges: Record<StoreKey, boolean> = empty;
+        const initialUncleanData: Record<StoreKey, boolean> = empty;
+        (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
+          const store = storeMap[storeKey];
+          if (store) {
+            const field = store.get()[storyfragment.id];
+            const validationFunction = validationFunctions[storeKey];
+            if (
+              (field && field.current.length === 0) ||
+              (field &&
+                validationFunction &&
+                !validationFunction(field.current))
+            )
+              initialUncleanData[storeKey] = true;
+            else initialUncleanData[storeKey] = false;
+            initialUnsavedChanges[storeKey] = field
+              ? field.current !== field.original
+              : false;
+          }
+        });
+        unsavedChangesStore.setKey(storyfragment.id, initialUnsavedChanges);
+        uncleanDataStore.setKey(storyfragment.id, initialUncleanData);
+        temporaryErrorsStore.setKey(storyfragment.id, empty);
       }
     };
 

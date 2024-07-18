@@ -6,7 +6,9 @@ export type ToolMode = "insert" | "text" | "styles" | "settings" | "eraser";
 export type StoreKey =
   | "storyFragmentTitle"
   | "storyFragmentSlug"
-  | "storyFragmentTailwindBgColour";
+  | "storyFragmentTailwindBgColour"
+  | "storyFragmentMenuId"
+  | "storyFragmentSocialImagePath";
 // Add other stores here
 //
 

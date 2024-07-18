@@ -54,12 +54,19 @@ export const StoryFragmentHeader = (props: { id: string }) => {
   const [isClient, setIsClient] = useState(false);
 
   const handleEditModeToggle = () => {
-    const currentEditMode = $editMode[id] || ``;
-    if (currentEditMode === `settings`) {
-      editModeStore.setKey(id, ``);
+    if ($editMode?.mode === `settings`) {
+      editModeStore.set({
+        id,
+        mode: ``,
+        type: `storyfragment`,
+      });
       handleToggleOff(true);
     } else {
-      editModeStore.setKey(id, "settings");
+      editModeStore.set({
+        id,
+        mode: `settings`,
+        type: `storyfragment`,
+      });
       handleToggleOn(true);
     }
   };

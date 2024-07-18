@@ -6,7 +6,6 @@ import {
   uncleanDataStore,
   temporaryErrorsStore,
   viewportStore,
-  editModeStore,
   toolModeStore,
   toolAddModeStore,
   storyFragmentTitle,
@@ -69,7 +68,6 @@ export const useStoryKeepUtils = (
   );
 
   const { value: viewport } = useStore(viewportStore);
-  const { value: editMode } = useStore(editModeStore);
   const { value: toolMode } = useStore(toolModeStore);
   const { value: toolAddMode } = useStore(toolAddModeStore);
 
@@ -77,10 +75,6 @@ export const useStoryKeepUtils = (
     newViewport: "auto" | "mobile" | "tablet" | "desktop"
   ) => {
     viewportStore.set({ value: newViewport });
-  };
-
-  const setEditMode = (newEditMode: string) => {
-    editModeStore.setKey(id, newEditMode);
   };
 
   const setToolMode = (newToolMode: ToolMode) => {
@@ -243,8 +237,6 @@ export const useStoryKeepUtils = (
     handleEditingChange,
     viewport,
     setViewport,
-    editMode,
-    setEditMode,
     toolMode,
     setToolMode,
     toolAddMode,

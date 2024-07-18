@@ -18,6 +18,19 @@ export interface ToggleEditModalEvent extends Event {
   };
 }
 
+export type EditModeValue = {
+  id: string;
+  mode: string;
+  type:
+    | "storyfragment"
+    | "pane"
+    | "context"
+    | "tractstack"
+    | "resource"
+    | "menu"
+    | "file";
+};
+
 export type StoreMapType = {
   [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
 };

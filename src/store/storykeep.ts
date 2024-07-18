@@ -1,4 +1,4 @@
-import { map } from "nanostores";
+import { map, atom } from "nanostores";
 import type {
   BeliefDatum,
   BgPaneDatum,
@@ -16,6 +16,7 @@ import type {
   StoreKey,
   ToolMode,
   ToolAddMode,
+  EditModeValue,
 } from "../types";
 import { toolAddModes } from "../constants";
 
@@ -43,7 +44,8 @@ export const toolModeStore = map<{ value: ToolMode }>({
 export const toolAddModeStore = map<{ value: ToolAddMode }>({
   value: toolAddModes[0], // Default to the first mode
 });
-export const editModeStore = map<Record<string, string>>({});
+
+export const editModeStore = atom<EditModeValue | null>(null);
 
 // datums from turso
 export const menu = map<Record<string, FieldWithHistory<MenuDatum>>>();

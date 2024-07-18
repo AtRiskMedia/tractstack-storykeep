@@ -49,6 +49,14 @@ import type {
   ImpressionDatum,
 } from "../../types";
 
+function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
+  return {
+    current: value,
+    original: value,
+    history: [],
+  };
+}
+
 export const StoryKeepStore = (props: {
   storyfragment: StoryFragmentDatum;
 }) => {
@@ -56,14 +64,6 @@ export const StoryKeepStore = (props: {
 
   useEffect(() => {
     const populateStores = (fragment: StoryFragmentDatum) => {
-      console.log(`populating store`);
-      function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
-        return {
-          current: value,
-          original: value,
-          history: [],
-        };
-      }
       if (!storyFragmentInit.get()[fragment.id]?.init) {
         storyFragmentInit.set({
           ...storyFragmentInit.get(),
@@ -106,6 +106,40 @@ export const StoryKeepStore = (props: {
             fragment.tailwindBgColour || ``
           ),
         });
+
+        // Initialize unsavedChanges and uncleanData for this storyFragment
+        const emptyStoryFragment = {
+          storyFragmentTitle: false,
+          storyFragmentSlug: false,
+          storyFragmentTailwindBgColour: false,
+          storyFragmentSocialImagePath: false,
+          storyFragmentMenuId: false,
+        };
+        const initialUnsavedChanges: Record<StoreKey, boolean> =
+          emptyStoryFragment;
+        const initialUncleanData: Record<StoreKey, boolean> =
+          emptyStoryFragment;
+        (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
+          const store = storeMap[storeKey];
+          if (store) {
+            const field = store.get()[storyfragment.id];
+            const validationFunction = validationFunctions[storeKey];
+            if (
+              (field && field.current.length === 0) ||
+              (field &&
+                validationFunction &&
+                !validationFunction(field.current))
+            )
+              initialUncleanData[storeKey] = true;
+            else initialUncleanData[storeKey] = false;
+            initialUnsavedChanges[storeKey] = field
+              ? field.current !== field.original
+              : false;
+          }
+        });
+        unsavedChangesStore.setKey(storyfragment.id, initialUnsavedChanges);
+        uncleanDataStore.setKey(storyfragment.id, initialUncleanData);
+        temporaryErrorsStore.setKey(storyfragment.id, emptyStoryFragment);
 
         fragment.panesPayload.forEach((payload: PaneDatum) => {
           if (!paneInit.get()[payload.id]?.init) {
@@ -246,38 +280,6 @@ export const StoryKeepStore = (props: {
               });
           }
         });
-
-        // Initialize unsavedChanges and uncleanData
-        const empty = {
-          storyFragmentTitle: false,
-          storyFragmentSlug: false,
-          storyFragmentTailwindBgColour: false,
-          storyFragmentSocialImagePath: false,
-          storyFragmentMenuId: false,
-        };
-        const initialUnsavedChanges: Record<StoreKey, boolean> = empty;
-        const initialUncleanData: Record<StoreKey, boolean> = empty;
-        (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
-          const store = storeMap[storeKey];
-          if (store) {
-            const field = store.get()[storyfragment.id];
-            const validationFunction = validationFunctions[storeKey];
-            if (
-              (field && field.current.length === 0) ||
-              (field &&
-                validationFunction &&
-                !validationFunction(field.current))
-            )
-              initialUncleanData[storeKey] = true;
-            else initialUncleanData[storeKey] = false;
-            initialUnsavedChanges[storeKey] = field
-              ? field.current !== field.original
-              : false;
-          }
-        });
-        unsavedChangesStore.setKey(storyfragment.id, initialUnsavedChanges);
-        uncleanDataStore.setKey(storyfragment.id, initialUncleanData);
-        temporaryErrorsStore.setKey(storyfragment.id, empty);
       }
     };
 

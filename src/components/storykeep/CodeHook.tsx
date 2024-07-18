@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { editModeStore, paneInit, paneCodeHook } from "../../store/storykeep";
+import { editModeStore, paneInit } from "../../store/storykeep";
 import { handleToggleOn, handleToggleOff } from "../../utils/storykeep";
 
 export const CodeHook = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit);
-  const $paneCodeHook = useStore(paneCodeHook);
+  //const $paneCodeHook = useStore(paneCodeHook);
   const $editMode = useStore(editModeStore);
 
   useEffect(() => {
@@ -19,15 +19,14 @@ export const CodeHook = (props: { id: string }) => {
   const handleEditModeToggle = () => {
     if ($editMode?.mode === `codehook` && $editMode.id === id) {
       editModeStore.set(null);
-      handleToggleOff(true);
+      handleToggleOff();
     } else {
       editModeStore.set({
         id,
         mode: `codehook`,
         type: `pane`,
       });
-      handleToggleOn(true);
-      console.log($paneCodeHook[id].current);
+      handleToggleOn();
     }
   };
 

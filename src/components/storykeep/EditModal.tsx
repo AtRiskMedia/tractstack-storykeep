@@ -8,12 +8,14 @@ import {
 } from "../../store/storykeep";
 import { StoryFragmentSettings } from "./settings/storyfragment";
 import { CodeHookSettings } from "./settings/codehook";
+import type { DatumPayload } from "../../types";
 
 interface EditModalProps {
   type: "desktop" | "mobile";
+  payload: DatumPayload;
 }
 
-export const EditModal = ({ type }: EditModalProps) => {
+export const EditModal = ({ type, payload }: EditModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
   const $storyFragmentInit = useStore(storyFragmentInit);
@@ -51,9 +53,9 @@ export const EditModal = ({ type }: EditModalProps) => {
       <div className="border border-myblue border-2 p-6 border-dotted">
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
-          <StoryFragmentSettings id={$editMode.id} />
+          <StoryFragmentSettings id={$editMode.id} payload={payload} />
         ) : $editMode?.type === `pane` && $editMode?.mode === `codehook` ? (
-          <CodeHookSettings id={$editMode.id} />
+          <CodeHookSettings id={$editMode.id} payload={payload} />
         ) : null}
       </div>
     </div>

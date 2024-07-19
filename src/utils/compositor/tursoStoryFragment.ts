@@ -191,6 +191,7 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
             menuPayload:
               (typeof r?.menu_title === `string` &&
                 typeof r?.menu_theme === `string` && {
+                  id: r.id,
                   title: r.menu_title,
                   theme: r.menu_theme,
                   optionsPayload:

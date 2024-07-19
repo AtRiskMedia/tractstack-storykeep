@@ -23,6 +23,7 @@ import type {
   ToggleEditModalEvent,
   ToolAddMode,
   ToolMode,
+  HistoryEntry,
 } from "../types";
 
 export const storeMap: StoreMapType = {
@@ -109,78 +110,108 @@ export const useStoryKeepUtils = (
     [id]
   );
 
-  const updateStoreField = useCallback(
-    (storeKey: StoreKey, newValue: string): boolean => {
-      const store = storeMap[storeKey];
-      if (!store) return false;
+  const updateStoreField = (storeKey: StoreKey, newValue: string): boolean => {
+    const store = storeMap[storeKey];
+    if (!store) return false;
 
-      const validationFunction = validationFunctions[storeKey];
-      if (validationFunction && !validationFunction(newValue)) {
-        setTemporaryError(storeKey);
-        return false;
-      }
-
-      const currentStoreValue = store.get();
-      const currentField = currentStoreValue[id];
-      const now = Date.now();
-
-      if (currentField && newValue !== currentField.current) {
-        const timeSinceLastUpdate =
-          now - (lastUpdateTimeRef.current[storeKey] || 0);
-
-        const newHistory = [...currentField.history];
-
-        // Add new entry if history is not full AND enough time has passed
-        if (
-          newHistory.length < MAX_HISTORY_LENGTH &&
-          timeSinceLastUpdate > 4000
-        ) {
-          newHistory.unshift({ value: currentField.current, timestamp: now });
-
-          // If history exceeds max length, remove the second entry (keeping original)
-          if (newHistory.length > MAX_HISTORY_LENGTH) {
-            newHistory.splice(1, 1);
-          }
-
-          lastUpdateTimeRef.current[storeKey] = now;
-        }
-
-        const newField: FieldWithHistory<string> = {
-          current: newValue,
-          original: currentField.original,
-          history: newHistory,
-        };
-
-        if (newValue.length === 0) {
-          uncleanDataStore.setKey(id, {
-            ...(uncleanDataStore.get()[id] || {}),
-            [storeKey]: true,
-          });
-        } else {
-          uncleanDataStore.setKey(id, {
-            ...(uncleanDataStore.get()[id] || {}),
-            [storeKey]: false,
-          });
-        }
-
-        store.set({
-          ...currentStoreValue,
-          [id]: newField,
-        });
-
-        const isUnsaved = newValue !== currentField.original;
-        unsavedChangesStore.setKey(id, {
-          ...(unsavedChangesStore.get()[id] || {}),
-          [storeKey]: isUnsaved,
-        });
-
-        return true;
-      }
-
+    if (!isValidValue(storeKey, newValue)) {
+      setTemporaryError(storeKey);
       return false;
-    },
-    [id, storeMap, validationFunctions, setTemporaryError]
-  );
+    }
+
+    const currentStoreValue = store.get();
+    const currentField = currentStoreValue[id];
+    if (!currentField || newValue === currentField.current) return false;
+
+    const now = Date.now();
+    const newHistory = updateHistory(storeKey, currentField, now);
+    const newField = createNewField(currentField, newValue, newHistory);
+
+    updateStores(store, storeKey, currentStoreValue, newField, newValue);
+
+    return true;
+  };
+
+  const isValidValue = (storeKey: StoreKey, value: string): boolean => {
+    const validationFunction = validationFunctions[storeKey];
+    return !validationFunction || validationFunction(value);
+  };
+
+  const updateHistory = (
+    storeKey: StoreKey,
+    currentField: FieldWithHistory<string>,
+    now: number
+  ): HistoryEntry<string>[] => {
+    const timeSinceLastUpdate =
+      now - (lastUpdateTimeRef.current[storeKey] || 0);
+    const newHistory = [...currentField.history];
+
+    if (newHistory.length < MAX_HISTORY_LENGTH && timeSinceLastUpdate > 4000) {
+      newHistory.unshift({ value: currentField.current, timestamp: now });
+      if (newHistory.length > MAX_HISTORY_LENGTH) {
+        newHistory.splice(1, 1);
+      }
+      lastUpdateTimeRef.current[storeKey] = now;
+    }
+
+    return newHistory;
+  };
+
+  const createNewField = (
+    currentField: FieldWithHistory<string>,
+    newValue: string,
+    newHistory: HistoryEntry<string>[]
+  ): FieldWithHistory<string> => ({
+    current: newValue,
+    original: currentField.original,
+    history: newHistory,
+  });
+
+  const updateStores = (
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    store: any,
+    storeKey: StoreKey,
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    currentStoreValue: any,
+    newField: FieldWithHistory<string>,
+    newValue: string
+  ) => {
+    updateUncleanDataStore(storeKey, newValue);
+    updateMainStore(store, currentStoreValue, newField);
+    updateUnsavedChangesStore(storeKey, newValue, newField.original);
+  };
+
+  const updateUncleanDataStore = (storeKey: StoreKey, newValue: string) => {
+    uncleanDataStore.setKey(id, {
+      ...(uncleanDataStore.get()[id] || {}),
+      [storeKey]: newValue.length === 0,
+    });
+  };
+
+  const updateMainStore = (
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    store: any,
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    currentStoreValue: any,
+    newField: FieldWithHistory<string>
+  ) => {
+    store.set({
+      ...currentStoreValue,
+      [id]: newField,
+    });
+  };
+
+  const updateUnsavedChangesStore = (
+    storeKey: StoreKey,
+    newValue: string,
+    originalValue: string
+  ) => {
+    const isUnsaved = newValue !== originalValue;
+    unsavedChangesStore.setKey(id, {
+      ...(unsavedChangesStore.get()[id] || {}),
+      [storeKey]: isUnsaved,
+    });
+  };
 
   const handleUndo = useCallback(
     (storeKey: StoreKey) => {

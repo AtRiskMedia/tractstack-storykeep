@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useStore } from "@nanostores/react";
 import { storyFragmentTailwindBgColour } from "../../../store/storykeep";
@@ -20,13 +20,10 @@ const StoryFragmentTailwindBgColour = ({
   const $storyFragmentTailwindBgColour = useStore(
     storyFragmentTailwindBgColour
   );
-
   const [localValue, setLocalValue] = useState(
     $storyFragmentTailwindBgColour[id]?.current || ""
   );
-
   const hexColor = useMemo(() => tailwindToHex(localValue), [localValue]);
-
   const debouncedUpdateField = useRef(
     debounce((newValue: string) => {
       updateStoreField("storyFragmentTailwindBgColour", newValue);
@@ -37,37 +34,35 @@ const StoryFragmentTailwindBgColour = ({
     setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
   }, [$storyFragmentTailwindBgColour[id]?.current]);
 
-  const handleChange = useCallback(
-    (newColor: string) => {
-      setLocalValue(newColor);
-      debouncedUpdateField(`bg-${newColor}`);
-    },
-    [debouncedUpdateField]
-  );
+  function handleChange(newColor: string) {
+    setLocalValue(newColor);
+    debouncedUpdateField(`bg-${newColor}`);
+  }
 
-  const handleUndoCallback = useCallback(() => {
+  function handleUndoClick() {
     handleUndo("storyFragmentTailwindBgColour");
-    const undoneValue = $storyFragmentTailwindBgColour[id]?.current || "";
-    setLocalValue(undoneValue);
-  }, [handleUndo, $storyFragmentTailwindBgColour, id]);
+    setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
+  }
 
   return (
-    <div className="flex items-center space-x-4 space-y-2">
+    <div className="flex items-center space-x-4">
       <span
         id="storyFragmentTailwindBgColour-label"
-        className="text-md leading-6 text-mydarkgrey flex-shrink-0"
+        className="flex items-center text-md text-mydarkgrey flex-shrink-0"
       >
         <span className="hidden md:inline-block">Tailwind</span>
         {` `}
         Bg Color
       </span>
-      <ColorPickerWrapper
-        id="storyFragmentTailwindBgColour"
-        defaultColor={hexColor}
-        onColorChange={handleChange}
-      />
+      <div className="flex-grow">
+        <ColorPickerWrapper
+          id="storyFragmentTailwindBgColour"
+          defaultColor={hexColor}
+          onColorChange={handleChange}
+        />
+      </div>
       <button
-        onClick={handleUndoCallback}
+        onClick={handleUndoClick}
         className="disabled:hidden ml-2"
         disabled={$storyFragmentTailwindBgColour[id]?.history.length === 0}
       >

@@ -1,5 +1,6 @@
 import { createClient } from "@libsql/client/web";
 import { cleanTursoResource } from "../utils/compositor/tursoResource";
+import { cleanTursoPayload } from "../utils/compositor/tursoPayload";
 import { cleanTursoContentMap } from "../utils/compositor/tursoContentMap";
 import { cleanTursoStoryFragment } from "../utils/compositor/tursoStoryFragment";
 import { cleanTursoContextPane } from "../utils/compositor/tursoContextPane";
@@ -8,12 +9,87 @@ import type {
   StoryFragmentDatum,
   ContextPaneDatum,
   ContentMap,
+  DatumPayload,
 } from "../types.ts";
 
 export const turso = createClient({
   url: import.meta.env.TURSO_DATABASE_URL,
   authToken: import.meta.env.TURSO_AUTH_TOKEN,
 });
+
+export async function getDatumPayload(): Promise<DatumPayload> {
+  try {
+    const { rows } = await turso.execute(
+      `WITH dummy AS (SELECT 1),
+resource_data AS (
+  SELECT json_group_array(json_object(
+    'id', id,
+    'title', title,
+    'slug', slug,
+    'category_slug', category_slug,
+    'oneliner', oneliner,
+    'options_payload', options_payload,
+    'action_lisp', action_lisp
+  )) AS resources
+  FROM resource
+),
+file_data AS (
+  SELECT json_group_array(json_object(
+    'id', id,
+    'filename', filename,
+    'url', url
+  )) AS files
+  FROM file
+),
+tractstack_data AS (
+  SELECT json_group_array(json_object(
+    'id', id,
+    'title', title,
+    'slug', slug,
+    'social_image_path', social_image_path
+  )) AS tractstack
+  FROM tractstack
+),
+menu_data AS (
+  SELECT json_group_array(json_object(
+    'id', id,
+    'title', title,
+    'theme', theme,
+    'options_payload', options_payload
+  )) AS menus
+  FROM menu
+)
+SELECT
+  json_object(
+    'resources', COALESCE(resource_data.resources, '[]'),
+    'files', COALESCE(file_data.files, '[]'),
+    'tractstack', COALESCE(tractstack_data.tractstack, '[]'),
+    'menus', COALESCE(menu_data.menus, '[]')
+  ) AS result
+FROM
+  dummy
+  LEFT JOIN resource_data ON 1=1
+  LEFT JOIN file_data ON 1=1
+  LEFT JOIN tractstack_data ON 1=1
+  LEFT JOIN menu_data ON 1=1
+LIMIT 1;`
+    );
+    const rawPayload = rows?.at(0)?.result;
+    const payload =
+      typeof rawPayload === `string` && rawPayload && JSON.parse(rawPayload);
+    return cleanTursoPayload(
+      payload || {
+        files: [],
+        menus: [],
+        tractstack: [],
+        resources: [],
+      }
+    );
+  } catch (error) {
+    console.error("Error fetching ResourceBySlug:", error);
+    throw error;
+  }
+}
 
 export async function getResourcesBySlug(
   slugs: string[]

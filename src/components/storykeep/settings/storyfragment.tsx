@@ -8,11 +8,16 @@ import {
 //  unsavedChangesStore,
 //  uncleanDataStore,
 //} from "../../../store/storykeep";
+import type { DatumPayload } from "../../../types";
 
 import StoryFragmentSocialImagePath from "../fields/StoryFragmentSocialImagePath";
+import StoryFragmentMenu from "../fields/StoryFragmentMenu";
 
-export const StoryFragmentSettings = (props: { id: string }) => {
-  const { id } = props;
+export const StoryFragmentSettings = (props: {
+  id: string;
+  payload: DatumPayload;
+}) => {
+  const { id, payload } = props;
 
   // helpers
   const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
@@ -20,7 +25,14 @@ export const StoryFragmentSettings = (props: { id: string }) => {
 
   return (
     <>
-      <p>StoryFragment: {id}</p>
+      <StoryFragmentMenu
+        id={id}
+        isEditing={isEditing}
+        handleEditingChange={handleEditingChange}
+        updateStoreField={updateStoreField}
+        handleUndo={handleUndo}
+        payload={payload.menus}
+      />
 
       <StoryFragmentSocialImagePath
         id={id}

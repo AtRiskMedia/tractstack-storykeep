@@ -32,53 +32,46 @@ const StoryFragmentSlug = ({
 
   return (
     <>
-      <div className="flex items-center space-x-4 space-y-2">
+      <div className="flex items-center space-x-4">
         <span
           id="storyFragmentSlug-label"
-          className="text-md leading-6 text-mydarkgrey flex-shrink-0"
+          className="flex items-center text-md text-mydarkgrey flex-shrink-0"
         >
-          Slug <span className="hidden md:inline-block">(url path)</span>
+          Slug <span className="hidden md:inline-block ml-1">(url path)</span>
         </span>
-        <div className="flex flex-grow items-center">
-          <div className="relative flex-grow">
-            <ContentEditableField
-              id="storyFragmentSlug"
-              value={$storyFragmentSlug[id]?.current || ""}
-              onChange={newValue =>
-                updateStoreField("storyFragmentSlug", newValue)
-              }
-              onEditingChange={editing =>
-                handleEditingChange("storyFragmentSlug", editing)
-              }
-              placeholder="Enter title here"
-              className="block w-full rounded-md border-0 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
-              style={{
-                border: "1px solid black",
-                padding: "5px 30px 5px 5px",
-                width: "100%",
-              }}
-            />
-            {($uncleanData[id]?.storyFragmentSlug ||
-              $temporaryErrors[id]?.storyFragmentSlug) && (
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                <ExclamationCircleIcon
-                  aria-hidden="true"
-                  className="h-5 w-5 text-red-500"
-                />
-              </div>
-            )}
-          </div>
-          <button
-            onClick={() => handleUndo("storyFragmentSlug")}
-            className="disabled:hidden ml-2"
-            disabled={$storyFragmentSlug[id]?.history.length === 0}
-          >
-            <ChevronDoubleLeftIcon
-              className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
-              title="Undo"
-            />
-          </button>
+        <div className="flex-grow relative">
+          <ContentEditableField
+            id="storyFragmentSlug"
+            value={$storyFragmentSlug[id]?.current || ""}
+            onChange={newValue =>
+              updateStoreField("storyFragmentSlug", newValue)
+            }
+            onEditingChange={editing =>
+              handleEditingChange("storyFragmentSlug", editing)
+            }
+            placeholder="Enter slug here"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+          />
+          {($uncleanData[id]?.storyFragmentSlug ||
+            $temporaryErrors[id]?.storyFragmentSlug) && (
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+              <ExclamationCircleIcon
+                aria-hidden="true"
+                className="h-5 w-5 text-red-500"
+              />
+            </div>
+          )}
         </div>
+        <button
+          onClick={() => handleUndo("storyFragmentSlug")}
+          className="disabled:hidden ml-2"
+          disabled={$storyFragmentSlug[id]?.history.length === 0}
+        >
+          <ChevronDoubleLeftIcon
+            className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
+            title="Undo"
+          />
+        </button>
       </div>
       {(isEditing.storyFragmentSlug || $uncleanData[id]?.storyFragmentSlug) && (
         <ul className="text-black bg-mygreen/20 rounded mt-2 font-lg flex flex-wrap px-4 py-2">

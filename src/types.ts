@@ -381,6 +381,13 @@ export interface BeliefDatum {
   [key: string]: string | string[];
 }
 
+export interface DatumPayload {
+  files: TursoFileNode[];
+  tractstack: TractStackDatum[];
+  menus: MenuDatum[];
+  resources: ResourceDatum[];
+}
+
 export type GraphRelationshipDatum = {
   from?: number;
   to?: number;
@@ -412,6 +419,7 @@ export interface ImpressionDatum {
 }
 
 export interface MenuDatum {
+  id: string;
   title: string;
   theme: string;
   optionsPayload: MenuLink[];

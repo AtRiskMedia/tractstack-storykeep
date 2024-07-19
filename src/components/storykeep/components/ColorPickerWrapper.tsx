@@ -21,7 +21,7 @@ const ColorPickerWrapper = ({
     return (
       <div
         id={id}
-        style={{ backgroundColor: defaultColor }} // Use inline style for hex color
+        style={{ backgroundColor: defaultColor }}
         className="border border-dotted border-1 border-black h-8 w-24 cursor-pointer"
       ></div>
     );

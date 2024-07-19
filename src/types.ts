@@ -6,11 +6,29 @@ export type ToolMode = "insert" | "text" | "styles" | "settings" | "eraser";
 export type StoreKey =
   | "storyFragmentTitle"
   | "storyFragmentSlug"
-  | "storyFragmentTailwindBgColour"
+  | "storyFragmentTractStackId"
   | "storyFragmentMenuId"
-  | "storyFragmentSocialImagePath";
-// Add other stores here
-//
+  | "storyFragmentPaneIds"
+  | "storyFragmentSocialImagePath"
+  | "storyFragmentTailwindBgColour"
+  | "paneTitle"
+  | "paneSlug"
+  | "paneMarkdownBody"
+  | "paneIsContextPane"
+  | "paneIsHiddenPane"
+  | "paneHasOverflowHidden"
+  | "paneHasMaxHScreen"
+  | "paneHeightOffsetDesktop"
+  | "paneHeightOffsetTablet"
+  | "paneHeightOffsetMobile"
+  | "paneHeightRatioDesktop"
+  | "paneHeightRatioTablet"
+  | "paneHeightRatioMobile"
+  | "paneFiles"
+  | "paneCodeHook"
+  | "paneImpression"
+  | "paneHeldBeliefs"
+  | "paneWithheldBeliefs";
 
 export type ToolAddMode = (typeof toolAddModes)[number];
 

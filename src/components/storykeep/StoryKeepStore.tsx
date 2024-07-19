@@ -36,7 +36,6 @@ import {
   uncleanDataStore,
   temporaryErrorsStore,
 } from "../../store/storykeep";
-import { storeMap, validationFunctions } from "../../utils/storykeep";
 import type {
   StoreKey,
   StoryFragmentDatum,
@@ -68,79 +67,165 @@ export const StoryKeepStore = (props: {
           ...storyFragmentInit.get(),
           [fragment.id]: { init: true },
         });
-        storyFragmentTitle.set({
-          ...storyFragmentTitle.get(),
-          [fragment.id]: createFieldWithHistory(fragment.title),
-        });
-        storyFragmentSlug.set({
-          ...storyFragmentSlug.get(),
-          [fragment.id]: createFieldWithHistory(fragment.slug),
-        });
-        storyFragmentTractStackId.set({
-          ...storyFragmentTractStackId.get(),
-          [fragment.id]: createFieldWithHistory(fragment.tractStackId),
-        });
-        storyFragmentMenuId.set({
-          ...storyFragmentMenuId.get(),
-          [fragment.id]: createFieldWithHistory(fragment.menuId || ``),
-        });
-        storyFragmentPaneIds.set({
-          ...storyFragmentPaneIds.get(),
-          [fragment.id]: createFieldWithHistory(
-            fragment.panesPayload.map((payload: PaneDatum) => payload.id)
-          ),
-        });
-        storyFragmentSocialImagePath.set({
-          ...storyFragmentSocialImagePath.get(),
-          [fragment.id]: createFieldWithHistory(fragment.socialImagePath || ``),
-        });
-        storyFragmentTailwindBgColour.set({
-          ...storyFragmentTailwindBgColour.get(),
-          [fragment.id]: createFieldWithHistory(
-            fragment.tailwindBgColour || ``
-          ),
+
+        // Initialize StoryFragment stores
+        const storyFragmentStores = [
+          { store: storyFragmentTitle, value: fragment.title },
+          { store: storyFragmentSlug, value: fragment.slug },
+          { store: storyFragmentTractStackId, value: fragment.tractStackId },
+          { store: storyFragmentMenuId, value: fragment.menuId || `` },
+          {
+            store: storyFragmentPaneIds,
+            value: fragment.panesPayload.map(
+              (payload: PaneDatum) => payload.id
+            ),
+          },
+          {
+            store: storyFragmentSocialImagePath,
+            value: fragment.socialImagePath || ``,
+          },
+          {
+            store: storyFragmentTailwindBgColour,
+            value: fragment.tailwindBgColour || ``,
+          },
+        ];
+
+        storyFragmentStores.forEach(({ store, value }) => {
+          store.set({
+            ...store.get(),
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+            [fragment.id]: createFieldWithHistory(value as any),
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+          } as any);
         });
 
-        // Initialize unsavedChanges and uncleanData for this storyFragment
-        const emptyStoryFragment = {
-          storyFragmentTitle: false,
-          storyFragmentSlug: false,
-          storyFragmentTailwindBgColour: false,
-          storyFragmentSocialImagePath: false,
-          storyFragmentMenuId: false,
-        };
-        const initialUnsavedChanges: Record<StoreKey, boolean> =
-          emptyStoryFragment;
-        const initialUncleanData: Record<StoreKey, boolean> =
-          emptyStoryFragment;
-        (Object.keys(storeMap) as StoreKey[]).forEach(storeKey => {
-          const store = storeMap[storeKey];
-          if (store) {
-            const field = store.get()[storyfragment.id];
-            const validationFunction = validationFunctions[storeKey];
-            if (
-              (field && field.current.length === 0) ||
-              (field &&
-                validationFunction &&
-                !validationFunction(field.current))
-            )
-              initialUncleanData[storeKey] = true;
-            else initialUncleanData[storeKey] = false;
-            initialUnsavedChanges[storeKey] = field
-              ? field.current !== field.original
-              : false;
-          }
-        });
-        unsavedChangesStore.setKey(storyfragment.id, initialUnsavedChanges);
-        uncleanDataStore.setKey(storyfragment.id, initialUncleanData);
-        temporaryErrorsStore.setKey(storyfragment.id, emptyStoryFragment);
+        // Initialize unsavedChanges, uncleanData, and temporaryErrors for StoryFragment
+        const storyFragmentKeys: StoreKey[] = [
+          "storyFragmentTitle",
+          "storyFragmentSlug",
+          "storyFragmentTractStackId",
+          "storyFragmentMenuId",
+          "storyFragmentPaneIds",
+          "storyFragmentSocialImagePath",
+          "storyFragmentTailwindBgColour",
+        ];
+        const emptyStoryFragment = storyFragmentKeys.reduce(
+          (acc, key) => ({ ...acc, [key]: false }),
+          {} as Record<StoreKey, boolean>
+        );
 
+        unsavedChangesStore.setKey(fragment.id, emptyStoryFragment);
+        uncleanDataStore.setKey(fragment.id, emptyStoryFragment);
+        temporaryErrorsStore.setKey(fragment.id, emptyStoryFragment);
+
+        // Process Panes
         fragment.panesPayload.forEach((payload: PaneDatum) => {
           if (!paneInit.get()[payload.id]?.init) {
             paneInit.set({
               ...paneInit.get(),
               [payload.id]: { init: true },
             });
+
+            // Initialize Pane stores
+            const paneStores = [
+              { store: paneTitle, value: payload.title },
+              { store: paneSlug, value: payload.slug },
+              { store: paneMarkdownBody, value: payload.markdown.body || `` },
+              { store: paneIsContextPane, value: payload.isContextPane },
+              {
+                store: paneHeightOffsetDesktop,
+                value: payload.heightOffsetDesktop,
+              },
+              {
+                store: paneHeightOffsetMobile,
+                value: payload.heightOffsetTablet,
+              },
+              {
+                store: paneHeightOffsetTablet,
+                value: payload.heightOffsetMobile,
+              },
+              {
+                store: paneHeightRatioDesktop,
+                value: payload.heightRatioDesktop,
+              },
+              {
+                store: paneHeightRatioMobile,
+                value: payload.heightRatioTablet,
+              },
+              {
+                store: paneHeightRatioTablet,
+                value: payload.heightRatioMobile,
+              },
+              {
+                store: paneIsHiddenPane,
+                value: payload.optionsPayload.hiddenPane || false,
+              },
+              {
+                store: paneHasOverflowHidden,
+                value: payload.optionsPayload.overflowHidden || false,
+              },
+              {
+                store: paneHasMaxHScreen,
+                value: payload.optionsPayload.maxHScreen || false,
+              },
+            ];
+
+            paneStores.forEach(({ store, value }) => {
+              store.set({
+                ...store.get(),
+                /* eslint-disable @typescript-eslint/no-explicit-any */
+                [payload.id]: createFieldWithHistory(value as any),
+                /* eslint-disable @typescript-eslint/no-explicit-any */
+              } as any);
+            });
+
+            // Initialize optional Pane stores
+            if (payload?.optionsPayload?.codeHook) {
+              paneCodeHook.set({
+                ...paneCodeHook.get(),
+                [payload.id]: createFieldWithHistory(
+                  payload.optionsPayload.codeHook
+                ),
+              });
+            }
+
+            if (
+              typeof payload?.optionsPayload?.impressions?.at(0) !== `undefined`
+            ) {
+              paneImpression.set({
+                ...paneImpression.get(),
+                [payload.id]: createFieldWithHistory(
+                  payload.optionsPayload.impressions.at(0) as ImpressionDatum
+                ),
+              });
+            }
+
+            if (payload?.optionsPayload?.heldBeliefs?.length) {
+              paneHeldBeliefs.set({
+                ...paneHeldBeliefs.get(),
+                [payload.id]: createFieldWithHistory(
+                  payload.optionsPayload.heldBeliefs
+                ),
+              });
+            }
+
+            if (payload?.optionsPayload?.withheldBeliefs?.length) {
+              paneWithheldBeliefs.set({
+                ...paneWithheldBeliefs.get(),
+                [payload.id]: createFieldWithHistory(
+                  payload.optionsPayload.withheldBeliefs
+                ),
+              });
+            }
+
+            if (payload?.files) {
+              paneFiles.set({
+                ...paneFiles.get(),
+                [payload.id]: createFieldWithHistory(payload.files),
+              });
+            }
+
+            // Process PaneFragments
             const thisPaneFragmentIds =
               payload.optionsPayload?.paneFragmentsPayload?.map(
                 (
@@ -175,103 +260,40 @@ export const StoryKeepStore = (props: {
                 }
               ) || [];
 
-            paneTitle.set({
-              ...paneTitle.get(),
-              [payload.id]: createFieldWithHistory(payload.title),
-            });
-            paneSlug.set({
-              ...paneSlug.get(),
-              [payload.id]: createFieldWithHistory(payload.slug),
-            });
-            paneMarkdownBody.set({
-              ...paneMarkdownBody.get(),
-              [payload.id]: createFieldWithHistory(payload.markdown.body || ``),
-            });
-            paneIsContextPane.set({
-              ...paneIsContextPane.get(),
-              [payload.id]: createFieldWithHistory(payload.isContextPane),
-            });
             paneFragmentIds.set({
               ...paneFragmentIds.get(),
               [payload.id]: createFieldWithHistory(thisPaneFragmentIds),
             });
-            paneHeightOffsetDesktop.set({
-              ...paneHeightOffsetDesktop.get(),
-              [payload.id]: createFieldWithHistory(payload.heightOffsetDesktop),
-            });
-            paneHeightOffsetMobile.set({
-              ...paneHeightOffsetMobile.get(),
-              [payload.id]: createFieldWithHistory(payload.heightOffsetTablet),
-            });
-            paneHeightOffsetTablet.set({
-              ...paneHeightOffsetTablet.get(),
-              [payload.id]: createFieldWithHistory(payload.heightOffsetMobile),
-            });
-            paneHeightRatioDesktop.set({
-              ...paneHeightRatioDesktop.get(),
-              [payload.id]: createFieldWithHistory(payload.heightRatioDesktop),
-            });
-            paneHeightRatioMobile.set({
-              ...paneHeightRatioMobile.get(),
-              [payload.id]: createFieldWithHistory(payload.heightRatioTablet),
-            });
-            paneHeightRatioTablet.set({
-              ...paneHeightRatioTablet.get(),
-              [payload.id]: createFieldWithHistory(payload.heightRatioMobile),
-            });
-            paneIsHiddenPane.set({
-              ...paneIsHiddenPane.get(),
-              [payload.id]: createFieldWithHistory(
-                payload.optionsPayload.hiddenPane || false
-              ),
-            });
-            paneHasOverflowHidden.set({
-              ...paneHasOverflowHidden.get(),
-              [payload.id]: createFieldWithHistory(
-                payload.optionsPayload.overflowHidden || false
-              ),
-            });
-            paneHasMaxHScreen.set({
-              ...paneHasMaxHScreen.get(),
-              [payload.id]: createFieldWithHistory(
-                payload.optionsPayload.maxHScreen || false
-              ),
-            });
-            if (payload?.optionsPayload?.codeHook)
-              paneCodeHook.set({
-                ...paneCodeHook.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.codeHook
-                ),
-              });
-            if (
-              typeof payload?.optionsPayload?.impressions?.at(0) !== `undefined`
-            )
-              paneImpression.set({
-                ...paneImpression.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.impressions.at(0) as ImpressionDatum
-                ),
-              });
-            if (payload?.optionsPayload?.heldBeliefs?.length)
-              paneHeldBeliefs.set({
-                ...paneHeldBeliefs.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.heldBeliefs
-                ),
-              });
-            if (payload?.optionsPayload?.withheldBeliefs?.length)
-              paneWithheldBeliefs.set({
-                ...paneWithheldBeliefs.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.withheldBeliefs
-                ),
-              });
-            if (payload?.files)
-              paneFiles.set({
-                ...paneFiles.get(),
-                [payload.id]: createFieldWithHistory(payload.files),
-              });
+
+            // Initialize unsavedChanges, uncleanData, and temporaryErrors for Pane
+            const paneKeys: StoreKey[] = [
+              "paneTitle",
+              "paneSlug",
+              "paneMarkdownBody",
+              "paneIsContextPane",
+              "paneIsHiddenPane",
+              "paneHasOverflowHidden",
+              "paneHasMaxHScreen",
+              "paneHeightOffsetDesktop",
+              "paneHeightOffsetTablet",
+              "paneHeightOffsetMobile",
+              "paneHeightRatioDesktop",
+              "paneHeightRatioTablet",
+              "paneHeightRatioMobile",
+              "paneFiles",
+              "paneCodeHook",
+              "paneImpression",
+              "paneHeldBeliefs",
+              "paneWithheldBeliefs",
+            ];
+            const emptyPane = paneKeys.reduce(
+              (acc, key) => ({ ...acc, [key]: false }),
+              {} as Record<StoreKey, boolean>
+            );
+
+            unsavedChangesStore.setKey(payload.id, emptyPane);
+            uncleanDataStore.setKey(payload.id, emptyPane);
+            temporaryErrorsStore.setKey(payload.id, emptyPane);
           }
         });
       }

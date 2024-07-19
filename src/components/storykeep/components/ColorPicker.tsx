@@ -1,8 +1,9 @@
-import { useRef, useEffect } from "react";
-import Picker from "vanilla-picker";
+import { useState, useEffect, useCallback, } from "react";
+import { HexColorPicker } from "react-colorful";
 import tinycolor from "tinycolor2";
 import { tailwindColors } from "../../../assets/tailwindColors";
 import { debounce } from "../../../utils/helpers";
+import type { CSSProperties } from "react";
 
 export interface ColorPickerProps {
   id: string;
@@ -46,41 +47,60 @@ const findClosestTailwindColor = (color: string): ClosestColor | null => {
   return closestColor;
 };
 
-const ColorPicker = ({ defaultColor, onColorChange }: ColorPickerProps) => {
-  const divRef = useRef<HTMLDivElement>(null);
-  const pickerRef = useRef<Picker | null>(null);
+const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
+  const [displayColorPicker, setDisplayColorPicker] = useState(false);
+  const [color, setColor] = useState(defaultColor);
 
   useEffect(() => {
-    if (divRef.current && !pickerRef.current) {
-      pickerRef.current = new Picker({
-        parent: divRef.current,
-        color: defaultColor,
-        popup: "bottom",
-        alpha: false,
-        onDone: debounce(color => {
-          const closestColor = findClosestTailwindColor(color.hex);
-          if (closestColor) {
-            onColorChange(`${closestColor.name}-${closestColor.shade}`);
-          }
-        }, 300),
-      });
-    }
+    setColor(defaultColor);
+  }, [defaultColor]);
 
-    return () => {
-      if (pickerRef.current) {
-        pickerRef.current.destroy();
-        pickerRef.current = null;
+  const handleClick = useCallback(() => {
+    setDisplayColorPicker(prev => !prev);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setDisplayColorPicker(false);
+  }, []);
+
+  const handleColorChange = useCallback(
+    debounce((newColor: string) => {
+      setColor(newColor);
+      const closestColor = findClosestTailwindColor(newColor);
+      if (closestColor) {
+        onColorChange(`${closestColor.name}-${closestColor.shade}`);
       }
-    };
-  }, [onColorChange, defaultColor]);
+    }, 300),
+    [onColorChange]
+  );
+
+  const popover: CSSProperties = {
+    position: "absolute",
+    zIndex: 2,
+  };
+  const cover: CSSProperties = {
+    position: "fixed",
+    top: "0px",
+    right: "0px",
+    bottom: "0px",
+    left: "0px",
+  };
 
   return (
-    <div
-      ref={divRef}
-      style={{ backgroundColor: defaultColor }} // Use inline style for hex color
-      className="border border-dotted border-1 border-black h-10 w-24 cursor-pointer"
-      onClick={() => pickerRef.current?.show()}
-    />
+    <div>
+      <div
+        id={id}
+        style={{ backgroundColor: color }}
+        className="border border-dotted border-1 border-black h-10 w-24 cursor-pointer"
+        onClick={handleClick}
+      />
+      {displayColorPicker ? (
+        <div style={popover}>
+          <div style={cover} onClick={handleClose} />
+          <HexColorPicker color={color} onChange={handleColorChange} />
+        </div>
+      ) : null}
+    </div>
   );
 };
 

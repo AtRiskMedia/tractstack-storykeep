@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useStore } from "@nanostores/react";
 import { storyFragmentTailwindBgColour } from "../../../store/storykeep";
@@ -20,10 +20,13 @@ const StoryFragmentTailwindBgColour = ({
   const $storyFragmentTailwindBgColour = useStore(
     storyFragmentTailwindBgColour
   );
+
   const [localValue, setLocalValue] = useState(
     $storyFragmentTailwindBgColour[id]?.current || ""
   );
+
   const hexColor = useMemo(() => tailwindToHex(localValue), [localValue]);
+
   const debouncedUpdateField = useRef(
     debounce((newValue: string) => {
       updateStoreField("storyFragmentTailwindBgColour", newValue);
@@ -34,35 +37,36 @@ const StoryFragmentTailwindBgColour = ({
     setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
   }, [$storyFragmentTailwindBgColour[id]?.current]);
 
-  function handleChange(newColor: string) {
-    setLocalValue(newColor);
-    debouncedUpdateField(`bg-${newColor}`);
-  }
+  const handleChange = useCallback(
+    (newColor: string) => {
+      setLocalValue(newColor);
+      debouncedUpdateField(`bg-${newColor}`);
+    },
+    [debouncedUpdateField]
+  );
 
-  function handleUndoClick() {
+  const handleUndoCallback = useCallback(() => {
     handleUndo("storyFragmentTailwindBgColour");
     setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
-  }
+  }, [handleUndo, $storyFragmentTailwindBgColour, id]);
 
   return (
-    <div className="flex items-center space-x-4 py-1.5">
+    <div className="flex items-center space-x-4 space-y-2">
       <span
         id="storyFragmentTailwindBgColour-label"
-        className="flex items-center text-md text-mydarkgrey flex-shrink-0"
+        className="text-md leading-6 text-mydarkgrey flex-shrink-0"
       >
         <span className="hidden md:inline-block">Tailwind</span>
         {` `}
         Bg Color
       </span>
-      <div className="flex-grow">
-        <ColorPickerWrapper
-          id="storyFragmentTailwindBgColour"
-          defaultColor={hexColor}
-          onColorChange={handleChange}
-        />
-      </div>
+      <ColorPickerWrapper
+        id="storyFragmentTailwindBgColour"
+        defaultColor={hexColor}
+        onColorChange={handleChange}
+      />
       <button
-        onClick={handleUndoClick}
+        onClick={handleUndoCallback}
         className="disabled:hidden ml-2"
         disabled={$storyFragmentTailwindBgColour[id]?.history.length === 0}
       >

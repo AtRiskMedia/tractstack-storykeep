@@ -35,21 +35,39 @@ export const storeMap: StoreMapType = {
   // Add other stores here
 };
 
-export const validationFunctions: Partial<
+export const preValidationFunctions: Partial<
   Record<StoreKey, ValidationFunction>
 > = {
-  // temporaryErrors will catch length === 0
   storyFragmentTailwindBgColour: (value: string) => value.length <= 20,
   storyFragmentTitle: (value: string) => value.length <= 80,
   storyFragmentSlug: (value: string) =>
     value.length === 0 ||
     (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
   storyFragmentSocialImagePath: (value: string) =>
-    value.length === 0 ||
-    (value.length <= 80 && /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?$/.test(value)),
+    value.length <= 80 && /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?$/.test(value),
   storyFragmentMenuId: (value: string) => value.length <= 32,
-  // Add more validation functions for other fields
-  //
+  // Add more pre-validation functions for other fields as needed
+};
+
+export const validationFunctions: Partial<
+  Record<StoreKey, ValidationFunction>
+> = {
+  storyFragmentTailwindBgColour: (value: string) =>
+    value.length > 0 && value.length <= 20,
+  storyFragmentTitle: (value: string) => value.length > 0 && value.length <= 80,
+  storyFragmentSlug: (value: string) =>
+    (value.length > 0 &&
+      value.length <= 50 &&
+      /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)) ||
+    value.length === 0,
+  storyFragmentSocialImagePath: (value: string) =>
+    (value.length > 0 &&
+      value.length <= 80 &&
+      /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?$/.test(value)) ||
+    value.length === 0,
+  storyFragmentMenuId: (value: string) =>
+    value.length > 0 && value.length <= 32,
+  // Add more validation functions for other fields as needed
 };
 
 const initializeLastUpdateTime = (
@@ -105,7 +123,7 @@ export const useStoryKeepUtils = (
           ...(temporaryErrorsStore.get()[id] || {}),
           [storeKey]: false,
         });
-      }, 2000);
+      }, 5000);
     },
     [id]
   );
@@ -133,7 +151,7 @@ export const useStoryKeepUtils = (
   };
 
   const isValidValue = (storeKey: StoreKey, value: string): boolean => {
-    const validationFunction = validationFunctions[storeKey];
+    const validationFunction = preValidationFunctions[storeKey];
     return !validationFunction || validationFunction(value);
   };
 
@@ -145,7 +163,6 @@ export const useStoryKeepUtils = (
     const timeSinceLastUpdate =
       now - (lastUpdateTimeRef.current[storeKey] || 0);
     const newHistory = [...currentField.history];
-
     if (newHistory.length < MAX_HISTORY_LENGTH && timeSinceLastUpdate > 4000) {
       newHistory.unshift({ value: currentField.current, timestamp: now });
       if (newHistory.length > MAX_HISTORY_LENGTH) {
@@ -224,10 +241,14 @@ export const useStoryKeepUtils = (
         const [lastEntry, ...newHistory] = currentField.history;
 
         const validationFunction = validationFunctions[storeKey];
-        if (validationFunction && !validationFunction(lastEntry.value)) {
+        const preValidationFunction = preValidationFunctions[storeKey];
+        if (preValidationFunction && !preValidationFunction(lastEntry.value)) {
           setTemporaryError(storeKey);
           return;
-        }
+        } else console.log(1);
+        if (validationFunction && !validationFunction(lastEntry.value)) {
+          setTemporaryError(storeKey);
+        } else console.log(2);
 
         store.set({
           ...currentStoreValue,

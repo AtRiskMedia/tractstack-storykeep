@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import tinycolor from "tinycolor2";
 import { tailwindColors } from "../../../assets/tailwindColors";
@@ -50,9 +50,11 @@ const findClosestTailwindColor = (color: string): ClosestColor | null => {
 const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [color, setColor] = useState(defaultColor);
+  const lastSelectedColor = useRef(defaultColor);
 
   useEffect(() => {
     setColor(defaultColor);
+    lastSelectedColor.current = defaultColor;
   }, [defaultColor]);
 
   const handleClick = useCallback(() => {
@@ -61,17 +63,34 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
 
   const handleClose = useCallback(() => {
     setDisplayColorPicker(false);
-  }, []);
+    // Apply the last selected color when closing without choosing
+    if (color !== lastSelectedColor.current) {
+      setColor(lastSelectedColor.current);
+      const closestColor = findClosestTailwindColor(lastSelectedColor.current);
+      if (closestColor) {
+        onColorChange(`${closestColor.name}-${closestColor.shade}`);
+      }
+    }
+  }, [color, onColorChange]);
 
   const handleColorChange = useCallback(
-    debounce((newColor: string) => {
+    (newColor: string) => {
       setColor(newColor);
+      lastSelectedColor.current = newColor;
       const closestColor = findClosestTailwindColor(newColor);
       if (closestColor) {
         onColorChange(`${closestColor.name}-${closestColor.shade}`);
       }
-    }, 300),
+    },
     [onColorChange]
+  );
+
+  const debouncedHandleColorChange = useCallback(
+    debounce((newColor: string) => {
+      handleColorChange(newColor);
+      setDisplayColorPicker(false);
+    }, 300),
+    [handleColorChange]
   );
 
   const popover: CSSProperties = {
@@ -97,7 +116,7 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
       {displayColorPicker ? (
         <div style={popover}>
           <div style={cover} onClick={handleClose} />
-          <HexColorPicker color={color} onChange={handleColorChange} />
+          <HexColorPicker color={color} onChange={debouncedHandleColorChange} />
         </div>
       ) : null}
     </div>

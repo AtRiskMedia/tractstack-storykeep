@@ -26,7 +26,7 @@ import type {
   HistoryEntry,
 } from "../types";
 
-export const storeMap: StoreMapType = {
+const storeMap: StoreMapType = {
   storyFragmentTitle: storyFragmentTitle,
   storyFragmentSlug: storyFragmentSlug,
   storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
@@ -35,36 +35,31 @@ export const storeMap: StoreMapType = {
   // Add other stores here
 };
 
-export const preValidationFunctions: Partial<
-  Record<StoreKey, ValidationFunction>
-> = {
+const preValidationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   storyFragmentTailwindBgColour: (value: string) => value.length <= 20,
   storyFragmentTitle: (value: string) => value.length <= 80,
   storyFragmentSlug: (value: string) =>
-    value.length === 0 ||
-    (value.length <= 50 && /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)),
+    value.length === 0 || (value.length <= 50 && /^[a-z0-9-]*$/.test(value)),
   storyFragmentSocialImagePath: (value: string) =>
-    value.length <= 80 && /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?$/.test(value),
+    value.length <= 80 &&
+    /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?[\w-]*\.?(?:png|jpg)?$/.test(value),
   storyFragmentMenuId: (value: string) => value.length <= 32,
   // Add more pre-validation functions for other fields as needed
 };
 
-export const validationFunctions: Partial<
-  Record<StoreKey, ValidationFunction>
-> = {
+const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   storyFragmentTailwindBgColour: (value: string) =>
     value.length > 0 && value.length <= 20,
   storyFragmentTitle: (value: string) => value.length > 0 && value.length <= 80,
   storyFragmentSlug: (value: string) =>
-    (value.length > 0 &&
-      value.length <= 50 &&
-      /^[a-z](?:[a-z0-9-]{0,49})?$/.test(value)) ||
-    value.length === 0,
+    value.length > 0 &&
+    value.length <= 50 &&
+    /^[a-z](?:[a-z0-9-]*[a-z0-9])?$/.test(value),
   storyFragmentSocialImagePath: (value: string) =>
+    value.length === 0 ||
     (value.length > 0 &&
       value.length <= 80 &&
-      /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?$/.test(value)) ||
-    value.length === 0,
+      /^\/?([\w-.]+(?:\/[\w-.]+)*\/)?[\w-]+\.(?:png|jpg)$/.test(value)),
   storyFragmentMenuId: (value: string) =>
     value.length > 0 && value.length <= 32,
   // Add more validation functions for other fields as needed
@@ -82,11 +77,7 @@ const initializeLastUpdateTime = (
   );
 };
 
-export const useStoryKeepUtils = (
-  id: string,
-  storeMap: StoreMapType,
-  validationFunctions: Partial<Record<StoreKey, ValidationFunction>>
-) => {
+export const useStoryKeepUtils = (id: string) => {
   const [isEditing, setIsEditing] = useState<
     Partial<Record<StoreKey, boolean>>
   >({});
@@ -132,26 +123,53 @@ export const useStoryKeepUtils = (
     const store = storeMap[storeKey];
     if (!store) return false;
 
-    if (!isValidValue(storeKey, newValue)) {
+    const isValid = isValidValue(storeKey, newValue);
+    const isPreValid = isPreValidValue(storeKey, newValue);
+    if (!isPreValid) {
+      // don't save to undo if preValid fails
+      // contentEditable also rejects when return false
       setTemporaryError(storeKey);
       return false;
+    }
+    if (!isValid || !isPreValidValue) {
+      uncleanDataStore.setKey(id, {
+        ...(uncleanDataStore.get()[id] || {}),
+        [storeKey]: true,
+      });
+    } else {
+      uncleanDataStore.setKey(id, {
+        ...(uncleanDataStore.get()[id] || {}),
+        [storeKey]: false,
+      });
     }
 
     const currentStoreValue = store.get();
     const currentField = currentStoreValue[id];
-    if (!currentField || newValue === currentField.current) return false;
+    if (currentField && newValue !== currentField.current && isPreValid) {
+      const now = Date.now();
+      const newHistory = updateHistory(storeKey, currentField, now);
+      const newField = createNewField(currentField, newValue, newHistory);
 
-    const now = Date.now();
-    const newHistory = updateHistory(storeKey, currentField, now);
-    const newField = createNewField(currentField, newValue, newHistory);
+      store.set({
+        ...currentStoreValue,
+        [id]: newField,
+      });
 
-    updateStores(store, storeKey, currentStoreValue, newField, newValue);
-
+      const isUnsaved = newValue !== newField.original;
+      unsavedChangesStore.setKey(id, {
+        ...(unsavedChangesStore.get()[id] || {}),
+        [storeKey]: isUnsaved,
+      });
+    }
     return true;
   };
 
+  const isPreValidValue = (storeKey: StoreKey, value: string): boolean => {
+    const preValidationFunction = preValidationFunctions[storeKey];
+    return !preValidationFunction || preValidationFunction(value);
+  };
   const isValidValue = (storeKey: StoreKey, value: string): boolean => {
-    const validationFunction = preValidationFunctions[storeKey];
+    const validationFunction = validationFunctions[storeKey];
     return !validationFunction || validationFunction(value);
   };
 
@@ -163,14 +181,14 @@ export const useStoryKeepUtils = (
     const timeSinceLastUpdate =
       now - (lastUpdateTimeRef.current[storeKey] || 0);
     const newHistory = [...currentField.history];
-    if (newHistory.length < MAX_HISTORY_LENGTH && timeSinceLastUpdate > 4000) {
+    if (timeSinceLastUpdate > 4000) {
       newHistory.unshift({ value: currentField.current, timestamp: now });
       if (newHistory.length > MAX_HISTORY_LENGTH) {
-        newHistory.splice(1, 1);
+        // Remove the second oldest entry, not the first one
+        newHistory.splice(-2, 1);
       }
       lastUpdateTimeRef.current[storeKey] = now;
     }
-
     return newHistory;
   };
 
@@ -184,52 +202,6 @@ export const useStoryKeepUtils = (
     history: newHistory,
   });
 
-  const updateStores = (
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    store: any,
-    storeKey: StoreKey,
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    currentStoreValue: any,
-    newField: FieldWithHistory<string>,
-    newValue: string
-  ) => {
-    updateUncleanDataStore(storeKey, newValue);
-    updateMainStore(store, currentStoreValue, newField);
-    updateUnsavedChangesStore(storeKey, newValue, newField.original);
-  };
-
-  const updateUncleanDataStore = (storeKey: StoreKey, newValue: string) => {
-    uncleanDataStore.setKey(id, {
-      ...(uncleanDataStore.get()[id] || {}),
-      [storeKey]: newValue.length === 0,
-    });
-  };
-
-  const updateMainStore = (
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    store: any,
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    currentStoreValue: any,
-    newField: FieldWithHistory<string>
-  ) => {
-    store.set({
-      ...currentStoreValue,
-      [id]: newField,
-    });
-  };
-
-  const updateUnsavedChangesStore = (
-    storeKey: StoreKey,
-    newValue: string,
-    originalValue: string
-  ) => {
-    const isUnsaved = newValue !== originalValue;
-    unsavedChangesStore.setKey(id, {
-      ...(unsavedChangesStore.get()[id] || {}),
-      [storeKey]: isUnsaved,
-    });
-  };
-
   const handleUndo = useCallback(
     (storeKey: StoreKey) => {
       const store = storeMap[storeKey];
@@ -239,17 +211,6 @@ export const useStoryKeepUtils = (
       const currentField = currentStoreValue[id];
       if (currentField && currentField.history.length > 0) {
         const [lastEntry, ...newHistory] = currentField.history;
-
-        const validationFunction = validationFunctions[storeKey];
-        const preValidationFunction = preValidationFunctions[storeKey];
-        if (preValidationFunction && !preValidationFunction(lastEntry.value)) {
-          setTemporaryError(storeKey);
-          return;
-        }
-        if (validationFunction && !validationFunction(lastEntry.value)) {
-          setTemporaryError(storeKey);
-        }
-
         store.set({
           ...currentStoreValue,
           [id]: {
@@ -259,18 +220,6 @@ export const useStoryKeepUtils = (
           },
         });
         lastUpdateTimeRef.current[storeKey] = Date.now();
-
-        const isUnsaved = lastEntry.value !== currentField.original;
-        unsavedChangesStore.setKey(id, {
-          ...(unsavedChangesStore.get()[id] || {}),
-          [storeKey]: isUnsaved,
-        });
-
-        uncleanDataStore.setKey(id, {
-          ...(uncleanDataStore.get()[id] || {}),
-          [storeKey]: false,
-        });
-
         updateStoreField(storeKey, lastEntry.value);
       }
     },

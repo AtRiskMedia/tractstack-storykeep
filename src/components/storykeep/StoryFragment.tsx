@@ -7,11 +7,7 @@ import {
 } from "../../store/storykeep";
 import { PaneWrapper } from "./PaneWrapper";
 import { classNames } from "../../utils/helpers";
-import {
-  storeMap,
-  useStoryKeepUtils,
-  validationFunctions,
-} from "../../utils/storykeep";
+import { useStoryKeepUtils } from "../../utils/storykeep";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
@@ -25,7 +21,7 @@ export const StoryFragment = (props: { id: string }) => {
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
 
   // helpers
-  const { viewport } = useStoryKeepUtils(id, storeMap, validationFunctions);
+  const { viewport } = useStoryKeepUtils(id);
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) setIsClient(true);

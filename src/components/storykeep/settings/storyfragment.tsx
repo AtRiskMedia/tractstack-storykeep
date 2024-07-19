@@ -1,13 +1,5 @@
-//import { useStore } from "@nanostores/react";
-import {
-  useStoryKeepUtils,
-  storeMap,
-  validationFunctions,
-} from "../../../utils/storykeep";
-//import {
-//  unsavedChangesStore,
-//  uncleanDataStore,
-//} from "../../../store/storykeep";
+import StoryFragmentTailwindBgColour from "../fields/StoryFragmentTailwindBgColour";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import type { DatumPayload } from "../../../types";
 
 import StoryFragmentSocialImagePath from "../fields/StoryFragmentSocialImagePath";
@@ -21,10 +13,16 @@ export const StoryFragmentSettings = (props: {
 
   // helpers
   const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
-    useStoryKeepUtils(id, storeMap, validationFunctions);
+    useStoryKeepUtils(id);
 
   return (
     <>
+      <StoryFragmentTailwindBgColour
+        id={id}
+        updateStoreField={updateStoreField}
+        handleUndo={handleUndo}
+      />
+
       <StoryFragmentMenu
         id={id}
         isEditing={isEditing}

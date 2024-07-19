@@ -6,7 +6,6 @@ import {
   storyFragmentSlug,
   storyFragmentTractStackId,
   storyFragmentMenuId,
-  storyFragmentMenu,
   storyFragmentPaneIds,
   storyFragmentSocialImagePath,
   storyFragmentTailwindBgColour,
@@ -85,11 +84,6 @@ export const StoryKeepStore = (props: {
           ...storyFragmentMenuId.get(),
           [fragment.id]: createFieldWithHistory(fragment.menuId || ``),
         });
-        if (fragment?.menuPayload)
-          storyFragmentMenu.set({
-            ...storyFragmentMenu.get(),
-            [fragment.id]: createFieldWithHistory(fragment.menuPayload),
-          });
         storyFragmentPaneIds.set({
           ...storyFragmentPaneIds.get(),
           [fragment.id]: createFieldWithHistory(

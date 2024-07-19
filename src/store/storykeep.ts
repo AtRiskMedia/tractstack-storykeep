@@ -68,8 +68,6 @@ export const storyFragmentTractStackId =
   map<Record<string, FieldWithHistory<string>>>();
 export const storyFragmentMenuId =
   map<Record<string, FieldWithHistory<string>>>();
-export const storyFragmentMenu =
-  map<Record<string, FieldWithHistory<MenuDatum>>>();
 export const storyFragmentPaneIds =
   map<Record<string, FieldWithHistory<string[]>>>();
 export const storyFragmentSocialImagePath =

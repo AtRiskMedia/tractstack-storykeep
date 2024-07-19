@@ -32,7 +32,7 @@ const StoryFragmentSlug = ({
 
   return (
     <>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 py-1.5">
         <span
           id="storyFragmentSlug-label"
           className="flex items-center text-md text-mydarkgrey flex-shrink-0"

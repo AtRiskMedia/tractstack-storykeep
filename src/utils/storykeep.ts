@@ -245,10 +245,10 @@ export const useStoryKeepUtils = (
         if (preValidationFunction && !preValidationFunction(lastEntry.value)) {
           setTemporaryError(storeKey);
           return;
-        } else console.log(1);
+        }
         if (validationFunction && !validationFunction(lastEntry.value)) {
           setTemporaryError(storeKey);
-        } else console.log(2);
+        }
 
         store.set({
           ...currentStoreValue,

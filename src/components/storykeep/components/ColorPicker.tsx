@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { HexColorPicker } from "react-colorful";
 import tinycolor from "tinycolor2";
 import { tailwindColors } from "../../../assets/tailwindColors";

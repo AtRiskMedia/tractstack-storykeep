@@ -87,11 +87,11 @@ export const paneHasOverflowHidden =
 export const paneHasMaxHScreen =
   map<Record<string, FieldWithHistory<boolean>>>();
 export const paneHeightOffsetDesktop =
-  map<Record<number, FieldWithHistory<number>>>();
+  map<Record<string, FieldWithHistory<number>>>();
 export const paneHeightOffsetTablet =
-  map<Record<number, FieldWithHistory<number>>>();
+  map<Record<string, FieldWithHistory<number>>>();
 export const paneHeightOffsetMobile =
-  map<Record<number, FieldWithHistory<number>>>();
+  map<Record<string, FieldWithHistory<number>>>();
 export const paneHeightRatioDesktop =
   map<Record<string, FieldWithHistory<string>>>();
 export const paneHeightRatioTablet =

@@ -547,11 +547,12 @@ export async function initStoryKeep() {
 
   window.addEventListener("resize", handleResize);
 
-  document.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      toggleOffEditModal();
-    }
-  });
+  // must handle inside each component other will lose track of state
+  //document.addEventListener("keydown", (event: KeyboardEvent) => {
+  //  if (event.key === "Escape") {
+  //    toggleOffEditModal();
+  //  }
+  //});
 
   // Initialize
   handleHeaderBehavior();

@@ -8,7 +8,6 @@ export const PaneWrapper = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit);
-  //const $paneTitle = useStore(paneTitle);
   const $paneCodeHook = useStore(paneCodeHook);
   const isCodeHook = typeof $paneCodeHook[id] === `object`;
 
@@ -19,7 +18,6 @@ export const PaneWrapper = (props: { id: string }) => {
   }, [id, $paneInit]);
 
   if (!isClient) return <div>Loading...</div>;
-  //console.log($paneTitle[id].current);
   if (isCodeHook) return <CodeHook id={id} />;
   return <Pane id={id} />;
 };

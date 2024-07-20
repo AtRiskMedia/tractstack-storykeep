@@ -87,8 +87,8 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             Logo
           </object>
           <h1 className="font-2xl font-bold font-action mr-auto">
-            <span className="xs:hidden md:inline-block">Welcome to your</span>{" "}
-            Story Keep
+            <span className="xs:hidden md:inline-block">your</span> amplify your
+            content
           </h1>
           <button
             type="button"

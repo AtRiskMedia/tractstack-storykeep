@@ -6,6 +6,7 @@ import { handleToggleOn, handleToggleOff } from "../../utils/storykeep";
 export const CodeHook = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const $paneInit = useStore(paneInit);
   //const $paneCodeHook = useStore(paneCodeHook);
   const $editMode = useStore(editModeStore);
@@ -16,15 +17,40 @@ export const CodeHook = (props: { id: string }) => {
     }
   }, [id, $paneInit]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.key === "Escape" &&
+        $editMode?.type === "pane" &&
+        $editMode?.mode === "settings" &&
+        $editMode.id === id
+      ) {
+        toggleOffEditModal();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [$editMode, id]);
+
+  const toggleOffEditModal = () => {
+    editModeStore.set(null);
+    handleToggleOff();
+  };
+
   const handleEditModeToggle = () => {
-    if ($editMode?.mode === `codehook` && $editMode.id === id) {
-      editModeStore.set(null);
-      handleToggleOff();
+    if (
+      $editMode?.type === "pane" &&
+      $editMode?.mode === "settings" &&
+      $editMode.id === id
+    ) {
+      toggleOffEditModal();
     } else {
       editModeStore.set({
         id,
-        mode: `codehook`,
-        type: `pane`,
+        mode: "settings",
+        type: "pane",
       });
       handleToggleOn();
     }
@@ -33,15 +59,52 @@ export const CodeHook = (props: { id: string }) => {
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <p>
-      Code Hook: {id}
-      <button
-        type="button"
-        className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+    <div
+      style={{ position: "relative" }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div>
+        {/* Placeholder content */}
+        Code Hook: {id}
+      </div>
+      <div
         onClick={handleEditModeToggle}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          cursor: "pointer",
+          backgroundColor: isHovered ? "rgba(0, 0, 0, 0.1)" : "transparent",
+          transition: "background-color 0.3s ease",
+        }}
       >
-        Settings
-      </button>
-    </p>
+        {isHovered && (
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              backgroundColor: "white",
+              padding: "10px",
+              borderRadius: "5px",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            Edit{" "}
+            <button
+              onClick={handleEditModeToggle}
+              style={{ fontWeight: "bold" }}
+            >
+              settings
+            </button>{" "}
+            on this code hook
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

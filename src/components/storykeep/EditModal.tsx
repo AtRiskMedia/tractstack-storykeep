@@ -8,6 +8,8 @@ import {
 } from "../../store/storykeep";
 import { StoryFragmentSettings } from "./settings/storyfragment";
 import { CodeHookSettings } from "./settings/codehook";
+import { PaneSettings } from "./settings/pane";
+import { handleToggleOff } from "../../utils/storykeep";
 import type { DatumPayload } from "../../types";
 
 interface EditModalProps {
@@ -46,6 +48,25 @@ export const EditModal = ({ type, payload }: EditModalProps) => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && $editMode !== null) {
+        toggleOffEditModal();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [$editMode]);
+
+  const toggleOffEditModal = () => {
+    editModeStore.set(null);
+    handleToggleOff();
+  };
+
   if (!isClient || $activeEditModal !== type) return null;
 
   return (
@@ -56,6 +77,9 @@ export const EditModal = ({ type, payload }: EditModalProps) => {
           <StoryFragmentSettings id={$editMode.id} payload={payload} />
         ) : $editMode?.type === `pane` && $editMode?.mode === `codehook` ? (
           <CodeHookSettings id={$editMode.id} payload={payload} />
+        ) : null}
+        {$editMode?.type === `pane` && $editMode?.mode === `settings` ? (
+          <PaneSettings id={$editMode.id} payload={payload} />
         ) : null}
       </div>
     </div>

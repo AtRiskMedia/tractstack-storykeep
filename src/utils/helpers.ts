@@ -25,6 +25,46 @@ export function handleResize() {
   document.documentElement.style.setProperty(`--scale`, thisScale.toString());
 }
 
+export function handleEditorResize() {
+  const previewElement = document.getElementById("storykeep-preview");
+  if (!previewElement) return;
+
+  const resizeObserver = new ResizeObserver(() => {
+    // Calculate scrollbar width
+    const scrollBarOffset =
+      window.innerWidth - document.documentElement.clientWidth;
+
+    // Get the actual width of the preview element
+    const previewWidth = previewElement.clientWidth;
+
+    // Adjust the width to account for the scrollbar
+    const adjustedWidth = previewWidth + scrollBarOffset;
+
+    let baseWidth;
+
+    // Use adjustedWidth for breakpoint checks
+    if (adjustedWidth <= 800) {
+      baseWidth = 600;
+    } else if (adjustedWidth <= 1367) {
+      baseWidth = 1080;
+    } else {
+      baseWidth = 1920;
+    }
+
+    // Use the actual previewWidth for scale calculation
+    const thisScale = previewWidth / baseWidth;
+
+    previewElement.style.setProperty(`--scale`, thisScale.toString());
+  });
+
+  resizeObserver.observe(previewElement);
+
+  // Clean up function
+  return () => {
+    resizeObserver.disconnect();
+  };
+}
+
 export function scrollToTop() {
   const button = document.querySelector("button#top");
   button?.addEventListener("click", () => {

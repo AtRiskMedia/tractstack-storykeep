@@ -6,7 +6,7 @@ import {
   storyFragmentTailwindBgColour,
 } from "../../store/storykeep";
 import { PaneWrapper } from "./PaneWrapper";
-import { classNames } from "../../utils/helpers";
+import { classNames, handleEditorResize } from "../../utils/helpers";
 import { useStoryKeepUtils } from "../../utils/storykeep";
 
 export const StoryFragment = (props: { id: string }) => {
@@ -27,11 +27,23 @@ export const StoryFragment = (props: { id: string }) => {
     if ($storyFragmentInit[id]?.init) setIsClient(true);
   }, [id, $storyFragmentInit]);
 
+  useEffect(() => {
+    // Slight delay to ensure styles are applied
+    const timerId = setTimeout(() => {
+      const cleanup = handleEditorResize();
+      return () => {
+        if (cleanup) cleanup();
+        clearTimeout(timerId);
+      };
+    }, 100);
+  }, []);
+
   if (!isClient) return <div>Loading...</div>;
 
   return (
     <div className="bg-mydarkgrey/20">
       <div
+        id="storykeep-preview"
         className={classNames(
           tailwindBgColour ? tailwindBgColour : `bg-white`,
           `overflow-hidden`,

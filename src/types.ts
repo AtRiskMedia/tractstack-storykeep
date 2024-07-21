@@ -381,6 +381,35 @@ export interface ContextPaneDatum {
   codeHookOptions: { [key: number]: string };
 }
 
+export interface BreakOptionsDatum {
+  id: string;
+  artpackMode: string;
+  styles: { fill: string };
+  shapeName: string;
+}
+
+export interface MaskOptionsDatum {
+  id: string;
+  artpackMode: string;
+  classNamesParent: string;
+  styles: {
+    backgroundImage: string;
+    backgroundSize: string;
+    WebkitMaskImage: string;
+    maskImage: string;
+    maskRepeat: string;
+    WebkitMaskSize: string;
+    maskSize: string;
+  };
+}
+
+export interface ShapeOptionsDatum {
+  id: string;
+  shapeName: string;
+  classNamesParent: string;
+  artpackMode: string | null;
+}
+
 export interface BeliefOptionDatum {
   id: number;
   slug: string;

@@ -16,38 +16,42 @@ interface Props {
     imageData: FileNode[];
     buttonData: { [key: string]: ButtonData };
   };
-  thisClassNames: any;
+  thisClassNames: { [key: string]: string | string[] };
   memory: any;
   paneId: string;
   slug: string;
   idx: number;
   outerIdx: number;
+  offset?: number;
 }
 
-const { payload, thisClassNames, paneId, slug, idx, outerIdx } = Astro.props;
+const {
+  payload,
+  thisClassNames,
+  paneId,
+  slug,
+  idx,
+  outerIdx,
+  offset = 0,
+} = Astro.props;
 
-let memory = { ...Astro.props.memory };
+const memory = { ...Astro.props.memory };
 
 const thisAst = payload.ast.at(0);
-
 const Tag = thisAst?.tagName || thisAst?.type;
 
-// if string[], use idx to select correct nth style to inject
-// must increment memory index
-if (thisAst?.tagName && typeof thisClassNames[thisAst?.tagName] === `object`) {
-  if (typeof memory[thisAst.tagName] !== `undefined`)
-    memory[thisAst.tagName] = memory[thisAst.tagName] + 1;
-  else memory[thisAst.tagName] = 0;
+if (Tag && typeof thisClassNames[Tag] === `object`) {
+  if (typeof memory[Tag] !== `undefined`) memory[Tag] = memory[Tag] + 1;
+  else memory[Tag] = offset;
 }
 const injectClassNames =
   typeof thisAst?.tagName === `undefined`
     ? ``
-    : typeof thisClassNames[thisAst?.tagName] === `string`
-      ? thisClassNames[thisAst?.tagName]
-      : typeof thisClassNames[thisAst?.tagName] !== `undefined` &&
-          typeof thisClassNames[thisAst?.tagName][memory[thisAst.tagName]] !==
-            `undefined`
-        ? thisClassNames[thisAst?.tagName][memory[thisAst.tagName]]
+    : typeof thisClassNames[Tag] === `object` &&
+        thisClassNames[Tag].length >= offset + 1
+      ? (thisClassNames[Tag][offset] as string)
+      : typeof thisClassNames[Tag] === `string`
+        ? (thisClassNames[Tag] as string)
         : ``;
 
 // applies only when Tag === `a`
@@ -75,33 +79,23 @@ const altText =
   thisAst.properties?.alt ||
   `This should be descriptive text of an image | We apologize the alt text is missing.`;
 const injectClassNamesImgWrapper =
-  thisAst.tagName &&
-  typeof thisClassNames.imgWrapper !== `undefined` &&
-  typeof thisClassNames.imgWrapper === `string`
-    ? thisClassNames.imgWrapper
-    : thisAst.tagName &&
-        typeof thisClassNames.imgWrapper !== `undefined` &&
-        typeof thisClassNames.imgWrapper === `object`
-      ? thisClassNames.imgWrapper[
-          thisAst.tagName && typeof memory.imgWrapper !== `undefined`
-            ? memory.imgWrapper + 1
-            : 0
-        ]
-      : ``;
+  typeof thisAst?.tagName === `undefined`
+    ? ``
+    : typeof thisClassNames.imgWrapper === `object` &&
+        thisClassNames.imgWrapper.length >= offset + 1
+      ? thisClassNames.imgWrapper[offset]
+      : typeof thisClassNames.imgWrapper === `string`
+        ? thisClassNames.imgWrapper
+        : ``;
 const injectClassNamesImg =
-  thisAst.tagName &&
-  typeof thisClassNames.img !== `undefined` &&
-  typeof thisClassNames.img === `string`
-    ? thisClassNames.img
-    : thisAst.tagName &&
-        typeof thisClassNames.img !== `undefined` &&
-        typeof thisClassNames.img === `object`
-      ? thisClassNames.img[
-          thisAst.tagName && typeof memory.img !== `undefined`
-            ? memory.img + 1
-            : 0
-        ]
-      : ``;
+  typeof thisAst?.tagName === `undefined`
+    ? ``
+    : typeof thisClassNames.img === `object` &&
+        thisClassNames.img.length >= offset + 1
+      ? thisClassNames.img[offset]
+      : typeof thisClassNames.img === `string`
+        ? thisClassNames.img
+        : ``;
 const thisImage = payload?.imageData?.filter(
   (image: any) => image.filename === thisAst.properties?.src
 )[0];
@@ -146,16 +140,17 @@ const value3 =
     `h5`,
     `h6`,
   ].includes(Tag) ? (
-    <Tag class={classNames(injectClassNames)}>
-      {thisAst?.children?.map((p: any) => (
+    <Tag class={injectClassNames}>
+      {thisAst?.children?.map((p: any, childIdx: number) => (
         <Astro.self
           payload={{ ...payload, ast: [p] }}
           thisClassNames={thisClassNames}
           memory={memory}
           paneId={paneId}
           slug={slug}
-          idx={idx + 1}
+          idx={idx}
           outerIdx={outerIdx}
+          offset={childIdx}
         />
       ))}
     </Tag>

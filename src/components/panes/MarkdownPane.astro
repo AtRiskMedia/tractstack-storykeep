@@ -12,7 +12,6 @@ interface Props {
 }
 
 const { payload, markdown, files, paneId, slug } = Astro.props;
-
 const hasHidden =
   payload.hiddenViewports.includes(`desktop`) ||
   payload.hiddenViewports.includes(`tablet`) ||

@@ -1,5 +1,6 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
+import { cleanHtmlAst } from "./cleanHtmlAst";
 import type { Row } from "@libsql/client";
 import type { FileDatum, PaneDatum, FileNode } from "../../types";
 
@@ -25,9 +26,8 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
       body: row.markdown_body,
       slug: `${row.slug}-markdown`,
       title: `Copy for ${row.slug}`,
-      htmlAst: toHast(fromMarkdown(row.markdown_body)),
+      htmlAst: cleanHtmlAst(toHast(fromMarkdown(row.markdown_body))),
     };
-
   if (
     typeof row?.id === `string` &&
     typeof row?.title === `string` &&

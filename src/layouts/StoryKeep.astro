@@ -97,7 +97,6 @@ const contentMap: ContentMap[] = await getContentMap();
     <script>
       import {
         scrollToTop,
-        handleResize,
         handleScroll,
         startLoadingAnimation,
         stopLoadingAnimation,
@@ -105,7 +104,6 @@ const contentMap: ContentMap[] = await getContentMap();
       } from "../utils/helpers";
       import { init } from "../utils/init";
 
-      const debouncedHandleResize = debounce(handleResize, 250);
       const debouncedHandleScroll = debounce(handleScroll, 250);
 
       // always run first load
@@ -127,13 +125,10 @@ const contentMap: ContentMap[] = await getContentMap();
         setupEventHandlers();
         init();
         handleScroll();
-        handleResize();
         scrollToTop();
-        window.addEventListener(`resize`, debouncedHandleResize);
         document.addEventListener("scroll", debouncedHandleScroll);
       });
       document.addEventListener("astro:before-preparation", () => {
-        window.removeEventListener(`resize`, debouncedHandleResize);
         document.removeEventListener("scroll", debouncedHandleScroll);
       });
     </script>

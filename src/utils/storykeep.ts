@@ -1,5 +1,4 @@
 import { useStore } from "@nanostores/react";
-import { debounce } from "./helpers";
 import { useCallback, useState, useRef } from "react";
 import {
   unsavedChangesStore,
@@ -20,7 +19,6 @@ import type {
   StoreMapType,
   FieldWithHistory,
   ValidationFunction,
-  ToggleEditModalEvent,
   ToolAddMode,
   ToolMode,
   HistoryEntry,
@@ -253,25 +251,7 @@ export const useStoryKeepUtils = (id: string) => {
   };
 };
 
-export async function initStoryKeep() {
-  interface Breakpoints {
-    xs: number;
-    md: number;
-    xl: number;
-  }
-  interface EditableElement extends HTMLElement {
-    dataset: {
-      elementId: string;
-    };
-  }
-
-  interface EditableElement extends HTMLElement {
-    dataset: {
-      elementId: string;
-    };
-  }
-
-  const mainContent = document.getElementById("main-content") as HTMLElement;
+export function initStoryKeep() {
   const websiteContent = document.getElementById(
     "website-content"
   ) as HTMLElement;
@@ -279,149 +259,92 @@ export async function initStoryKeep() {
   const editModalMobile = document.getElementById(
     "edit-modal-mobile"
   ) as HTMLElement;
-  const editableElements = document.querySelectorAll(
-    ".editable-element"
-  ) as NodeListOf<Element>;
-  const editInfo = document.getElementById("edit-info") as HTMLElement;
-  const editInfoMobile = document.getElementById(
-    "edit-info-mobile"
-  ) as HTMLElement;
   const header = document.getElementById("main-header") as HTMLElement;
 
-  const BREAKPOINTS: Breakpoints = {
-    xs: 600,
-    md: 800,
+  const BREAKPOINTS = {
     xl: 1367,
   };
   const SHORT_SCREEN_THRESHOLD = 600;
   const STICKY_HEADER_THRESHOLD = 1200;
 
   let isEditMode = false;
-  let activeElement: EditableElement | null = null;
+  let activeElement: HTMLElement | null = null;
 
   function handleHeaderBehavior(): void {
     const viewportHeight = window.innerHeight;
-    if (viewportHeight > STICKY_HEADER_THRESHOLD) {
-      header.classList.add("sticky", "top-0");
+    header.classList.toggle("sticky", viewportHeight > STICKY_HEADER_THRESHOLD);
+    header.classList.toggle("top-0", viewportHeight > STICKY_HEADER_THRESHOLD);
+    header.style.zIndex = "9000";
+  }
+
+  function adjustEditPanePosition(): void {
+    const headerHeight = header.offsetHeight;
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const isHeaderVisible = scrollTop < headerHeight;
+
+    if (isHeaderVisible) {
+      editPane.style.top = `${headerHeight - scrollTop}px`;
     } else {
-      header.classList.remove("sticky", "top-0");
+      editPane.style.top = "0";
     }
   }
 
   function handleEditModeLayout(preventHeaderScroll = false): void {
     const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
     const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
-    const headerHeight = header.offsetHeight;
-    const isHeaderSticky = header.classList.contains("sticky");
-    const hasVerticalScroll =
-      document.documentElement.scrollHeight > window.innerHeight;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
 
-    mainContent.classList.toggle("xl:pr-1/3", isEditMode && isDesktop);
+    editPane.style.zIndex = "8000";
+    editModalMobile.style.zIndex = "8000";
 
     if (isDesktop) {
-      if (isEditMode) {
-        editPane.classList.remove("invisible", "opacity-0");
-        editPane.classList.add("visible", "opacity-100", "fixed", "right-0");
-        editModalMobile.classList.add("invisible", "opacity-0");
-        editModalMobile.classList.remove("visible", "opacity-100");
-        websiteContent.classList.add("xl:w-2/3");
-        editPane.classList.add("xl:w-1/3");
-
-        // Adjust the position of the edit pane
-        editPane.style.marginTop = "0";
-
-        if (
-          isHeaderSticky ||
-          (!hasVerticalScroll && scrollTop < headerHeight)
-        ) {
-          editPane.style.top = `${headerHeight}px`;
-          editPane.style.height = `calc(100vh - ${headerHeight}px)`;
-        } else {
-          editPane.style.top = "0";
-          editPane.style.height = "100vh";
-        }
-
-        if (isShortScreen) {
-          websiteContent.classList.remove("hidden");
-          if (!preventHeaderScroll) scrollHeaderOutOfView();
-        }
-      } else {
-        editPane.classList.add("invisible", "opacity-0");
-        editPane.classList.remove("visible", "opacity-100", "fixed", "right-0");
-        websiteContent.classList.remove("xl:w-2/3");
-        editPane.classList.remove("xl:w-1/3");
-      }
+      editPane.style.transform = isEditMode
+        ? "translateX(0)"
+        : "translateX(100%)";
+      editModalMobile.style.transform = "translateY(100%)";
+      adjustEditPanePosition();
     } else {
+      editPane.style.transform = "translateX(100%)";
       if (isEditMode) {
-        editPane.classList.remove("visible", "opacity-100");
-        editPane.classList.add("invisible", "opacity-0");
-        editModalMobile.classList.remove("invisible", "opacity-0");
-        editModalMobile.classList.add("visible", "opacity-100");
         if (isShortScreen) {
           editModalMobile.style.top = "0";
-          editModalMobile.style.bottom = "0";
           editModalMobile.style.height = "100%";
-          editModalMobile.style.zIndex = "1000";
           websiteContent.classList.add("hidden");
         } else {
           editModalMobile.style.top = "auto";
-          editModalMobile.style.bottom = "0";
           editModalMobile.style.height = `${window.innerHeight / 3}px`;
-          editModalMobile.style.zIndex = "10";
           websiteContent.classList.remove("hidden");
           websiteContent.style.paddingBottom = `${window.innerHeight / 3}px`;
         }
-        if (!isHeaderSticky && !preventHeaderScroll) {
-          scrollHeaderOutOfView();
-        }
-        if (!isShortScreen) {
-          scrollElementIntoView();
-        }
+        editModalMobile.style.transform = "translateY(0)";
       } else {
-        editPane.classList.remove("visible", "opacity-100");
-        editPane.classList.add("invisible", "opacity-0");
-        editModalMobile.classList.remove("visible", "opacity-100");
-        editModalMobile.classList.add("invisible", "opacity-0");
+        editModalMobile.style.transform = "translateY(100%)";
         websiteContent.style.paddingBottom = "0";
         websiteContent.classList.remove("hidden");
       }
     }
-    handleScroll();
+
+    if (isEditMode && !preventHeaderScroll) {
+      scrollHeaderOutOfView();
+    }
+
+    if (isEditMode && activeElement) {
+      scrollElementIntoView();
+    }
   }
 
   function toggleEditMode(element: HTMLElement): void {
-    if (!(element instanceof HTMLElement)) return;
-
     if (isEditMode && element === activeElement) {
       isEditMode = false;
       activeElement = null;
-    } else if (isEditMode) {
-      activeElement = element as EditableElement;
     } else {
       isEditMode = true;
-      activeElement = element as EditableElement;
+      activeElement = element;
     }
-
-    if (isEditMode) {
-      const elementIndex = Array.from(editableElements).indexOf(element) + 1;
-      const infoText = `Editing element ${elementIndex} of ${editableElements.length}`;
-      editInfo.textContent = infoText;
-      editInfoMobile.textContent = infoText;
-      if (!header.classList.contains("sticky")) {
-        scrollHeaderOutOfView();
-      }
-    } else {
-      editInfo.textContent = "";
-      editInfoMobile.textContent = "";
-    }
-
     handleEditModeLayout();
   }
 
   function scrollElementIntoView(): void {
     if (!activeElement) return;
-
     const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
     if (isDesktop) return;
 
@@ -433,10 +356,7 @@ export async function initStoryKeep() {
     if (elementRect.bottom > viewportHeight - editModalHeight) {
       const targetScroll =
         scrollY + elementRect.bottom - (viewportHeight - editModalHeight) + 20;
-      window.scrollTo({
-        top: targetScroll,
-        behavior: "smooth",
-      });
+      window.scrollTo({ top: targetScroll, behavior: "smooth" });
     }
   }
 
@@ -444,7 +364,6 @@ export async function initStoryKeep() {
     const headerHeight = header.offsetHeight;
     const currentScrollTop =
       window.scrollY || document.documentElement.scrollTop;
-
     window.scrollTo({
       top: Math.max(currentScrollTop, headerHeight),
       behavior: "smooth",
@@ -454,25 +373,11 @@ export async function initStoryKeep() {
   function handleResize(): void {
     handleHeaderBehavior();
     handleEditModeLayout();
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    if (!isEditMode || isDesktop) {
-      websiteContent.style.paddingBottom = "0";
-    }
   }
 
   function handleScroll(): void {
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    const isHeaderSticky = header.classList.contains("sticky");
-    const headerHeight = header.offsetHeight;
-    const currentScrollTop =
-      window.scrollY || document.documentElement.scrollTop;
-
-    if (!isHeaderSticky && isEditMode && isDesktop) {
-      if (currentScrollTop < headerHeight) {
-        editPane.style.top = `${headerHeight - currentScrollTop}px`;
-      } else {
-        editPane.style.top = "0";
-      }
+    if (window.innerWidth >= BREAKPOINTS.xl) {
+      adjustEditPanePosition();
     }
   }
 
@@ -480,88 +385,59 @@ export async function initStoryKeep() {
     const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
     const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
     const hide = isDesktop || !isShortScreen;
-    if (hide && isEditMode && activeElement === element)
+    if (hide && isEditMode && activeElement === element) {
       toggleEditMode(element);
+    }
   }
 
-  // helper fns for react
-  function toggleOnEditModal(preventHeaderScroll = false): void {
+  // Event listeners for React components
+  document.addEventListener("toggle-on-edit-modal", ((event: CustomEvent) => {
+    const preventHeaderScroll = event.detail?.preventHeaderScroll || false;
+    const targetElementId = event.detail?.targetElementId;
     isEditMode = true;
+    if (targetElementId) {
+      activeElement = document.getElementById(targetElementId);
+    }
     handleEditModeLayout(preventHeaderScroll);
-  }
+  }) as EventListener);
 
-  function toggleOffEditModal(preventHeaderScroll = false): void {
+  document.addEventListener("toggle-off-edit-modal", ((event: CustomEvent) => {
+    const preventHeaderScroll = event.detail?.preventHeaderScroll || false;
     isEditMode = false;
+    activeElement = null;
     handleEditModeLayout(preventHeaderScroll);
-  }
-
-  document.addEventListener("toggle-on-edit-modal", ((event: Event) => {
-    if (event instanceof CustomEvent) {
-      const customEvent = event as unknown as ToggleEditModalEvent;
-      const preventHeaderScroll =
-        customEvent.detail?.preventHeaderScroll || false;
-      toggleOnEditModal(preventHeaderScroll);
-    }
   }) as EventListener);
-
-  document.addEventListener("toggle-off-edit-modal", ((event: Event) => {
-    if (event instanceof CustomEvent) {
-      const customEvent = event as unknown as ToggleEditModalEvent;
-      const preventHeaderScroll =
-        customEvent.detail?.preventHeaderScroll || false;
-      toggleOffEditModal(preventHeaderScroll);
-    }
-  }) as EventListener);
-
-  // add .editable-element and EditMode will auto disable if scrolled out of view
-  editableElements.forEach((element: Element) => {
-    if (element instanceof HTMLElement) {
-      element.addEventListener("click", () =>
-        toggleEditMode(element as EditableElement)
-      );
-    }
-  });
-
-  const observer = new IntersectionObserver(
-    (entries: IntersectionObserverEntry[]) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) {
-          toggleOff(entry.target as EditableElement);
-        }
-      });
-    }
-  );
-
-  editableElements.forEach((el: Element) => {
-    if (el instanceof HTMLElement) {
-      observer.observe(el);
-    }
-  });
-
-  window.addEventListener(
-    "scroll",
-    debounce(() => {
-      handleScroll();
-    }, 100)
-  );
-
-  window.addEventListener("resize", handleResize);
-
-  // must handle inside each component other will lose track of state
-  //document.addEventListener("keydown", (event: KeyboardEvent) => {
-  //  if (event.key === "Escape") {
-  //    toggleOffEditModal();
-  //  }
-  //});
 
   // Initialize
   handleHeaderBehavior();
+  window.addEventListener("resize", handleResize);
+  window.addEventListener("scroll", handleScroll);
+
+  // Set up observers for editable elements
+  const editableElements = document.querySelectorAll(".editable-element");
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) {
+        toggleOff(entry.target as HTMLElement);
+      }
+    });
+  });
+
+  editableElements.forEach(el => {
+    if (el instanceof HTMLElement) {
+      el.addEventListener("click", () => toggleEditMode(el));
+      observer.observe(el);
+    }
+  });
 }
 
-// global fn to toggle layout
-export const handleToggleOn = (preventHeaderScroll = false) => {
+// Global functions to toggle layout (updated to include targetElementId)
+export const handleToggleOn = (
+  preventHeaderScroll = false,
+  targetElementId?: string
+) => {
   const event = new CustomEvent("toggle-on-edit-modal", {
-    detail: { preventHeaderScroll },
+    detail: { preventHeaderScroll, targetElementId },
   });
   document.dispatchEvent(event);
 };

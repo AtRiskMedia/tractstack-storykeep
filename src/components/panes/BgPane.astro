@@ -2,37 +2,15 @@
 import Svg from "@components/panes/Svg.astro";
 import { classNames } from "../../utils/helpers";
 import { svgImageMask } from "../../utils/compositor/svgImageMask";
-import type { BgPaneDatum } from "../../types";
+import type {
+  BgPaneDatum,
+  BreakOptionsDatum,
+  MaskOptionsDatum,
+  ShapeOptionsDatum,
+} from "../../types";
 
 interface Props {
   payload: BgPaneDatum;
-}
-
-interface BreakOptionsDatum {
-  id: string;
-  artpackMode: string;
-  styles: { fill: string };
-  shapeName: string;
-}
-interface MaskOptionsDatum {
-  id: string;
-  artpackMode: string;
-  classNamesParent: string;
-  styles: {
-    backgroundImage: string;
-    backgroundSize: string;
-    WebkitMaskImage: string;
-    maskImage: string;
-    maskRepeat: string;
-    WebkitMaskSize: string;
-    maskSize: string;
-  };
-}
-interface ShapeOptionsDatum {
-  id: string;
-  shapeName: string;
-  classNamesParent: string;
-  artpackMode: null;
 }
 
 const { payload } = Astro.props;

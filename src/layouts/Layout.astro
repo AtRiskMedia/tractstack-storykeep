@@ -159,7 +159,7 @@ const contentMap: ContentMap[] = await getContentMap();
         setupEventHandlers();
         scrollToTop();
 
-        window.addEventListener(`resize`, debouncedHandleResize);
+        window.addEventListener(`resize`, handleResize);
         document.addEventListener("scroll", debouncedHandleScroll);
 
         const googleSiteVerification = import.meta.env
@@ -187,7 +187,7 @@ const contentMap: ContentMap[] = await getContentMap();
           eventStreamController.stop();
           eventStreamController = null;
         }
-        window.removeEventListener(`resize`, debouncedHandleResize);
+        window.removeEventListener(`resize`, handleResize);
         document.removeEventListener("scroll", debouncedHandleScroll);
       });
     </script>

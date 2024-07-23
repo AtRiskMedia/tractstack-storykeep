@@ -96,18 +96,10 @@ const contentMap: ContentMap[] = await getContentMap();
     <!-- Tract Stack Concierge -->
     <script>
       import {
-        scrollToTop,
-        handleScroll,
         startLoadingAnimation,
         stopLoadingAnimation,
-        debounce,
       } from "../utils/helpers";
       import { init } from "../utils/init";
-
-      const debouncedHandleScroll = debounce(handleScroll, 250);
-
-      // always run first load
-      //handleResize();
 
       function setupEventHandlers() {
         // Set up animation event listeners
@@ -124,12 +116,6 @@ const contentMap: ContentMap[] = await getContentMap();
       document.addEventListener("astro:page-load", () => {
         setupEventHandlers();
         init();
-        handleScroll();
-        scrollToTop();
-        document.addEventListener("scroll", debouncedHandleScroll);
-      });
-      document.addEventListener("astro:before-preparation", () => {
-        document.removeEventListener("scroll", debouncedHandleScroll);
       });
     </script>
 

@@ -126,7 +126,6 @@ const contentMap: ContentMap[] = await getContentMap();
       import { init } from "../utils/init";
       import type { EventStreamController } from "../types";
 
-      const debouncedHandleResize = debounce(handleResize, 250);
       const debouncedHandleScroll = debounce(handleScroll, 250);
 
       // always run first load

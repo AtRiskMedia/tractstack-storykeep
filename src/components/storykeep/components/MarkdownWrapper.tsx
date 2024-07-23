@@ -1,8 +1,10 @@
+import { memo } from "react";
 import MarkdownPane from "./MarkdownPane";
 import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
+import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import type {
   MarkdownDatum,
   MarkdownPaneDatum,
@@ -48,15 +50,21 @@ const MarkdownWrapper = ({
   const paneFragmentStyle = {
     gridArea: "1/1/1/1",
   };
+
   // has modal shape?
   const isModal =
     thisPayload.isModal &&
     typeof thisPayload?.optionsPayload?.modal !== `undefined`;
+
   // uses textShapeOutside
   const hasTextShapeOutside =
     thisPayload.textShapeOutsideMobile !== `none` ||
     thisPayload.textShapeOutsideTablet !== `none` ||
     thisPayload.textShapeOutsideDesktop !== `none`;
+
+  // generate markdown global lookup
+  const markdownLookup =
+    markdown?.htmlAst && generateMarkdownLookup(markdown.htmlAst);
 
   if (isModal && thisModalPayload) {
     return (
@@ -82,6 +90,7 @@ const MarkdownWrapper = ({
             modalPayload={thisModalPayload}
             paneId={paneId}
             slug={slug}
+            markdownLookup={markdownLookup}
           />
         </div>
       </div>
@@ -97,6 +106,7 @@ const MarkdownWrapper = ({
         paneHeight={paneHeight}
         paneId={paneId}
         slug={slug}
+        markdownLookup={markdownLookup}
       />
     );
   }
@@ -109,6 +119,7 @@ const MarkdownWrapper = ({
         files={files}
         paneId={paneId}
         slug={slug}
+        markdownLookup={markdownLookup}
       />
     );
   }
@@ -116,4 +127,4 @@ const MarkdownWrapper = ({
   return null;
 };
 
-export default MarkdownWrapper;
+export default memo(MarkdownWrapper);

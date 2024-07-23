@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
@@ -22,7 +22,11 @@ import {
   paneHasMaxHScreen,
   paneFiles,
 } from "../../store/storykeep";
-import { handleToggleOn, handleToggleOff } from "../../utils/storykeep";
+import {
+  isFullScreenEditModal,
+  handleToggleOn,
+  handleToggleOff,
+} from "../../utils/storykeep";
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
 import { cleanHtmlAst } from "../../utils/compositor/cleanHtmlAst";
@@ -76,6 +80,15 @@ export const Pane = (props: { id: string }) => {
   const $paneHasOverflowHidden = useStore(paneHasOverflowHidden);
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen);
   const $paneFiles = useStore(paneFiles);
+  const [paneElement, setPaneElement] = useState<HTMLDivElement | null>(null);
+  const paneRef = useCallback(
+    (node: HTMLDivElement) => {
+      if (node !== null) {
+        setPaneElement(node);
+      }
+    },
+    [props.id]
+  );
 
   useEffect(() => {
     if ($paneInit[id]?.init) {
@@ -194,10 +207,38 @@ export const Pane = (props: { id: string }) => {
     };
   }, [$editMode, id]);
 
-  const toggleOffEditModal = () => {
+  useEffect(() => {
+    if (!paneElement || isFullScreenEditModal($editMode?.mode || ``)) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) {
+          const currentEditMode = editModeStore.get();
+          if (
+            currentEditMode?.type === "pane" &&
+            currentEditMode.mode === "settings" &&
+            currentEditMode.id === props.id
+          ) {
+            toggleOffEditModal();
+          }
+        }
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(paneElement);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [paneElement, props.id, $editMode]);
+
+  const toggleOffEditModal = useCallback(() => {
     editModeStore.set(null);
     handleToggleOff();
-  };
+  }, [props.id]);
 
   const handleEditModeToggle = () => {
     if (
@@ -220,6 +261,7 @@ export const Pane = (props: { id: string }) => {
 
   return (
     <div
+      ref={paneRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{ position: "relative" }}
@@ -276,7 +318,7 @@ export const Pane = (props: { id: string }) => {
           right: 0,
           bottom: 0,
           cursor: "pointer",
-          backgroundColor: isHovered ? "rgba(0, 0, 0, 0.1)" : "transparent",
+          backgroundColor: isHovered ? "rgba(167,177,183,.85)" : "transparent",
           transition: "background-color 0.3s ease",
         }}
       >

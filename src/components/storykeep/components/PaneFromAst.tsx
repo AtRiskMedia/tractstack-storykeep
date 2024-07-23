@@ -1,8 +1,7 @@
-import { classNames } from "../../../utils/helpers";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
-import type { ButtonData, FileNode } from "../../../types";
+import type { ButtonData, FileNode, MarkdownLookup } from "../../../types";
 
 interface PaneFromAstProps {
   payload: {
@@ -12,43 +11,78 @@ interface PaneFromAstProps {
     buttonData: { [key: string]: ButtonData };
   };
   thisClassNames: { [key: string]: string | string[] };
-  memory: { [key: string]: number };
   paneId: string;
   slug: string;
-  idx: number;
+  idx: number | null;
   outerIdx: number;
-  offset?: number;
+  markdownLookup?: MarkdownLookup;
 }
 
 const PaneFromAst = ({
   payload,
   thisClassNames,
-  memory: initialMemory,
   paneId,
   slug,
-  idx,
+  idx = null,
   outerIdx,
-  offset = 0,
+  markdownLookup,
 }: PaneFromAstProps) => {
-  const memory = { ...initialMemory };
-
   const thisAst = payload.ast[0];
 
   const Tag = thisAst?.tagName || thisAst?.type;
+  let globalNth: number | undefined = undefined;
 
-  if (Tag && typeof thisClassNames[Tag] === `object`) {
-    if (typeof memory[Tag] !== `undefined`) memory[Tag] = memory[Tag] + 1;
-    else memory[Tag] = offset;
+  switch (Tag) {
+    case `li`:
+      if (
+        idx &&
+        markdownLookup?.listItemsLookup &&
+        markdownLookup.listItemsLookup[outerIdx] &&
+        typeof markdownLookup.listItemsLookup[outerIdx][idx] === `number`
+      )
+        globalNth = markdownLookup.listItemsLookup[outerIdx][idx];
+      break;
+    case `img`:
+      if (
+        idx &&
+        markdownLookup?.imagesLookup &&
+        markdownLookup.imagesLookup[outerIdx] &&
+        typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
+      )
+        globalNth = markdownLookup.imagesLookup[outerIdx][idx];
+      break;
+    case `code`:
+      if (
+        idx &&
+        markdownLookup?.codeItemsLookup &&
+        markdownLookup.codeItemsLookup[outerIdx] &&
+        typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
+      )
+        globalNth = markdownLookup.codeItemsLookup[outerIdx][idx];
+      break;
+    case `a`:
+      if (
+        idx &&
+        markdownLookup?.linksLookup &&
+        markdownLookup.linksLookup[outerIdx] &&
+        typeof markdownLookup.linksLookup[outerIdx][idx] === `number`
+      )
+        globalNth = markdownLookup.linksLookup[outerIdx][idx];
+      break;
   }
+
   const injectClassNames =
     typeof thisAst?.tagName === `undefined`
       ? ``
-      : typeof thisClassNames[Tag] === `object` &&
-          thisClassNames[Tag].length >= offset + 1
-        ? (thisClassNames[Tag][offset] as string)
-        : typeof thisClassNames[Tag] === `string`
-          ? (thisClassNames[Tag] as string)
-          : ``;
+      : typeof thisClassNames[Tag] === `string`
+        ? (thisClassNames[Tag] as string)
+        : typeof thisClassNames[Tag] === `object` &&
+            globalNth &&
+            thisClassNames[Tag].length >= globalNth + 1
+          ? (thisClassNames[Tag][globalNth] as string)
+          : typeof thisClassNames[Tag] === `object`
+            ? (thisClassNames[Tag][0] as string)
+            : ``;
 
   // Handle button payload
   const buttonPayload =
@@ -75,34 +109,6 @@ const PaneFromAst = ({
   const altText =
     thisAst.properties?.alt ||
     "This should be descriptive text of an image | We apologize the alt text is missing.";
-  const injectClassNamesImgWrapper =
-    thisAst.tagName &&
-    typeof thisClassNames.imgWrapper !== `undefined` &&
-    typeof thisClassNames.imgWrapper === `string`
-      ? thisClassNames.imgWrapper
-      : thisAst.tagName &&
-          typeof thisClassNames.imgWrapper !== `undefined` &&
-          typeof thisClassNames.imgWrapper === `object`
-        ? thisClassNames.imgWrapper[
-            thisAst.tagName && typeof memory.imgWrapper !== `undefined`
-              ? memory.imgWrapper + 1
-              : 0
-          ]
-        : ``;
-  const injectClassNamesImg =
-    thisAst.tagName &&
-    typeof thisClassNames.img !== `undefined` &&
-    typeof thisClassNames.img === `string`
-      ? thisClassNames.img
-      : thisAst.tagName &&
-          typeof thisClassNames.img !== `undefined` &&
-          typeof thisClassNames.img === `object`
-        ? thisClassNames.img[
-            thisAst.tagName && typeof memory.img !== `undefined`
-              ? memory.img + 1
-              : 0
-          ]
-        : ``;
   const thisImage = payload?.imageData?.filter(
     (image: any) => image.filename === thisAst.properties?.src
   )[0];
@@ -159,12 +165,11 @@ const PaneFromAst = ({
             key={childIdx}
             payload={{ ...payload, ast: [p] }}
             thisClassNames={thisClassNames}
-            memory={memory}
             paneId={paneId}
             slug={slug}
-            idx={idx}
+            idx={!idx ? childIdx : idx}
             outerIdx={outerIdx}
-            offset={childIdx}
+            markdownLookup={markdownLookup}
           />
         ))}
       </TagComponent>
@@ -204,17 +209,7 @@ const PaneFromAst = ({
   }
 
   if (Tag === "img" && imageSrc) {
-    return (
-      <img
-        className={classNames(
-          injectClassNames,
-          injectClassNamesImgWrapper,
-          injectClassNamesImg
-        )}
-        src={imageSrc}
-        alt={altText}
-      />
-    );
+    return <img className={injectClassNames} src={imageSrc} alt={altText} />;
   }
 
   if (Tag === "code") {

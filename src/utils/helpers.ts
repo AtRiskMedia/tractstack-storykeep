@@ -75,6 +75,7 @@ export function scrollToTop() {
   });
 }
 
+// scroll to top functionality
 export function handleScroll() {
   const rootElement = document.documentElement;
   const button = document.querySelector("button#top");

@@ -3,7 +3,12 @@ import PaneFromAst from "./PaneFromAst.astro";
 import { SvgInsideLeftModal } from "@components/panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "@components/panes/SvgInsideRightModal";
 import { classNames } from "../../utils/helpers";
-import type { FileNode, MarkdownDatum, MarkdownPaneDatum } from "../../types";
+import type {
+  MarkdownLookup,
+  FileNode,
+  MarkdownDatum,
+  MarkdownPaneDatum,
+} from "../../types";
 
 interface Props {
   payload: MarkdownPaneDatum;
@@ -19,10 +24,19 @@ interface Props {
   };
   paneId: string;
   slug: string;
+  markdownLookup: MarkdownLookup;
 }
 
-const { payload, markdown, files, paneHeight, modalPayload, paneId, slug } =
-  Astro.props;
+const {
+  payload,
+  markdown,
+  files,
+  paneHeight,
+  modalPayload,
+  paneId,
+  slug,
+  markdownLookup,
+} = Astro.props;
 
 const optionsPayload = payload.optionsPayload;
 const baseClasses: { [key: string]: string } = {
@@ -131,11 +145,11 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
                   ast: [thisAstPayload],
                 }}
                 thisClassNames={thisPayload?.injectClassNames || ``}
-                memory={{}}
                 paneId={paneId}
                 slug={slug}
-                idx={0}
+                idx={null}
                 outerIdx={idx}
+                markdownLookup={markdownLookup}
               />
             ))}
         </div>

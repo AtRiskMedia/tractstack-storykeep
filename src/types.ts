@@ -2,6 +2,22 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+interface IndexedItem {
+  parentNth: number;
+  childNth: number;
+}
+
+export interface MarkdownLookup {
+  images: { [key: number]: IndexedItem };
+  codeItems: { [key: number]: IndexedItem };
+  listItems: { [key: number]: IndexedItem };
+  links: { [key: number]: IndexedItem };
+  imagesLookup: { [parentNth: number]: { [childNth: number]: number } };
+  codeItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
+  listItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
+  linksLookup: { [parentNth: number]: { [childNth: number]: number } };
+}
+
 export type ToolMode = "insert" | "text" | "styles" | "settings" | "eraser";
 export type StoreKey =
   | "storyFragmentTitle"
@@ -205,6 +221,8 @@ export interface MarkdownPaneDatum extends PaneFragmentDatum {
         classNamesPayload: {
           [key: string]: {
             classes: {
+              // key is the element, e.g. h2
+              // [] is for per viewport settings, or single [] to apply to all
               [key: string]: string[] | number[];
             };
           };

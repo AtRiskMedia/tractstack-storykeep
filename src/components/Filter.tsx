@@ -107,7 +107,7 @@ const Filter = (props: {
     }
   }, [id, heldBeliefsFilter, withheldBeliefsFilter, reveal, overrideWithhold]);
 
-  return <div />;
+  return null;
 };
 
 export default Filter;

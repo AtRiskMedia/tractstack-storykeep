@@ -6,6 +6,7 @@ import type {
   FileNode,
   MarkdownDatum,
   MarkdownPaneDatum,
+  MarkdownLookup,
 } from "../../../types";
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
   paneHeight: [number, number, number];
   paneId: string;
   slug: string;
+  markdownLookup: MarkdownLookup;
 }
 
 const MarkdownInsidePane = ({
@@ -24,6 +26,7 @@ const MarkdownInsidePane = ({
   paneHeight,
   paneId,
   slug,
+  markdownLookup,
 }: Props) => {
   const optionsPayload = payload.optionsPayload;
   const baseClasses: { [key: string]: string } = {
@@ -137,11 +140,11 @@ const MarkdownInsidePane = ({
                             ast: [thisAstPayload],
                           }}
                           thisClassNames={thisPayload.injectClassNames || ``}
-                          memory={{}}
                           paneId={paneId}
                           slug={slug}
-                          idx={0}
+                          idx={null}
                           outerIdx={idx}
+                          markdownLookup={markdownLookup}
                         />
                       ))}
                   </div>

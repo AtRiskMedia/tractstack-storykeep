@@ -70,7 +70,7 @@ const maxHScreen: { [key: string]: boolean } = panesPayload.reduce(function (
             typeof hiddenPanes[pane.id] === `boolean` ? `true` : `false`
           }
         >
-          {!hiddenPanes[pane.id] ? (
+          {applyFilter[pane.id] ? (
             <Filter
               client:load
               id={pane.id}

@@ -13,6 +13,7 @@ import {
   storyFragmentMenuId,
   storyFragmentSocialImagePath,
 } from "../store/storykeep";
+import { debounce } from "./helpers";
 import { MAX_HISTORY_LENGTH } from "../constants";
 import type {
   StoreKey,
@@ -23,6 +24,12 @@ import type {
   ToolMode,
   HistoryEntry,
 } from "../types";
+
+const SHORT_SCREEN_THRESHOLD = 600;
+const STICKY_HEADER_THRESHOLD = 1200;
+const BREAKPOINTS = {
+  xl: 1367,
+};
 
 const storeMap: StoreMapType = {
   storyFragmentTitle: storyFragmentTitle,
@@ -261,12 +268,6 @@ export function initStoryKeep() {
   ) as HTMLElement;
   const header = document.getElementById("main-header") as HTMLElement;
 
-  const BREAKPOINTS = {
-    xl: 1367,
-  };
-  const SHORT_SCREEN_THRESHOLD = 600;
-  const STICKY_HEADER_THRESHOLD = 1200;
-
   let isEditMode = false;
   let activeElement: HTMLElement | null = null;
 
@@ -293,8 +294,8 @@ export function initStoryKeep() {
     const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
     const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
 
-    editPane.style.zIndex = "8000";
-    editModalMobile.style.zIndex = "8000";
+    editPane.style.zIndex = isEditMode ? "9001" : "8000";
+    editModalMobile.style.zIndex = isEditMode ? "9001" : "8000";
 
     if (isDesktop) {
       editPane.style.transform = isEditMode
@@ -330,17 +331,6 @@ export function initStoryKeep() {
     if (isEditMode && activeElement) {
       scrollElementIntoView();
     }
-  }
-
-  function toggleEditMode(element: HTMLElement): void {
-    if (isEditMode && element === activeElement) {
-      isEditMode = false;
-      activeElement = null;
-    } else {
-      isEditMode = true;
-      activeElement = element;
-    }
-    handleEditModeLayout();
   }
 
   function scrollElementIntoView(): void {
@@ -380,15 +370,7 @@ export function initStoryKeep() {
       adjustEditPanePosition();
     }
   }
-
-  function toggleOff(element: HTMLElement): void {
-    const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    const hide = isDesktop || !isShortScreen;
-    if (hide && isEditMode && activeElement === element) {
-      toggleEditMode(element);
-    }
-  }
+  const debouncedHandleScroll = debounce(handleScroll, 50);
 
   // Event listeners for React components
   document.addEventListener("toggle-on-edit-modal", ((event: CustomEvent) => {
@@ -411,24 +393,7 @@ export function initStoryKeep() {
   // Initialize
   handleHeaderBehavior();
   window.addEventListener("resize", handleResize);
-  window.addEventListener("scroll", handleScroll);
-
-  // Set up observers for editable elements
-  const editableElements = document.querySelectorAll(".editable-element");
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) {
-        toggleOff(entry.target as HTMLElement);
-      }
-    });
-  });
-
-  editableElements.forEach(el => {
-    if (el instanceof HTMLElement) {
-      el.addEventListener("click", () => toggleEditMode(el));
-      observer.observe(el);
-    }
-  });
+  window.addEventListener("scroll", debouncedHandleScroll);
 }
 
 // Global functions to toggle layout (updated to include targetElementId)
@@ -447,4 +412,10 @@ export const handleToggleOff = (preventHeaderScroll = false) => {
     detail: { preventHeaderScroll },
   });
   document.dispatchEvent(event);
+};
+
+export const isFullScreenEditModal = (mode: string) => {
+  const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
+  const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
+  return mode === "settings" && isShortScreen && !isDesktop;
 };

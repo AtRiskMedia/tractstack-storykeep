@@ -4,6 +4,7 @@ import type {
   FileNode,
   MarkdownPaneDatum,
   MarkdownDatum,
+  MarkdownLookup,
 } from "../../../types";
 
 interface Props {
@@ -12,9 +13,17 @@ interface Props {
   files: FileNode[];
   paneId: string;
   slug: string;
+  markdownLookup: MarkdownLookup;
 }
 
-const MarkdownPane = ({ payload, markdown, files, paneId, slug }: Props) => {
+const MarkdownPane = ({
+  payload,
+  markdown,
+  files,
+  paneId,
+  slug,
+  markdownLookup,
+}: Props) => {
   const hasHidden =
     payload.hiddenViewports.includes(`desktop`) ||
     payload.hiddenViewports.includes(`tablet`) ||
@@ -41,7 +50,6 @@ const MarkdownPane = ({ payload, markdown, files, paneId, slug }: Props) => {
     typeof classNamesParent === `string`
       ? [classNamesParent]
       : classNamesParent;
-
   const content = astPayload.ast
     /* eslint-disable @typescript-eslint/no-explicit-any */
     .filter((e: any) => !(e?.type === `text` && e?.value === `\n`))
@@ -54,11 +62,11 @@ const MarkdownPane = ({ payload, markdown, files, paneId, slug }: Props) => {
           ast: [thisAstPayload],
         }}
         thisClassNames={injectClassNames}
-        memory={{}}
         paneId={paneId}
         slug={slug}
-        idx={0}
+        idx={null}
         outerIdx={idx}
+        markdownLookup={markdownLookup}
       />
     ));
 

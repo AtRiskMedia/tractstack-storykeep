@@ -32,38 +32,17 @@ const payload = await getDatumPayload();
   ogImage={storyfragment.socialImagePath}
   canonicalURL={canonicalURL}
 >
-  <div class="m-0 p-0 flex flex-col bg-slate-50">
+  <div class="m-0 p-0 flex flex-col bg-slate-50 w-full">
     <StoryKeepStore client:load storyfragment={storyfragment} />
     <header
-      class="z-10 bg-white shadow-md px-4 flex justify-between items-center"
+      class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-full"
       id="main-header"
     >
       <StoryFragmentHeader client:load id={storyfragment.id} />
-      <!--
-      <h1 class="text-2xl font-bold">StoryKeep</h1>
-      <div class="flex space-x-2">
-        <button
-          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-          data-viewport="auto">Auto</button
-        >
-        <button
-          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-          data-viewport="xs">XS</button
-        >
-        <button
-          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-          data-viewport="md">MD</button
-        >
-        <button
-          class="viewport-button px-4 py-2 bg-gray-200 border border-gray-300 rounded-md hover:bg-gray-300 transition-colors"
-          data-viewport="xl">XL</button
-        >
-      </div>
-      -->
     </header>
 
-    <div id="main-content" class="bg-white">
-      <main id="website-content" class="overflow-y-auto">
+    <div id="storykeep" class="bg-white overflow-auto">
+      <main id="website-content" class="overflow-auto w-full">
         <StoryFragment id={storyfragment.id} client:load />
       </main>
     </div>

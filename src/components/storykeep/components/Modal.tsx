@@ -1,6 +1,14 @@
+import { useStore } from "@nanostores/react";
 import SvgModal from "./SvgModal";
 import { classNames } from "../../../utils/helpers";
-import type { MarkdownPaneDatum } from "../../../types";
+import { viewportStore } from "../../../store/storykeep";
+import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
+import type {
+  ClassNamesPayloadValue,
+  OptionsPayloadDatum,
+  MarkdownPaneDatum,
+  ViewportKey,
+} from "../../../types";
 
 interface ModalOptionsDatum {
   id: string;
@@ -19,69 +27,87 @@ interface Props {
   };
 }
 
+const getClassString = (
+  classNameInput: string | { classes: ClassNamesPayloadValue }
+): string => {
+  if (typeof classNameInput === "string") {
+    return classNameInput;
+  }
+  if (typeof classNameInput === "object" && "classes" in classNameInput) {
+    return Object.values(classNameInput.classes).join(" ");
+  }
+  return "";
+};
+
 const Modal = ({ payload, modalPayload }: Props) => {
+  const $viewport = useStore(viewportStore) as { value: ViewportKey };
+  const viewportKey: ViewportKey =
+    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
   const optionsPayload = payload.optionsPayload;
+  const optionsPayloadDatum: OptionsPayloadDatum =
+    optionsPayload && reduceClassNamesPayload(optionsPayload);
   const baseClasses: { [key: string]: string } = {
-    mobile: `md:hidden`,
-    tablet: `hidden md:grid xl:hidden`,
-    desktop: `hidden xl:grid`,
+    mobile:
+      viewportKey === "mobile" ? "grid" : viewportKey ? "hidden" : "md:hidden",
+    tablet:
+      viewportKey === "tablet"
+        ? "grid"
+        : viewportKey
+          ? "hidden"
+          : "hidden md:grid xl:hidden",
+    desktop:
+      viewportKey === "desktop"
+        ? "grid"
+        : viewportKey
+          ? "hidden"
+          : "hidden xl:grid",
   };
 
-  // prepare for each breakpoint
-  const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
-    const shapeName =
-      viewportKey === `desktop`
-        ? payload.textShapeOutsideDesktop
-        : viewportKey === `tablet`
-          ? payload.textShapeOutsideTablet
-          : viewportKey === `mobile`
-            ? payload.textShapeOutsideMobile
-            : payload.textShapeOutside;
-    const thisId = `${viewportKey}-${payload.id}-modal`;
+  // Prepare options for each breakpoint
+  const viewportLookup =
+    viewportKey && [`mobile`, `tablet`, `desktop`].includes(viewportKey)
+      ? [viewportKey]
+      : ["mobile", "tablet", "desktop"];
+  const options = viewportLookup.map(
+    (_viewportKey: string): ModalOptionsDatum => {
+      const shapeName =
+        _viewportKey === `desktop`
+          ? payload.textShapeOutsideDesktop
+          : _viewportKey === `tablet`
+            ? payload.textShapeOutsideTablet
+            : _viewportKey === `mobile`
+              ? payload.textShapeOutsideMobile
+              : payload.textShapeOutside;
+      const thisId = `${_viewportKey}-${shapeName}-modal`;
 
-    // check for tailwind classes
-    const hasClassNamesParent = optionsPayload?.classNamesParent;
-    const classNamesParent =
-      hasClassNamesParent &&
-      typeof optionsPayload?.classNamesParent?.all !== `undefined`
-        ? optionsPayload.classNamesParent.all
-        : typeof optionsPayload?.classNamesParent !== `undefined` &&
-            typeof optionsPayload?.classNamesParent[viewportKey] !== `undefined`
-          ? optionsPayload.classNamesParent[viewportKey]
-          : ``;
-    const hasClassNamesModal = optionsPayload?.classNamesModal;
-    const classNamesModal =
-      hasClassNamesModal &&
-      typeof optionsPayload?.classNamesModal?.all !== `undefined`
-        ? optionsPayload.classNamesModal.all
-        : typeof optionsPayload?.classNamesModal !== `undefined` &&
-            typeof optionsPayload?.classNamesModal[viewportKey] !== `undefined`
-          ? optionsPayload.classNamesModal[viewportKey]
-          : ``;
-    return {
-      id: thisId,
-      classes: classNames(
-        baseClasses[viewportKey],
-        classNamesParent,
-        classNamesModal
-      ),
-      shapeName: shapeName,
-    };
-  });
-
-  const viewportLookup = [`mobile`, `tablet`, `desktop`];
+      const injectClassNames =
+        (viewportKey &&
+          optionsPayloadDatum?.classNamesModal &&
+          optionsPayloadDatum?.classNamesModal[viewportKey]) ||
+        optionsPayloadDatum?.classNamesModal?.all ||
+        optionsPayload?.classNamesModal?.all ||
+        ``;
+      return {
+        id: thisId,
+        classes: classNames(
+          baseClasses[_viewportKey],
+          getClassString(injectClassNames)
+        ),
+        shapeName: shapeName ?? "",
+      };
+    }
+  );
 
   return (
     <>
-      {[0, 1, 2].map((i: number) => {
-        if (options[i]) {
-          const thisOptions = options[i] as ModalOptionsDatum;
+      {options.map((option, i) => {
+        if (option) {
           return (
-            <div key={thisOptions.id} className={thisOptions.classes}>
+            <div key={option.id} className={option.classes}>
               <SvgModal
-                shapeName={thisOptions.shapeName}
+                shapeName={option.shapeName}
                 viewportKey={viewportLookup[i]}
-                id={thisOptions.id}
+                id={option.id}
                 modalPayload={modalPayload[viewportLookup[i]]}
               />
             </div>

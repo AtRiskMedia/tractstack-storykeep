@@ -1,12 +1,18 @@
+import { useStore } from "@nanostores/react";
 import PaneFromAst from "./PaneFromAst";
 import { SvgInsideLeftModal } from "../../panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "../../panes/SvgInsideRightModal";
 import { classNames } from "../../../utils/helpers";
+import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
+import { viewportStore } from "../../../store/storykeep";
+import type { ReactNode } from "react";
 import type {
   FileNode,
   MarkdownDatum,
   MarkdownPaneDatum,
   MarkdownLookup,
+  OptionsPayloadDatum,
+  ViewportKey,
 } from "../../../types";
 
 interface Props {
@@ -36,66 +42,96 @@ const MarkdownInsideModal = ({
   slug,
   markdownLookup,
 }: Props) => {
+  const $viewport = useStore(viewportStore) as { value: ViewportKey };
+  const viewportKey: ViewportKey =
+    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
   const optionsPayload = payload.optionsPayload;
+  const optionsPayloadDatum: OptionsPayloadDatum =
+    optionsPayload && reduceClassNamesPayload(optionsPayload);
   const baseClasses: { [key: string]: string } = {
-    mobile: `md:hidden`,
-    tablet: `hidden md:grid xl:hidden`,
-    desktop: `hidden xl:grid`,
+    mobile:
+      viewportKey === "mobile" ? "grid" : viewportKey ? "hidden" : "md:hidden",
+    tablet:
+      viewportKey === "tablet"
+        ? "grid"
+        : viewportKey
+          ? "hidden"
+          : "hidden md:grid xl:hidden",
+    desktop:
+      viewportKey === "desktop"
+        ? "grid"
+        : viewportKey
+          ? "hidden"
+          : "hidden xl:grid",
   };
   const paneFragmentStyle = {
     gridArea: "1/1/1/1",
   };
 
-  const payloads = ["mobile", "tablet", "desktop"].map(
-    (viewportKey: string) => {
-      if (payload.hiddenViewports.includes(viewportKey)) return null;
+  const viewportLookup =
+    viewportKey && [`mobile`, `tablet`, `desktop`].includes(viewportKey)
+      ? [viewportKey]
+      : ["mobile", "tablet", "desktop"];
+  const payloads = viewportLookup.map((_viewportKey: string) => {
+    if (payload.hiddenViewports.includes(_viewportKey)) return null;
 
-      const shapeName =
-        viewportKey === `desktop`
-          ? payload.textShapeOutsideDesktop
-          : viewportKey === `tablet`
-            ? payload.textShapeOutsideTablet
-            : viewportKey === `mobile`
-              ? payload.textShapeOutsideMobile
-              : payload.textShapeOutside;
-      const astPayload = {
-        ast: markdown.htmlAst.children,
-        buttonData: optionsPayload?.buttons || {},
-        imageData: files,
-      };
-      const injectClassNames = optionsPayload?.classNames?.all || {};
-      const classNamesParentRaw = optionsPayload?.classNamesParent
-        ? optionsPayload.classNamesParent?.all
-        : ``;
-      const classNamesParent =
-        typeof classNamesParentRaw === `string`
-          ? [classNamesParentRaw]
-          : classNamesParentRaw;
-      return {
-        shapeName,
-        astPayload,
-        injectClassNames,
-        classNamesParent,
-        viewportKey,
-      };
-    }
-  );
+    const shapeName =
+      _viewportKey === `desktop`
+        ? payload.textShapeOutsideDesktop
+        : _viewportKey === `tablet`
+          ? payload.textShapeOutsideTablet
+          : _viewportKey === `mobile`
+            ? payload.textShapeOutsideMobile
+            : payload.textShapeOutside;
+    const astPayload = {
+      ast: markdown.htmlAst.children,
+      buttonData: optionsPayload?.buttons || {},
+      imageData: files,
+    };
+    const injectClassNames =
+      (viewportKey &&
+        optionsPayloadDatum?.classNames &&
+        optionsPayloadDatum?.classNames[viewportKey]) ||
+      optionsPayloadDatum?.classNames?.all ||
+      optionsPayload?.classNames?.all ||
+      {};
+    const classNamesParentRaw =
+      (viewportKey &&
+        optionsPayloadDatum?.classNamesParent &&
+        optionsPayloadDatum?.classNamesParent[viewportKey]) ||
+      optionsPayloadDatum?.classNamesParent?.all ||
+      optionsPayload?.classNamesParent?.all ||
+      ``;
+    const classNamesParent = Array.isArray(classNamesParentRaw)
+      ? classNamesParentRaw
+      : [classNamesParentRaw];
+
+    return {
+      shapeName,
+      astPayload,
+      injectClassNames,
+      classNamesParent,
+      viewportKey: _viewportKey,
+    };
+  });
 
   return (
     <>
       {payloads.map((thisPayload, index) =>
         thisPayload ? (
           <div key={index}>
-            {thisPayload.classNamesParent
+            {(thisPayload.classNamesParent as string[])
               .slice()
               .reverse()
               .reduce(
-                (content, cssClass) => (
+                (content: ReactNode, cssClass: string) => (
                   <div className={cssClass}>{content}</div>
                 ),
                 <div
                   className={classNames(
-                    thisPayload.classNamesParent.join(` `) || ``,
+                    Array.isArray(thisPayload.classNamesParent)
+                      ? thisPayload.classNamesParent.join(` `)
+                      : ``,
                     (thisPayload.viewportKey &&
                       baseClasses[thisPayload.viewportKey]) ||
                       ``,
@@ -149,7 +185,11 @@ const MarkdownInsideModal = ({
                             ...thisPayload.astPayload,
                             ast: [thisAstPayload],
                           }}
-                          thisClassNames={thisPayload.injectClassNames || ``}
+                          thisClassNames={
+                            thisPayload.injectClassNames as {
+                              [key: string]: string | string[];
+                            }
+                          }
                           paneId={paneId}
                           slug={slug}
                           idx={null}

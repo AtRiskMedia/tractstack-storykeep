@@ -40,8 +40,15 @@ const classNamesParent = optionsPayload?.classNamesParent
   ? optionsPayload.classNamesParent?.all
   : ``;
 // ensure this is an array
-const parentClasses =
-  typeof classNamesParent === `string` ? [classNamesParent] : classNamesParent;
+const parentClasses = Array.isArray(classNamesParent)
+  ? classNamesParent
+  : typeof classNamesParent === "string"
+    ? [classNamesParent]
+    : classNamesParent &&
+        typeof classNamesParent === "object" &&
+        "classes" in classNamesParent
+      ? [classNamesParent.classes]
+      : [];
 ---
 
 {

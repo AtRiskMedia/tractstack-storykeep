@@ -2,7 +2,7 @@
 import PaneFromAst from "./PaneFromAst.astro";
 import { SvgInsideLeftModal } from "@components/panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "@components/panes/SvgInsideRightModal";
-import { classNames } from "../../utils/helpers";
+import { classNames, getClassNames } from "../../utils/helpers";
 import type {
   MarkdownLookup,
   FileNode,
@@ -64,9 +64,12 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     buttonData: optionsPayload?.buttons || {},
     imageData: files,
   };
-  const injectClassNames = optionsPayload?.classNames?.all || {};
-  const classNamesParentRaw = optionsPayload?.classNamesParent
-    ? optionsPayload.classNamesParent?.all
+  const injectClassNames =
+    typeof optionsPayload?.classNames?.all === `object`
+      ? optionsPayload.classNames.all
+      : {};
+  const classNamesParentRaw = optionsPayload?.classNamesParent?.all
+    ? getClassNames(optionsPayload.classNamesParent.all)
     : ``;
   const classNamesParent =
     typeof classNamesParentRaw === `string`
@@ -85,7 +88,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
 {
   payloads.map(thisPayload =>
     thisPayload?.classNamesParent.reverse().reduce(
-      (content, cssClass) => {
+      (content: JSX.Element, cssClass: string) => {
         return <div class={cssClass}>{content}</div>;
       },
       <div

@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { editModeStore, paneInit } from "../../store/storykeep";
 import { handleToggleOn, handleToggleOff } from "../../utils/storykeep";
 
-export const CodeHook = (props: { id: string }) => {
+const CodeHook = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -108,3 +109,5 @@ export const CodeHook = (props: { id: string }) => {
     </div>
   );
 };
+
+export default memo(CodeHook);

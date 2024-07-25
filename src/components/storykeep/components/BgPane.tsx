@@ -1,71 +1,103 @@
+import { memo } from "react";
+import { useStore } from "@nanostores/react";
 import { Svg } from "../../../components/panes/Svg";
 import { classNames } from "../../../utils/helpers";
 import { svgImageMask } from "../../../utils/compositor/svgImageMask";
 import { cleanShapeOptionsDatum } from "../../../utils/compositor/shapeOptionsDatum";
+import { viewportStore } from "../../../store/storykeep";
+import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
 import type {
   BgPaneDatum,
   BreakOptionsDatum,
   MaskOptionsDatum,
   ShapeOptionsDatum,
+  OptionsPayloadDatum,
+  ViewportKey,
 } from "../../../types";
 
 const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
+  const $viewport = useStore(viewportStore) as { value: ViewportKey };
+  const viewportKey: ViewportKey =
+    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
   const optionsPayload = payload.optionsPayload;
+  const optionsPayloadDatum: OptionsPayloadDatum | undefined =
+    optionsPayload &&
+    optionsPayload?.classNamesPayload &&
+    reduceClassNamesPayload(optionsPayload);
   const hasArtpack = optionsPayload?.artpack;
   const hasArtpackAll = hasArtpack?.all;
   const baseClasses: { [key: string]: string } = {
-    mobile: `md:hidden`,
-    tablet: `hidden md:block xl:hidden`,
-    desktop: `hidden xl:block`,
+    mobile:
+      viewportKey === "mobile" ? "grid" : viewportKey ? "hidden" : "md:hidden",
+    tablet:
+      viewportKey === "tablet"
+        ? "grid"
+        : viewportKey
+          ? "hidden"
+          : "hidden md:grid xl:hidden",
+    desktop:
+      viewportKey === "desktop"
+        ? "grid"
+        : viewportKey
+          ? "hidden"
+          : "hidden xl:grid",
   };
 
   // prepare for each breakpoint
-  const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
-    if (payload.hiddenViewports.includes(viewportKey)) return null;
+  const viewportLookup =
+    viewportKey && [`mobile`, `tablet`, `desktop`].includes(viewportKey)
+      ? [viewportKey]
+      : ["mobile", "tablet", "desktop"];
+  const options = viewportLookup.map((_viewportKey: string) => {
+    if (payload.hiddenViewports.includes(_viewportKey)) return null;
 
     // check for artpack payload
     const hasArtpackViewport =
       hasArtpack &&
-      typeof hasArtpack[viewportKey] !== `undefined` &&
-      hasArtpack[viewportKey];
+      typeof hasArtpack[_viewportKey] !== `undefined` &&
+      hasArtpack[_viewportKey];
     const artpack = (hasArtpack && hasArtpackAll) || hasArtpackViewport;
     const artpackMode = artpack ? artpack.mode : null;
     const artpackFiletype = artpack ? artpack.filetype : null;
     const artpackCollection = artpack ? artpack.collection : null;
     const viewportPrefix =
-      viewportKey === `desktop` || viewportKey === `tablet` ? `1920` : `800`;
+      _viewportKey === `desktop` || _viewportKey === `tablet` ? `1920` : `800`;
     const filenamePrefix =
       artpackCollection !== `custom` ? `${artpackCollection}-` : ``;
     const artpackImage = artpack ? artpack.image : null;
 
     // check for shape mask
     const thisShapeSelector =
-      viewportKey === `desktop`
+      _viewportKey === `desktop`
         ? payload.shapeDesktop
-        : viewportKey === `tablet`
+        : _viewportKey === `tablet`
           ? payload.shapeTablet
-          : viewportKey === `mobile`
+          : _viewportKey === `mobile`
             ? payload.shapeMobile
             : payload.shape;
     const shapeName = thisShapeSelector !== `none` ? thisShapeSelector : null;
-    const thisId = `${viewportKey}-${payload.id}-pane`;
+    const thisId = `${_viewportKey}-${thisShapeSelector}-pane`;
 
     // check for tailwind classes
-    const hasClassNamesParent = optionsPayload?.classNamesParent;
     const classNamesParent =
-      hasClassNamesParent &&
-      typeof optionsPayload?.classNamesParent?.all !== `undefined`
-        ? optionsPayload.classNamesParent.all
-        : typeof optionsPayload?.classNamesParent !== `undefined` &&
-            typeof optionsPayload?.classNamesParent[viewportKey] !== `undefined`
-          ? optionsPayload.classNamesParent[viewportKey]
-          : ``;
+      optionsPayloadDatum?.classNamesParent &&
+      viewportKey &&
+      typeof optionsPayloadDatum?.classNamesParent[viewportKey] !== `undefined`
+        ? optionsPayloadDatum.classNamesParent[viewportKey]
+        : optionsPayload?.classNamesParent &&
+            typeof optionsPayload?.classNamesParent?.all !== `undefined`
+          ? optionsPayload.classNamesParent.all
+          : typeof optionsPayload?.classNamesParent !== `undefined` &&
+              typeof optionsPayload?.classNamesParent[_viewportKey] !==
+                `undefined`
+            ? optionsPayload.classNamesParent[_viewportKey]
+            : ``;
 
     // based on artpack mode
     switch (artpackMode) {
       case `break`: {
         return {
-          id: `${viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${payload.id}`,
           artpackMode,
           styles: { fill: (artpack && artpack?.svgFill) || `none` },
           shapeName: `${artpackCollection}${artpackImage}`,
@@ -73,10 +105,10 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
       }
       case `mask`: {
         const maskSvg =
-          shapeName && svgImageMask(shapeName, thisId, viewportKey);
+          shapeName && svgImageMask(shapeName, thisId, _viewportKey);
         if (!maskSvg) return null;
         return {
-          id: `${viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${payload.id}`,
           artpackMode,
           classNamesParent,
           styles: {
@@ -93,14 +125,12 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
 
       default:
         return {
-          id: `${viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${payload.id}`,
           shapeName,
           classNamesParent,
         };
     }
   });
-
-  const viewportLookup = [`mobile`, `tablet`, `desktop`];
 
   return (
     <>
@@ -166,4 +196,4 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
   );
 };
 
-export default BgPane;
+export default memo(BgPane);

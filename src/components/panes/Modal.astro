@@ -65,8 +65,8 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     id: thisId,
     classes: classNames(
       baseClasses[viewportKey],
-      classNamesParent,
-      classNamesModal
+      typeof classNamesParent === `string` ? classNamesParent : ``,
+      typeof classNamesModal === `string` ? classNamesModal : ``
     ),
     shapeName: shapeName,
   };

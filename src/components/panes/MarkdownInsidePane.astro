@@ -2,12 +2,13 @@
 import PaneFromAst from "./PaneFromAst.astro";
 import { SvgInsideLeft } from "@components/panes/SvgInsideLeft";
 import { SvgInsideRight } from "@components/panes/SvgInsideRight";
-import { classNames } from "../../utils/helpers";
+import { classNames, getClassNames } from "../../utils/helpers";
 import type {
   MarkdownLookup,
   FileNode,
   MarkdownDatum,
   MarkdownPaneDatum,
+  ClassNamesPayloadValue,
 } from "../../types";
 
 interface Props {
@@ -52,11 +53,10 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
   const injectClassNames = optionsPayload?.classNames?.all || {};
   const classNamesParentRaw = optionsPayload?.classNamesParent
     ? optionsPayload.classNamesParent?.all
-    : ``;
-  const classNamesParent =
-    typeof classNamesParentRaw === `string`
-      ? [classNamesParentRaw]
-      : classNamesParentRaw;
+    : [];
+  const classNamesParent = Array.isArray(classNamesParentRaw)
+    ? classNamesParentRaw
+    : [classNamesParentRaw];
   return {
     shapeName,
     astPayload,
@@ -68,75 +68,85 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
 ---
 
 {
-  payloads.map(thisPayload =>
-    thisPayload?.classNamesParent.reverse().reduce(
-      (content, cssClass) => {
-        return <div class={cssClass}>{content}</div>;
-      },
-      <div
-        class={classNames(
-          thisPayload?.classNamesParent.join(` `) || ``,
-          (thisPayload?.viewportKey && baseClasses[thisPayload?.viewportKey]) ||
-            ``,
-          `h-fit-contents`
-        )}
-      >
-        <div
-          class="relative w-full h-full justify-self-start"
-          style={paneFragmentStyle}
-        >
-          <SvgInsideLeft
-            client:visible
-            shapeName={thisPayload?.shapeName || ``}
-            viewportKey={thisPayload?.viewportKey}
-            id={`markdown-${paneId}`}
-            paneHeight={
-              paneHeight[
-                thisPayload?.viewportKey === `desktop`
-                  ? 2
-                  : thisPayload?.viewportKey === `tablet`
-                    ? 1
-                    : 0
-              ]
-            }
-          />
-          <SvgInsideRight
-            client:visible
-            shapeName={thisPayload?.shapeName || ``}
-            viewportKey={thisPayload?.viewportKey}
-            id={`markdown-${paneId}`}
-            paneHeight={
-              paneHeight[
-                thisPayload?.viewportKey === `desktop`
-                  ? 2
-                  : thisPayload?.viewportKey === `tablet`
-                    ? 1
-                    : 0
-              ]
-            }
-          />
-          {thisPayload?.astPayload?.ast
-            .filter(
-              /* eslint-disable @typescript-eslint/no-explicit-any */
-              (e: any) => !(e?.type === `text` && e?.value === `\n`)
-            )
-            /* eslint-disable @typescript-eslint/no-explicit-any */
-            .map((thisAstPayload: any, idx: number) => (
-              <PaneFromAst
-                payload={{
-                  ...thisPayload?.astPayload,
-                  ast: [thisAstPayload],
-                }}
-                thisClassNames={thisPayload?.injectClassNames || ``}
-                paneId={paneId}
-                slug={slug}
-                idx={null}
-                outerIdx={idx}
-                markdownLookup={markdownLookup}
-              />
-            ))}
-        </div>
-      </div>
-    )
+  payloads.map(
+    thisPayload =>
+      thisPayload && (
+        <Fragment>
+          {(
+            thisPayload.classNamesParent as (
+              | string
+              | { classes: ClassNamesPayloadValue }
+            )[]
+          ).reduceRight(
+            (content, cssClass) => (
+              <div class={getClassNames(cssClass).join(" ")}>{content}</div>
+            ),
+            <div
+              class={classNames(
+                thisPayload.classNamesParent.flatMap(getClassNames).join(" ") ||
+                  ``,
+                (thisPayload.viewportKey &&
+                  baseClasses[thisPayload.viewportKey]) ||
+                  ``,
+                `h-fit-contents`
+              )}
+            >
+              <div
+                class="relative w-full h-full justify-self-start"
+                style={paneFragmentStyle}
+              >
+                <SvgInsideLeft
+                  client:visible
+                  shapeName={thisPayload.shapeName || ``}
+                  viewportKey={thisPayload.viewportKey}
+                  id={`markdown-${paneId}`}
+                  paneHeight={
+                    paneHeight[
+                      thisPayload.viewportKey === `desktop`
+                        ? 2
+                        : thisPayload.viewportKey === `tablet`
+                          ? 1
+                          : 0
+                    ]
+                  }
+                />
+                <SvgInsideRight
+                  client:visible
+                  shapeName={thisPayload.shapeName || ``}
+                  viewportKey={thisPayload.viewportKey}
+                  id={`markdown-${paneId}`}
+                  paneHeight={
+                    paneHeight[
+                      thisPayload.viewportKey === `desktop`
+                        ? 2
+                        : thisPayload.viewportKey === `tablet`
+                          ? 1
+                          : 0
+                    ]
+                  }
+                />
+                {thisPayload.astPayload.ast
+                  .filter(
+                    (e: any) => !(e?.type === `text` && e?.value === `\n`)
+                  )
+                  .map((thisAstPayload: any, idx: number) => (
+                    <PaneFromAst
+                      payload={{
+                        ...thisPayload.astPayload,
+                        ast: [thisAstPayload],
+                      }}
+                      thisClassNames={thisPayload.injectClassNames}
+                      paneId={paneId}
+                      slug={slug}
+                      idx={null}
+                      outerIdx={idx}
+                      markdownLookup={markdownLookup}
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+        </Fragment>
+      )
   )
 }

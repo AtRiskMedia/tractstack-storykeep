@@ -166,31 +166,86 @@ export interface BgPaneDatum extends PaneFragmentDatum {
   shapeDesktop?: string;
   shapeTablet?: string;
   shapeMobile?: string;
-  optionsPayload: {
-    artpack?: {
-      [key: string]: {
-        image: string;
-        collection: string;
-        filetype: string;
-        mode: string;
-        objectFit: string;
-        svgFill?: string;
-      };
-    };
-    classNamesPayload?: {
-      [key: string]: {
-        classes: {
-          [key: string]: {
-            [key: string]: string[];
-          };
-        };
-      };
-    };
-    classNamesParent?: {
-      [key: string]: string;
+  optionsPayload: OptionsPayloadDatum;
+}
+
+export type ViewportKey = "mobile" | "tablet" | "desktop" | "auto" | null;
+
+export type TupleValue = string | number | boolean;
+export type Tuple =
+  | [TupleValue]
+  | [TupleValue, TupleValue]
+  | [TupleValue, TupleValue, TupleValue];
+
+export interface ClassNamesPayloadValue {
+  [key: string]: string | string[];
+}
+
+export interface ClassNamesPayloadDatumValue {
+  [key: string]: Tuple;
+}
+export interface ClassNamesPayloadDatumWrapper {
+  [key: number]: ClassNamesPayloadDatumValue;
+}
+
+export interface ClassNamesPayload {
+  [key: string]:
+    | {
+        classes: ClassNamesPayloadValue;
+      }
+    | string;
+}
+export interface ClassNamesPrePayload {
+  [key: string]: TupleValue | TupleValue[];
+}
+
+export interface ClassNamesPayloadDatum {
+  [key: string]: {
+    classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumWrapper;
+    count?: number;
+    override: {
+      [key: string]: Tuple[];
     };
   };
 }
+
+export interface ClassNamesPayloadResult {
+  all: string;
+  mobile: string;
+  tablet: string;
+  desktop: string;
+}
+
+export interface OptionsPayloadDatum {
+  classNamesPayload: ClassNamesPayloadDatum;
+  classNamesParent?: ClassNamesPayload;
+  classNamesModal?: ClassNamesPayload;
+  classNames?: {
+    all: ClassNamesPayloadValue;
+    desktop?: ClassNamesPayloadValue;
+    tablet?: ClassNamesPayloadValue;
+    mobile?: ClassNamesPayloadValue;
+  };
+  buttons?: ButtonData;
+  modal?: {
+    [key: string]: {
+      zoomFactor: number;
+      paddingLeft: number;
+      paddingTop: number;
+    };
+  };
+  artpack?: {
+    [key: string]: {
+      image: string;
+      collection: string;
+      filetype: string;
+      mode: string;
+      objectFit: string;
+      svgFill?: string;
+    };
+  };
+}
+
 export interface MarkdownPaneDatum extends PaneFragmentDatum {
   type: `markdown`;
   imageMaskShape: string;
@@ -201,42 +256,7 @@ export interface MarkdownPaneDatum extends PaneFragmentDatum {
   textShapeOutsideDesktop?: string;
   textShapeOutsideTablet?: string;
   textShapeOutsideMobile?: string;
-  optionsPayload: {
-    classNamesParent?: {
-      [key: string]: string;
-    };
-    classNamesModal?: {
-      [key: string]: string;
-    };
-    classNames?: {
-      [key: string]: {
-        [key: string]: string | string[];
-      };
-    };
-    buttons?: {
-      [key: string]: {
-        urlTarget: string;
-        callbackPayload: string;
-        className: string;
-        classNamesPayload: {
-          [key: string]: {
-            classes: {
-              // key is the element, e.g. h2
-              // [] is for per viewport settings, or single [] to apply to all
-              [key: string]: string[] | number[];
-            };
-          };
-        };
-      };
-    };
-    modal?: {
-      [key: string]: {
-        zoomFactor: number;
-        paddingLeft: number;
-        paddingTop: number;
-      };
-    };
-  };
+  optionsPayload: OptionsPayloadDatum;
   isModal: boolean;
   markdownId?: string;
   markdownBody?: string;
@@ -641,13 +661,10 @@ export interface ButtonData {
   urlTarget: string;
   callbackPayload: string;
   className: string;
-  classNamesPayload: {
-    [key: string]: {
-      classes: {
-        [key: string]: string[] | number[];
-      };
-    };
-  };
+  classNamesPayload: ClassNamesPayload;
+  classNameDesktop?: string;
+  classNameTablet?: string;
+  classNameMobile?: string;
 }
 
 export interface ResourceDatumEventProps {
@@ -662,416 +679,3 @@ export interface ResourceDatumEventProps {
   dateString: string;
   venue: string;
 }
-
-//
-//
-//
-//export interface Path {
-//  alias: string;
-//  pid: number;
-//  langcode: string;
-//}
-//
-///* eslint-disable @typescript-eslint/no-explicit-any */
-//export interface DrupalNode extends Record<string, any> {
-//  id: string;
-//  type: string;
-//  langcode: string;
-//  status: boolean;
-//  drupal_internal__nid: number;
-//  drupal_internal__vid: number;
-//  changed: string;
-//  created: string;
-//  title: string;
-//  default_langcode: boolean;
-//  sticky: boolean;
-//  path: Path;
-//}
-//
-///* eslint-disable @typescript-eslint/no-explicit-any */
-//export interface DrupalFile extends Record<string, any> {
-//  id: string;
-//  type: string;
-//  langcode: string;
-//  status: boolean;
-//  drupal_internal__fid: number;
-//  changed: string;
-//  created: string;
-//  filename: string;
-//  uri: {
-//    value: string;
-//    url: string;
-//  };
-//  filesize: number;
-//  filemime: string;
-//  resourceIdObjMeta?: DrupalFileMeta;
-//  path: Path;
-//}
-//
-///* eslint-disable @typescript-eslint/no-explicit-any */
-//export interface DrupalFileMeta extends Record<string, any> {
-//  alt?: string;
-//  title?: string;
-//  width: number;
-//  height: number;
-//}
-//
-//
-//export interface PaneNode {
-//  type: `node--pane`;
-//  id: string;
-//  field_slug?: string;
-//}
-//interface StoryFragmentNode {
-//  type: `node--story_fragment`;
-//  id: string;
-//}
-//interface TractStackNode {
-//  type: `node--tractstack`;
-//  id: string;
-//  title: string;
-//  field_slug: string;
-//}
-////interface MenuNode {
-////  type: `node--menu`;
-////  id: string;
-////}
-////interface MarkdownNode {
-////  type: `node--markdown`;
-////  id: string;
-////}
-//
-//// Tract Stack types
-//
-//interface T8kNode {
-//  type: string;
-//  id: string;
-//  title: string;
-//  links: {
-//    self: {
-//      href: string;
-//    };
-//  };
-//}
-//export interface StoryFragment extends T8kNode {
-//  field_slug: string;
-//  field_panes: PaneNode[];
-//  field_tract_stack: TractStackNode;
-//}
-//export interface StoryFragmentSiteMap extends T8kNode {
-//  field_slug: string;
-//  changed: string;
-//  created: string;
-//}
-//
-//export interface TractStack extends T8kNode {
-//  field_slug: string;
-//}
-//export interface Pane extends T8kNode {
-//  field_slug: string;
-//  field_is_context_pane: boolean;
-//}
-//export interface ContextPaneSiteMap extends T8kNode {
-//  field_slug: string;
-//  changed: string;
-//  created: string;
-//}
-//export interface Markdown extends T8kNode {
-//  field_slug: string;
-//  field_category_slug: string | null;
-//}
-//export interface Resource extends T8kNode {
-//  field_slug: string;
-//  field_category_slug: string | null;
-//}
-//export interface Menu extends T8kNode {
-//  field_theme: string;
-//}
-//
-//export interface StoryFragmentDatum extends StoryFragment {
-//  drupal_internal__nid: number;
-//  field_social_image_path: string;
-//  field_tailwind_background_colour: string;
-//  field_tract_stack: TractStackNode;
-//  field_panes: PaneNode[];
-//  field_menu: MenuDatum;
-//  changed: string;
-//  created: string;
-//}
-//
-//export interface StoryFragmentFullDatum extends T8kNode {
-//  field_slug: string;
-//  field_panes: PaneFullDatum[];
-//  field_tract_stack: TractStackNode;
-//  drupal_internal__nid: number;
-//  field_social_image_path: string;
-//  field_tailwind_background_colour: string;
-//  field_menu: MenuDatum;
-//  changed: string;
-//  created: string;
-//}
-//
-//export interface TractStackDatum extends TractStack {
-//  drupal_internal__nid: number;
-//  field_story_fragment: StoryFragmentNode[];
-//}
-//export interface PaneDatumProps {
-//  title: string;
-//  id: string;
-//  slug: string;
-//  drupalNid: number;
-//  optionsPayload: PaneOptionsPayload;
-//  isContextPane: boolean;
-//  heightRatioDesktop: string;
-//  heightRatioTablet: string;
-//  heightRatioMobile: string;
-//  heightOffsetDesktop: number;
-//  heightOffsetTablet: number;
-//  heightOffsetMobile: number;
-//  markdown: MarkdownPaneProps[];
-//  files: FileNode[];
-//}
-//export interface PaneDatum extends Pane {
-//  drupal_internal__nid: number;
-//  field_options: string;
-//  field_is_context_pane: boolean;
-//  field_height_ratio_desktop: string;
-//  field_height_ratio_tablet: string;
-//  field_height_ratio_mobile: string;
-//  field_height_offset_desktop: number;
-//  field_height_offset_tablet: number;
-//  field_height_offset_mobile: number;
-//  field_markdown: MarkdownDatum[];
-//  field_image: DrupalFile[];
-//  field_image_svg: DrupalFile[];
-//}
-//export interface PaneFullDatum extends Pane {
-//  drupal_internal__nid: number;
-//  field_options: string;
-//  field_is_context_pane: boolean;
-//  field_height_ratio_desktop: string;
-//  field_height_ratio_tablet: string;
-//  field_height_ratio_mobile: string;
-//  field_height_offset_desktop: number;
-//  field_height_offset_tablet: number;
-//  field_height_offset_mobile: number;
-//  field_markdown: MarkdownFullDatum[];
-//  field_image: FileNode[];
-//  field_image_svg: FileNode[];
-//}
-//
-//export interface ContextPaneDatum extends PaneDatum {
-//  changed: string;
-//  created: string;
-//}
-//export interface ContextPaneFullDatum extends PaneFullDatum {
-//  changed: string;
-//  created: string;
-//}
-//
-//export interface MarkdownDatum extends Markdown {
-//  drupal_internal__nid: number;
-//  field_markdown_body: string;
-//  field_image: DrupalFile[];
-//  field_image_svg: DrupalFile[];
-//}
-//export interface MarkdownFullDatum extends Markdown {
-//  drupal_internal__nid: number;
-//  field_markdown_body: string;
-//  field_image: FileNode[];
-//  field_image_svg: FileNode[];
-//}
-//export interface ResourceDatum extends Resource {
-//  drupal_internal__nid: number;
-//  field_options: string;
-//  field_action_lisp: string;
-//  field_oneliner: string;
-//}
-//
-//
-//export interface ResourceDatumEventProps {
-//  title: string;
-//  slug: string;
-//  category: string | null;
-//  actionLisp: string;
-//  oneliner: string;
-//  /* eslint-disable @typescript-eslint/no-explicit-any */
-//  optionsPayload: any;
-//  timeString: string;
-//  dateString: string;
-//  venue: string;
-//}
-//
-//export interface StoryFragmentProps {
-//  title: string;
-//  id: string;
-//  slug: string;
-//  socialImagePath: string | undefined;
-//  tailwindBgColour: string | undefined;
-//  menu: MenuDatum;
-//  panes: PaneNode[];
-//  panesPayload: PaneDatumProps[];
-//  impressions: ImpressionDatum[];
-//  tractStackId: string;
-//  tractStackTitle: string;
-//  tractStackSlug: string;
-//  changed: Date;
-//  created: Date;
-//}
-//
-//export interfac
-//  title: string;
-//  id: string;
-//  slug: string;
-//  panePayload: PaneDatumProps;
-//  impressions: ImpressionDatum[];
-//  changed: Date;
-//  created: Date;
-//}
-//
-//// axios sync to concierge
-//
-//export interface IEventStream {
-//  duration: number;
-//  id: string;
-//  type: string;
-//  verb: string;
-//  targetId?: string;
-//  score?: string;
-//  title?: string;
-//  targetSlug?: string;
-//  isContextPane?: string;
-//}
-//export interface IEventStreamDict {
-//  [key: string]: IEventStream;
-//}
-//
-//
-//
-//
-//export interface ITokens {
-//  encryptedCode: string | null;
-//  encryptedEmail: string | null;
-//}
-//
-//export interface IAuthStorePayload {
-//  firstname: string | null;
-//  encryptedEmail: string | null;
-//  encryptedCode: string | null;
-//  email: string;
-//  contactPersona: string;
-//  shortBio: string;
-//  authenticated: boolean;
-//  knownLead: boolean;
-//  badLogin: boolean;
-//}
-//
-//export interface IAuthStoreLoginResponse {
-//  refreshToken: string | null;
-//  jwt: string | null;
-//  auth: boolean;
-//  knownLead: boolean;
-//  neo4jEnabled: boolean;
-//  firstname: string | null;
-//  fingerprint: string;
-//  encryptedEmail: string | null;
-//  encryptedCode: string | null;
-//  beliefs: object | null;
-//}
-//
-//
-//export interface ImpressionsDatum {
-//  [key: string]: ImpressionDatum;
-//}
-//
-//export interface ResourcesPayload {
-//  perCodeHookPayload: { [key: number]: CodeHookDatum };
-//  perCodeHookResourceCategory: { [key: number]: string[] };
-//  /* eslint-disable @typescript-eslint/no-explicit-any */
-//  perCodeHookOptions: any;
-//  resources: ResourceDatumProps[];
-//}
-//
-//export interface CodeHookDatum {
-//  target: string;
-//  url: string | undefined;
-//  options: string | undefined;
-//  height: string | undefined;
-//  width: string | undefined;
-//}
-//
-//export interface PaneRenderProps {
-//  payload: PaneDatumProps;
-//}
-//
-//
-//export interface MarkdownPaneProps {
-//  id: string;
-//  drupalNid: number;
-//  title: string;
-//  body: string;
-//  htmlAst: any;
-//  slug: string;
-//}
-//
-//export interface ButtonData {
-//  urlTarget: string;
-//  callbackPayload: string;
-//  className: string;
-//  classNamesPayload: {
-//    [key: string]: {
-//      classes: {
-//        [key: string]: string[] | number[];
-//      };
-//    };
-//  };
-//}
-//
-//export type LispTokens = (string | LispTokens)[];
-//
-//export interface PaneFromAstProps {
-//  payload: {
-//    ast: any[];
-//    imageData: FileNode[];
-//    buttonData: { [key: string]: ButtonData };
-//  };
-//  thisClassNames: any;
-//  memory: any;
-//  id: string;
-//  paneId: string;
-//  slug: string;
-//  idx: number;
-//}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//export interface ICodeHookIframe {
-//  target: string;
-//  url: string;
-//  height?: number;
-//  width?: number;
-//}
-//export interface ICodeHookShopify {
-//  id: string;
-//  target: string;
-//}
-//export interface ICodeHook {
-//  name: string;
-//  target: string;
-//}
-//
-//
-//export interface GraphPayload {
-//  payload: {
-//    nodes: GraphNodeDatum[];
-//    edges: GraphRelationshipDatum[];
-//  };
-//}
-//

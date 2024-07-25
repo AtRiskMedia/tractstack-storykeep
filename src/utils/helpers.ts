@@ -5,10 +5,24 @@ import type {
   GraphNode,
   GraphNodeDatum,
   GraphRelationshipDatum,
+  ClassNamesPayloadValue,
 } from "../types";
 
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(` `);
+}
+
+export function getClassNames(
+  input: string | { classes: ClassNamesPayloadValue }
+): string[] {
+  if (!input) {
+    return [];
+  }
+  if (typeof input === "string") {
+    return [input];
+  } else {
+    return Object.values(input.classes).flat();
+  }
 }
 
 export function handleResize() {

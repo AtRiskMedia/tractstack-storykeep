@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { memo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
@@ -264,7 +264,7 @@ export const Pane = (props: { id: string }) => {
       ref={paneRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      style={{ position: "relative" }}
+      className="relative"
     >
       <div
         id={`pane-inner-${id}`}
@@ -274,7 +274,8 @@ export const Pane = (props: { id: string }) => {
           paneHeightOffset ? paneHeightOffset : ``,
           hasMaxHScreen ? `max-h-screen` : ``,
           hasOverflowHidden ? `overflow-hidden` : ``,
-          `grid`
+          `grid`,
+          bgColour ? `bg-[${bgColour}]` : ""
         )}
       >
         {paneFragments
@@ -311,41 +312,29 @@ export const Pane = (props: { id: string }) => {
       </div>
       <div
         onClick={handleEditModeToggle}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          cursor: "pointer",
-          backgroundColor: isHovered ? "rgba(167,177,183,.85)" : "transparent",
-          transition: "background-color 0.3s ease",
-        }}
+        className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
+          isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
+        }`}
       >
         {isHovered && (
           <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "white",
-              padding: "10px",
-              borderRadius: "5px",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-            }}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+               bg-white p-2.5 rounded-md shadow-md
+               text-xl md:text-3xl font-action mx-6"
           >
-            Edit{" "}
-            <button
-              onClick={handleEditModeToggle}
-              style={{ fontWeight: "bold" }}
-            >
-              settings
-            </button>{" "}
-            on this pane
+            {$editMode?.id === id ? (
+              <span>Close settings pane</span>
+            ) : (
+              <span>
+                Edit <button onClick={handleEditModeToggle}>settings</button> on
+                this pane
+              </span>
+            )}
           </div>
         )}
       </div>
     </div>
   );
 };
+
+export default memo(Pane);

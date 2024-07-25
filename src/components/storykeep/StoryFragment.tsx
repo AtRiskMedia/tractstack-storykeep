@@ -4,13 +4,16 @@ import {
   storyFragmentInit,
   storyFragmentPaneIds,
   storyFragmentTailwindBgColour,
+  viewportStore,
 } from "../../store/storykeep";
 import { PaneWrapper } from "./PaneWrapper";
 import { classNames, handleEditorResize } from "../../utils/helpers";
-import { useStoryKeepUtils } from "../../utils/storykeep";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
+  const $viewport = useStore(viewportStore);
+  const viewportKey =
+    $viewport?.value && $viewport.value !== `auto` ? $viewport.value : null;
   const [isClient, setIsClient] = useState(false);
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds);
@@ -19,9 +22,6 @@ export const StoryFragment = (props: { id: string }) => {
   );
   const paneIds = $storyFragmentPaneIds[id]?.current;
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
-
-  // helpers
-  const { viewport } = useStoryKeepUtils(id);
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) setIsClient(true);
@@ -38,6 +38,31 @@ export const StoryFragment = (props: { id: string }) => {
     }, 100);
   }, []);
 
+  useEffect(() => {
+    const outerDiv = document.getElementById(`storykeep`);
+    if (outerDiv) {
+      outerDiv.classList.remove(
+        `min-w-[500px]`,
+        `max-w-[780px]`,
+        `min-w-[1024px]`,
+        `max-w-[1367px]`,
+        `min-w-[1368px]`,
+        `max-w-[1920px]`
+      );
+      switch (viewportKey) {
+        case "mobile":
+          outerDiv.classList.add(`min-w-[500px]`, `max-w-[780px]`);
+          break;
+        case "tablet":
+          outerDiv.classList.add(`min-w-[1024px]`, `max-w-[1367px]`);
+          break;
+        case "desktop":
+          outerDiv.classList.add(`min-w-[1368px]`, `max-w-[1920px]`);
+          break;
+      }
+    }
+  }, [viewportKey]);
+
   if (!isClient) return <div>Loading...</div>;
 
   return (
@@ -47,11 +72,13 @@ export const StoryFragment = (props: { id: string }) => {
         className={classNames(
           tailwindBgColour ? tailwindBgColour : `bg-white`,
           `overflow-hidden`,
-          viewport === `mobile`
-            ? `max-w-[800px]`
-            : viewport === `tablet`
-              ? `max-w-[1367px]`
-              : `max-w-[1920px]`
+          viewportKey === `mobile`
+            ? `min-w-[500px] max-w-[800px]`
+            : viewportKey === `tablet`
+              ? `min-w-[1024px] max-w-[1367px]`
+              : viewportKey === `desktop`
+                ? `min-w-[1368px] max-w-[1920px]`
+                : ``
         )}
       >
         {paneIds.map((paneId: string) => (

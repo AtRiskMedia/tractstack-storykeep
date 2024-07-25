@@ -41,9 +41,7 @@ const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
 
   useEffect(() => {
     const handleResize = debounce(() => {
-      const mainContent = document.getElementById(
-        "main-content"
-      ) as HTMLElement;
+      const mainContent = document.getElementById(`storykeep`) as HTMLElement;
       setWidth(mainContent.offsetWidth);
     }, 100);
 

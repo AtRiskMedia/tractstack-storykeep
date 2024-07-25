@@ -1,6 +1,7 @@
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
+import type { ReactNode } from "react";
 import type { ButtonData, FileNode, MarkdownLookup } from "../../../types";
 
 interface PaneFromAstProps {
@@ -16,7 +17,42 @@ interface PaneFromAstProps {
   idx: number | null;
   outerIdx: number;
   markdownLookup?: MarkdownLookup;
+  toolMode: string;
 }
+
+const EditableOuterWrapper = ({ children }: { children: ReactNode }) => {
+  return (
+    <div className="relative">
+      {children}
+      <div
+        style={{ outline: "2px dashed purple" }}
+        className="absolute inset-0 w-full h-full z-101 hover:bg-myorange/10"
+      />
+    </div>
+  );
+};
+const EditableInnerWrapper = ({ children }: { children: ReactNode }) => {
+  return (
+    <span className="relative">
+      {children}
+      <span
+        style={{ outline: "1px dashed red" }}
+        className="absolute inset-0 w-full h-full z-102 hover:bg-myorange/20"
+      />
+    </span>
+  );
+};
+const EditableInnerElementWrapper = ({ children }: { children: ReactNode }) => {
+  return (
+    <div className="relative">
+      {children}
+      <div
+        style={{ outline: "1px solid red" }}
+        className="absolute inset-0 w-full h-full z-103 hover:bg-myorange/50"
+      />
+    </div>
+  );
+};
 
 const PaneFromAst = ({
   payload,
@@ -26,6 +62,7 @@ const PaneFromAst = ({
   idx = null,
   outerIdx,
   markdownLookup,
+  toolMode,
 }: PaneFromAstProps) => {
   const thisAst = payload.ast[0];
 
@@ -137,6 +174,8 @@ const PaneFromAst = ({
       ? thisHookValuesRaw[2]
       : "";
 
+  const isParent = typeof idx !== `number` || Tag === `li`;
+
   // Render component based on Tag
   if (Tag === "text") return thisAst.value;
   if (Tag === "br") return <br />;
@@ -158,7 +197,7 @@ const PaneFromAst = ({
     ].includes(Tag)
   ) {
     const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    return (
+    const child = (
       <TagComponent className={injectClassNames}>
         {thisAst?.children?.map((p: any, childIdx: number) => (
           <PaneFromAst
@@ -170,14 +209,22 @@ const PaneFromAst = ({
             idx={!idx ? childIdx : idx}
             outerIdx={outerIdx}
             markdownLookup={markdownLookup}
+            toolMode={toolMode}
           />
         ))}
       </TagComponent>
     );
+    if (toolMode !== `text` || !isParent || [`ol`, `ul`].includes(Tag))
+      return child;
+    if ([`li`].includes(Tag))
+      return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
+    if ([`strong`, `em`].includes(Tag))
+      return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
+    return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
   }
 
   if (Tag === "a" && isExternalUrl) {
-    return (
+    const child = (
       <a
         target="_blank"
         rel="noreferrer"
@@ -187,6 +234,8 @@ const PaneFromAst = ({
         {thisAst.children[0].value}
       </a>
     );
+    if (toolMode !== `text`) return child;
+    return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
   }
 
   if (
@@ -196,7 +245,7 @@ const PaneFromAst = ({
     thisAst.children[0].type === "text" &&
     thisAst.children[0].value
   ) {
-    return (
+    const child = (
       <AstToButton
         className={buttonPayload.className || ""}
         callbackPayload={callbackPayload}
@@ -206,6 +255,8 @@ const PaneFromAst = ({
         text={thisAst.children[0].value}
       />
     );
+    if (toolMode !== `text`) return child;
+    return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
   }
 
   if (Tag === "img" && imageSrc) {

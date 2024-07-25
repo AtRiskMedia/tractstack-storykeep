@@ -30,6 +30,7 @@ interface Props {
   paneId: string;
   slug: string;
   markdownLookup: MarkdownLookup;
+  toolMode: string;
 }
 
 const MarkdownInsideModal = ({
@@ -41,6 +42,7 @@ const MarkdownInsideModal = ({
   paneId,
   slug,
   markdownLookup,
+  toolMode,
 }: Props) => {
   const $viewport = useStore(viewportStore) as { value: ViewportKey };
   const viewportKey: ViewportKey =
@@ -195,6 +197,7 @@ const MarkdownInsideModal = ({
                           idx={null}
                           outerIdx={idx}
                           markdownLookup={markdownLookup}
+                          toolMode={toolMode}
                         />
                       ))}
                   </div>

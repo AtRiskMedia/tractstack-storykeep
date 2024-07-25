@@ -1,7 +1,12 @@
 import { memo } from "react";
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { editModeStore, paneInit } from "../../store/storykeep";
+import {
+  toolModeStore,
+  editModeStore,
+  paneInit,
+  paneCodeHook,
+} from "../../store/storykeep";
 import { handleToggleOn, handleToggleOff } from "../../utils/storykeep";
 
 const CodeHook = (props: { id: string }) => {
@@ -9,7 +14,10 @@ const CodeHook = (props: { id: string }) => {
   const [isClient, setIsClient] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const $paneInit = useStore(paneInit);
-  //const $paneCodeHook = useStore(paneCodeHook);
+  const $toolMode = useStore(toolModeStore);
+  const toolMode = $toolMode.value || ``;
+  const $paneCodeHook = useStore(paneCodeHook);
+  const slug = $paneCodeHook[id].current?.target || id;
   const $editMode = useStore(editModeStore);
 
   useEffect(() => {
@@ -65,47 +73,36 @@ const CodeHook = (props: { id: string }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div>
-        {/* Placeholder content */}
-        Code Hook: {id}
+      <div className="w-full text-center text-xl font-myblue font-bold bg-mygreen/20">
+        Code Hook: {slug}
       </div>
-      <div
-        onClick={handleEditModeToggle}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          cursor: "pointer",
-          backgroundColor: isHovered ? "rgba(0, 0, 0, 0.1)" : "transparent",
-          transition: "background-color 0.3s ease",
-        }}
-      >
-        {isHovered && (
-          <div
-            style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              backgroundColor: "white",
-              padding: "10px",
-              borderRadius: "5px",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            Edit{" "}
-            <button
-              onClick={handleEditModeToggle}
-              style={{ fontWeight: "bold" }}
+      {toolMode === `settings` ? (
+        <div
+          onClick={handleEditModeToggle}
+          className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
+            isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
+          }`}
+        >
+          {isHovered && (
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+               bg-white p-2.5 rounded-md shadow-md
+               text-xl md:text-3xl font-action mx-6"
             >
-              settings
-            </button>{" "}
-            on this code hook
-          </div>
-        )}
-      </div>
+              {$editMode?.id === id ? (
+                <span>Close settings pane</span>
+              ) : (
+                <span>
+                  Edit <button onClick={handleEditModeToggle}>settings</button>{" "}
+                  on code hook
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="absolute inset-0 w-full h-full z-50" />
+      )}
     </div>
   );
 };

@@ -20,6 +20,7 @@ interface Props {
   paneId: string;
   slug: string;
   markdownLookup: MarkdownLookup;
+  toolMode: string;
 }
 
 const MarkdownPane = ({
@@ -29,6 +30,7 @@ const MarkdownPane = ({
   paneId,
   slug,
   markdownLookup,
+  toolMode,
 }: Props) => {
   const $viewport = useStore(viewportStore) as { value: ViewportKey };
   const viewportKey: ViewportKey =
@@ -96,6 +98,7 @@ const MarkdownPane = ({
         idx={null}
         outerIdx={idx}
         markdownLookup={markdownLookup}
+        toolMode={toolMode}
       />
     ));
 

@@ -21,6 +21,7 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneFiles,
+  toolModeStore,
 } from "../../store/storykeep";
 import {
   isFullScreenEditModal,
@@ -64,6 +65,8 @@ export const Pane = (props: { id: string }) => {
   const [bgColour, setBgColour] = useState<string | null>(null);
   const bgColourStyle = bgColour ? { backgroundColor: bgColour } : {};
   const $editMode = useStore(editModeStore);
+  const $toolMode = useStore(toolModeStore);
+  const toolMode = $toolMode.value || ``;
   const $paneInit = useStore(paneInit);
   const $paneSlug = useStore(paneSlug);
   const $paneMarkdownBody = useStore(paneMarkdownBody);
@@ -310,29 +313,33 @@ export const Pane = (props: { id: string }) => {
             ) : null
           )}
       </div>
-      <div
-        onClick={handleEditModeToggle}
-        className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
-          isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
-        }`}
-      >
-        {isHovered && (
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
+      {toolMode === `settings` ? (
+        <div
+          onClick={handleEditModeToggle}
+          className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
+            isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
+          }`}
+        >
+          {isHovered && (
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
                bg-white p-2.5 rounded-md shadow-md
                text-xl md:text-3xl font-action mx-6"
-          >
-            {$editMode?.id === id ? (
-              <span>Close settings pane</span>
-            ) : (
-              <span>
-                Edit <button onClick={handleEditModeToggle}>settings</button> on
-                this pane
-              </span>
-            )}
-          </div>
-        )}
-      </div>
+            >
+              {$editMode?.id === id ? (
+                <span>Close settings pane</span>
+              ) : (
+                <span>
+                  Edit <button onClick={handleEditModeToggle}>settings</button>{" "}
+                  on this pane
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="absolute inset-0 w-full h-full z-50" />
+      )}
     </div>
   );
 };

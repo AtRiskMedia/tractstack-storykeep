@@ -5,7 +5,7 @@ import {
   ComputerDesktopIcon,
   ArrowsPointingOutIcon,
 } from "@heroicons/react/24/outline";
-import { debounce } from "../../utils/helpers";
+import { debounce } from "../../../utils/helpers";
 
 interface ViewportSelectorProps {
   viewport: "auto" | "mobile" | "tablet" | "desktop";

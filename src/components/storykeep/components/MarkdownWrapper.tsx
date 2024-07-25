@@ -1,9 +1,11 @@
 import { memo } from "react";
+import { useStore } from "@nanostores/react";
 import MarkdownPane from "./MarkdownPane";
 import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
+import { toolModeStore } from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import type {
   MarkdownDatum,
@@ -29,6 +31,8 @@ const MarkdownWrapper = ({
   paneId,
   slug,
 }: Props) => {
+  const $toolMode = useStore(toolModeStore);
+  const toolMode = $toolMode.value || ``;
   // this is either MarkdownPane, Modal+MarkdownInsideModal, or MarkdownInsidePane
   const thisPayload = payload as MarkdownPaneDatum;
   const thisModalPayload =
@@ -91,6 +95,7 @@ const MarkdownWrapper = ({
             paneId={paneId}
             slug={slug}
             markdownLookup={markdownLookup}
+            toolMode={toolMode}
           />
         </div>
       </div>
@@ -107,6 +112,7 @@ const MarkdownWrapper = ({
         paneId={paneId}
         slug={slug}
         markdownLookup={markdownLookup}
+        toolMode={toolMode}
       />
     );
   }
@@ -120,6 +126,7 @@ const MarkdownWrapper = ({
         paneId={paneId}
         slug={slug}
         markdownLookup={markdownLookup}
+        toolMode={toolMode}
       />
     );
   }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import ViewportSelector from "./ViewportSelector";
-import ToolModeSelector from "./ToolModeSelector";
-import ToolAddModeSelector from "./ToolAddModeSelector";
+import ViewportSelector from "./components/ViewportSelector";
+import ToolModeSelector from "./components/ToolModeSelector";
+import ToolAddModeSelector from "./components/ToolAddModeSelector";
 import StoryFragmentTitle from "./fields/StoryFragmentTitle";
 import StoryFragmentSlug from "./fields/StoryFragmentSlug";
 import {
@@ -87,8 +87,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             Logo
           </object>
           <h1 className="font-2xl font-bold font-action mr-auto">
-            <span className="xs:hidden md:inline-block">your</span> amplify your
-            content
+            website builder for the people
           </h1>
           <button
             type="button"

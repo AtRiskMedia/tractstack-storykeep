@@ -1,5 +1,5 @@
-import type { ToolMode } from "../../types";
-import { toolModeButtons } from "../../constants";
+import type { ToolMode } from "../../../types";
+import { toolModeButtons } from "../../../constants";
 
 interface ToolModeSelectorProps {
   toolMode: ToolMode;

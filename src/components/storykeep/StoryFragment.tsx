@@ -6,7 +6,7 @@ import {
   storyFragmentTailwindBgColour,
   viewportStore,
 } from "../../store/storykeep";
-import { PaneWrapper } from "./PaneWrapper";
+import PaneWrapper from "./PaneWrapper";
 import { classNames, handleEditorResize } from "../../utils/helpers";
 
 export const StoryFragment = (props: { id: string }) => {

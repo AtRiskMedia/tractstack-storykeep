@@ -4,6 +4,7 @@ import {
   Cog8ToothIcon,
   TrashIcon,
   PlusCircleIcon,
+  Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
 import type { ToolMode, ToolAddMode } from "./types";
 
@@ -52,6 +53,7 @@ export const toolModes: ToolMode[] = [
   "styles",
   "settings",
   "eraser",
+  "pane",
 ];
 
 export const toolModeButtons = [
@@ -74,6 +76,11 @@ export const toolModeButtons = [
     key: "eraser" as const,
     Icon: TrashIcon,
     title: "Erase element",
+  },
+  {
+    key: "pane" as const,
+    Icon: Square3Stack3DIcon,
+    title: "Insert Pane",
   },
   {
     key: "settings" as const,

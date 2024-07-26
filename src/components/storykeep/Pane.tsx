@@ -1,10 +1,9 @@
-import { memo, useState, useEffect, useCallback } from "react";
+import { memo, useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
 import { classNames } from "../../utils/helpers";
 import {
-  editModeStore,
   paneInit,
   paneSlug,
   paneMarkdownBody,
@@ -21,13 +20,7 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneFiles,
-  toolModeStore,
 } from "../../store/storykeep";
-import {
-  isFullScreenEditModal,
-  handleToggleOn,
-  handleToggleOff,
-} from "../../utils/storykeep";
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
 import { cleanHtmlAst } from "../../utils/compositor/cleanHtmlAst";
@@ -48,7 +41,6 @@ const paneFragmentStyle = {
 export const Pane = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [slug, setSlug] = useState(`slug`);
   const [markdown, setMarkdown] = useState<MarkdownDatum | null>(null);
   const [files, setFiles] = useState<FileDatum[]>([]);
@@ -64,9 +56,6 @@ export const Pane = (props: { id: string }) => {
   >([]);
   const [bgColour, setBgColour] = useState<string | null>(null);
   const bgColourStyle = bgColour ? { backgroundColor: bgColour } : {};
-  const $editMode = useStore(editModeStore);
-  const $toolMode = useStore(toolModeStore);
-  const toolMode = $toolMode.value || ``;
   const $paneInit = useStore(paneInit);
   const $paneSlug = useStore(paneSlug);
   const $paneMarkdownBody = useStore(paneMarkdownBody);
@@ -83,15 +72,6 @@ export const Pane = (props: { id: string }) => {
   const $paneHasOverflowHidden = useStore(paneHasOverflowHidden);
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen);
   const $paneFiles = useStore(paneFiles);
-  const [paneElement, setPaneElement] = useState<HTMLDivElement | null>(null);
-  const paneRef = useCallback(
-    (node: HTMLDivElement) => {
-      if (node !== null) {
-        setPaneElement(node);
-      }
-    },
-    [props.id]
-  );
 
   useEffect(() => {
     if ($paneInit[id]?.init) {
@@ -193,82 +173,10 @@ export const Pane = (props: { id: string }) => {
     setIsClient(true);
   }, [id, $paneInit]);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === "Escape" &&
-        $editMode?.type === "pane" &&
-        $editMode?.mode === "settings" &&
-        $editMode.id === id
-      ) {
-        toggleOffEditModal();
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [$editMode, id]);
-
-  useEffect(() => {
-    if (!paneElement || isFullScreenEditModal($editMode?.mode || ``)) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) {
-          const currentEditMode = editModeStore.get();
-          if (
-            currentEditMode?.type === "pane" &&
-            currentEditMode.mode === "settings" &&
-            currentEditMode.id === props.id
-          ) {
-            toggleOffEditModal();
-          }
-        }
-      },
-      { threshold: 0 }
-    );
-
-    observer.observe(paneElement);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [paneElement, props.id, $editMode]);
-
-  const toggleOffEditModal = useCallback(() => {
-    editModeStore.set(null);
-    handleToggleOff();
-  }, [props.id]);
-
-  const handleEditModeToggle = () => {
-    if (
-      $editMode?.type === "pane" &&
-      $editMode?.mode === "settings" &&
-      $editMode.id === id
-    ) {
-      toggleOffEditModal();
-    } else {
-      editModeStore.set({
-        id,
-        mode: "settings",
-        type: "pane",
-      });
-      handleToggleOn();
-    }
-  };
-
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div
-      ref={paneRef}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative"
-    >
+    <div className="relative">
       <div
         id={`pane-inner-${id}`}
         style={bgColourStyle}
@@ -313,33 +221,7 @@ export const Pane = (props: { id: string }) => {
             ) : null
           )}
       </div>
-      {toolMode === `settings` ? (
-        <div
-          onClick={handleEditModeToggle}
-          className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
-            isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
-          }`}
-        >
-          {isHovered && (
-            <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 
-               bg-white p-2.5 rounded-md shadow-md
-               text-xl md:text-3xl font-action mx-6"
-            >
-              {$editMode?.id === id ? (
-                <span>Close settings pane</span>
-              ) : (
-                <span>
-                  Edit <button onClick={handleEditModeToggle}>settings</button>{" "}
-                  on this pane
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="absolute inset-0 w-full h-full z-50" />
-      )}
+      <div className="absolute inset-0 w-full h-full z-50" />
     </div>
   );
 };

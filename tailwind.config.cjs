@@ -119,8 +119,9 @@ module.exports = {
         r20: 'calc(var(--scale) * 5rem)',
       },
       fontFamily: {
-        action: ['Font-Action', 'Georgia', 'Times New Roman', 'Times', 'serif'],
+        action: ['Font-Action','Inter','Georgia', 'Times New Roman', 'Times', 'serif'],
         main: [
+          'Inter',
           'Font-Main',
           'Arial',
           'Helvetica Neue',

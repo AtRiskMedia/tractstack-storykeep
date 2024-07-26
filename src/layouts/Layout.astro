@@ -36,6 +36,7 @@ const {
 const socialImageURL = `${website}/${ogImage ?? SITE.ogImage ?? `og.png`}`;
 const socialLogoURL = `${website}/${ogLogo ?? SITE.ogLogo ?? `logo.png`}`;
 
+const useCustomFonts = import.meta.env.PUBLIC_USE_CUSTOM_FONTS || false;
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 const gtagUrl =
   typeof googleSiteVerification === `string`
@@ -100,6 +101,19 @@ const contentMap: ContentMap[] = await getContentMap();
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
+
+    {
+      !useCustomFonts && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+            rel="stylesheet"
+          />
+        </>
+      )
+    }
 
     <!-- Google Analytics -->
     <script async is:inline define:vars={{ gtagUrl }} src={gtagUrl}></script>

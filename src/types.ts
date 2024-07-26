@@ -18,7 +18,13 @@ export interface MarkdownLookup {
   linksLookup: { [parentNth: number]: { [childNth: number]: number } };
 }
 
-export type ToolMode = "insert" | "text" | "styles" | "settings" | "eraser";
+export type ToolMode =
+  | "insert"
+  | "text"
+  | "styles"
+  | "settings"
+  | "pane"
+  | "eraser";
 export type StoreKey =
   | "storyFragmentTitle"
   | "storyFragmentSlug"

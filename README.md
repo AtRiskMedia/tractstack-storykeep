@@ -1,6 +1,6 @@
 # Tract Stack
 
-the SEO-friendly website builder that boosts conversions
+the website builder that converts
 
 by [At Risk Media](https://atriskmedia.com)
 

@@ -87,7 +87,7 @@ export const StoryFragmentHeader = (props: { id: string }) => {
             Logo
           </object>
           <h1 className="font-2xl font-bold font-action mr-auto">
-            website builder for the people
+            the website builder that converts
           </h1>
           <button
             type="button"

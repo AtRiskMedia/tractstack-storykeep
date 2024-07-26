@@ -25,8 +25,9 @@ const EditableOuterWrapper = ({ children }: { children: ReactNode }) => {
     <div className="relative">
       {children}
       <div
-        style={{ outline: "2px dashed purple" }}
-        className="absolute inset-0 w-full h-full z-101 hover:bg-myorange/10"
+        className="absolute inset-0 w-full h-full z-101 hover:bg-white hover:bg-opacity-10 hover:outline-white/20
+                   outline outline-2 outline-dotted outline-white/20 outline-offset-[-2px]
+                   mix-blend-exclusion"
       />
     </div>
   );
@@ -36,8 +37,9 @@ const EditableInnerWrapper = ({ children }: { children: ReactNode }) => {
     <span className="relative">
       {children}
       <span
-        style={{ outline: "1px dashed red" }}
-        className="absolute inset-0 w-full h-full z-102 hover:bg-myorange/20"
+        className="absolute inset-0 w-full h-full z-102 hover:bg-white hover:bg-opacity-20 hover:outline-white
+                   outline outline-2 outline-dashed outline-white/85 outline-offset-[-2px]
+                   mix-blend-exclusion"
       />
     </span>
   );
@@ -47,9 +49,35 @@ const EditableInnerElementWrapper = ({ children }: { children: ReactNode }) => {
     <div className="relative">
       {children}
       <div
-        style={{ outline: "1px solid red" }}
-        className="absolute inset-0 w-full h-full z-103 hover:bg-myorange/50"
+        className="absolute inset-0 w-full h-full z-103 hover:bg-white hover:bg-opacity-10 hover:outline-white
+                   outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
+                   mix-blend-exclusion"
       />
+    </div>
+  );
+};
+const EditableTopBottomWrapper = ({ children }: { children: ReactNode }) => {
+  return (
+    <div className="relative group">
+      {children}
+      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
+        <div
+          className="absolute inset-0 w-full h-full
+                     hover:bg-white hover:bg-opacity-40
+                     mix-blend-exclusion
+                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
+                     before:bg-white/30 hover:before:bg-white before:mix-blend-exclusion"
+        />
+      </div>
+      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
+        <div
+          className="absolute inset-0 w-full h-full
+                     hover:bg-white hover:bg-opacity-40
+                     mix-blend-exclusion
+                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
+                     after:bg-white/30 hover:after:bg-white after:mix-blend-exclusion"
+        />
+      </div>
     </div>
   );
 };
@@ -175,6 +203,9 @@ const PaneFromAst = ({
       : "";
 
   const isParent = typeof idx !== `number` || Tag === `li`;
+  const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode);
+  const showOverlay2 = [`insert`].includes(toolMode);
+  const noOverlay = !showOverlay && !showOverlay2;
 
   // Render component based on Tag
   if (Tag === "text") return thisAst.value;
@@ -214,13 +245,15 @@ const PaneFromAst = ({
         ))}
       </TagComponent>
     );
-    if (toolMode !== `text` || !isParent || [`ol`, `ul`].includes(Tag))
-      return child;
-    if ([`li`].includes(Tag))
+    if (noOverlay || !isParent || [`ol`, `ul`].includes(Tag)) return child;
+    if (showOverlay && [`li`].includes(Tag))
       return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
-    if ([`strong`, `em`].includes(Tag))
+    if (showOverlay && [`strong`, `em`].includes(Tag))
       return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
-    return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
+    if (showOverlay)
+      return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
+    if (showOverlay2)
+      return <EditableTopBottomWrapper>{child}</EditableTopBottomWrapper>;
   }
 
   if (Tag === "a" && isExternalUrl) {
@@ -234,7 +267,7 @@ const PaneFromAst = ({
         {thisAst.children[0].value}
       </a>
     );
-    if (toolMode !== `text`) return child;
+    if (!showOverlay) return child;
     return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
   }
 
@@ -255,7 +288,7 @@ const PaneFromAst = ({
         text={thisAst.children[0].value}
       />
     );
-    if (toolMode !== `text`) return child;
+    if (!showOverlay) return child;
     return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
   }
 

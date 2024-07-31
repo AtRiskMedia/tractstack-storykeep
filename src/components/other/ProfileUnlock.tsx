@@ -20,6 +20,7 @@ export async function goUnlockProfile(payload: {
     const ref = referrer.get();
     const settings = { ...payload, referrer: ref };
     const conciergeSync = await getTokens(settings);
+    console.log(`conciergeSync`,conciergeSync)
     if (conciergeSync?.error) {
       error.set(true);
       success.set(false);
@@ -81,6 +82,7 @@ export const ProfileUnlock = () => {
   const [codeword, setCodeword] = useState(``);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    console.log(`unlock`)
     e.preventDefault();
     setBadLogin(false);
     setSubmitted(true);

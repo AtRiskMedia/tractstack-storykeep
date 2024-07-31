@@ -8,6 +8,7 @@ import { ProfileUnlock } from "./ProfileUnlock";
 export const ProfileSwitch = () => {
   const $authPayload = useStore(auth);
   const [mode, setMode] = useState(`unset`);
+  console.log(mode)
 
   useEffect(() => {
     if (

@@ -1,28 +1,41 @@
 import type { APIRoute } from "astro";
+import { proxyRequestWithRefresh } from "../../../../api/authService";
 
 const BACKEND_URL = import.meta.env.PUBLIC_CONCIERGE_BASE_URL;
 
 export const GET: APIRoute = async ({ request }) => {
   const token = request.headers.get("Authorization");
-
   try {
-    const response = await fetch(`${BACKEND_URL}/users/profile`, {
-      headers: {
-        Authorization: token || "",
+    console.log(`*`)
+    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+      `${BACKEND_URL}/users/profile`,
+      {
+        headers: {
+          Authorization: token || "",
+        },
       },
-    });
+      undefined // No refresh token for GET request
+    );
+    console.log(`*`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    console.log(`profile`,data,response)
+    return new Response(
+      JSON.stringify({
+        ...data,
+        newRefreshToken,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error in profile get route:", error);
     return new Response(
@@ -41,30 +54,43 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  const body = await request.json();
-  const token = request.headers.get("Authorization");
-
+  let body;
   try {
-    const response = await fetch(`${BACKEND_URL}/users/profile`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token || "",
+    body = await request.json();
+    const { refreshToken, ...restBody } = body;
+    const token = request.headers.get("Authorization");
+
+    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+      `${BACKEND_URL}/users/profile`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token || "",
+        },
+        body: JSON.stringify(restBody),
       },
-      body: JSON.stringify(body),
-    });
+      refreshToken
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    console.log(`profile`,data,response)
+    return new Response(
+      JSON.stringify({
+        ...data,
+        newRefreshToken,
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     console.error("Error in profile post route:", error);
     return new Response(

@@ -33,6 +33,7 @@ async function goSaveProfile(payload: {
 }) {
   try {
     const response = await saveProfile({ profile: payload });
+    console.log(`saveProfile`,response)
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -67,17 +68,18 @@ async function goSaveProfile(payload: {
 async function goLoadProfile() {
   try {
     const response = await loadProfile();
+    console.log(`loadProfile`,response)
     profile.set({
-      firstname: response?.data?.firstname || undefined,
-      contactPersona: response?.data?.contactPersona || undefined,
-      email: response?.data?.email || undefined,
-      shortBio: response?.data?.shortBio || undefined,
+      firstname: response?.firstname || undefined,
+      contactPersona: response?.contactPersona || undefined,
+      email: response?.email || undefined,
+      shortBio: response?.shortBio || undefined,
     });
-    if (response?.data?.knownLead) {
+    if (response?.knownLead) {
       auth.setKey(`hasProfile`, `1`);
       auth.setKey(`consent`, `1`);
     }
-    if (typeof response?.data?.auth !== `undefined` && response.data.auth)
+    if (typeof response?.auth !== `undefined` && response.auth)
       auth.setKey(`unlockedProfile`, `1`);
     success.set(true);
     loading.set(false);
@@ -181,6 +183,7 @@ export const ProfileEdit = () => {
   }, [saved]);
 
   useEffect(() => {
+    console.log(`edit`)
     // on init, load profile from concierge
     if (
       $sync &&
@@ -192,6 +195,7 @@ export const ProfileEdit = () => {
       $authPayload?.token
     ) {
       const checkProfile = profile.get();
+      console.log(`checkProfile`,checkProfile)
       if (
         !checkProfile.firstname ||
         !checkProfile.contactPersona ||
@@ -199,6 +203,7 @@ export const ProfileEdit = () => {
       ) {
         error.set(false);
         loading.set(true);
+        console.log(`goLoadProfile`)
         goLoadProfile();
       } else {
         error.set(false);
@@ -218,6 +223,7 @@ export const ProfileEdit = () => {
     ) {
       setSubmitted(false);
       const val = profile.get();
+      console.log(`else`,val)
       if (val.firstname) setFirstname(val.firstname);
       if (val.email) setEmail(val.email);
       if (val.shortBio) setBio(val.shortBio);

@@ -27,18 +27,18 @@ export function getClassNames(
 
 function getScrollBarWidth() {
   // Create a temporary element to measure the scrollbar width
-  const div = document.createElement('div');
-  div.style.overflow = 'scroll';
-  div.style.width = '100px';
-  div.style.height = '100px';
-  div.style.position = 'absolute';
-  div.style.top = '-9999px'; // Move it out of the viewport
+  const div = document.createElement("div");
+  div.style.overflow = "scroll";
+  div.style.width = "100px";
+  div.style.height = "100px";
+  div.style.position = "absolute";
+  div.style.top = "-9999px"; // Move it out of the viewport
   document.body.appendChild(div);
 
   // Create an inner element to measure the difference
-  const innerDiv = document.createElement('div');
-  innerDiv.style.width = '100%';
-  innerDiv.style.height = '100%';
+  const innerDiv = document.createElement("div");
+  innerDiv.style.width = "100%";
+  innerDiv.style.height = "100%";
   div.appendChild(innerDiv);
 
   // Calculate the scrollbar width

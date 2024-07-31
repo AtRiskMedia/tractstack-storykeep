@@ -33,7 +33,6 @@ async function goSaveProfile(payload: {
 }) {
   try {
     const response = await saveProfile({ profile: payload });
-    console.log(`saveProfile`,response)
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -60,7 +59,6 @@ async function goSaveProfile(payload: {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
     return false;
   }
 }
@@ -68,7 +66,6 @@ async function goSaveProfile(payload: {
 async function goLoadProfile() {
   try {
     const response = await loadProfile();
-    console.log(`loadProfile`,response)
     profile.set({
       firstname: response?.firstname || undefined,
       contactPersona: response?.contactPersona || undefined,
@@ -96,7 +93,6 @@ async function goLoadProfile() {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
   }
 }
 
@@ -183,7 +179,6 @@ export const ProfileEdit = () => {
   }, [saved]);
 
   useEffect(() => {
-    console.log(`edit`)
     // on init, load profile from concierge
     if (
       $sync &&
@@ -195,7 +190,6 @@ export const ProfileEdit = () => {
       $authPayload?.token
     ) {
       const checkProfile = profile.get();
-      console.log(`checkProfile`,checkProfile)
       if (
         !checkProfile.firstname ||
         !checkProfile.contactPersona ||
@@ -203,7 +197,6 @@ export const ProfileEdit = () => {
       ) {
         error.set(false);
         loading.set(true);
-        console.log(`goLoadProfile`)
         goLoadProfile();
       } else {
         error.set(false);
@@ -223,7 +216,6 @@ export const ProfileEdit = () => {
     ) {
       setSubmitted(false);
       const val = profile.get();
-      console.log(`else`,val)
       if (val.firstname) setFirstname(val.firstname);
       if (val.email) setEmail(val.email);
       if (val.shortBio) setBio(val.shortBio);

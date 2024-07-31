@@ -64,7 +64,6 @@ async function goSaveProfile(payload: {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
     return false;
   }
 }
@@ -72,7 +71,6 @@ async function goSaveProfile(payload: {
 async function goLoadProfile() {
   try {
     const response = await loadProfile();
-    console.log(`loadProfile`,response)
     profile.set({
       firstname: response?.data?.firstname || undefined,
       contactPersona: response?.data?.contactPersona || undefined,
@@ -100,7 +98,6 @@ async function goLoadProfile() {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
   }
 }
 
@@ -184,7 +181,6 @@ export const ProfileCreate = () => {
   }, [badSave]);
 
   useEffect(() => {
-    console.log(`create`)
     // on init, load profile from concierge
     if (
       $sync &&

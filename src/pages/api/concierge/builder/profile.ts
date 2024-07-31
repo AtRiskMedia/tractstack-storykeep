@@ -6,7 +6,6 @@ const BACKEND_URL = import.meta.env.PUBLIC_CONCIERGE_BASE_URL;
 export const GET: APIRoute = async ({ request }) => {
   const token = request.headers.get("Authorization");
   try {
-    console.log(`*`)
     const { response, newRefreshToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/users/profile`,
       {
@@ -16,14 +15,12 @@ export const GET: APIRoute = async ({ request }) => {
       },
       undefined // No refresh token for GET request
     );
-    console.log(`*`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log(`profile`,data,response)
     return new Response(
       JSON.stringify({
         ...data,
@@ -78,7 +75,6 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const data = await response.json();
-    console.log(`profile`,data,response)
     return new Response(
       JSON.stringify({
         ...data,

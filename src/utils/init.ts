@@ -1,4 +1,4 @@
-import { getTokens } from "../api/axiosClient";
+import { getTokens } from "../api/fetchClient";
 import { events, current } from "../store/events";
 import {
   auth,

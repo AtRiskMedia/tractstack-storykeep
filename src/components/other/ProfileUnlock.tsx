@@ -10,7 +10,7 @@ import {
   loading,
   referrer,
 } from "../../store/auth";
-import { getTokens } from "../../api/axiosClient";
+import { getTokens } from "../../api/fetchClient";
 
 export async function goUnlockProfile(payload: {
   email: string;

@@ -181,7 +181,7 @@ export async function eventSync(payload: EventStream[]) {
   }
 
   const response = await pushPayload(options);
-  if (response.status === 200) return true;
+  if (response.message && !response.error) return true;
 
   return false;
 }

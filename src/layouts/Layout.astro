@@ -116,12 +116,10 @@ const contentMap: ContentMap[] = await getContentMap();
     }
 
     <!-- Google Analytics -->
-    <script async is:inline define:vars={{ gtagUrl }} src={gtagUrl}></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
+    {gtagUrl && <script async is:inline src={gtagUrl} />}
+    <script>
+      // Move this to a separate TypeScript file, e.g., src/utils/gtag.ts
+      import "../utils/gtag";
     </script>
 
     <!-- Tract Stack Concierge -->

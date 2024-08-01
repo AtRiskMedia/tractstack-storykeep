@@ -40,6 +40,9 @@ export async function init() {
     auth.setKey(`key`, undefined);
     reset = true;
     //window.location.reload();
+  } else if (Date.now() > lastActive + JWT_LIFETIME * 5) {
+    // if consent provided; lock profile after > 1 hr
+    auth.setKey(`unlockedProfile`, undefined);
   }
 
   // sync once; unless soon inactive
@@ -106,14 +109,12 @@ export async function init() {
   }
   if (conciergeSync?.knownLead) {
     auth.setKey(`consent`, `1`);
+  }
+  if (conciergeSync?.auth) {
     auth.setKey(`hasProfile`, `1`);
   } else {
     auth.setKey(`hasProfile`, undefined);
-    }
-  if (conciergeSync?.auth) {
-    auth.setKey(`unlockedProfile`, `1`);
-  } else {
-    auth.setKey(`unlockedProfile`, undefined);
+    auth.setKey("unlockedProfile", undefined);
   }
   auth.setKey(`active`, Date.now().toString());
 

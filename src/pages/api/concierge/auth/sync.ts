@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { proxyRequestWithRefresh } from "../../../../api/authService";
 
-const BACKEND_URL = import.meta.env.PUBLIC_CONCIERGE_BASE_URL;
+const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
 export const POST: APIRoute = async ({ request }) => {
   const body = await request.json();

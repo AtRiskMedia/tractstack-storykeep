@@ -33,7 +33,9 @@ const current: Current = {
   stylesUrl={stylesUrl}
 >
   <Header title={pane.title} slug="context" impressions={pane.impressions} />
-  <main id="main-content">
+  <main id="main-content" 
+class="min-h-screen"
+  >
     <ContextPaneWrapper
       pane={pane.panePayload}
       resources={pane.resourcesPayload}

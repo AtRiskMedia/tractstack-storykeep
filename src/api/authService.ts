@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.PUBLIC_CONCIERGE_BASE_URL;
+const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
 export async function proxyRequestWithRefresh(
   url: string,

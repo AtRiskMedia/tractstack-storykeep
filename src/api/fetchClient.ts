@@ -93,15 +93,13 @@ function setRefreshedTokens(response: IAuthStoreLoginResponse) {
       firstname: response.firstname,
     });
   }
-  if (response.knownLead) {
-    auth.setKey("consent", "1");
-    auth.setKey("hasProfile", "1");
-  } else {
-    auth.setKey("hasProfile", undefined);
+  if (response?.knownLead) {
+    auth.setKey(`consent`, `1`);
   }
-  if (response.auth) {
-    auth.setKey("unlockedProfile", "1");
+  if (response?.auth) {
+    auth.setKey(`hasProfile`, `1`);
   } else {
+    auth.setKey(`hasProfile`, undefined);
     auth.setKey("unlockedProfile", undefined);
   }
   auth.setKey("active", Date.now().toString());

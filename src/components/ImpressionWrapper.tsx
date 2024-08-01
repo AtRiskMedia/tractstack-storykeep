@@ -67,7 +67,7 @@ const ImpressionWrapper = ({
   if (!icon) {
     if (!currentImpression || !$show) return <aside />;
     return (
-      <aside className="mr-1 fixed bottom-16 right-2 w-auto h-auto z-70 h-[calc(--scale)*152px] w-[calc(--scale)*540px] max-h-[152px] max-w-[540px] md:h-[135px] md:w-[480px] overflow-hidden bg-white rounded-md border border-mydarkgrey">
+      <aside className="mr-1 fixed bottom-16 right-2 w-auto h-auto z-70 h-[calc(--scale)*152px] w-[calc(--scale)*540px] max-h-[152px] max-w-[540px] md:h-[135px] md:w-[480px] overflow-hidden bg-white rounded-md border border-mydarkgrey hover:z-101">
         <button
           type="button"
           className="z-90101 absolute right-2 top-2 rounded-md bg-white text-mylightgrey hover:text-mylightgrey focus:outline-none focus:ring-2 focus:ring-mygreen focus:ring-offset-2"

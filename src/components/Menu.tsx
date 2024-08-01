@@ -88,23 +88,13 @@ const Menu = (props: { payload: MenuDatum }) => {
                       </div>
                     ))}
                   </div>
-                  <div className="bg-slate-50 p-8">
-                    <div className="flex justify-between">
-                      {additionalLinks.length ? (
+                  {additionalLinks.length ? (
+                    <div className="bg-slate-50 p-8">
+                      <div className="flex justify-between">
                         <h3 className="mt-4 text-sm leading-6 text-myblue">
                           Additional Links
                         </h3>
-                      ) : (
-                        <div />
-                      )}
-                      <a
-                        href="/concierge/graph"
-                        className="text-sm leading-6 text-myblue"
-                      >
-                        Breadcrumbs <span aria-hidden="true">&rarr;</span>
-                      </a>
-                    </div>
-                    {additionalLinks.length ? (
+                      </div>
                       <ul role="list" className="mt-6 space-y-6">
                         {additionalLinks.map((item: MenuLink) => (
                           <li key={item.name} className="relative">
@@ -119,8 +109,8 @@ const Menu = (props: { payload: MenuDatum }) => {
                           </li>
                         ))}
                       </ul>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </Popover.Panel>

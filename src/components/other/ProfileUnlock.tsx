@@ -107,6 +107,17 @@ export const ProfileUnlock = () => {
       <h3 className="font-action text-xl py-6 text-myblue">
         Welcome Back. Unlock your profile &gt;
       </h3>
+      <p className="text-md pb-6">
+        Don't have a profile?
+        <button
+          className="text-myblue hover:text-black underline ml-3"
+          onClick={() => auth.setKey(`hasProfile`, undefined)}
+        >
+          Create one
+        </button>
+        .
+      </p>
+
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-3 gap-4">

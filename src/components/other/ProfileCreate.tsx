@@ -81,8 +81,9 @@ async function goLoadProfile() {
       auth.setKey(`hasProfile`, `1`);
       auth.setKey(`consent`, `1`);
     }
-    if (typeof response?.data?.auth !== `undefined` && response.data.auth)
+    if (typeof response?.data?.auth !== `undefined` && response.data.auth) {
       auth.setKey(`unlockedProfile`, `1`);
+    }
     success.set(true);
     loading.set(false);
     /* eslint-disable @typescript-eslint/no-explicit-any */

@@ -107,10 +107,14 @@ export async function init() {
   if (conciergeSync?.knownLead) {
     auth.setKey(`consent`, `1`);
     auth.setKey(`hasProfile`, `1`);
-  } else auth.setKey(`hasProfile`, undefined);
+  } else {
+    auth.setKey(`hasProfile`, undefined);
+    }
   if (conciergeSync?.auth) {
     auth.setKey(`unlockedProfile`, `1`);
-  } else auth.setKey(`unlockedProfile`, undefined);
+  } else {
+    auth.setKey(`unlockedProfile`, undefined);
+  }
   auth.setKey(`active`, Date.now().toString());
 
   // unlock; set sync

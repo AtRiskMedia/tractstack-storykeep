@@ -95,6 +95,11 @@ const PaneFromAst = ({
   const thisAst = payload.ast[0];
 
   const Tag = thisAst?.tagName || thisAst?.type;
+  const outerLookup =
+    [`p`, `ul`, `ol`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) &&
+    markdownLookup?.nthTagLookup[Tag] &&
+    markdownLookup.nthTagLookup[Tag][outerIdx] &&
+    markdownLookup.nthTagLookup[Tag][outerIdx].nth;
   let globalNth: number | undefined = undefined;
 
   switch (Tag) {
@@ -142,12 +147,17 @@ const PaneFromAst = ({
       : typeof thisClassNames[Tag] === `string`
         ? (thisClassNames[Tag] as string)
         : typeof thisClassNames[Tag] === `object` &&
-            globalNth &&
-            thisClassNames[Tag].length >= globalNth + 1
-          ? (thisClassNames[Tag][globalNth] as string)
-          : typeof thisClassNames[Tag] === `object`
-            ? (thisClassNames[Tag][0] as string)
-            : ``;
+            outerLookup &&
+            thisClassNames[Tag].length >= outerLookup + 1
+          ? (thisClassNames[Tag][outerLookup] as string)
+          : typeof thisClassNames[Tag] === `object` &&
+              globalNth &&
+              !outerLookup &&
+              thisClassNames[Tag].length >= globalNth + 1
+            ? (thisClassNames[Tag][globalNth] as string)
+            : typeof thisClassNames[Tag] === `object`
+              ? (thisClassNames[Tag][0] as string)
+              : ``;
 
   // Handle button payload
   const buttonPayload =

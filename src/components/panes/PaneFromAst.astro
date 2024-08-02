@@ -35,7 +35,11 @@ const {
 
 const thisAst = payload.ast.at(0);
 const Tag = thisAst?.tagName || thisAst?.type;
-
+const outerLookup =
+  [`p`, `ul`, `ol`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) &&
+  markdownLookup?.nthTagLookup[Tag] &&
+  markdownLookup.nthTagLookup[Tag][outerIdx] &&
+  markdownLookup.nthTagLookup[Tag][outerIdx].nth;
 let globalNth: number | undefined = undefined;
 
 if (typeof idx === `number`) {
@@ -81,12 +85,17 @@ const injectClassNames =
     : typeof thisClassNames[Tag] === `string`
       ? (thisClassNames[Tag] as string)
       : typeof thisClassNames[Tag] === `object` &&
-          globalNth &&
-          thisClassNames[Tag].length >= globalNth + 1
-        ? (thisClassNames[Tag][globalNth] as string)
-        : typeof thisClassNames[Tag] === `object`
-          ? (thisClassNames[Tag][0] as string)
-          : ``;
+          outerLookup &&
+          thisClassNames[Tag].length >= outerLookup + 1
+        ? (thisClassNames[Tag][outerLookup] as string)
+        : !outerLookup &&
+            typeof thisClassNames[Tag] === `object` &&
+            globalNth &&
+            thisClassNames[Tag].length >= globalNth + 1
+          ? (thisClassNames[Tag][globalNth] as string)
+          : typeof thisClassNames[Tag] === `object`
+            ? (thisClassNames[Tag][0] as string)
+            : ``;
 
 // applies only when Tag === `a`
 // Tag === `a` and has buttonPayload is rendered in an island

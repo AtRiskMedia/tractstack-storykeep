@@ -16,6 +16,8 @@ export interface MarkdownLookup {
   codeItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   listItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   linksLookup: { [parentNth: number]: { [childNth: number]: number } };
+  nthTag: { [key: number]: string };
+  nthTagLookup: { [key: string]: { [key: number]: { nth: number } } };
 }
 
 export type ToolMode =

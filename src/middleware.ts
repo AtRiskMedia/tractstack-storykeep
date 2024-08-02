@@ -6,7 +6,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const auth = await isAuthenticated(context as any);
   context.locals.user = { isAuthenticated: auth };
 
-  const protectedRoutes = ["/*/edit", "/storykeep/create"];
+  const protectedRoutes = ["/*/edit", "/storykeep/create", "/api/turso/*"];
   const isProtectedRoute = protectedRoutes.some(route => {
     if (route.includes("*")) {
       const regex = new RegExp("^" + route.replace("*", ".*"));
@@ -20,6 +20,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   if (!auth && isProtectedRoute) {
+    if (context.url.pathname.startsWith("/api/turso/")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
     return context.redirect(
       `/storykeep/login?redirect=${context.url.pathname}`
     );

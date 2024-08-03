@@ -12,7 +12,7 @@ import {
   paneInit,
   paneTitle,
   paneSlug,
-  paneMarkdownBody,
+  paneMarkdownFragmentId,
   paneIsContextPane,
   paneHeightOffsetDesktop,
   paneHeightOffsetMobile,
@@ -130,7 +130,6 @@ export const StoryKeepStore = (props: {
             const paneStores = [
               { store: paneTitle, value: payload.title },
               { store: paneSlug, value: payload.slug },
-              { store: paneMarkdownBody, value: payload.markdown.body || `` },
               { store: paneIsContextPane, value: payload.isContextPane },
               {
                 store: paneHeightOffsetDesktop,
@@ -248,7 +247,15 @@ export const StoryKeepStore = (props: {
                     case `markdown`:
                       paneFragmentMarkdown.set({
                         ...paneFragmentMarkdown.get(),
-                        [paneFragmentId]: createFieldWithHistory(paneFragment),
+                        [paneFragmentId]: createFieldWithHistory({
+                          markdown: payload.markdown,
+                          payload: paneFragment,
+                          type: `markdown`,
+                        }),
+                      });
+                      paneMarkdownFragmentId.set({
+                        ...paneMarkdownFragmentId.get(),
+                        [payload.id]: createFieldWithHistory(paneFragmentId),
                       });
                       break;
                     default:
@@ -269,7 +276,6 @@ export const StoryKeepStore = (props: {
             const paneKeys: StoreKey[] = [
               "paneTitle",
               "paneSlug",
-              "paneMarkdownBody",
               "paneIsContextPane",
               "paneIsHiddenPane",
               "paneHasOverflowHidden",

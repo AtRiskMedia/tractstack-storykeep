@@ -160,6 +160,7 @@ export async function getStoryFragmentBySlug(
                              'height_ratio_tablet', p.height_ratio_tablet,
                              'options_payload', p.options_payload,
                              'markdown_body', md.body,
+                             'markdown_id', md.id,
                              'files', (
                                  SELECT json_group_array(json_object(
                                      'id', f.id,

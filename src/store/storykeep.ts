@@ -3,7 +3,7 @@ import type {
   BeliefDatum,
   BgPaneDatum,
   BgColourDatum,
-  MarkdownPaneDatum,
+  MarkdownEditDatum,
   FieldWithHistory,
   FileDatum,
   MenuDatum,
@@ -77,7 +77,8 @@ export const storyFragmentTailwindBgColour =
 
 export const paneTitle = map<Record<string, FieldWithHistory<string>>>();
 export const paneSlug = map<Record<string, FieldWithHistory<string>>>();
-export const paneMarkdownBody = map<Record<string, FieldWithHistory<string>>>();
+export const paneMarkdownFragmentId =
+  map<Record<string, FieldWithHistory<string>>>();
 export const paneIsContextPane =
   map<Record<string, FieldWithHistory<boolean>>>();
 export const paneIsHiddenPane =
@@ -120,4 +121,4 @@ export const paneFragmentBgPane =
 export const paneFragmentBgColour =
   map<Record<string, FieldWithHistory<BgColourDatum>>>();
 export const paneFragmentMarkdown =
-  map<Record<string, FieldWithHistory<MarkdownPaneDatum>>>();
+  map<Record<string, FieldWithHistory<MarkdownEditDatum>>>();

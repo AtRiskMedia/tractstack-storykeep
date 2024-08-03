@@ -1,8 +1,16 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useMemo, useState, useRef } from "react";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { toHast } from "mdast-util-to-hast";
+import { cleanHtmlAst } from "../../../utils/compositor/cleanHtmlAst";
 import ContentEditableField from "./ContentEditableField";
-import { paneMarkdownBody, toolModeStore } from "../../../store/storykeep";
+import {
+  paneFragmentMarkdown,
+  paneMarkdownFragmentId,
+  toolModeStore,
+} from "../../../store/storykeep";
 import { updateMarkdownPart } from "../../../utils/compositor/markdownUtils";
 import { useStore } from "@nanostores/react";
+import type { Root } from "hast";
 
 interface EditableContentProps {
   content: string;
@@ -22,15 +30,35 @@ const EditableContent = ({
   parentTag,
 }: EditableContentProps) => {
   const $toolMode = useStore(toolModeStore);
-  const [isEditing, setIsEditing] = useState(false);
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
+  const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
+  const [localContent, setLocalContent] = useState(content);
+  const pendingUpdate = useRef(false);
 
-  useEffect(() => {
-    setIsEditing($toolMode.value === "text");
-  }, [$toolMode.value]);
+  const isEditing = useMemo(
+    () => $toolMode.value === "text",
+    [$toolMode.value]
+  );
 
-  const handleEdit = useCallback(
-    (newContent: string) => {
-      const currentMarkdown = paneMarkdownBody.get()[paneId].current;
+  const regenerateHtmlAst = useCallback((markdown: string): Root => {
+    const mdast = fromMarkdown(markdown);
+    return cleanHtmlAst(toHast(mdast)) as Root;
+  }, []);
+
+  const updateStore = useCallback(
+    (newContent: string, updateHtmlAst: boolean) => {
+      if (!fragmentId) return;
+
+      const fragmentData = $paneFragmentMarkdown[fragmentId];
+      if (
+        !fragmentData ||
+        !fragmentData.current ||
+        !fragmentData.current.markdown
+      )
+        return;
+
+      const currentMarkdown = fragmentData.current.markdown.body;
       const updatedMarkdown = updateMarkdownPart(
         currentMarkdown,
         newContent,
@@ -39,39 +67,68 @@ const EditableContent = ({
         parentTag
       );
 
-      paneMarkdownBody.setKey(paneId, {
-        ...paneMarkdownBody.get()[paneId],
-        current: updatedMarkdown,
-      });
-      return true;
+      const updatedData = {
+        ...fragmentData,
+        current: {
+          ...fragmentData.current,
+          markdown: {
+            ...fragmentData.current.markdown,
+            body: updatedMarkdown,
+          },
+        },
+      };
+
+      if (updateHtmlAst) {
+        updatedData.current.markdown.htmlAst =
+          regenerateHtmlAst(updatedMarkdown);
+        pendingUpdate.current = false;
+      }
+
+      paneFragmentMarkdown.setKey(fragmentId, updatedData);
     },
-    [paneId, tag, nthIndex, parentTag]
+    [
+      fragmentId,
+      tag,
+      nthIndex,
+      parentTag,
+      $paneFragmentMarkdown,
+      regenerateHtmlAst,
+    ]
   );
 
-  const handleClick = () => {
-    console.log(`click`, isEditing, $toolMode.value);
-    if ($toolMode.value === "text") {
-      setIsEditing(true);
-    }
-  };
+  const handleEdit = useCallback(
+    (newContent: string) => {
+      setLocalContent(newContent);
+      updateStore(newContent, false);
+      pendingUpdate.current = true;
+      return true;
+    },
+    [updateStore]
+  );
+
+  const handleEditingChange = useCallback(
+    (editing: boolean) => {
+      if (!editing && pendingUpdate.current) {
+        // Update htmlAst when focus is lost and there's a pending update
+        updateStore(localContent, true);
+      }
+    },
+    [localContent, updateStore]
+  );
 
   if (isEditing) {
     return (
       <ContentEditableField
         id={`${tag}-${paneId}`}
-        value={content}
+        value={localContent}
         onChange={handleEdit}
-        onEditingChange={() => {}}
+        onEditingChange={handleEditingChange}
         className={classes}
       />
     );
   }
 
-  return (
-    <div className={classes} onClick={handleClick}>
-      {content}
-    </div>
-  );
+  return <div className={classes}>{localContent}</div>;
 };
 
 export default EditableContent;

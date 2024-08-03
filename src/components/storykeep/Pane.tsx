@@ -1,12 +1,13 @@
 import { memo, useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { fromMarkdown } from "mdast-util-from-markdown";
-import { toHast } from "mdast-util-to-hast";
+//import { fromMarkdown } from "mdast-util-from-markdown";
+//import { toHast } from "mdast-util-to-hast";
+//import { cleanHtmlAst } from "../../utils/compositor/cleanHtmlAst";
+//import type { Root } from "hast";
 import { classNames } from "../../utils/helpers";
 import {
   paneInit,
   paneSlug,
-  paneMarkdownBody,
   paneHeightOffsetDesktop,
   paneHeightOffsetMobile,
   paneHeightOffsetTablet,
@@ -24,16 +25,15 @@ import {
 } from "../../store/storykeep";
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
-import { cleanHtmlAst } from "../../utils/compositor/cleanHtmlAst";
 import type {
   BgPaneDatum,
   BgColourDatum,
   MarkdownPaneDatum,
   FileDatum,
+  MarkdownEditDatum,
   MarkdownDatum,
   //EditModeValue,
 } from "../../types";
-import type { Root } from "hast";
 
 const paneFragmentStyle = {
   gridArea: "1/1/1/1",
@@ -43,7 +43,6 @@ export const Pane = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const [slug, setSlug] = useState(`slug`);
-  const [markdown, setMarkdown] = useState<MarkdownDatum | null>(null);
   const [files, setFiles] = useState<FileDatum[]>([]);
   const [hasOverflowHidden, setHasOverflowHidden] = useState(false);
   const [hasMaxHScreen, setHasMaxHScreen] = useState(false);
@@ -53,13 +52,12 @@ export const Pane = (props: { id: string }) => {
   const [paneHeightRatio, setPaneHeightRatio] = useState<string | null>(null);
   const [paneHeightOffset, setPaneHeightOffset] = useState<string | null>(null);
   const [paneFragments, setPaneFragments] = useState<
-    (BgPaneDatum | BgColourDatum | MarkdownPaneDatum)[]
+    (BgPaneDatum | BgColourDatum | MarkdownEditDatum)[]
   >([]);
   const [bgColour, setBgColour] = useState<string | null>(null);
   const bgColourStyle = bgColour ? { backgroundColor: bgColour } : {};
   const $paneInit = useStore(paneInit);
   const $paneSlug = useStore(paneSlug);
-  const $paneMarkdownBody = useStore(paneMarkdownBody);
   const $paneHeightOffsetDesktop = useStore(paneHeightOffsetDesktop);
   const $paneHeightOffsetTablet = useStore(paneHeightOffsetTablet);
   const $paneHeightOffsetMobile = useStore(paneHeightOffsetMobile);
@@ -79,31 +77,21 @@ export const Pane = (props: { id: string }) => {
   useEffect(() => {
     if ($paneInit[id]?.init) {
       setSlug($paneSlug[id].current);
-      const markdownPayload = $paneMarkdownBody[id]?.current &&
-        typeof $paneMarkdownBody[id].current === `string` &&
-        $paneSlug[id]?.current && {
-          body: $paneMarkdownBody[id].current,
-          slug: `${$paneSlug[id].current}-markdown`,
-          title: `Copy for ${$paneSlug[id].current}`,
-          htmlAst: cleanHtmlAst(
-            toHast(fromMarkdown($paneMarkdownBody[id].current))
-          ),
-        };
-      if (markdownPayload && markdownPayload?.htmlAst?.type === "root") {
-        const rootAst = markdownPayload.htmlAst as Root;
-
-        setMarkdown({
-          ...markdownPayload,
-          htmlAst: rootAst,
-        });
-      }
       setFiles($paneFiles[id].current);
       setHasOverflowHidden($paneHasOverflowHidden[id].current);
       setHasMaxHScreen($paneHasMaxHScreen[id].current);
-      const paneFragments: (MarkdownPaneDatum | BgPaneDatum | BgColourDatum)[] =
+      const paneFragments: (MarkdownEditDatum | BgPaneDatum | BgColourDatum)[] =
         $paneFragmentIds[id].current.map((f: string) => {
+          if ($paneFragmentMarkdown[f]?.current.type === `markdown`) {
+            return {
+              markdown: $paneFragmentMarkdown[f]?.current
+                ?.markdown as MarkdownDatum,
+              payload: $paneFragmentMarkdown[f]?.current
+                ?.payload as MarkdownPaneDatum,
+              type: `markdown`,
+            };
+          }
           return (
-            ($paneFragmentMarkdown[f]?.current as MarkdownPaneDatum) ||
             ($paneFragmentBgPane[f]?.current as BgPaneDatum) ||
             ($paneFragmentBgColour[f]?.current as BgColourDatum) ||
             []
@@ -162,7 +150,7 @@ export const Pane = (props: { id: string }) => {
         )
       );
       const bgColourPane = paneFragments?.find(
-        (a): a is BgColourDatum | BgPaneDatum | MarkdownPaneDatum =>
+        (a): a is BgColourDatum | BgPaneDatum | MarkdownEditDatum =>
           a.type === "bgColour"
       );
       if (
@@ -198,15 +186,15 @@ export const Pane = (props: { id: string }) => {
               (a.type === `markdown` ? 1 : 0) - (b.type === `markdown` ? 1 : 0)
           )
           .map((f, idx) =>
-            f.type === `markdown` && markdown ? (
+            f.type === `markdown` ? (
               <div
                 key={idx}
                 className="relative w-full h-auto justify-self-start"
                 style={paneFragmentStyle}
               >
                 <MarkdownWrapper
-                  payload={f as MarkdownPaneDatum}
-                  markdown={markdown}
+                  payload={f.payload as MarkdownPaneDatum}
+                  markdown={f.markdown}
                   files={files}
                   paneHeight={paneHeight}
                   paneId={id}

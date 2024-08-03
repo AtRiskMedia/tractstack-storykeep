@@ -24,6 +24,7 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
   const markdown = typeof row?.markdown_body === `string` &&
     typeof row?.slug === `string` && {
       body: row.markdown_body,
+      id: row.markdown_id,
       slug: `${row.slug}-markdown`,
       title: `Copy for ${row.slug}`,
       htmlAst: cleanHtmlAst(toHast(fromMarkdown(row.markdown_body))),

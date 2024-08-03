@@ -2,7 +2,6 @@ import { useStore } from "@nanostores/react";
 import {
   paneTitle,
   paneSlug,
-  paneMarkdownBody,
   paneFragmentIds,
   //paneIsContextPane,
   //paneHeightOffsetDesktop,
@@ -30,7 +29,6 @@ export const PaneSettings = (props: { id: string; payload: DatumPayload }) => {
   console.log(payload);
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
-  const $paneMarkdownBody = useStore(paneMarkdownBody);
   const $paneFragmentIds = useStore(paneFragmentIds);
   //const $paneIsContextPane = useStore(paneIsContextPane);
   //const $paneHeightOffsetDesktop = useStore(paneHeightOffsetDesktop);
@@ -57,7 +55,6 @@ export const PaneSettings = (props: { id: string; payload: DatumPayload }) => {
       <ul>
         <li>{$paneTitle[id].current}</li>
         <li>{$paneSlug[id].current}</li>
-        <li>{$paneMarkdownBody[id].current}</li>
         <li>{$paneFragmentIds[id].current.join(`, `)}</li>
       </ul>
     </>

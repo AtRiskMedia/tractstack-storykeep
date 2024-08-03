@@ -289,6 +289,12 @@ export interface OptionsPayloadDatum {
   };
 }
 
+export interface MarkdownEditDatum {
+  markdown: MarkdownDatum;
+  payload: MarkdownPaneDatum;
+  type: `markdown`;
+}
+
 export interface MarkdownPaneDatum extends PaneFragmentDatum {
   type: `markdown`;
   imageMaskShape: string;
@@ -301,8 +307,8 @@ export interface MarkdownPaneDatum extends PaneFragmentDatum {
   textShapeOutsideMobile?: string;
   optionsPayload: OptionsPayloadDatum;
   isModal: boolean;
-  markdownId?: string;
-  markdownBody?: string;
+  //markdownBody: string;
+  //markdownId: string;
 }
 
 export interface PaneOptionsPayload {
@@ -403,6 +409,7 @@ export interface ResourceDatum {
 
 export interface MarkdownDatum {
   body: string;
+  id: string;
   slug: string;
   title: string;
   htmlAst: Root;

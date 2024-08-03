@@ -223,7 +223,10 @@ const PaneFromAst = ({
   if (Tag === "text") return thisAst.value;
   if (Tag === "br") return <br />;
 
-  if (toolMode === `text` && [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag)) {
+  if (
+    toolMode === `text` &&
+    [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag)
+  ) {
     const content = thisAst.children
       .map((child: any) => {
         if (child.type === "text") {
@@ -241,7 +244,7 @@ const PaneFromAst = ({
       markdownLookup.nthTagLookup[Tag][outerIdx].nth;
 
     return (
-      <div className="hover:bg-mylightgrey hover:bg-opacity-10">
+      <div className="hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-mylightgrey/20 outline outline-2 outline-dotted outline-mylightgrey/20 outline-offset-[-2px]">
         <EditableContent
           content={content}
           tag={Tag}

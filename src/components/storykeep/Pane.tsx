@@ -20,6 +20,7 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneFiles,
+  toolModeStore,
 } from "../../store/storykeep";
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
@@ -72,6 +73,8 @@ export const Pane = (props: { id: string }) => {
   const $paneHasOverflowHidden = useStore(paneHasOverflowHidden);
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen);
   const $paneFiles = useStore(paneFiles);
+  const $toolMode = useStore(toolModeStore);
+  const toolMode = $toolMode.value || ``;
 
   useEffect(() => {
     if ($paneInit[id]?.init) {
@@ -221,7 +224,9 @@ export const Pane = (props: { id: string }) => {
             ) : null
           )}
       </div>
-      <div className="absolute inset-0 w-full h-full z-50" />
+      {toolMode !== "text" && (
+        <div className="absolute inset-0 w-full h-full z-50" />
+      )}
     </div>
   );
 };

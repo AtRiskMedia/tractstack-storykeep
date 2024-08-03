@@ -2,6 +2,41 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+export type TursoOperation = "test" | "getResourcesBySlug";
+
+export interface TursoClientError extends Error {
+  name: string;
+  message: string;
+}
+
+export class NetworkError extends Error implements TursoClientError {
+  constructor(message: string) {
+    super(message);
+    this.name = "NetworkError";
+  }
+}
+
+export class UnauthorizedError extends Error implements TursoClientError {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class TursoOperationError extends Error implements TursoClientError {
+  constructor(
+    message: string,
+    public operation: TursoOperation
+  ) {
+    super(message);
+    this.name = "TursoOperationError";
+  }
+}
+
+export function isTursoClientError(error: unknown): error is TursoClientError {
+  return error instanceof Error && "name" in error && "message" in error;
+}
+
 interface IndexedItem {
   parentNth: number;
   childNth: number;

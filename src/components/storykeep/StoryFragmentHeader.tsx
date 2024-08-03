@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useStore } from "@nanostores/react";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
@@ -19,10 +19,14 @@ import {
   handleToggleOn,
   handleToggleOff,
 } from "../../utils/storykeep";
+//import { tursoClient } from "../../api/tursoClient";
+//import {
+//  UnauthorizedError,
+//  TursoOperationError,
+//  NetworkError,
+//} from "../../types";
 
-export const StoryFragmentHeader = (props: { id: string }) => {
-  const { id } = props;
-
+export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
   // helpers
   const {
     isEditing,
@@ -48,6 +52,9 @@ export const StoryFragmentHeader = (props: { id: string }) => {
 
   const [isClient, setIsClient] = useState(false);
 
+  //const [testResult, setTestResult] = useState<string | null>(null);
+  //const [error, setError] = useState<string | null>(null);
+
   const handleEditModeToggle = () => {
     if ($editMode?.mode === `settings`) {
       editModeStore.set({
@@ -65,6 +72,30 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       handleToggleOn(true);
     }
   };
+
+  //useEffect(() => {
+  //  async function runTest() {
+  //    try {
+  //      const result = await tursoClient.test();
+  //      setTestResult(JSON.stringify(result));
+  //      setError(null);
+  //    } catch (error) {
+  //      if (error instanceof UnauthorizedError) {
+  //        setError("You need to log in");
+  //      } else if (error instanceof TursoOperationError) {
+  //        setError(`Operation failed: ${error.operation}`);
+  //      } else if (error instanceof NetworkError) {
+  //        setError("Network issue detected");
+  //      } else if (error instanceof Error) {
+  //        setError(`An unknown error occurred: ${error.message}`);
+  //      } else {
+  //        setError("An unknown error occurred");
+  //      }
+  //    }
+  //  }
+
+  //  runTest();
+  //}, []);
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) {
@@ -160,4 +191,4 @@ export const StoryFragmentHeader = (props: { id: string }) => {
       </div>
     </div>
   );
-};
+});

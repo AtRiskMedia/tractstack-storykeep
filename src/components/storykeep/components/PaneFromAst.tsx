@@ -1,6 +1,8 @@
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
+import EditableContent from "./EditableContent";
+import { renderNestedElement } from "../../../utils/compositor/markdownUtils";
 import type { ReactNode } from "react";
 import type { ButtonData, FileNode, MarkdownLookup } from "../../../types";
 
@@ -16,7 +18,7 @@ interface PaneFromAstProps {
   slug: string;
   idx: number | null;
   outerIdx: number;
-  markdownLookup?: MarkdownLookup;
+  markdownLookup: MarkdownLookup;
   toolMode: string;
 }
 
@@ -220,6 +222,37 @@ const PaneFromAst = ({
   // Render component based on Tag
   if (Tag === "text") return thisAst.value;
   if (Tag === "br") return <br />;
+
+  if ([`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag)) {
+    const content = thisAst.children
+      .map((child: any) => {
+        if (child.type === "text") {
+          return child.value;
+        } else if (child.type === "element") {
+          return renderNestedElement(child);
+        }
+        return "";
+      })
+      .join("");
+    const nthIndex =
+      //Tag === "li" && idx
+      //  ? markdownLookup.listItemsLookup[outerIdx][idx]
+      //  :
+      markdownLookup.nthTagLookup[Tag][outerIdx].nth;
+
+    return (
+      <div className="hover:bg-mylightgrey hover:bg-opacity-10">
+        <EditableContent
+          content={content}
+          tag={Tag}
+          paneId={paneId}
+          classes={injectClassNames}
+          nthIndex={nthIndex}
+          parentTag={Tag === "li" ? thisAst.parent.tagName : undefined}
+        />
+      </div>
+    );
+  }
 
   if (
     [

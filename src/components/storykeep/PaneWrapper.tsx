@@ -116,7 +116,8 @@ const PaneWrapper = (props: { id: string }) => {
   };
 
   const handleClick = () => {
-    handleEditModeToggle();
+    if ([`styles`, `settings`, `pane`].includes(toolMode))
+      handleEditModeToggle();
   };
 
   const handleInsertClick = (position: "top" | "bottom") => {
@@ -157,7 +158,9 @@ const PaneWrapper = (props: { id: string }) => {
 
   const Content = isCodeHook ? <CodeHook id={id} /> : <Pane id={id} />;
 
-  return (
+  return ![`pane`, `settings`].includes(toolMode) ? (
+    Content
+  ) : (
     <div
       ref={paneRef}
       onClick={handleClick}

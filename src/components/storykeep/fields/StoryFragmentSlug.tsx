@@ -2,7 +2,7 @@ import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
-import ContentEditableField from "../ContentEditableField";
+import ContentEditableField from "../components/ContentEditableField";
 import { useStore } from "@nanostores/react";
 import {
   storyFragmentSlug,

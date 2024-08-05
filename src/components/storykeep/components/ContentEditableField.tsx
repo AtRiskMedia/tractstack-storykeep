@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from "react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, KeyboardEvent } from "react";
 
 interface ContentEditableFieldProps {
   id: string;
@@ -7,6 +7,7 @@ interface ContentEditableFieldProps {
   className?: string;
   onChange: (value: string) => boolean;
   onEditingChange: (editing: boolean) => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => boolean;
   placeholder?: string;
   style?: CSSProperties;
 }
@@ -16,6 +17,7 @@ const ContentEditableField = ({
   value,
   onChange,
   onEditingChange,
+  onKeyDown,
   className,
   placeholder = "",
   style = {},
@@ -25,6 +27,18 @@ const ContentEditableField = ({
   const [internalValue, setInternalValue] = useState(value);
   const isInitialMount = useRef(true);
   const [editing, setEditing] = useState(false);
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (onKeyDown) {
+        const shouldContinue = onKeyDown(event);
+        if (!shouldContinue) {
+          event.preventDefault();
+        }
+      }
+    },
+    [onKeyDown]
+  );
 
   const setCursorPosition = useCallback(
     (element: HTMLElement, position: number) => {
@@ -118,6 +132,7 @@ const ContentEditableField = ({
       onInput={handleContentChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onKeyDown={onKeyDown ? handleKeyDown : undefined}
       style={{
         ...style,
         minHeight: "1em",

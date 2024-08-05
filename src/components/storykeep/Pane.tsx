@@ -1,9 +1,5 @@
-import { memo, useState, useEffect } from "react";
+import { memo, useMemo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
-//import { fromMarkdown } from "mdast-util-from-markdown";
-//import { toHast } from "mdast-util-to-hast";
-//import { cleanHtmlAst } from "../../utils/compositor/cleanHtmlAst";
-//import type { Root } from "hast";
 import { classNames } from "../../utils/helpers";
 import {
   paneInit,
@@ -26,36 +22,34 @@ import {
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
 import type {
-  BgPaneDatum,
   BgColourDatum,
-  MarkdownPaneDatum,
-  FileDatum,
+  BgPaneDatum,
   MarkdownEditDatum,
-  MarkdownDatum,
-  //EditModeValue,
+  FileDatum,
 } from "../../types";
 
 const paneFragmentStyle = {
   gridArea: "1/1/1/1",
 };
 
-export const Pane = (props: { id: string }) => {
+type MarkdownFragment = MarkdownEditDatum & { type: "markdown" };
+type BgPaneFragment = BgPaneDatum & { type: "bgPane" };
+type BgColourFragment = BgColourDatum & { type: "bgColour" };
+type FragmentType = MarkdownFragment | BgPaneFragment | BgColourFragment;
+
+const Pane = memo((props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
-  const [slug, setSlug] = useState(`slug`);
-  const [files, setFiles] = useState<FileDatum[]>([]);
-  const [hasOverflowHidden, setHasOverflowHidden] = useState(false);
-  const [hasMaxHScreen, setHasMaxHScreen] = useState(false);
-  const [paneHeight, setPaneHeight] = useState<[number, number, number]>([
-    0, 0, 0,
-  ]);
-  const [paneHeightRatio, setPaneHeightRatio] = useState<string | null>(null);
-  const [paneHeightOffset, setPaneHeightOffset] = useState<string | null>(null);
-  const [paneFragments, setPaneFragments] = useState<
-    (BgPaneDatum | BgColourDatum | MarkdownEditDatum)[]
-  >([]);
-  const [bgColour, setBgColour] = useState<string | null>(null);
-  const bgColourStyle = bgColour ? { backgroundColor: bgColour } : {};
+  const [paneData, setPaneData] = useState({
+    slug: "",
+    files: [] as FileDatum[],
+    hasOverflowHidden: false,
+    hasMaxHScreen: false,
+    paneHeight: [0, 0, 0] as [number, number, number],
+    paneHeightRatio: "",
+    paneHeightOffset: "",
+    bgColour: null as string | null,
+  });
   const $paneInit = useStore(paneInit);
   const $paneSlug = useStore(paneSlug);
   const $paneHeightOffsetDesktop = useStore(paneHeightOffsetDesktop);
@@ -72,99 +66,115 @@ export const Pane = (props: { id: string }) => {
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen);
   const $paneFiles = useStore(paneFiles);
   const $toolMode = useStore(toolModeStore);
-  const toolMode = $toolMode.value || ``;
 
-  useEffect(() => {
-    if ($paneInit[id]?.init) {
-      setSlug($paneSlug[id].current);
-      setFiles($paneFiles[id].current);
-      setHasOverflowHidden($paneHasOverflowHidden[id].current);
-      setHasMaxHScreen($paneHasMaxHScreen[id].current);
-      const paneFragments: (MarkdownEditDatum | BgPaneDatum | BgColourDatum)[] =
-        $paneFragmentIds[id].current.map((f: string) => {
-          if ($paneFragmentMarkdown[f]?.current.type === `markdown`) {
-            return {
-              markdown: $paneFragmentMarkdown[f]?.current
-                ?.markdown as MarkdownDatum,
-              payload: $paneFragmentMarkdown[f]?.current
-                ?.payload as MarkdownPaneDatum,
-              type: `markdown`,
-            };
-          }
-          return (
-            ($paneFragmentBgPane[f]?.current as BgPaneDatum) ||
-            ($paneFragmentBgColour[f]?.current as BgColourDatum) ||
-            []
-          );
-        });
-      setPaneFragments(paneFragments);
-      const paneHeightRatioDesktop =
-        Number($paneHeightRatioDesktop[id].current) == 0
-          ? null
-          : Math.floor(
-              (1920 * Number($paneHeightRatioDesktop[id].current)) / 100
-            );
-      const paneHeightRatioTablet =
-        Number($paneHeightRatioTablet[id].current) == 0
-          ? null
-          : Math.floor(
-              (1080 * Number($paneHeightRatioTablet[id].current)) / 100
-            );
-      const paneHeightRatioMobile =
-        Number($paneHeightRatioMobile[id].current) == 0
-          ? null
-          : Math.floor(
-              (600 * Number($paneHeightRatioMobile[id].current)) / 100
-            );
-      setPaneHeightRatio(
-        classNames(
-          paneHeightRatioMobile
-            ? `h-[calc(var(--scale)*${paneHeightRatioMobile}px)] xs:h-[calc(var(--scale)*${paneHeightRatioMobile}px)]`
-            : ``,
-          paneHeightRatioTablet
-            ? `md:h-[calc(var(--scale)*${paneHeightRatioTablet}px)]`
-            : ``,
-          paneHeightRatioDesktop
-            ? `xl:h-[calc(var(--scale)*${paneHeightRatioDesktop}px)]`
-            : ``
-        )
-      );
-      setPaneHeight([
+  const memoizedPaneData = useMemo(
+    () => ({
+      slug: $paneSlug[id].current,
+      files: $paneFiles[id].current,
+      hasOverflowHidden: $paneHasOverflowHidden[id].current,
+      hasMaxHScreen: $paneHasMaxHScreen[id].current,
+      paneHeight: [
         Math.floor((600 * Number($paneHeightRatioMobile[id].current)) / 100),
         Math.floor((1080 * Number($paneHeightRatioTablet[id].current)) / 100),
         Math.floor((1920 * Number($paneHeightRatioDesktop[id].current)) / 100),
-      ]);
-      setPaneHeightOffset(
-        classNames(
-          $paneHeightOffsetMobile[id]?.current !== undefined
-            ? `mt-[calc(var(--scale)*${Math.floor((600 * ($paneHeightOffsetMobile[id]?.current ?? 0)) / 100)}px)] xs:mt-[calc(var(--scale)*${Math.floor((600 * ($paneHeightOffsetMobile[id]?.current ?? 1)) / 100)}px)]`
-            : ``,
-          $paneHeightOffsetTablet[id]?.current !== undefined
-            ? `md:mt-[calc(var(--scale)*${Math.floor(
-                (1080 * ($paneHeightOffsetTablet[id]?.current ?? 1)) / 100
-              )}px)]`
-            : ``,
-          $paneHeightOffsetDesktop[id]?.current !== undefined
-            ? `xl:mt-[calc(var(--scale)*${Math.floor((1920 * ($paneHeightOffsetDesktop[id]?.current ?? 1)) / 100)}px)]`
-            : ``
-        )
-      );
-      const bgColourPane = paneFragments?.find(
-        (a): a is BgColourDatum | BgPaneDatum | MarkdownEditDatum =>
-          a.type === "bgColour"
-      );
-      if (
-        bgColourPane &&
-        bgColourPane.type === "bgColour" &&
-        "bgColour" in bgColourPane
-      ) {
-        setBgColour(bgColourPane.bgColour);
-      }
+      ] as [number, number, number],
+      paneHeightRatio: classNames(/* ... */),
+      paneHeightOffset: classNames(/* ... */),
+      bgColour:
+        $paneFragmentIds[id].current
+          .map(fragmentId => $paneFragmentBgColour[fragmentId]?.current)
+          .find(fragment => fragment && fragment.type === "bgColour")
+          ?.bgColour || null,
+    }),
+    [
+      id,
+      $paneSlug,
+      $paneFiles,
+      $paneHasOverflowHidden,
+      $paneHasMaxHScreen,
+      $paneHeightRatioMobile,
+      $paneHeightRatioTablet,
+      $paneHeightRatioDesktop,
+      $paneHeightOffsetMobile,
+      $paneHeightOffsetTablet,
+      $paneHeightOffsetDesktop,
+      $paneFragmentIds,
+      $paneFragmentBgColour,
+    ]
+  );
+
+  useEffect(() => {
+    if ($paneInit[id]?.init) {
+      setPaneData(memoizedPaneData);
+      setIsClient(true);
     }
-    setIsClient(true);
-  }, [id, $paneInit]);
+  }, [id, $paneInit, memoizedPaneData]);
+
+  const renderFragment = useCallback(
+    (fragmentId: string) => {
+      const markdownFragment = $paneFragmentMarkdown[fragmentId]?.current as
+        | MarkdownFragment
+        | undefined;
+      const bgPaneFragment = $paneFragmentBgPane[fragmentId]?.current as
+        | BgPaneFragment
+        | undefined;
+      const bgColourFragment = $paneFragmentBgColour[fragmentId]?.current as
+        | BgColourFragment
+        | undefined;
+
+      const fragment: FragmentType | undefined =
+        markdownFragment || bgPaneFragment || bgColourFragment;
+
+      if (!fragment) return null;
+
+      switch (fragment.type) {
+        case "markdown":
+          return (
+            <div
+              key={fragmentId}
+              className="relative w-full h-auto justify-self-start"
+              style={paneFragmentStyle}
+            >
+              <MarkdownWrapper
+                payload={fragment.payload}
+                markdown={fragment.markdown}
+                files={paneData.files}
+                paneHeight={paneData.paneHeight}
+                paneId={id}
+                slug={paneData.slug}
+              />
+            </div>
+          );
+        case "bgPane":
+          return (
+            <div
+              key={fragmentId}
+              className="relative w-full h-auto justify-self-start"
+              style={paneFragmentStyle}
+            >
+              <BgPane payload={fragment} />
+            </div>
+          );
+        default:
+          return null;
+      }
+    },
+    [
+      $paneFragmentMarkdown,
+      $paneFragmentBgPane,
+      $paneFragmentBgColour,
+      paneData,
+      id,
+      $toolMode.value,
+    ]
+  );
 
   if (!isClient) return <div>Loading...</div>;
+
+  const bgColourStyle = paneData.bgColour
+    ? { backgroundColor: paneData.bgColour }
+    : {};
+  const toolMode = $toolMode.value || ``;
 
   return (
     <div className="relative">
@@ -172,51 +182,21 @@ export const Pane = (props: { id: string }) => {
         id={`pane-inner-${id}`}
         style={bgColourStyle}
         className={classNames(
-          paneHeightRatio ? paneHeightRatio : ``,
-          paneHeightOffset ? paneHeightOffset : ``,
-          hasMaxHScreen ? `max-h-screen` : ``,
-          hasOverflowHidden ? `overflow-hidden` : ``,
+          paneData.paneHeightRatio,
+          paneData.paneHeightOffset,
+          paneData.hasMaxHScreen ? `max-h-screen` : ``,
+          paneData.hasOverflowHidden ? `overflow-hidden` : ``,
           `grid`,
-          bgColour ? `bg-[${bgColour}]` : ""
+          paneData.bgColour ? `bg-[${paneData.bgColour}]` : ""
         )}
       >
-        {paneFragments
-          .sort(
-            (a, b) =>
-              (a.type === `markdown` ? 1 : 0) - (b.type === `markdown` ? 1 : 0)
-          )
-          .map((f, idx) =>
-            f.type === `markdown` ? (
-              <div
-                key={idx}
-                className="relative w-full h-auto justify-self-start"
-                style={paneFragmentStyle}
-              >
-                <MarkdownWrapper
-                  payload={f.payload as MarkdownPaneDatum}
-                  markdown={f.markdown}
-                  files={files}
-                  paneHeight={paneHeight}
-                  paneId={id}
-                  slug={slug}
-                />
-              </div>
-            ) : f.type === `bgPane` ? (
-              <div
-                key={idx}
-                className="relative w-full h-auto justify-self-start"
-                style={paneFragmentStyle}
-              >
-                <BgPane payload={f as BgPaneDatum} />
-              </div>
-            ) : null
-          )}
+        {$paneFragmentIds[id].current.map(renderFragment)}
       </div>
       {toolMode !== "text" && (
         <div className="absolute inset-0 w-full h-full z-50" />
       )}
     </div>
   );
-};
+});
 
-export default memo(Pane);
+export default Pane;

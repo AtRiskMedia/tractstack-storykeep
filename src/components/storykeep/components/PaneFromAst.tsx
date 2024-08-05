@@ -1,3 +1,4 @@
+import { useState, useCallback, useRef } from "react";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
@@ -103,6 +104,34 @@ const PaneFromAst = ({
     markdownLookup.nthTagLookup[Tag][outerIdx] &&
     markdownLookup.nthTagLookup[Tag][outerIdx].nth;
   let globalNth: number | undefined = undefined;
+
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const updateQueue = useRef<(() => void)[]>([]);
+
+  const queueUpdate = useCallback(
+    (updateFn: () => void) => {
+      updateQueue.current.push(updateFn);
+      if (!isUpdating) {
+        void processQueue();
+      }
+    },
+    [isUpdating]
+  );
+
+  const processQueue = useCallback(async () => {
+    if (updateQueue.current.length === 0) {
+      setIsUpdating(false);
+      return;
+    }
+
+    setIsUpdating(true);
+    const nextUpdate = updateQueue.current.shift();
+    if (nextUpdate) {
+      nextUpdate();
+    }
+    setTimeout(processQueue, 0);
+  }, []);
 
   switch (Tag) {
     case `li`:
@@ -252,6 +281,8 @@ const PaneFromAst = ({
           classes={injectClassNames}
           nthIndex={nthIndex}
           parentTag={Tag === "li" ? thisAst.parent.tagName : undefined}
+          queueUpdate={queueUpdate}
+          isUpdating={isUpdating}
         />
       </div>
     );

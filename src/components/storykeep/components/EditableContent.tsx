@@ -1,16 +1,15 @@
-import { useCallback, useMemo, useState, useRef } from "react";
-import { fromMarkdown } from "mdast-util-from-markdown";
-import { toHast } from "mdast-util-to-hast";
-import { cleanHtmlAst } from "../../../utils/compositor/cleanHtmlAst";
-import ContentEditableField from "./ContentEditableField";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
-  toolModeStore,
 } from "../../../store/storykeep";
-import { updateMarkdownPart } from "../../../utils/compositor/markdownUtils";
-import { useStore } from "@nanostores/react";
-import type { Root } from "hast";
+import {
+  updateMarkdownPart,
+  extractNthElement,
+} from "../../../utils/compositor/markdownUtils";
+import ContentEditableField from "./ContentEditableField";
+import type { KeyboardEvent } from "react";
 
 interface EditableContentProps {
   content: string;
@@ -19,6 +18,8 @@ interface EditableContentProps {
   classes: string;
   nthIndex: number;
   parentTag?: string;
+  queueUpdate: (updateFn: () => void) => void;
+  isUpdating: boolean;
 }
 
 const EditableContent = ({
@@ -28,79 +29,80 @@ const EditableContent = ({
   classes,
   nthIndex,
   parentTag,
+  queueUpdate,
+  isUpdating,
 }: EditableContentProps) => {
-  const $toolMode = useStore(toolModeStore);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
+
   const [localContent, setLocalContent] = useState(content);
-  const pendingUpdate = useRef(false);
+  const originalContentRef = useRef(content);
 
-  const isEditing = useMemo(
-    () => $toolMode.value === "text",
-    [$toolMode.value]
-  );
-
-  const regenerateHtmlAst = useCallback((markdown: string): Root => {
-    const mdast = fromMarkdown(markdown);
-    return cleanHtmlAst(toHast(mdast)) as Root;
-  }, []);
-
-  const updateStore = useCallback(
-    (newContent: string, updateHtmlAst: boolean) => {
-      if (!fragmentId) return;
-
-      const fragmentData = $paneFragmentMarkdown[fragmentId];
-      if (
-        !fragmentData ||
-        !fragmentData.current ||
-        !fragmentData.current.markdown
-      )
-        return;
-
-      const currentMarkdown = fragmentData.current.markdown.body;
-      const updatedMarkdown = updateMarkdownPart(
-        currentMarkdown,
-        newContent,
+  useEffect(() => {
+    if (fragmentId && $paneFragmentMarkdown[fragmentId] && !isUpdating) {
+      const fullMarkdown =
+        $paneFragmentMarkdown[fragmentId].current.markdown.body;
+      const extractedContent = extractNthElement(
+        fullMarkdown,
         tag,
         nthIndex,
         parentTag
       );
-
-      const updatedData = {
-        ...fragmentData,
-        current: {
-          ...fragmentData.current,
-          markdown: {
-            ...fragmentData.current.markdown,
-            body: updatedMarkdown,
-          },
-        },
-      };
-
-      if (updateHtmlAst) {
-        updatedData.current.markdown.htmlAst =
-          regenerateHtmlAst(updatedMarkdown);
-        pendingUpdate.current = false;
+      if (extractedContent !== localContent) {
+        setLocalContent(extractedContent);
+        originalContentRef.current = extractedContent;
       }
+    }
+  }, [fragmentId, $paneFragmentMarkdown, tag, nthIndex, parentTag, isUpdating]);
 
-      paneFragmentMarkdown.setKey(fragmentId, updatedData);
+  const updateStore = useCallback(
+    (newContent: string) => {
+      queueUpdate(() => {
+        if (!fragmentId) return;
+        const fragmentData = $paneFragmentMarkdown[fragmentId];
+        if (
+          !fragmentData ||
+          !fragmentData.current ||
+          !fragmentData.current.markdown
+        )
+          return;
+
+        const currentMarkdown = fragmentData.current.markdown.body;
+        const updatedMarkdown = updateMarkdownPart(
+          currentMarkdown,
+          newContent,
+          tag,
+          nthIndex,
+          parentTag
+        );
+
+        paneFragmentMarkdown.setKey(fragmentId, {
+          ...fragmentData,
+          current: {
+            ...fragmentData.current,
+            markdown: {
+              ...fragmentData.current.markdown,
+              body: updatedMarkdown,
+            },
+          },
+          history: [
+            ...fragmentData.history,
+            {
+              value: fragmentData.current,
+              timestamp: Date.now(),
+            },
+          ],
+        });
+      });
     },
-    [
-      fragmentId,
-      tag,
-      nthIndex,
-      parentTag,
-      $paneFragmentMarkdown,
-      regenerateHtmlAst,
-    ]
+    [fragmentId, tag, nthIndex, parentTag, $paneFragmentMarkdown, queueUpdate]
   );
 
   const handleEdit = useCallback(
     (newContent: string) => {
       setLocalContent(newContent);
-      updateStore(newContent, false);
-      pendingUpdate.current = true;
+      updateStore(newContent);
       return true;
     },
     [updateStore]
@@ -108,27 +110,65 @@ const EditableContent = ({
 
   const handleEditingChange = useCallback(
     (editing: boolean) => {
-      if (!editing && pendingUpdate.current) {
-        // Update htmlAst when focus is lost and there's a pending update
-        updateStore(localContent, true);
+      if (!editing && localContent !== originalContentRef.current) {
+        originalContentRef.current = localContent;
       }
     },
-    [localContent, updateStore]
+    [localContent]
   );
 
-  if (isEditing) {
-    return (
-      <ContentEditableField
-        id={`${tag}-${paneId}`}
-        value={localContent}
-        onChange={handleEdit}
-        onEditingChange={handleEditingChange}
-        className={classes}
-      />
-    );
-  }
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        event.currentTarget.blur();
+        return false;
+      }
 
-  return <div className={classes}>{localContent}</div>;
+      if (event.ctrlKey && event.key === "z") {
+        event.preventDefault();
+        if (!fragmentId) return false;
+        const fragmentData = $paneFragmentMarkdown[fragmentId];
+        if (!fragmentData || fragmentData.history.length === 0) return false;
+
+        queueUpdate(() => {
+          const previousState =
+            fragmentData.history[fragmentData.history.length - 1].value;
+          const newHistory = {
+            ...fragmentData,
+            current: previousState,
+            history: fragmentData.history.slice(0, -1),
+          };
+          paneFragmentMarkdown.setKey(fragmentId, newHistory);
+
+          const undoneContent = extractNthElement(
+            previousState.markdown.body,
+            tag,
+            nthIndex,
+            parentTag
+          );
+          setLocalContent(undoneContent);
+          originalContentRef.current = undoneContent;
+        });
+
+        return false;
+      }
+
+      return true;
+    },
+    [fragmentId, $paneFragmentMarkdown, tag, nthIndex, parentTag, queueUpdate]
+  );
+
+  return (
+    <ContentEditableField
+      id={`${tag}-${paneId}`}
+      value={localContent}
+      onChange={handleEdit}
+      onEditingChange={handleEditingChange}
+      onKeyDown={handleKeyDown}
+      className={classes}
+    />
+  );
 };
 
 export default EditableContent;

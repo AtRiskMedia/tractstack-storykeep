@@ -6,7 +6,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const auth = await isAuthenticated(context as any);
   context.locals.user = { isAuthenticated: auth };
 
-  const protectedRoutes = ["/*/edit", "/storykeep/create", "/api/turso/*"];
+  const protectedRoutes = [
+    "/*/edit",
+    "/storykeep/create",
+    "/api/turso/*",
+    "/api/concierge/builder/*",
+  ];
   const isProtectedRoute = protectedRoutes.some(route => {
     if (route.includes("*")) {
       const regex = new RegExp("^" + route.replace("*", ".*"));

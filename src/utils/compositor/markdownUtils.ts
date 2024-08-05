@@ -10,12 +10,32 @@ export function updateMarkdownPart(
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (tag === "li" && parentTag) {
+
+    if (tag === "p" && !line.startsWith("#") && line !== "") {
+      // Handle paragraphs
+      if (currentIndex === nthIndex) {
+        lines[i] = newContent;
+        break;
+      }
+      currentIndex++;
+    } else if (tag.match(/^h[1-6]$/)) {
+      const headingLevel = Number(tag.charAt(1));
+      if (
+        line.startsWith("#".repeat(headingLevel)) &&
+        !line.startsWith("#".repeat(headingLevel + 1))
+      ) {
+        if (currentIndex === nthIndex) {
+          lines[i] = `${"#".repeat(headingLevel)} ${newContent}`;
+          break;
+        }
+        currentIndex++;
+      }
+    } else if (tag === "li" && parentTag) {
       // Handle list items
       if (
-        line.trim().startsWith(`- `) ||
-        line.trim().startsWith(`* `) ||
-        /^\d+\./.test(line.trim())
+        line.startsWith("- ") ||
+        line.startsWith("* ") ||
+        /^\d+\./.test(line)
       ) {
         if (currentIndex === nthIndex) {
           lines[i] = line.replace(
@@ -26,16 +46,6 @@ export function updateMarkdownPart(
         }
         currentIndex++;
       }
-    } else if (
-      line.startsWith(`<${tag}`) ||
-      line.match(new RegExp(`^#{1,6}\\s`))
-    ) {
-      // Handle other tags
-      if (currentIndex === nthIndex) {
-        lines[i] = newContent;
-        break;
-      }
-      currentIndex++;
     }
   }
 
@@ -52,3 +62,58 @@ export const renderNestedElement = (element: any): string => {
   // Add more cases for other nested elements as needed
   return element.children[0].value;
 };
+
+export function extractNthElement(
+  fullMarkdown: string,
+  tag: string,
+  nthIndex: number,
+  parentTag?: string
+): string {
+  const lines = fullMarkdown.split("\n");
+  let currentIndex = 0;
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (
+      tag === "p" &&
+      !line.startsWith("#") &&
+      !line.startsWith("-") &&
+      !line.startsWith("*") &&
+      !/^\d+\./.test(line) &&
+      line !== ""
+    ) {
+      if (currentIndex === nthIndex) {
+        return line;
+      }
+      currentIndex++;
+    } else if (tag.match(/^h[1-6]$/)) {
+      const headingLevel = Number(tag.charAt(1));
+      if (
+        line.startsWith("#".repeat(headingLevel)) &&
+        !line.startsWith("#".repeat(headingLevel + 1))
+      ) {
+        if (currentIndex === nthIndex) {
+          return line.replace(/^#+\s*/, "");
+        }
+        currentIndex++;
+      }
+    } else if (tag === "li" && parentTag) {
+      if (
+        line.startsWith("- ") ||
+        line.startsWith("* ") ||
+        /^\d+\./.test(line)
+      ) {
+        inList = true;
+        if (currentIndex === nthIndex) {
+          return line.replace(/^(\s*(?:-|\*|\d+\.)\s*)/, "");
+        }
+        currentIndex++;
+      } else if (inList && line === "") {
+        inList = false;
+      }
+    }
+  }
+  return "";
+}

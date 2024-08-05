@@ -3,7 +3,7 @@ import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
 import EditableContent from "./EditableContent";
-import { renderNestedElement } from "../../../utils/compositor/markdownUtils";
+import { validateNestedElement } from "../../../utils/compositor/markdownUtils";
 import type { ReactNode } from "react";
 import type { ButtonData, FileNode, MarkdownLookup } from "../../../types";
 
@@ -243,10 +243,15 @@ const PaneFromAst = ({
       ? thisHookValuesRaw[2]
       : "";
 
-  const isParent = typeof idx !== `number` || Tag === `li`;
+  //const isParent = typeof idx !== `number` || Tag === `li`;
   const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode);
   const showOverlay2 = [`insert`].includes(toolMode);
   const noOverlay = !showOverlay && !showOverlay2;
+  // filters out special cases such as link, bold, img
+  const isSpecial =
+    typeof idx === `number` && thisAst?.children && thisAst.children.at(0)
+      ? validateNestedElement(thisAst.children.at(0))
+      : null;
 
   // Render component based on Tag
   if (Tag === "text") return thisAst.value;
@@ -254,78 +259,22 @@ const PaneFromAst = ({
 
   if (
     toolMode === `text` &&
-    [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `li`].includes(Tag)
+    [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `li`].includes(Tag) &&
+    !isSpecial
   ) {
-    const content = thisAst.children
-      .map((child: any) => {
-        if (child.type === "text") {
-          return child.value;
-        } else if (child.type === "element") {
-          return renderNestedElement(child);
-        }
-        return "";
-      })
-      .join("");
-
-    let nthIndex: number;
-    let globalNth: number | undefined;
-
-    if (Tag === "li") {
-      if (
-        markdownLookup?.listItemsLookup &&
-        markdownLookup.listItemsLookup[outerIdx] &&
-        typeof idx === "number" &&
-        typeof markdownLookup.listItemsLookup[outerIdx][idx] === "number"
-      ) {
-        globalNth = markdownLookup.listItemsLookup[outerIdx][idx];
-        nthIndex = idx;
-      } else {
-        console.error("Unable to determine nthIndex for list item", {
-          outerIdx,
-          idx,
-        });
-        return null;
-      }
-    } else {
-      nthIndex = markdownLookup.nthTagLookup[Tag][outerIdx].nth;
-    }
-
-    const parentTag = Tag === "li" ? "ol" : undefined;
-
     return (
       <div className="hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-mylightgrey/20 outline outline-2 outline-dotted outline-mylightgrey/20 outline-offset-[-2px]">
         <EditableContent
-          content={content}
+          content={thisAst.children}
           tag={Tag}
           paneId={paneId}
           classes={injectClassNames}
-          nthIndex={nthIndex}
-          parentTag={parentTag}
-          globalNth={globalNth}
+          outerIdx={outerIdx}
+          idx={idx}
           queueUpdate={queueUpdate}
           isUpdating={isUpdating}
         />
       </div>
-    );
-  }
-
-  if (Tag === "ol") {
-    return (
-      <ol className={injectClassNames}>
-        {thisAst.children.map((child: any, childIdx: number) => (
-          <PaneFromAst
-            key={childIdx}
-            payload={{ ...payload, ast: [child] }}
-            thisClassNames={thisClassNames}
-            paneId={paneId}
-            slug={slug}
-            idx={childIdx}
-            outerIdx={outerIdx}
-            markdownLookup={markdownLookup}
-            toolMode={toolMode}
-          />
-        ))}
-      </ol>
     );
   }
 
@@ -363,7 +312,7 @@ const PaneFromAst = ({
         ))}
       </TagComponent>
     );
-    if (noOverlay || !isParent || [`ol`, `ul`].includes(Tag)) return child;
+    if (noOverlay || [`ol`, `ul`].includes(Tag)) return child;
     if (showOverlay && [`li`].includes(Tag))
       return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
     if (showOverlay && [`strong`, `em`].includes(Tag))

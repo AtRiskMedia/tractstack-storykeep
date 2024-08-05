@@ -14,7 +14,7 @@ import {
   storyFragmentSocialImagePath,
 } from "../store/storykeep";
 import { debounce } from "./helpers";
-import { MAX_HISTORY_LENGTH } from "../constants";
+import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../constants";
 import type {
   StoreKey,
   StoreMapType,
@@ -186,7 +186,7 @@ export const useStoryKeepUtils = (id: string) => {
     const timeSinceLastUpdate =
       now - (lastUpdateTimeRef.current[storeKey] || 0);
     const newHistory = [...currentField.history];
-    if (timeSinceLastUpdate > 4000) {
+    if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
       newHistory.unshift({ value: currentField.current, timestamp: now });
       if (newHistory.length > MAX_HISTORY_LENGTH) {
         // Remove the second oldest entry, not the first one

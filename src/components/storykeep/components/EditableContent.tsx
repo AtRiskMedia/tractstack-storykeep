@@ -9,7 +9,9 @@ import {
   extractNthElement,
 } from "../../../utils/compositor/markdownUtils";
 import ContentEditableField from "./ContentEditableField";
+import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../../../constants";
 import type { KeyboardEvent } from "react";
+import type { FieldWithHistory, HistoryEntry } from "../../../types";
 
 interface EditableContentProps {
   content: string;
@@ -18,6 +20,7 @@ interface EditableContentProps {
   classes: string;
   nthIndex: number;
   parentTag?: string;
+  globalNth?: number;
   queueUpdate: (updateFn: () => void) => void;
   isUpdating: boolean;
 }
@@ -29,6 +32,7 @@ const EditableContent = ({
   classes,
   nthIndex,
   parentTag,
+  globalNth,
   queueUpdate,
   isUpdating,
 }: EditableContentProps) => {
@@ -38,6 +42,7 @@ const EditableContent = ({
 
   const [localContent, setLocalContent] = useState(content);
   const originalContentRef = useRef(content);
+  const lastUpdateTimeRef = useRef(0);
 
   useEffect(() => {
     if (fragmentId && $paneFragmentMarkdown[fragmentId] && !isUpdating) {
@@ -55,6 +60,23 @@ const EditableContent = ({
       }
     }
   }, [fragmentId, $paneFragmentMarkdown, tag, nthIndex, parentTag, isUpdating]);
+
+  const updateHistory = useCallback(
+    (currentField: FieldWithHistory<any>, now: number): HistoryEntry<any>[] => {
+      const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
+      const newHistory = [...currentField.history];
+      if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
+        newHistory.unshift({ value: currentField.current, timestamp: now });
+        if (newHistory.length > MAX_HISTORY_LENGTH) {
+          // Remove the second oldest entry, not the first one
+          newHistory.splice(-2, 1);
+        }
+        lastUpdateTimeRef.current = now;
+      }
+      return newHistory;
+    },
+    []
+  );
 
   const updateStore = useCallback(
     (newContent: string) => {
@@ -74,8 +96,12 @@ const EditableContent = ({
           newContent,
           tag,
           nthIndex,
-          parentTag
+          parentTag,
+          globalNth
         );
+
+        const now = Date.now();
+        const newHistory = updateHistory(fragmentData, now);
 
         paneFragmentMarkdown.setKey(fragmentId, {
           ...fragmentData,
@@ -86,17 +112,20 @@ const EditableContent = ({
               body: updatedMarkdown,
             },
           },
-          history: [
-            ...fragmentData.history,
-            {
-              value: fragmentData.current,
-              timestamp: Date.now(),
-            },
-          ],
+          history: newHistory,
         });
       });
     },
-    [fragmentId, tag, nthIndex, parentTag, $paneFragmentMarkdown, queueUpdate]
+    [
+      fragmentId,
+      tag,
+      nthIndex,
+      parentTag,
+      globalNth,
+      $paneFragmentMarkdown,
+      queueUpdate,
+      updateHistory,
+    ]
   );
 
   const handleEdit = useCallback(
@@ -111,10 +140,11 @@ const EditableContent = ({
   const handleEditingChange = useCallback(
     (editing: boolean) => {
       if (!editing && localContent !== originalContentRef.current) {
+        updateStore(localContent);
         originalContentRef.current = localContent;
       }
     },
-    [localContent]
+    [localContent, updateStore]
   );
 
   const handleKeyDown = useCallback(
@@ -132,17 +162,15 @@ const EditableContent = ({
         if (!fragmentData || fragmentData.history.length === 0) return false;
 
         queueUpdate(() => {
-          const previousState =
-            fragmentData.history[fragmentData.history.length - 1].value;
-          const newHistory = {
+          const [lastEntry, ...newHistory] = fragmentData.history;
+          paneFragmentMarkdown.setKey(fragmentId, {
             ...fragmentData,
-            current: previousState,
-            history: fragmentData.history.slice(0, -1),
-          };
-          paneFragmentMarkdown.setKey(fragmentId, newHistory);
+            current: lastEntry.value,
+            history: newHistory,
+          });
 
           const undoneContent = extractNthElement(
-            previousState.markdown.body,
+            lastEntry.value.markdown.body,
             tag,
             nthIndex,
             parentTag

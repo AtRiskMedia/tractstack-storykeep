@@ -1,57 +1,3 @@
-export function updateMarkdownPart(
-  fullMarkdown: string,
-  newContent: string,
-  tag: string,
-  nthIndex: number,
-  parentTag?: string
-): string {
-  const lines = fullMarkdown.split("\n");
-  let currentIndex = 0;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (tag === "p" && !line.startsWith("#") && line !== "") {
-      // Handle paragraphs
-      if (currentIndex === nthIndex) {
-        lines[i] = newContent;
-        break;
-      }
-      currentIndex++;
-    } else if (tag.match(/^h[1-6]$/)) {
-      const headingLevel = Number(tag.charAt(1));
-      if (
-        line.startsWith("#".repeat(headingLevel)) &&
-        !line.startsWith("#".repeat(headingLevel + 1))
-      ) {
-        if (currentIndex === nthIndex) {
-          lines[i] = `${"#".repeat(headingLevel)} ${newContent}`;
-          break;
-        }
-        currentIndex++;
-      }
-    } else if (tag === "li" && parentTag) {
-      // Handle list items
-      if (
-        line.startsWith("- ") ||
-        line.startsWith("* ") ||
-        /^\d+\./.test(line)
-      ) {
-        if (currentIndex === nthIndex) {
-          lines[i] = line.replace(
-            /^(\s*(?:-|\*|\d+\.)\s*).*/,
-            `$1${newContent}`
-          );
-          break;
-        }
-        currentIndex++;
-      }
-    }
-  }
-
-  return lines.join("\n");
-}
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const renderNestedElement = (element: any): string => {
   if (element.tagName === "a") {
@@ -63,57 +9,115 @@ export const renderNestedElement = (element: any): string => {
   return element.children[0].value;
 };
 
-export function extractNthElement(
+export function updateMarkdownPart(
   fullMarkdown: string,
+  newContent: string,
   tag: string,
   nthIndex: number,
-  parentTag?: string
+  globalNth?: number
 ): string {
   const lines = fullMarkdown.split("\n");
-  let currentIndex = 0;
-  let inList = false;
+  const currentIndex = {
+    p: 0,
+    h1: 0,
+    h2: 0,
+    h3: 0,
+    h4: 0,
+    h5: 0,
+    h6: 0,
+    li: 0,
+  };
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    if (
-      tag === "p" &&
-      !line.startsWith("#") &&
-      !line.startsWith("-") &&
-      !line.startsWith("*") &&
-      !/^\d+\./.test(line) &&
-      line !== ""
-    ) {
-      if (currentIndex === nthIndex) {
-        return line;
-      }
-      currentIndex++;
-    } else if (tag.match(/^h[1-6]$/)) {
-      const headingLevel = Number(tag.charAt(1));
-      if (
-        line.startsWith("#".repeat(headingLevel)) &&
-        !line.startsWith("#".repeat(headingLevel + 1))
-      ) {
-        if (currentIndex === nthIndex) {
-          return line.replace(/^#+\s*/, "");
+    if (line === "") continue;
+
+    if (/^#{1,6}\s/.test(line)) {
+      const headingMatch = line.match(/^#+/);
+      const headingLevel = headingMatch ? headingMatch[0].length : 0;
+      if (headingLevel > 0 && headingLevel <= 6) {
+        const headingTag = `h${headingLevel}` as keyof typeof currentIndex;
+        if (tag === headingTag && currentIndex[headingTag] === nthIndex) {
+          lines[i] = `${"#".repeat(headingLevel)} ${newContent}`;
+          return lines.join("\n");
         }
-        currentIndex++;
+        currentIndex[headingTag]++;
       }
-    } else if (tag === "li" && parentTag) {
+    } else if (/^\d+\.\s/.test(line)) {
       if (
-        line.startsWith("- ") ||
-        line.startsWith("* ") ||
-        /^\d+\./.test(line)
+        tag === "li" &&
+        (globalNth !== undefined
+          ? currentIndex.li === globalNth
+          : currentIndex.li === nthIndex)
       ) {
-        inList = true;
-        if (currentIndex === nthIndex) {
-          return line.replace(/^(\s*(?:-|\*|\d+\.)\s*)/, "");
-        }
-        currentIndex++;
-      } else if (inList && line === "") {
-        inList = false;
+        lines[i] = line.replace(/^(\d+\.)\s*.*/, `$1 ${newContent}`);
+        return lines.join("\n");
       }
+      currentIndex.li++;
+    } else {
+      if (tag === "p" && currentIndex.p === nthIndex) {
+        lines[i] = newContent;
+        return lines.join("\n");
+      }
+      currentIndex.p++;
     }
   }
+
+  return lines.join("\n");
+}
+
+export function extractNthElement(
+  fullMarkdown: string,
+  tag: string,
+  nthIndex: number,
+  parentTag?: string,
+  globalNth?: number
+): string {
+  const lines = fullMarkdown.split("\n");
+  const currentIndex = {
+    p: 0,
+    h1: 0,
+    h2: 0,
+    h3: 0,
+    h4: 0,
+    h5: 0,
+    h6: 0,
+    li: 0,
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line === "") continue;
+
+    if (/^#{1,6}\s/.test(line)) {
+      const headingMatch = line.match(/^#+/);
+      const headingLevel = headingMatch ? headingMatch[0].length : 0;
+      if (headingLevel > 0 && headingLevel <= 6) {
+        const headingTag = `h${headingLevel}` as keyof typeof currentIndex;
+        if (tag === headingTag && currentIndex[headingTag] === nthIndex) {
+          return line.replace(/^#+\s*/, "");
+        }
+        currentIndex[headingTag]++;
+      }
+    } else if (/^\d+\.\s/.test(line)) {
+      if (
+        tag === "li" &&
+        (globalNth !== undefined
+          ? currentIndex.li === globalNth
+          : currentIndex.li === nthIndex)
+      ) {
+        return line.replace(/^\d+\.\s*/, "");
+      }
+      currentIndex.li++;
+    } else {
+      if (tag === "p" && currentIndex.p === nthIndex) {
+        return line;
+      }
+      currentIndex.p++;
+    }
+  }
+
   return "";
 }

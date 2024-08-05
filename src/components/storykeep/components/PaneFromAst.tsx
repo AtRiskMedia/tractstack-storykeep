@@ -254,7 +254,7 @@ const PaneFromAst = ({
 
   if (
     toolMode === `text` &&
-    [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag)
+    [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `li`].includes(Tag)
   ) {
     const content = thisAst.children
       .map((child: any) => {
@@ -266,11 +266,31 @@ const PaneFromAst = ({
         return "";
       })
       .join("");
-    const nthIndex =
-      //Tag === "li" && idx
-      //  ? markdownLookup.listItemsLookup[outerIdx][idx]
-      //  :
-      markdownLookup.nthTagLookup[Tag][outerIdx].nth;
+
+    let nthIndex: number;
+    let globalNth: number | undefined;
+
+    if (Tag === "li") {
+      if (
+        markdownLookup?.listItemsLookup &&
+        markdownLookup.listItemsLookup[outerIdx] &&
+        typeof idx === "number" &&
+        typeof markdownLookup.listItemsLookup[outerIdx][idx] === "number"
+      ) {
+        globalNth = markdownLookup.listItemsLookup[outerIdx][idx];
+        nthIndex = idx;
+      } else {
+        console.error("Unable to determine nthIndex for list item", {
+          outerIdx,
+          idx,
+        });
+        return null;
+      }
+    } else {
+      nthIndex = markdownLookup.nthTagLookup[Tag][outerIdx].nth;
+    }
+
+    const parentTag = Tag === "li" ? "ol" : undefined;
 
     return (
       <div className="hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-mylightgrey/20 outline outline-2 outline-dotted outline-mylightgrey/20 outline-offset-[-2px]">
@@ -280,11 +300,32 @@ const PaneFromAst = ({
           paneId={paneId}
           classes={injectClassNames}
           nthIndex={nthIndex}
-          parentTag={Tag === "li" ? thisAst.parent.tagName : undefined}
+          parentTag={parentTag}
+          globalNth={globalNth}
           queueUpdate={queueUpdate}
           isUpdating={isUpdating}
         />
       </div>
+    );
+  }
+
+  if (Tag === "ol") {
+    return (
+      <ol className={injectClassNames}>
+        {thisAst.children.map((child: any, childIdx: number) => (
+          <PaneFromAst
+            key={childIdx}
+            payload={{ ...payload, ast: [child] }}
+            thisClassNames={thisClassNames}
+            paneId={paneId}
+            slug={slug}
+            idx={childIdx}
+            outerIdx={outerIdx}
+            markdownLookup={markdownLookup}
+            toolMode={toolMode}
+          />
+        ))}
+      </ol>
     );
   }
 

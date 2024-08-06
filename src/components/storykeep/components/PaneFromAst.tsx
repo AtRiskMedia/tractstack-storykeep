@@ -249,7 +249,7 @@ const PaneFromAst = ({
   const noOverlay = !showOverlay && !showOverlay2;
   // filters out special cases such as link, bold, img
   const isSpecial =
-    typeof idx === `number` && thisAst?.children && thisAst.children.at(0)
+    thisAst?.children && thisAst.children.at(0)
       ? validateNestedElement(thisAst.children.at(0))
       : null;
 
@@ -257,6 +257,7 @@ const PaneFromAst = ({
   if (Tag === "text") return thisAst.value;
   if (Tag === "br") return <br />;
 
+  // if editable as text
   if (
     toolMode === `text` &&
     [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `li`].includes(Tag) &&
@@ -278,51 +279,7 @@ const PaneFromAst = ({
     );
   }
 
-  if (
-    [
-      "p",
-      "em",
-      "strong",
-      "ol",
-      "ul",
-      "li",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-    ].includes(Tag)
-  ) {
-    const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    const child = (
-      <TagComponent className={injectClassNames}>
-        {thisAst?.children?.map((p: any, childIdx: number) => (
-          <PaneFromAst
-            key={childIdx}
-            payload={{ ...payload, ast: [p] }}
-            thisClassNames={thisClassNames}
-            paneId={paneId}
-            slug={slug}
-            idx={!idx ? childIdx : idx}
-            outerIdx={outerIdx}
-            markdownLookup={markdownLookup}
-            toolMode={toolMode}
-          />
-        ))}
-      </TagComponent>
-    );
-    if (noOverlay || [`ol`, `ul`].includes(Tag)) return child;
-    if (showOverlay && [`li`].includes(Tag))
-      return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
-    if (showOverlay && [`strong`, `em`].includes(Tag))
-      return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
-    if (showOverlay)
-      return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
-    if (showOverlay2)
-      return <EditableTopBottomWrapper>{child}</EditableTopBottomWrapper>;
-  }
-
+  // else other edge cases
   if (Tag === "a" && isExternalUrl) {
     const child = (
       <a
@@ -399,6 +356,51 @@ const PaneFromAst = ({
         </div>
       );
     }
+  }
+
+  if (
+    [
+      "p",
+      "em",
+      "strong",
+      "ol",
+      "ul",
+      "li",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+    ].includes(Tag)
+  ) {
+    const TagComponent = Tag as keyof JSX.IntrinsicElements;
+    const child = (
+      <TagComponent className={injectClassNames}>
+        {thisAst?.children?.map((p: any, childIdx: number) => (
+          <PaneFromAst
+            key={childIdx}
+            payload={{ ...payload, ast: [p] }}
+            thisClassNames={thisClassNames}
+            paneId={paneId}
+            slug={slug}
+            idx={!idx ? childIdx : idx}
+            outerIdx={outerIdx}
+            markdownLookup={markdownLookup}
+            toolMode={toolMode}
+          />
+        ))}
+      </TagComponent>
+    );
+    if (noOverlay || [`ol`, `ul`].includes(Tag)) return child;
+    if (showOverlay && [`li`].includes(Tag))
+      return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
+    if (showOverlay && [`strong`, `em`].includes(Tag))
+      return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
+    if (showOverlay)
+      return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
+    if (showOverlay2)
+      return <EditableTopBottomWrapper>{child}</EditableTopBottomWrapper>;
   }
 
   return null;

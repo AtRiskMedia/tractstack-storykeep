@@ -35,6 +35,7 @@ const EditableContent = memo(
     queueUpdate,
     isUpdating,
   }: EditableContentProps) => {
+    console.log(`tag ${tag}:`,content)
     const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
     const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
     const fragmentId = $paneMarkdownFragmentId[paneId]?.current;

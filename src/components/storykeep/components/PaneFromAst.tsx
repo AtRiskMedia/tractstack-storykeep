@@ -1,9 +1,17 @@
 import { useState, useCallback, useRef } from "react";
+import { useStore } from "@nanostores/react";
+import {
+  paneFragmentMarkdown,
+  paneMarkdownFragmentId,
+} from "../../../store/storykeep";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
 import EditableContent from "./EditableContent";
-import { validateNestedElement } from "../../../utils/compositor/markdownUtils";
+import {
+  getGlobalNth,
+  extractMarkdownElement,
+} from "../../../utils/compositor/markdownUtils";
 import type { ReactNode } from "react";
 import type { ButtonData, FileNode, MarkdownLookup } from "../../../types";
 
@@ -28,6 +36,7 @@ const EditableOuterWrapper = ({ children }: { children: ReactNode }) => {
     <div className="relative">
       {children}
       <div
+        onClick={() => console.log(`EditableOuterWrapper`)}
         className="absolute inset-0 w-full h-full z-101 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white/20
                    outline outline-2 outline-dotted outline-white/20 outline-offset-[-2px]
                    mix-blend-exclusion"
@@ -40,6 +49,7 @@ const EditableInnerWrapper = ({ children }: { children: ReactNode }) => {
     <span className="relative">
       {children}
       <span
+        onClick={() => console.log(`EditableInnerWrapper`)}
         className="absolute inset-0 w-full h-full z-102 hover:bg-mylightgrey hover:bg-opacity-20 hover:outline-white
                    outline outline-2 outline-dashed outline-white/85 outline-offset-[-2px]
                    mix-blend-exclusion"
@@ -49,14 +59,15 @@ const EditableInnerWrapper = ({ children }: { children: ReactNode }) => {
 };
 const EditableInnerElementWrapper = ({ children }: { children: ReactNode }) => {
   return (
-    <div className="relative">
+    <span className="relative">
       {children}
-      <div
+      <span
+        onClick={() => console.log(`EditableInnerElementWrapper`)}
         className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white
                    outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
                    mix-blend-exclusion"
       />
-    </div>
+    </span>
   );
 };
 const EditableTopBottomWrapper = ({ children }: { children: ReactNode }) => {
@@ -65,6 +76,7 @@ const EditableTopBottomWrapper = ({ children }: { children: ReactNode }) => {
       {children}
       <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
         <div
+          onClick={() => console.log(`EditableTopBottomWrapper top`)}
           className="absolute inset-0 w-full h-full
                      hover:bg-mylightgrey hover:bg-opacity-40
                      mix-blend-exclusion
@@ -74,6 +86,7 @@ const EditableTopBottomWrapper = ({ children }: { children: ReactNode }) => {
       </div>
       <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
         <div
+          onClick={() => console.log(`EditableTopBottomWrapper bottom`)}
           className="absolute inset-0 w-full h-full
                      hover:bg-mylightgrey hover:bg-opacity-40
                      mix-blend-exclusion
@@ -98,12 +111,22 @@ const PaneFromAst = ({
   const thisAst = payload.ast[0];
 
   const Tag = thisAst?.tagName || thisAst?.type;
-  const outerLookup =
+  const outerGlobalNth =
     [`p`, `ul`, `ol`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) &&
     markdownLookup?.nthTagLookup[Tag] &&
     markdownLookup.nthTagLookup[Tag][outerIdx] &&
     markdownLookup.nthTagLookup[Tag][outerIdx].nth;
-  let globalNth: number | undefined = undefined;
+  const isTextContainerItem =
+    Tag === `li` &&
+    markdownLookup?.nthTag[outerIdx] &&
+    markdownLookup.nthTag[outerIdx] === `ol`;
+  const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode);
+  const showOverlay2 = [`insert`].includes(toolMode);
+  const noOverlay = !showOverlay && !showOverlay2;
+  const globalNth = getGlobalNth(Tag, idx, outerIdx, markdownLookup);
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
+  const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
 
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -133,57 +156,19 @@ const PaneFromAst = ({
     setTimeout(processQueue, 0);
   }, []);
 
-  switch (Tag) {
-    case `li`:
-      if (
-        idx &&
-        markdownLookup?.listItemsLookup &&
-        markdownLookup.listItemsLookup[outerIdx] &&
-        typeof markdownLookup.listItemsLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.listItemsLookup[outerIdx][idx];
-      break;
-    case `img`:
-      if (
-        idx &&
-        markdownLookup?.imagesLookup &&
-        markdownLookup.imagesLookup[outerIdx] &&
-        typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.imagesLookup[outerIdx][idx];
-      break;
-    case `code`:
-      if (
-        idx &&
-        markdownLookup?.codeItemsLookup &&
-        markdownLookup.codeItemsLookup[outerIdx] &&
-        typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.codeItemsLookup[outerIdx][idx];
-      break;
-    case `a`:
-      if (
-        idx &&
-        markdownLookup?.linksLookup &&
-        markdownLookup.linksLookup[outerIdx] &&
-        typeof markdownLookup.linksLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.linksLookup[outerIdx][idx];
-      break;
-  }
-
+  // Extract class names
   const injectClassNames =
     typeof thisAst?.tagName === `undefined`
       ? ``
       : typeof thisClassNames[Tag] === `string`
         ? (thisClassNames[Tag] as string)
         : typeof thisClassNames[Tag] === `object` &&
-            outerLookup &&
-            thisClassNames[Tag].length >= outerLookup + 1
-          ? (thisClassNames[Tag][outerLookup] as string)
+            outerGlobalNth &&
+            thisClassNames[Tag].length >= outerGlobalNth + 1
+          ? (thisClassNames[Tag][outerGlobalNth] as string)
           : typeof thisClassNames[Tag] === `object` &&
               globalNth &&
-              !outerLookup &&
+              !outerGlobalNth &&
               thisClassNames[Tag].length >= globalNth + 1
             ? (thisClassNames[Tag][globalNth] as string)
             : typeof thisClassNames[Tag] === `object`
@@ -201,7 +186,6 @@ const PaneFromAst = ({
     typeof payload?.buttonData[thisAst.properties.href] !== "undefined"
       ? payload.buttonData[thisAst.properties.href]
       : undefined;
-
   const callbackPayload =
     buttonPayload?.callbackPayload && lispLexer(buttonPayload?.callbackPayload);
   const targetUrl = callbackPayload && preParseAction(callbackPayload);
@@ -243,30 +227,22 @@ const PaneFromAst = ({
       ? thisHookValuesRaw[2]
       : "";
 
-  //const isParent = typeof idx !== `number` || Tag === `li`;
-  const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode);
-  const showOverlay2 = [`insert`].includes(toolMode);
-  const noOverlay = !showOverlay && !showOverlay2;
-  // filters out special cases such as link, bold, img
-  const isSpecial =
-    thisAst?.children && thisAst.children.at(0)
-      ? validateNestedElement(thisAst.children.at(0))
-      : null;
-
-  // Render component based on Tag
-  if (Tag === "text") return thisAst.value;
-  if (Tag === "br") return <br />;
-
   // if editable as text
   if (
     toolMode === `text` &&
-    [`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `li`].includes(Tag) &&
-    !isSpecial
+    ([`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) ||
+      isTextContainerItem)
   ) {
+    const content = extractMarkdownElement(
+      $paneFragmentMarkdown[fragmentId].current.markdown.body,
+      Tag,
+      outerIdx,
+      idx
+    );
     return (
       <div className="hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-mylightgrey/20 outline outline-2 outline-dotted outline-mylightgrey/20 outline-offset-[-2px]">
         <EditableContent
-          content={thisAst.children}
+          content={content}
           tag={Tag}
           paneId={paneId}
           classes={injectClassNames}
@@ -279,7 +255,60 @@ const PaneFromAst = ({
     );
   }
 
-  // else other edge cases
+  // if set-up for recursive handling
+  if (
+    [
+      "p",
+      "em",
+      "strong",
+      "ol",
+      "ul",
+      "li",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+    ].includes(Tag)
+  ) {
+    const TagComponent =
+      Tag !== `p`
+        ? (Tag as keyof JSX.IntrinsicElements)
+        : (`div` as keyof JSX.IntrinsicElements);
+    const child = (
+      <TagComponent className={injectClassNames}>
+        {thisAst?.children?.map((p: any, childIdx: number) => (
+          <PaneFromAst
+            key={childIdx}
+            payload={{ ...payload, ast: [p] }}
+            thisClassNames={thisClassNames}
+            paneId={paneId}
+            slug={slug}
+            idx={!idx ? childIdx : idx}
+            outerIdx={outerIdx}
+            markdownLookup={markdownLookup}
+            toolMode={toolMode}
+          />
+        ))}
+      </TagComponent>
+    );
+    if (noOverlay || [`ol`, `ul`, `strong`, `em`].includes(Tag)) return child;
+    if (showOverlay && [`li`].includes(Tag))
+      return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
+    if (showOverlay && [`strong`, `em`].includes(Tag))
+      return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
+    if (showOverlay)
+      return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
+    if (showOverlay2)
+      return <EditableTopBottomWrapper>{child}</EditableTopBottomWrapper>;
+  }
+
+  // can we render component based on Tag
+  if (Tag === "text") return thisAst.value;
+  if (Tag === "br") return <br />;
+
+  // other edge cases
   if (Tag === "a" && isExternalUrl) {
     const child = (
       <a
@@ -358,52 +387,8 @@ const PaneFromAst = ({
     }
   }
 
-  if (
-    [
-      "p",
-      "em",
-      "strong",
-      "ol",
-      "ul",
-      "li",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-    ].includes(Tag)
-  ) {
-    const TagComponent = Tag as keyof JSX.IntrinsicElements;
-    const child = (
-      <TagComponent className={injectClassNames}>
-        {thisAst?.children?.map((p: any, childIdx: number) => (
-          <PaneFromAst
-            key={childIdx}
-            payload={{ ...payload, ast: [p] }}
-            thisClassNames={thisClassNames}
-            paneId={paneId}
-            slug={slug}
-            idx={!idx ? childIdx : idx}
-            outerIdx={outerIdx}
-            markdownLookup={markdownLookup}
-            toolMode={toolMode}
-          />
-        ))}
-      </TagComponent>
-    );
-    if (noOverlay || [`ol`, `ul`].includes(Tag)) return child;
-    if (showOverlay && [`li`].includes(Tag))
-      return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
-    if (showOverlay && [`strong`, `em`].includes(Tag))
-      return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
-    if (showOverlay)
-      return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
-    if (showOverlay2)
-      return <EditableTopBottomWrapper>{child}</EditableTopBottomWrapper>;
-  }
-
-  return null;
+  console.log(`missed on Tag:${Tag}`, thisAst);
+  return <div className="bg-myorange text-black">{`missed on Tag:${Tag}`}</div>;
 };
 
 export default PaneFromAst;

@@ -7,9 +7,14 @@ import {
 import {
   updateMarkdownElement,
   extractMarkdownElement,
+  markdownToHtmlAst,
 } from "../../../utils/compositor/markdownUtils";
 import ContentEditableField from "./ContentEditableField";
-import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../../../constants";
+import {
+  MAX_LENGTH_CONTENT,
+  MS_BETWEEN_UNDO,
+  MAX_HISTORY_LENGTH,
+} from "../../../constants";
 import type { KeyboardEvent } from "react";
 import type { FieldWithHistory, HistoryEntry } from "../../../types";
 
@@ -35,7 +40,6 @@ const EditableContent = memo(
     queueUpdate,
     isUpdating,
   }: EditableContentProps) => {
-    console.log(`tag ${tag}:`,content)
     const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
     const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
     const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
@@ -45,21 +49,11 @@ const EditableContent = memo(
     const lastUpdateTimeRef = useRef(0);
 
     useEffect(() => {
-      if (fragmentId && $paneFragmentMarkdown[fragmentId] && !isUpdating) {
-        const fullMarkdown =
-          $paneFragmentMarkdown[fragmentId].current.markdown.body;
-        const extractedContent = extractMarkdownElement(
-          fullMarkdown,
-          tag,
-          outerIdx,
-          idx
-        );
-        if (extractedContent !== localContent) {
-          setLocalContent(extractedContent);
-          originalContentRef.current = extractedContent;
-        }
+      if (!isUpdating) {
+        setLocalContent(content);
+        originalContentRef.current = content;
       }
-    }, [fragmentId, $paneFragmentMarkdown, tag, outerIdx, idx, isUpdating]);
+    }, [content, isUpdating]);
 
     const updateHistory = useCallback(
       /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -93,14 +87,15 @@ const EditableContent = memo(
           )
             return;
 
-          const currentMarkdown = fragmentData.current.markdown.body;
           const updatedMarkdown = updateMarkdownElement(
-            currentMarkdown,
+            fragmentData.current.markdown.body,
             newContent,
             tag,
             outerIdx,
             idx
           );
+
+          const updatedHtmlAst = markdownToHtmlAst(updatedMarkdown);
 
           const now = Date.now();
           const newHistory = updateHistory(fragmentData, now);
@@ -112,6 +107,7 @@ const EditableContent = memo(
               markdown: {
                 ...fragmentData.current.markdown,
                 body: updatedMarkdown,
+                htmlAst: updatedHtmlAst,
               },
             },
             history: newHistory,
@@ -131,9 +127,12 @@ const EditableContent = memo(
 
     const handleEdit = useCallback(
       (newContent: string) => {
-        setLocalContent(newContent);
-        updateStore(newContent);
-        return true;
+        if (newContent.length <= MAX_LENGTH_CONTENT) {
+          setLocalContent(newContent);
+          updateStore(newContent);
+          return true;
+        }
+        return false;
       },
       [updateStore]
     );

@@ -1,4 +1,12 @@
-import type { Element, Text } from "hast";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { toHast } from "mdast-util-to-hast";
+import type { Root } from "hast";
+import type { MarkdownLookup } from "../../types";
+
+export function markdownToHtmlAst(markdown: string): Root {
+  const mdast = fromMarkdown(markdown);
+  return toHast(mdast) as Root;
+}
 
 //export function renderNestedElement(element: Element | Text): string {
 //  if (element.type === 'element') {
@@ -15,19 +23,19 @@ import type { Element, Text } from "hast";
 //  return (element as Text).value || '';
 //}
 
-export function validateNestedElement(element: Element | Text): boolean {
-  if ("tagName" in element) {
-    if (element.tagName === "a") {
-      return true;
-    } else if (element.tagName === "strong") {
-      return true;
-    } else if (element.tagName === "img") {
-      return true;
-    }
-    // Add more cases for other nested elements as needed
-  }
-  return false;
-}
+//export function validateNestedElement(element: Element | Text): boolean {
+//  if ("tagName" in element) {
+//    if (element.tagName === "a") {
+//      return true;
+//    } else if (element.tagName === "strong") {
+//      return true;
+//    } else if (element.tagName === "img") {
+//      return true;
+//    }
+//    // Add more cases for other nested elements as needed
+//  }
+//  return false;
+//}
 
 function processMarkdownElement(
   lines: string[],
@@ -137,4 +145,26 @@ export function updateMarkdownElement(
     newContent
   );
   return result || fullMarkdown;
+}
+
+export function getGlobalNth(
+  Tag: string,
+  idx: number | null = null,
+  outerIdx: number,
+  markdownLookup: MarkdownLookup
+): number | null {
+  if (idx === null) return null;
+
+  switch (Tag) {
+    case "li":
+      return markdownLookup?.listItemsLookup?.[outerIdx]?.[idx] ?? null;
+    case "img":
+      return markdownLookup?.imagesLookup?.[outerIdx]?.[idx] ?? null;
+    case "code":
+      return markdownLookup?.codeItemsLookup?.[outerIdx]?.[idx] ?? null;
+    case "a":
+      return markdownLookup?.linksLookup?.[outerIdx]?.[idx] ?? null;
+    default:
+      return null;
+  }
 }

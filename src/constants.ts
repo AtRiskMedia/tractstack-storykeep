@@ -19,6 +19,7 @@ export const ENABLE_HEADER_WIDGET =
 
 export const MAX_HISTORY_LENGTH = 10;
 export const MS_BETWEEN_UNDO = 10000;
+export const MAX_LENGTH_CONTENT = 10000;
 
 export const toolAddModes = [
   "paragraph",

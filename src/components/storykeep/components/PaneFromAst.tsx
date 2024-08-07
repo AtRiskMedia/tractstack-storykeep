@@ -13,7 +13,8 @@ import {
   extractMarkdownElement,
 } from "../../../utils/compositor/markdownUtils";
 import { toolAddModeTitles } from "../../../constants";
-import type { ReactNode } from "react";
+import { handleToggleOn } from "../../../utils/storykeep";
+import type {MouseEvent, ReactNode } from "react";
 import type {
   ButtonData,
   FileNode,
@@ -42,14 +43,16 @@ interface PaneFromAstProps {
 const EditableOuterWrapper = ({
   tooltip,
   onClick,
+  id,
   children,
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
+  id: string;
   children: ReactNode;
 }) => {
   return (
-    <div className="relative" title={tooltip}>
+    <div id={id} className="relative" title={tooltip}>
       {children}
       <div
         onClick={onClick}
@@ -63,14 +66,16 @@ const EditableOuterWrapper = ({
 const EditableInnerWrapper = ({
   tooltip,
   onClick,
+  id,
   children,
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
+  id: string;
   children: ReactNode;
 }) => {
   return (
-    <span className="relative" title={tooltip}>
+    <span id={id} className="relative" title={tooltip}>
       {children}
       <span
         onClick={onClick}
@@ -84,14 +89,16 @@ const EditableInnerWrapper = ({
 const EditableInnerElementWrapper = ({
   tooltip,
   onClick,
+  id,
   children,
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
+  id: string;
   children: ReactNode;
 }) => {
   return (
-    <span className="relative" title={tooltip}>
+    <span id={id} className="relative" title={tooltip}>
       {children}
       <span
         onClick={onClick}
@@ -104,9 +111,13 @@ const EditableInnerElementWrapper = ({
 };
 const EditableTopBottomWrapper = ({
   tooltips,
+  onClick,
+  id,
   children,
 }: {
   tooltips: [string, string];
+  onClick: (event: MouseEvent<HTMLDivElement>) => void;
+    id: string;
   children: ReactNode;
 }) => {
   return (
@@ -114,7 +125,8 @@ const EditableTopBottomWrapper = ({
       {children}
       <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
         <div
-          onClick={() => console.log(`EditableTopBottomWrapper top`)}
+          id={`${id}-top`}
+          onClick={onClick}
           title={tooltips.at(0)}
           className="absolute inset-0 w-full h-full
                      hover:bg-gradient-to-b hover:from-mylightgrey hover:via-mylightgrey/50 hover:to-transparent
@@ -125,7 +137,8 @@ const EditableTopBottomWrapper = ({
       </div>
       <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
         <div
-          onClick={() => console.log(`EditableTopBottomWrapper bottom`)}
+          id={`${id}-button`}
+          onClick={onClick}
           title={tooltips.at(1)}
           className="absolute inset-0 w-full h-full
                      hover:bg-gradient-to-t hover:from-mylightgrey hover:via-mylightgrey/50 hover:to-transparent
@@ -168,6 +181,7 @@ const PaneFromAst = ({
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
+  const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
 
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -206,12 +220,12 @@ const PaneFromAst = ({
       // TODO: Implement actual eraser functionality here
       // This will involve removing the element from the MarkdownEditDatum
       // and updating the paneFragmentMarkdown store
-    }
-    else {
+    } else {
       console.log(
         `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
       );
     }
+    handleToggleOn(false, thisId);
   }, [toolMode, Tag, outerIdx, idx]);
 
   // Extract class names
@@ -376,7 +390,11 @@ const PaneFromAst = ({
             : `UNKNOWN`;
       if (tip)
         return (
-          <EditableInnerElementWrapper tooltip={tip} onClick={handleToolModeClick}>
+          <EditableInnerElementWrapper
+            id={thisId}
+            tooltip={tip}
+            onClick={handleToolModeClick}
+          >
             {child}
           </EditableInnerElementWrapper>
         );
@@ -390,7 +408,11 @@ const PaneFromAst = ({
             : ``;
       if (tip)
         return (
-          <EditableOuterWrapper tooltip={tip} onClick={handleToolModeClick}>
+          <EditableOuterWrapper
+            id={thisId}
+            tooltip={tip}
+            onClick={handleToolModeClick}
+          >
             {child}
           </EditableOuterWrapper>
         );
@@ -400,6 +422,8 @@ const PaneFromAst = ({
       console.log(`MUST VALIDATE -- can ${thisTag || `Tag`} be added here?`);
       return (
         <EditableTopBottomWrapper
+          id={thisId}
+            onClick={handleToolModeClick}
           tooltips={[`Insert ${thisTag} above`, `Insert ${thisTag} below`]}
         >
           {child}
@@ -426,7 +450,11 @@ const PaneFromAst = ({
     );
     if (!showOverlay) return child;
     return (
-      <EditableInnerWrapper tooltip={`Edit this Link`} onClick={handleToolModeClick}>
+      <EditableInnerWrapper
+        id={thisId}
+        tooltip={`Edit this Link`}
+        onClick={handleToolModeClick}
+      >
         {child}
       </EditableInnerWrapper>
     );
@@ -451,7 +479,11 @@ const PaneFromAst = ({
     );
     if (!showOverlay) return child;
     return (
-      <EditableInnerWrapper tooltip={`Edit this Link`} onClick={handleToolModeClick}>
+      <EditableInnerWrapper
+        id={thisId}
+        tooltip={`Edit this Link`}
+        onClick={handleToolModeClick}
+      >
         {child}
       </EditableInnerWrapper>
     );

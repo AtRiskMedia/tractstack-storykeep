@@ -113,7 +113,7 @@ const PaneWrapper = (props: { id: string }) => {
         mode: "settings",
         type: "pane",
       });
-      handleToggleOn();
+      handleToggleOn(false,`pane-inner-${id}`);
     }
   };
 

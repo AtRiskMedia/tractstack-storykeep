@@ -336,25 +336,41 @@ export function initStoryKeep() {
     }
 
     if (isEditMode && activeElement) {
-      scrollElementIntoView();
+      scrollElementIntoView(activeElement);
     }
   }
 
-  function scrollElementIntoView(): void {
-    if (!activeElement) return;
+  function scrollElementIntoView(element: HTMLElement): void {
     const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
     if (isDesktop) return;
 
-    const elementRect = activeElement.getBoundingClientRect();
+    const header = document.getElementById("main-header");
+    const headerHeight = header ? header.offsetHeight : 0;
     const editModalHeight = window.innerHeight / 3;
     const viewportHeight = window.innerHeight;
-    const scrollY = window.scrollY;
+    const elementRect = element.getBoundingClientRect();
+    const availableSpace = viewportHeight - headerHeight - editModalHeight;
 
-    if (elementRect.bottom > viewportHeight - editModalHeight) {
-      const targetScroll =
-        scrollY + elementRect.bottom - (viewportHeight - editModalHeight) + 20;
-      window.scrollTo({ top: targetScroll, behavior: "smooth" });
+    // Calculate the ideal position to center the element
+    const idealTop = headerHeight + (availableSpace - elementRect.height) / 2;
+
+    // Determine the actual scroll position
+    let targetScroll;
+    if (elementRect.height <= availableSpace) {
+      // If the element fits in the available space, center it
+      targetScroll = window.scrollY + elementRect.top - idealTop;
+    } else {
+      // If the element is taller than available space, align the centers
+      const elementCenter = elementRect.top + elementRect.height / 2;
+      const availableSpaceCenter = headerHeight + availableSpace / 2;
+      targetScroll = window.scrollY + elementCenter - availableSpaceCenter;
     }
+
+    // Ensure we don't scroll past the top of the document
+    targetScroll = Math.max(0, targetScroll);
+
+    // Perform the scroll
+    window.scrollTo({ top: targetScroll, behavior: "smooth" });
   }
 
   function scrollHeaderOutOfView(): void {
@@ -378,6 +394,7 @@ export function initStoryKeep() {
     }
   }
   const debouncedHandleScroll = debounce(handleScroll, 50);
+  const debouncedHandleResize = debounce(handleResize, 50);
 
   // Event listeners for React components
   document.addEventListener("toggle-on-edit-modal", ((event: CustomEvent) => {
@@ -399,7 +416,7 @@ export function initStoryKeep() {
 
   // Initialize
   handleHeaderBehavior();
-  window.addEventListener("resize", handleResize);
+  window.addEventListener("resize", debouncedHandleResize);
   window.addEventListener("scroll", debouncedHandleScroll);
 }
 

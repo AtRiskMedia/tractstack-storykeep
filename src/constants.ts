@@ -21,6 +21,9 @@ export const MAX_HISTORY_LENGTH = 10;
 export const MS_BETWEEN_UNDO = 10000;
 export const MAX_LENGTH_CONTENT = 10000;
 
+export const SHORT_SCREEN_THRESHOLD = 600;
+export const STICKY_HEADER_THRESHOLD = 900;
+
 export const toolAddModes = [
   "paragraph",
   "h2",
@@ -50,20 +53,15 @@ export const toolAddModeTitles: Record<ToolAddMode, string> = {
 };
 
 export const toolModes: ToolMode[] = [
-  "insert",
   "text",
   "styles",
+  "insert",
   "settings",
   "eraser",
   "pane",
 ];
 
 export const toolModeButtons = [
-  {
-    key: "insert" as const,
-    Icon: PlusCircleIcon,
-    title: "Insert element",
-  },
   {
     key: "text" as const,
     Icon: PencilIcon,
@@ -75,18 +73,23 @@ export const toolModeButtons = [
     title: "Edit styles",
   },
   {
+    key: "insert" as const,
+    Icon: PlusCircleIcon,
+    title: "Insert element",
+  },
+  {
     key: "eraser" as const,
     Icon: TrashIcon,
     title: "Erase element",
   },
   {
-    key: "pane" as const,
-    Icon: Square3Stack3DIcon,
-    title: "Insert Pane",
-  },
-  {
     key: "settings" as const,
     Icon: Cog8ToothIcon,
     title: "Edit settings",
+  },
+  {
+    key: "pane" as const,
+    Icon: Square3Stack3DIcon,
+    title: "Insert Pane",
   },
 ] as const;

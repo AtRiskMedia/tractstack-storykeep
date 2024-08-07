@@ -1,6 +1,6 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
-import { cleanHtmlAst } from "./cleanHtmlAst";
+import { cleanHtmlAst } from "./markdownUtils";
 import type { Row } from "@libsql/client";
 import type { FileDatum, PaneDatum, FileNode } from "../../types";
 

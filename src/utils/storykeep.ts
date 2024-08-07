@@ -14,7 +14,12 @@ import {
   storyFragmentSocialImagePath,
 } from "../store/storykeep";
 import { debounce } from "./helpers";
-import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../constants";
+import {
+  MS_BETWEEN_UNDO,
+  MAX_HISTORY_LENGTH,
+  SHORT_SCREEN_THRESHOLD,
+  STICKY_HEADER_THRESHOLD,
+} from "../constants";
 import type {
   StoreKey,
   StoreMapType,
@@ -25,8 +30,6 @@ import type {
   HistoryEntry,
 } from "../types";
 
-const SHORT_SCREEN_THRESHOLD = 600;
-const STICKY_HEADER_THRESHOLD = 1200;
 const BREAKPOINTS = {
   xl: 1367,
 };

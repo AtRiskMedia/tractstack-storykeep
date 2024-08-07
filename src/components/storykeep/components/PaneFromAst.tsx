@@ -12,8 +12,15 @@ import {
   getGlobalNth,
   extractMarkdownElement,
 } from "../../../utils/compositor/markdownUtils";
+import { toolAddModeTitles } from "../../../constants";
 import type { ReactNode } from "react";
-import type { ButtonData, FileNode, MarkdownLookup } from "../../../types";
+import type {
+  ButtonData,
+  FileNode,
+  MarkdownLookup,
+  ToolAddMode,
+  ToolMode,
+} from "../../../types";
 
 interface PaneFromAstProps {
   payload: {
@@ -28,12 +35,19 @@ interface PaneFromAstProps {
   idx: number | null;
   outerIdx: number;
   markdownLookup: MarkdownLookup;
-  toolMode: string;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
 }
 
-const EditableOuterWrapper = ({ children }: { children: ReactNode }) => {
+const EditableOuterWrapper = ({
+  tooltip,
+  children,
+}: {
+  tooltip: string;
+  children: ReactNode;
+}) => {
   return (
-    <div className="relative">
+    <div className="relative" title={tooltip}>
       {children}
       <div
         onClick={() => console.log(`EditableOuterWrapper`)}
@@ -44,9 +58,15 @@ const EditableOuterWrapper = ({ children }: { children: ReactNode }) => {
     </div>
   );
 };
-const EditableInnerWrapper = ({ children }: { children: ReactNode }) => {
+const EditableInnerWrapper = ({
+  tooltip,
+  children,
+}: {
+  tooltip: string;
+  children: ReactNode;
+}) => {
   return (
-    <span className="relative">
+    <span className="relative" title={tooltip}>
       {children}
       <span
         onClick={() => console.log(`EditableInnerWrapper`)}
@@ -57,9 +77,15 @@ const EditableInnerWrapper = ({ children }: { children: ReactNode }) => {
     </span>
   );
 };
-const EditableInnerElementWrapper = ({ children }: { children: ReactNode }) => {
+const EditableInnerElementWrapper = ({
+  tooltip,
+  children,
+}: {
+  tooltip: string;
+  children: ReactNode;
+}) => {
   return (
-    <span className="relative">
+    <span className="relative" title={tooltip}>
       {children}
       <span
         onClick={() => console.log(`EditableInnerElementWrapper`)}
@@ -70,28 +96,36 @@ const EditableInnerElementWrapper = ({ children }: { children: ReactNode }) => {
     </span>
   );
 };
-const EditableTopBottomWrapper = ({ children }: { children: ReactNode }) => {
+const EditableTopBottomWrapper = ({
+  tooltips,
+  children,
+}: {
+  tooltips: [string, string];
+  children: ReactNode;
+}) => {
   return (
     <div className="relative group">
       {children}
       <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
         <div
           onClick={() => console.log(`EditableTopBottomWrapper top`)}
+          title={tooltips.at(0)}
           className="absolute inset-0 w-full h-full
-                     hover:bg-mylightgrey hover:bg-opacity-40
+                     hover:bg-gradient-to-b hover:from-mylightgrey hover:via-mylightgrey/50 hover:to-transparent
                      mix-blend-exclusion
                      before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
-                     before:bg-mylightgrey/30 hover:before:bg-mylightgrey before:mix-blend-exclusion"
+                     before:bg-mylightgrey/30 hover:before:bg-mylightgrey/85"
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
         <div
           onClick={() => console.log(`EditableTopBottomWrapper bottom`)}
+          title={tooltips.at(1)}
           className="absolute inset-0 w-full h-full
-                     hover:bg-mylightgrey hover:bg-opacity-40
+                     hover:bg-gradient-to-t hover:from-mylightgrey hover:via-mylightgrey/50 hover:to-transparent
                      mix-blend-exclusion
                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
-                     after:bg-white/30 hover:after:bg-white after:mix-blend-exclusion"
+                     after:bg-mylightgrey/30 hover:after:bg-mylightgrey/85"
         />
       </div>
     </div>
@@ -107,6 +141,7 @@ const PaneFromAst = ({
   outerIdx,
   markdownLookup,
   toolMode,
+  toolAddMode,
 }: PaneFromAstProps) => {
   const thisAst = payload.ast[0];
 
@@ -289,19 +324,63 @@ const PaneFromAst = ({
             outerIdx={outerIdx}
             markdownLookup={markdownLookup}
             toolMode={toolMode}
+            toolAddMode={toolAddMode}
           />
         ))}
       </TagComponent>
     );
     if (noOverlay || [`ol`, `ul`, `strong`, `em`].includes(Tag)) return child;
-    if (showOverlay && [`li`].includes(Tag))
-      return <EditableInnerElementWrapper>{child}</EditableInnerElementWrapper>;
-    if (showOverlay && [`strong`, `em`].includes(Tag))
-      return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
-    if (showOverlay)
-      return <EditableOuterWrapper>{child}</EditableOuterWrapper>;
-    if (showOverlay2)
-      return <EditableTopBottomWrapper>{child}</EditableTopBottomWrapper>;
+    if (showOverlay && [`li`].includes(Tag)) {
+      // is this an image?
+      const isImage =
+        idx && typeof markdownLookup.imagesLookup[outerIdx] !== `undefined`
+          ? typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
+          : false;
+      // is this an inline code?
+      const isWidget =
+        idx && typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`
+          ? typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
+          : false;
+      // is this a blockquote (not currently implemented)
+      const tip = isImage
+        ? `Edit this image`
+        : isWidget
+          ? `Edit this widget`
+          : isTextContainerItem
+            ? `Edit this text`
+            : `UNKNOWN`;
+      if (tip === `UNKNOWN`)
+        console.log(`MISS`, child, outerIdx, idx, Tag, markdownLookup);
+      if (tip)
+        return (
+          <EditableInnerElementWrapper tooltip={tip}>
+            {child}
+          </EditableInnerElementWrapper>
+        );
+    }
+    if (showOverlay) {
+      const tip =
+        toolMode === `styles`
+          ? `Edit styles`
+          : toolMode === `eraser`
+            ? `Erase this element`
+            : ``;
+      if (tip)
+        return (
+          <EditableOuterWrapper tooltip={tip}>{child}</EditableOuterWrapper>
+        );
+    }
+    if (showOverlay2) {
+      const thisTag = toolAddModeTitles[toolAddMode] || undefined;
+      console.log(`MUST VALIDATE -- can ${thisTag || `Tag`} be added here?`);
+      return (
+        <EditableTopBottomWrapper
+          tooltips={[`Insert ${thisTag} above`, `Insert ${thisTag} below`]}
+        >
+          {child}
+        </EditableTopBottomWrapper>
+      );
+    }
   }
 
   // can we render component based on Tag
@@ -321,7 +400,11 @@ const PaneFromAst = ({
       </a>
     );
     if (!showOverlay) return child;
-    return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
+    return (
+      <EditableInnerWrapper tooltip={`Edit this Link`}>
+        {child}
+      </EditableInnerWrapper>
+    );
   }
 
   if (
@@ -342,7 +425,11 @@ const PaneFromAst = ({
       />
     );
     if (!showOverlay) return child;
-    return <EditableInnerWrapper>{child}</EditableInnerWrapper>;
+    return (
+      <EditableInnerWrapper tooltip={`Edit this Link`}>
+        {child}
+      </EditableInnerWrapper>
+    );
   }
 
   if (Tag === "img" && imageSrc) {

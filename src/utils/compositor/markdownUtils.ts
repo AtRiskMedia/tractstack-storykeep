@@ -1,11 +1,28 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
-import type { Root } from "hast";
+import type { Element, Text, Root, RootContent } from "hast";
 import type { MarkdownLookup } from "../../types";
 
+type HastNode = RootContent | Root;
+
+export function cleanHtmlAst(node: HastNode): HastNode | null {
+  if (node.type === "text") {
+    // Remove text nodes that are just newlines
+    return (node as Text).value !== `\n` ? node : null;
+  } else if (node.type === "element" || node.type === "root") {
+    const element = node as Element | Root;
+    if ("children" in element) {
+      element.children = element.children
+        .map(child => cleanHtmlAst(child as HastNode))
+        .filter((child): child is RootContent => child !== null);
+    }
+    return element;
+  }
+  return node;
+}
 export function markdownToHtmlAst(markdown: string): Root {
   const mdast = fromMarkdown(markdown);
-  return toHast(mdast) as Root;
+  return cleanHtmlAst(toHast(mdast)) as Root;
 }
 
 //export function renderNestedElement(element: Element | Text): string {

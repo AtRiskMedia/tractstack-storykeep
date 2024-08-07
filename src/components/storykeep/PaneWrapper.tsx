@@ -27,22 +27,22 @@ const InsertTopBottomWrapper = ({
       {children}
       <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
         <div
-          onClick={() => onInsertClick(`top`)}
+          onClick={() => onInsertClick("top")}
           className="absolute inset-0 w-full h-full
-                     hover:bg-mylightgrey hover:bg-opacity-40
+                     hover:bg-gradient-to-b hover:from-mylightgrey/50 hover:via-mylightgrey/50 hover:to-transparent
                      mix-blend-exclusion
                      before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
-                     before:bg-mylightgrey/85 hover:before:bg-mylightgrey before:mix-blend-exclusion"
+                     before:bg-mylightgrey/85 hover:before:bg-mylightgrey"
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
         <div
-          onClick={() => onInsertClick(`bottom`)}
+          onClick={() => onInsertClick("bottom")}
           className="absolute inset-0 w-full h-full
-                     hover:bg-mylightgrey hover:bg-opacity-40
+                     hover:bg-gradient-to-t hover:from-mylightgrey/50 hover:via-mylightgrey/50 hover:to-transparent
                      mix-blend-exclusion
                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
-                     after:bg-white/85 hover:after:bg-white after:mix-blend-exclusion"
+                     after:bg-white/85 hover:after:bg-white"
         />
       </div>
     </div>

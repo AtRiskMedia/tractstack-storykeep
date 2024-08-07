@@ -70,13 +70,14 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
           addToLookup("links", linksIndex, parentNth, childNth);
           linksIndex++;
           break;
+        default:
       }
     }
 
     if ("children" in node && Array.isArray(node.children)) {
-      node.children.forEach((childNode, index) => {
+      node.children.forEach(childNode => {
         if (isProcessableNode(childNode)) {
-          processNode(childNode, parentNth, index);
+          processNode(childNode, parentNth, childNth);
         }
       });
     }
@@ -107,6 +108,5 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
       processRootNode(node, parentNth);
     }
   });
-
   return markdownLookup;
 }

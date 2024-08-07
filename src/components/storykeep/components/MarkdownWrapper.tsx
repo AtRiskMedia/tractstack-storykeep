@@ -5,7 +5,7 @@ import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
-import { toolModeStore } from "../../../store/storykeep";
+import { toolModeStore, toolAddModeStore } from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import type {
   MarkdownDatum,
@@ -33,7 +33,8 @@ const MarkdownWrapper = ({
 }: Props) => {
   const $toolMode = useStore(toolModeStore);
   const toolMode = $toolMode.value || ``;
-  // this is either MarkdownPane, Modal+MarkdownInsideModal, or MarkdownInsidePane
+  const $toolAddMode = useStore(toolAddModeStore);
+  const toolAddMode = $toolAddMode.value || ``;
   const thisPayload = payload as MarkdownPaneDatum;
   const thisModalPayload =
     thisPayload.isModal &&
@@ -96,6 +97,7 @@ const MarkdownWrapper = ({
             slug={slug}
             markdownLookup={markdownLookup}
             toolMode={toolMode}
+            toolAddMode={toolAddMode}
           />
         </div>
       </div>
@@ -113,6 +115,7 @@ const MarkdownWrapper = ({
         slug={slug}
         markdownLookup={markdownLookup}
         toolMode={toolMode}
+        toolAddMode={toolAddMode}
       />
     );
   }
@@ -127,6 +130,7 @@ const MarkdownWrapper = ({
         slug={slug}
         markdownLookup={markdownLookup}
         toolMode={toolMode}
+        toolAddMode={toolAddMode}
       />
     );
   }

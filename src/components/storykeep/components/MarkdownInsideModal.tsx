@@ -12,6 +12,8 @@ import type {
   MarkdownLookup,
   OptionsPayloadDatum,
   ViewportKey,
+  ToolMode,
+  ToolAddMode,
 } from "../../../types";
 
 interface Props {
@@ -29,7 +31,8 @@ interface Props {
   paneId: string;
   slug: string;
   markdownLookup: MarkdownLookup;
-  toolMode: string;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
 }
 
 const MarkdownInsideModal = ({
@@ -42,6 +45,7 @@ const MarkdownInsideModal = ({
   slug,
   markdownLookup,
   toolMode,
+  toolAddMode,
 }: Props) => {
   const $viewport = useStore(viewportStore) as { value: ViewportKey };
   const viewportKey: ViewportKey =
@@ -146,6 +150,7 @@ const MarkdownInsideModal = ({
               outerIdx={idx}
               markdownLookup={markdownLookup}
               toolMode={toolMode}
+              toolAddMode={toolAddMode}
             />
           ))}
       </div>

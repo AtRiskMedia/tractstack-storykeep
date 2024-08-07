@@ -28,21 +28,23 @@ const InsertTopBottomWrapper = ({
       <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
         <div
           onClick={() => onInsertClick("top")}
+          title="Insert new Pane above this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-b hover:from-mylightgrey/50 hover:via-mylightgrey/50 hover:to-transparent
+                     hover:bg-gradient-to-b hover:from-mylightgrey/85 hover:via-mylightgrey/85 hover:to-transparent
                      mix-blend-exclusion
                      before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
-                     before:bg-mylightgrey/85 hover:before:bg-mylightgrey"
+                     before:bg-mylightgrey hover:before:bg-mylightgrey"
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
         <div
           onClick={() => onInsertClick("bottom")}
+          title="Insert new Pane below this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-t hover:from-mylightgrey/50 hover:via-mylightgrey/50 hover:to-transparent
+                     hover:bg-gradient-to-t hover:from-mylightgrey/85 hover:via-mylightgrey/85 hover:to-transparent
                      mix-blend-exclusion
                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
-                     after:bg-white/85 hover:after:bg-white"
+                     after:bg-mylightgrey hover:after:bg-mylightgrey"
         />
       </div>
     </div>

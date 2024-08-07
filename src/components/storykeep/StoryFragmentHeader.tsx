@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { useStore } from "@nanostores/react";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
@@ -11,6 +11,8 @@ import {
   uncleanDataStore,
   storyFragmentInit,
   storyFragmentSlug,
+  storyFragmentPaneIds,
+  paneFragmentIds,
   // Add other stores here
   //
 } from "../../store/storykeep";
@@ -44,6 +46,24 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
   // required stores
   const $editMode = useStore(editModeStore);
   const $unsavedChanges = useStore(unsavedChangesStore);
+  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds);
+  const $paneFragmentIds = useStore(paneFragmentIds);
+  const hasUnsavedChanges = useMemo(() => {
+    const storyFragmentChanges = Object.values($unsavedChanges[id] || {}).some(
+      Boolean
+    );
+    const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
+      Object.values($unsavedChanges[paneId] || {}).some(Boolean)
+    );
+    const paneFragmentChanges = $storyFragmentPaneIds[id]?.current.some(
+      paneId =>
+        $paneFragmentIds[paneId]?.current.some(fragmentId =>
+          Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
+        )
+    );
+
+    return storyFragmentChanges || paneChanges || paneFragmentChanges;
+  }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
   const $uncleanData = useStore(uncleanDataStore);
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $storyFragmentSlug = useStore(storyFragmentSlug);
@@ -128,7 +148,7 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
             Settings
           </button>
 
-          {Object.values($unsavedChanges[id] || {}).some(Boolean) ? (
+          {hasUnsavedChanges ? (
             <a
               data-astro-reload
               href={`/${$storyFragmentSlug[id]?.original}/edit`}
@@ -145,16 +165,15 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
             </a>
           )}
 
-          <button
-            type="button"
-            className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
-            disabled={
-              !Object.values($unsavedChanges[id] || {}).some(Boolean) ||
-              Object.values($uncleanData[id] || {}).some(Boolean)
-            }
-          >
-            Save
-          </button>
+          {hasUnsavedChanges ? (
+            <button
+              type="button"
+              className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+              disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
+            >
+              Save
+            </button>
+          ) : null}
         </div>
       </div>
 

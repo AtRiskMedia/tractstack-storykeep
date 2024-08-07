@@ -13,7 +13,7 @@ import {
   storyFragmentMenuId,
   storyFragmentSocialImagePath,
 } from "../store/storykeep";
-import { debounce } from "./helpers";
+import { debounce, isDeepEqual } from "./helpers";
 import {
   MS_BETWEEN_UNDO,
   MAX_HISTORY_LENGTH,
@@ -153,7 +153,11 @@ export const useStoryKeepUtils = (id: string) => {
 
     const currentStoreValue = store.get();
     const currentField = currentStoreValue[id];
-    if (currentField && newValue !== currentField.current && isPreValid) {
+    if (
+      currentField &&
+      isPreValid &&
+      !isDeepEqual(newValue, currentField.current)
+    ) {
       const now = Date.now();
       const newHistory = updateHistory(storeKey, currentField, now);
       const newField = createNewField(currentField, newValue, newHistory);
@@ -163,7 +167,7 @@ export const useStoryKeepUtils = (id: string) => {
         [id]: newField,
       });
 
-      const isUnsaved = newValue !== newField.original;
+      const isUnsaved = !isDeepEqual(newValue, newField.original);
       unsavedChangesStore.setKey(id, {
         ...(unsavedChangesStore.get()[id] || {}),
         [storeKey]: isUnsaved,

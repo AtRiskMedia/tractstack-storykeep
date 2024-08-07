@@ -87,7 +87,10 @@ export type StoreKey =
   | "paneCodeHook"
   | "paneImpression"
   | "paneHeldBeliefs"
-  | "paneWithheldBeliefs";
+  | "paneWithheldBeliefs"
+  | "paneFragmentBgColour"
+  | "paneFragmentBgPane"
+  | "paneFragmentMarkdown";
 
 export type ToolAddMode = (typeof toolAddModes)[number];
 

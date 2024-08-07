@@ -3,6 +3,7 @@ import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
+  unsavedChangesStore,
 } from "../../../store/storykeep";
 import {
   updateMarkdownElement,
@@ -15,6 +16,7 @@ import {
   MS_BETWEEN_UNDO,
   MAX_HISTORY_LENGTH,
 } from "../../../constants";
+import { isDeepEqual } from "../../../utils/helpers";
 import type { KeyboardEvent } from "react";
 import type { FieldWithHistory, HistoryEntry } from "../../../types";
 
@@ -43,6 +45,7 @@ const EditableContent = memo(
     const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
     const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
     const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
+    const $unsavedChanges = useStore(unsavedChangesStore);
 
     const [localContent, setLocalContent] = useState(content);
     const originalContentRef = useRef(content);
@@ -100,17 +103,25 @@ const EditableContent = memo(
           const now = Date.now();
           const newHistory = updateHistory(fragmentData, now);
 
+          const newValue = {
+            ...fragmentData.current,
+            markdown: {
+              ...fragmentData.current.markdown,
+              body: updatedMarkdown,
+              htmlAst: updatedHtmlAst,
+            },
+          };
+
           paneFragmentMarkdown.setKey(fragmentId, {
             ...fragmentData,
-            current: {
-              ...fragmentData.current,
-              markdown: {
-                ...fragmentData.current.markdown,
-                body: updatedMarkdown,
-                htmlAst: updatedHtmlAst,
-              },
-            },
+            current: newValue,
             history: newHistory,
+          });
+
+          const isUnsaved = !isDeepEqual(newValue, fragmentData.original);
+          unsavedChangesStore.setKey(paneId, {
+            ...$unsavedChanges[paneId],
+            paneFragmentMarkdown: isUnsaved,
           });
         });
       },
@@ -129,7 +140,7 @@ const EditableContent = memo(
       (newContent: string) => {
         if (newContent.length <= MAX_LENGTH_CONTENT) {
           setLocalContent(newContent);
-          updateStore(newContent);
+          //updateStore(newContent);
           return true;
         }
         return false;
@@ -177,6 +188,15 @@ const EditableContent = memo(
             );
             setLocalContent(undoneContent);
             originalContentRef.current = undoneContent;
+
+            const isUnsaved = !isDeepEqual(
+              lastEntry.value,
+              fragmentData.original
+            );
+            unsavedChangesStore.setKey(paneId, {
+              ...$unsavedChanges[paneId],
+              paneFragmentMarkdown: isUnsaved,
+            });
           });
 
           return false;

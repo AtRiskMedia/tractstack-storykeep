@@ -41,16 +41,18 @@ interface PaneFromAstProps {
 
 const EditableOuterWrapper = ({
   tooltip,
+  onClick,
   children,
 }: {
   tooltip: string;
+  onClick: (event: MouseEvent<HTMLDivElement>) => void;
   children: ReactNode;
 }) => {
   return (
     <div className="relative" title={tooltip}>
       {children}
       <div
-        onClick={() => console.log(`EditableOuterWrapper`)}
+        onClick={onClick}
         className="absolute inset-0 w-full h-full z-101 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white/20
                    outline outline-2 outline-dotted outline-white/20 outline-offset-[-2px]
                    mix-blend-exclusion"
@@ -60,16 +62,18 @@ const EditableOuterWrapper = ({
 };
 const EditableInnerWrapper = ({
   tooltip,
+  onClick,
   children,
 }: {
   tooltip: string;
+  onClick: (event: MouseEvent<HTMLDivElement>) => void;
   children: ReactNode;
 }) => {
   return (
     <span className="relative" title={tooltip}>
       {children}
       <span
-        onClick={() => console.log(`EditableInnerWrapper`)}
+        onClick={onClick}
         className="absolute inset-0 w-full h-full z-102 hover:bg-mylightgrey hover:bg-opacity-20 hover:outline-white
                    outline outline-2 outline-dashed outline-white/85 outline-offset-[-2px]
                    mix-blend-exclusion"
@@ -79,16 +83,18 @@ const EditableInnerWrapper = ({
 };
 const EditableInnerElementWrapper = ({
   tooltip,
+  onClick,
   children,
 }: {
   tooltip: string;
+  onClick: (event: MouseEvent<HTMLDivElement>) => void;
   children: ReactNode;
 }) => {
   return (
     <span className="relative" title={tooltip}>
       {children}
       <span
-        onClick={() => console.log(`EditableInnerElementWrapper`)}
+        onClick={onClick}
         className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white
                    outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
                    mix-blend-exclusion"
@@ -190,6 +196,23 @@ const PaneFromAst = ({
     }
     setTimeout(processQueue, 0);
   }, []);
+
+  // Callback fns for toolMode
+  const handleToolModeClick = useCallback(() => {
+    if (toolMode === "eraser") {
+      console.log(
+        `Erasing element: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
+      );
+      // TODO: Implement actual eraser functionality here
+      // This will involve removing the element from the MarkdownEditDatum
+      // and updating the paneFragmentMarkdown store
+    }
+    else {
+      console.log(
+        `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
+      );
+    }
+  }, [toolMode, Tag, outerIdx, idx]);
 
   // Extract class names
   const injectClassNames =
@@ -353,7 +376,7 @@ const PaneFromAst = ({
             : `UNKNOWN`;
       if (tip)
         return (
-          <EditableInnerElementWrapper tooltip={tip}>
+          <EditableInnerElementWrapper tooltip={tip} onClick={handleToolModeClick}>
             {child}
           </EditableInnerElementWrapper>
         );
@@ -367,7 +390,9 @@ const PaneFromAst = ({
             : ``;
       if (tip)
         return (
-          <EditableOuterWrapper tooltip={tip}>{child}</EditableOuterWrapper>
+          <EditableOuterWrapper tooltip={tip} onClick={handleToolModeClick}>
+            {child}
+          </EditableOuterWrapper>
         );
     }
     if (showOverlay2) {
@@ -401,7 +426,7 @@ const PaneFromAst = ({
     );
     if (!showOverlay) return child;
     return (
-      <EditableInnerWrapper tooltip={`Edit this Link`}>
+      <EditableInnerWrapper tooltip={`Edit this Link`} onClick={handleToolModeClick}>
         {child}
       </EditableInnerWrapper>
     );
@@ -426,7 +451,7 @@ const PaneFromAst = ({
     );
     if (!showOverlay) return child;
     return (
-      <EditableInnerWrapper tooltip={`Edit this Link`}>
+      <EditableInnerWrapper tooltip={`Edit this Link`} onClick={handleToolModeClick}>
         {child}
       </EditableInnerWrapper>
     );

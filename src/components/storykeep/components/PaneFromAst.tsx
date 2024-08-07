@@ -333,12 +333,14 @@ const PaneFromAst = ({
     if (showOverlay && [`li`].includes(Tag)) {
       // is this an image?
       const isImage =
-        idx && typeof markdownLookup.imagesLookup[outerIdx] !== `undefined`
+        typeof idx === `number` &&
+        typeof markdownLookup.imagesLookup[outerIdx] !== `undefined`
           ? typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
           : false;
       // is this an inline code?
       const isWidget =
-        idx && typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`
+        typeof idx === `number` &&
+        typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`
           ? typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
           : false;
       // is this a blockquote (not currently implemented)
@@ -349,8 +351,6 @@ const PaneFromAst = ({
           : isTextContainerItem
             ? `Edit this text`
             : `UNKNOWN`;
-      if (tip === `UNKNOWN`)
-        console.log(`MISS`, child, outerIdx, idx, Tag, markdownLookup);
       if (tip)
         return (
           <EditableInnerElementWrapper tooltip={tip}>

@@ -66,25 +66,23 @@ export const StoryFragment = (props: { id: string }) => {
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div className="bg-mydarkgrey/20">
-      <div
-        id="storykeep-preview"
-        className={classNames(
-          tailwindBgColour ? tailwindBgColour : `bg-white`,
-          `overflow-hidden`,
-          viewportKey === `mobile`
-            ? `min-w-[500px] max-w-[800px]`
-            : viewportKey === `tablet`
-              ? `min-w-[1024px] max-w-[1367px]`
-              : viewportKey === `desktop`
-                ? `min-w-[1368px] max-w-[1920px]`
-                : ``
-        )}
-      >
-        {paneIds.map((paneId: string) => (
-          <PaneWrapper key={paneId} id={paneId} />
-        ))}
-      </div>
+    <div
+      id="storykeep-preview"
+      className={classNames(
+        tailwindBgColour ? tailwindBgColour : `bg-white`,
+        `overflow-hidden`,
+        viewportKey === `mobile`
+          ? `min-w-[500px] max-w-[800px]`
+          : viewportKey === `tablet`
+            ? `min-w-[1024px] max-w-[1367px]`
+            : viewportKey === `desktop`
+              ? `min-w-[1368px] max-w-[1920px]`
+              : ``
+      )}
+    >
+      {paneIds.map((paneId: string) => (
+        <PaneWrapper key={paneId} id={paneId} />
+      ))}
     </div>
   );
 };

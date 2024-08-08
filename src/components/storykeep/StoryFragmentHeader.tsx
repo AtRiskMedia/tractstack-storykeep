@@ -134,7 +134,7 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
   }, []);
 
   const debouncedHandleScroll = useMemo(
-    () => debounce(handleScroll, 10),
+    () => debounce(handleScroll, 30),
     [handleScroll]
   );
 
@@ -222,22 +222,22 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
             ) : null}
           </div>
         </div>
-          <div style={{ display: hideElements ? "none" : "block" }}>
-            <StoryFragmentTitle
-              id={id}
-              isEditing={isEditing}
-              handleEditingChange={handleEditingChange}
-              updateStoreField={updateStoreField}
-              handleUndo={handleUndo}
-            />
-            <StoryFragmentSlug
-              id={id}
-              isEditing={isEditing}
-              handleEditingChange={handleEditingChange}
-              updateStoreField={updateStoreField}
-              handleUndo={handleUndo}
-            />
-          </div>
+        <div style={{ display: hideElements ? "none" : "block" }}>
+          <StoryFragmentTitle
+            id={id}
+            isEditing={isEditing}
+            handleEditingChange={handleEditingChange}
+            updateStoreField={updateStoreField}
+            handleUndo={handleUndo}
+          />
+          <StoryFragmentSlug
+            id={id}
+            isEditing={isEditing}
+            handleEditingChange={handleEditingChange}
+            updateStoreField={updateStoreField}
+            handleUndo={handleUndo}
+          />
+        </div>
       </div>
     </div>
   );

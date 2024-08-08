@@ -32,7 +32,10 @@ const payload = await getDatumPayload();
   ogImage={storyfragment.socialImagePath}
   canonicalURL={canonicalURL}
 >
-  <div class="m-0 p-0 flex flex-col bg-slate-50 w-full">
+  <div
+    class="m-0 p-0 flex flex-col bg-mydarkgrey/85 w-full"
+    style="background-image: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0, 0, 0, 0.1) 10px, rgba(0, 0, 0, 0.1) 20px );"
+  >
     <StoryKeepStore client:load storyfragment={storyfragment} />
     <header
       class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-full"

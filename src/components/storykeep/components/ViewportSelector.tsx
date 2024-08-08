@@ -10,9 +10,10 @@ import { debounce } from "../../../utils/helpers";
 interface ViewportSelectorProps {
   viewport: "auto" | "mobile" | "tablet" | "desktop";
   setViewport: (viewport: "auto" | "mobile" | "tablet" | "desktop") => void;
+  hideElements?: boolean;
 }
 
-const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
+const ViewportSelector = ({ viewport, setViewport,hideElements }: ViewportSelectorProps) => {
   const [width, setWidth] = useState(0);
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
@@ -55,8 +56,10 @@ const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
   return (
     <div>
       <div className="flex items-center">
-        <span className="mr-2 text-sm text-mydarkgrey">Designing for:</span>
-        <span className="font-bold text-xl text-myblue pr-4">
+        <span 
+          className={`mr-2 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}>Designing for:</span>
+        <span 
+          className={`font-bold text-xl text-myblue pr-4 ${hideElements ? `hidden md:block` : ``}`}>
           {viewport !== `auto`
             ? viewport
             : width < 800

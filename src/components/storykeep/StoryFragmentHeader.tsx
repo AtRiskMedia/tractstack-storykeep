@@ -157,7 +157,10 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
         <div
           className={`flex flex-wrap items-center gap-y-2 gap-x-4 ${hideElements ? `justify-around` : `justify-end`}`}
         >
-          <div style={{ display: hideElements ? "none" : "block" }}>
+          <div
+            className="mr-auto pr-12"
+            style={{ display: hideElements ? "none" : "block" }}>
+            <div className="flex flex-nowrap">
             <object
               type="image/svg+xml"
               data="/custom/logo.svg"
@@ -166,18 +169,14 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
             >
               Logo
             </object>
-          </div>
-          <div
-            className="mr-auto"
-            style={{ display: hideElements ? "none" : "block" }}
-          >
             <h1 className="font-2xl font-bold font-action">
               the website builder that converts
             </h1>
+            </div>
           </div>
 
-          <ViewportSelector viewport={viewport} setViewport={setViewport} />
-          <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} />
+          <ViewportSelector viewport={viewport} setViewport={setViewport} hideElements={hideElements}/>
+          <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} hideElements={hideElements}/>
           {toolMode === `insert` ? (
             <ToolAddModeSelector
               toolAddMode={toolAddMode}

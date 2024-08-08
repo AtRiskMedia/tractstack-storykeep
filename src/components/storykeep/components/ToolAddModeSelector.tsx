@@ -1,5 +1,5 @@
-import type { ToolAddMode } from "../../../types";
 import { toolAddModeTitles, toolAddModes } from "../../../constants";
+import type { ToolAddMode } from "../../../types";
 
 interface ToolAddModeSelectorProps {
   toolAddMode: ToolAddMode;

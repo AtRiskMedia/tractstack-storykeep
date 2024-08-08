@@ -159,24 +159,33 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
         >
           <div
             className="mr-auto pr-12"
-            style={{ display: hideElements ? "none" : "block" }}>
+            style={{ display: hideElements ? "none" : "block" }}
+          >
             <div className="flex flex-nowrap">
-            <object
-              type="image/svg+xml"
-              data="/custom/logo.svg"
-              className="h-5 w-auto pointer-events-none mr-2"
-              aria-label="Logo"
-            >
-              Logo
-            </object>
-            <h1 className="font-2xl font-bold font-action">
-              the website builder that converts
-            </h1>
+              <object
+                type="image/svg+xml"
+                data="/custom/logo.svg"
+                className="h-5 w-auto pointer-events-none mr-2"
+                aria-label="Logo"
+              >
+                Logo
+              </object>
+              <h1 className="text-xl font-bold font-action">
+                the website builder that converts
+              </h1>
             </div>
           </div>
 
-          <ViewportSelector viewport={viewport} setViewport={setViewport} hideElements={hideElements}/>
-          <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} hideElements={hideElements}/>
+          <ViewportSelector
+            viewport={viewport}
+            setViewport={setViewport}
+            hideElements={hideElements}
+          />
+          <ToolModeSelector
+            toolMode={toolMode}
+            setToolMode={setToolMode}
+            hideElements={hideElements}
+          />
           {toolMode === `insert` ? (
             <ToolAddModeSelector
               toolAddMode={toolAddMode}

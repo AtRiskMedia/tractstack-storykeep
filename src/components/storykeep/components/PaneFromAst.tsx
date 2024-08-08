@@ -12,8 +12,9 @@ import {
   getGlobalNth,
   extractMarkdownElement,
 } from "../../../utils/compositor/markdownUtils";
-import { toolAddModeTitles } from "../../../constants";
-import { handleToggleOn } from "../../../utils/storykeep";
+import EraserWrapper from "./EraserWrapper";
+import InsertWrapper from "./InsertWrapper";
+//import { handleToggleOn } from "../../../utils/storykeep";
 import type { MouseEvent, ReactNode } from "react";
 import type {
   ButtonData,
@@ -109,47 +110,6 @@ const EditableInnerElementWrapper = ({
     </span>
   );
 };
-const EditableTopBottomWrapper = ({
-  tooltips,
-  onClick,
-  id,
-  children,
-}: {
-  tooltips: [string, string];
-  onClick: (event: MouseEvent<HTMLDivElement>) => void;
-  id: string;
-  children: ReactNode;
-}) => {
-  return (
-    <div className="relative group">
-      {children}
-      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
-        <div
-          id={`${id}-top`}
-          onClick={onClick}
-          title={tooltips.at(0)}
-          className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-b hover:from-mylightgrey hover:via-mylightgrey/50 hover:to-transparent
-                     mix-blend-exclusion
-                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
-                     before:bg-mylightgrey/30 hover:before:bg-mylightgrey/85"
-        />
-      </div>
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
-        <div
-          id={`${id}-button`}
-          onClick={onClick}
-          title={tooltips.at(1)}
-          className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-t hover:from-mylightgrey hover:via-mylightgrey/50 hover:to-transparent
-                     mix-blend-exclusion
-                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
-                     after:bg-mylightgrey/30 hover:after:bg-mylightgrey/85"
-        />
-      </div>
-    </div>
-  );
-};
 
 const PaneFromAst = ({
   payload,
@@ -213,19 +173,10 @@ const PaneFromAst = ({
 
   // Callback fns for toolMode
   const handleToolModeClick = useCallback(() => {
-    if (toolMode === "eraser") {
-      console.log(
-        `Erasing element: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
-      );
-      // TODO: Implement actual eraser functionality here
-      // This will involve removing the element from the MarkdownEditDatum
-      // and updating the paneFragmentMarkdown store
-    } else {
-      console.log(
-        `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
-      );
-    }
-    handleToggleOn(false, thisId);
+    console.log(
+      `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
+    );
+    //handleToggleOn(false, thisId);
   }, [toolMode, Tag, outerIdx, idx]);
 
   // Extract class names
@@ -381,6 +332,12 @@ const PaneFromAst = ({
           ? typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
           : false;
       // is this a blockquote (not currently implemented)
+      if (toolMode === `eraser`)
+        return (
+          <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+            {child}
+          </EraserWrapper>
+        );
       const tip = isImage
         ? `Edit this image`
         : isWidget
@@ -400,12 +357,14 @@ const PaneFromAst = ({
         );
     }
     if (showOverlay) {
-      const tip =
-        toolMode === `styles`
-          ? `Edit styles`
-          : toolMode === `eraser`
-            ? `Erase this element`
-            : ``;
+      if (toolMode === `eraser`)
+        return (
+          <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+            {child}
+          </EraserWrapper>
+        );
+
+      const tip = toolMode === `styles` ? `Make pretty` : ``;
       if (tip)
         return (
           <EditableOuterWrapper
@@ -418,16 +377,15 @@ const PaneFromAst = ({
         );
     }
     if (showOverlay2) {
-      const thisTag = toolAddModeTitles[toolAddMode] || undefined;
-      console.log(`MUST VALIDATE -- can ${thisTag || `Tag`} be added here?`);
       return (
-        <EditableTopBottomWrapper
-          id={thisId}
-          onClick={handleToolModeClick}
-          tooltips={[`Insert ${thisTag} above`, `Insert ${thisTag} below`]}
+        <InsertWrapper
+          toolAddMode={toolAddMode}
+          fragmentId={fragmentId}
+          outerIdx={outerIdx}
+          idx={idx}
         >
           {child}
-        </EditableTopBottomWrapper>
+        </InsertWrapper>
       );
     }
   }
@@ -449,15 +407,23 @@ const PaneFromAst = ({
       </a>
     );
     if (!showOverlay) return child;
-    return (
-      <EditableInnerWrapper
-        id={thisId}
-        tooltip={`Edit this Link`}
-        onClick={handleToolModeClick}
-      >
-        {child}
-      </EditableInnerWrapper>
-    );
+    if (toolMode === `eraser`) return child;
+    // will add lateron
+    //return (
+    //  <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+    //    {child}
+    //  </EraserWrapper>
+    //);
+    if (toolMode === `styles`)
+      return (
+        <EditableInnerWrapper
+          id={thisId}
+          tooltip={`Configure this Link`}
+          onClick={handleToolModeClick}
+        >
+          {child}
+        </EditableInnerWrapper>
+      );
   }
 
   if (
@@ -478,15 +444,23 @@ const PaneFromAst = ({
       />
     );
     if (!showOverlay) return child;
-    return (
-      <EditableInnerWrapper
-        id={thisId}
-        tooltip={`Edit this Link`}
-        onClick={handleToolModeClick}
-      >
-        {child}
-      </EditableInnerWrapper>
-    );
+    if (toolMode === `eraser`) return child;
+    // will add lateron
+    //return (
+    //  <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+    //    {child}
+    //  </EraserWrapper>
+    //);
+    if (toolMode === `styles`)
+      return (
+        <EditableInnerWrapper
+          id={thisId}
+          tooltip={`Style this Link`}
+          onClick={handleToolModeClick}
+        >
+          {child}
+        </EditableInnerWrapper>
+      );
   }
 
   if (Tag === "img" && imageSrc) {

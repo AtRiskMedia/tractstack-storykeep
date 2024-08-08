@@ -7,17 +7,27 @@ interface ToolModeSelectorProps {
   hideElements?: boolean;
 }
 
-const ToolModeSelector = ({ toolMode, setToolMode,hideElements }: ToolModeSelectorProps) => {
+const ToolModeSelector = ({
+  toolMode,
+  setToolMode,
+  hideElements,
+}: ToolModeSelectorProps) => {
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
 
   return (
     <div>
       <div className="flex items-center">
-        <span className={`mr-2 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
-        >Current tool:</span>
-        <span className={`font-bold text-xl text-myblue pr-4 ${hideElements ? `hidden md:block` : ``}`}
-        >{toolMode}</span>
+        <span
+          className={`mr-2 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
+        >
+          Current tool:
+        </span>
+        <span
+          className={`font-bold text-xl text-myblue pr-4 ${hideElements ? `hidden md:block` : ``}`}
+        >
+          {toolMode}
+        </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">
           {toolModeButtons.map(({ key, Icon, title }, index) => (
             <button

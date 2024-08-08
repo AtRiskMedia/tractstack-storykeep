@@ -14,7 +14,7 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import { toolAddModeTitles } from "../../../constants";
 import { handleToggleOn } from "../../../utils/storykeep";
-import type {MouseEvent, ReactNode } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import type {
   ButtonData,
   FileNode,
@@ -117,7 +117,7 @@ const EditableTopBottomWrapper = ({
 }: {
   tooltips: [string, string];
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
-    id: string;
+  id: string;
   children: ReactNode;
 }) => {
   return (
@@ -423,7 +423,7 @@ const PaneFromAst = ({
       return (
         <EditableTopBottomWrapper
           id={thisId}
-            onClick={handleToolModeClick}
+          onClick={handleToolModeClick}
           tooltips={[`Insert ${thisTag} above`, `Insert ${thisTag} below`]}
         >
           {child}

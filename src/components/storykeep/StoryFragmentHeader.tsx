@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo, memo } from "react";
 import { useStore } from "@nanostores/react";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
@@ -21,6 +21,7 @@ import {
   handleToggleOn,
   handleToggleOff,
 } from "../../utils/storykeep";
+import { debounce } from "../../utils/helpers";
 //import { tursoClient } from "../../api/tursoClient";
 //import {
 //  UnauthorizedError,
@@ -71,6 +72,8 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
   //
 
   const [isClient, setIsClient] = useState(false);
+  const [hideElements, setHideElements] = useState(false);
+  const headerRef = useRef<HTMLDivElement>(null);
 
   //const [testResult, setTestResult] = useState<string | null>(null);
   //const [error, setError] = useState<string | null>(null);
@@ -123,90 +126,118 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
     }
   }, [id, $storyFragmentInit]);
 
+  const handleScroll = useCallback(() => {
+    if (headerRef.current) {
+      const scrollPosition = window.scrollY;
+      setHideElements(scrollPosition > 0);
+    }
+  }, []);
+
+  const debouncedHandleScroll = useMemo(
+    () => debounce(handleScroll, 10),
+    [handleScroll]
+  );
+
+  useEffect(() => {
+    window.addEventListener("scroll", debouncedHandleScroll);
+
+    // Call handleScroll immediately to set initial state
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", debouncedHandleScroll);
+    };
+  }, [debouncedHandleScroll, handleScroll]);
+
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div className="w-full">
+    <div className="w-full" ref={headerRef}>
       <div className="w-full my-2">
-        <div className="flex flex-wrap items-center justify-end">
-          <object
-            type="image/svg+xml"
-            data="/custom/logo.svg"
-            className="h-5 w-auto pointer-events-none mr-2"
-            aria-label="Logo"
+        <div
+          className={`flex flex-wrap items-center gap-y-2 gap-x-4 ${hideElements ? `justify-around` : `justify-start`}`}
+        >
+          <div style={{ display: hideElements ? "none" : "block" }}>
+            <object
+              type="image/svg+xml"
+              data="/custom/logo.svg"
+              className="h-5 w-auto pointer-events-none mr-2"
+              aria-label="Logo"
+            >
+              Logo
+            </object>
+          </div>
+          <div
+            className="mr-auto"
+            style={{ display: hideElements ? "none" : "block" }}
           >
-            Logo
-          </object>
-          <h1 className="font-2xl font-bold font-action mr-auto">
-            the website builder that converts
-          </h1>
-          <button
-            type="button"
-            className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-            onClick={handleEditModeToggle}
-          >
-            Settings
-          </button>
+            <h1 className="font-2xl font-bold font-action">
+              the website builder that converts
+            </h1>
+          </div>
 
-          {hasUnsavedChanges ? (
-            <a
-              data-astro-reload
-              href={`/${$storyFragmentSlug[id]?.original}/edit`}
-              className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-            >
-              Cancel
-            </a>
-          ) : (
-            <a
-              href={`/${$storyFragmentSlug[id]?.original}`}
-              className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-            >
-              Close
-            </a>
-          )}
-
-          {hasUnsavedChanges ? (
-            <button
-              type="button"
-              className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
-              disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
-            >
-              Save
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      <StoryFragmentTitle
-        id={id}
-        isEditing={isEditing}
-        handleEditingChange={handleEditingChange}
-        updateStoreField={updateStoreField}
-        handleUndo={handleUndo}
-      />
-      <StoryFragmentSlug
-        id={id}
-        isEditing={isEditing}
-        handleEditingChange={handleEditingChange}
-        updateStoreField={updateStoreField}
-        handleUndo={handleUndo}
-      />
-
-      <div className="flex flex-wrap items-start gap-y-3 gap-x-12 md:gap-x-16 py-3">
-        <div className="flex-shrink-0 basis-auto">
           <ViewportSelector viewport={viewport} setViewport={setViewport} />
-        </div>
-        <div className="flex-shrink-0 basis-auto">
           <ToolModeSelector toolMode={toolMode} setToolMode={setToolMode} />
-        </div>
-        {toolMode === `insert` ? (
-          <div className="flex-shrink-0 basis-auto">
+          {toolMode === `insert` ? (
             <ToolAddModeSelector
               toolAddMode={toolAddMode}
               setToolAddMode={setToolAddMode}
             />
+          ) : null}
+
+          <div className="inline">
+            <button
+              type="button"
+              className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+              onClick={handleEditModeToggle}
+            >
+              Settings
+            </button>
+
+            {hasUnsavedChanges ? (
+              <a
+                data-astro-reload
+                href={`/${$storyFragmentSlug[id]?.original}/edit`}
+                className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+              >
+                Cancel
+              </a>
+            ) : (
+              <a
+                href={`/${$storyFragmentSlug[id]?.original}`}
+                className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+              >
+                Close
+              </a>
+            )}
+
+            {hasUnsavedChanges ? (
+              <button
+                type="button"
+                className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+                disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
+              >
+                Save
+              </button>
+            ) : null}
           </div>
-        ) : null}
+        </div>
+          <div style={{ display: hideElements ? "none" : "block" }}>
+            <StoryFragmentTitle
+              id={id}
+              isEditing={isEditing}
+              handleEditingChange={handleEditingChange}
+              updateStoreField={updateStoreField}
+              handleUndo={handleUndo}
+            />
+            <StoryFragmentSlug
+              id={id}
+              isEditing={isEditing}
+              handleEditingChange={handleEditingChange}
+              updateStoreField={updateStoreField}
+              handleUndo={handleUndo}
+            />
+          </div>
       </div>
     </div>
   );

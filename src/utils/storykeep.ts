@@ -285,17 +285,18 @@ export function initStoryKeep() {
     header.style.zIndex = "9000";
   }
 
-  function adjustEditPanePosition(): void {
-    const headerHeight = header.offsetHeight;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const isHeaderVisible = scrollTop < headerHeight;
+function adjustEditPanePosition(): void {
+  const headerHeight = header.offsetHeight;
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const isHeaderVisible = scrollTop < headerHeight;
+  const isHeaderSticky = header.classList.contains('sticky');
 
-    if (isHeaderVisible) {
-      editPane.style.top = `${headerHeight - scrollTop}px`;
-    } else {
-      editPane.style.top = "0";
-    }
+  if (isHeaderVisible || isHeaderSticky) {
+    editPane.style.top = `${headerHeight}px`;
+  } else {
+    editPane.style.top = "0";
   }
+}
 
   function handleEditModeLayout(preventHeaderScroll = false): void {
     const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
@@ -309,6 +310,7 @@ export function initStoryKeep() {
         ? "translateX(0)"
         : "translateX(100%)";
       editModalMobile.style.transform = "translateY(100%)";
+      if (isEditMode)
       adjustEditPanePosition();
     } else {
       editPane.style.transform = "translateX(100%)";

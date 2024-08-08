@@ -155,7 +155,7 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
     <div className="w-full" ref={headerRef}>
       <div className="w-full my-2">
         <div
-          className={`flex flex-wrap items-center gap-y-2 gap-x-4 ${hideElements ? `justify-around` : `justify-start`}`}
+          className={`flex flex-wrap items-center gap-y-2 gap-x-4 ${hideElements ? `justify-around` : `justify-end`}`}
         >
           <div style={{ display: hideElements ? "none" : "block" }}>
             <object

@@ -16,6 +16,7 @@ import {
   // Add other stores here
   //
 } from "../../store/storykeep";
+import { STICKY_HEADER_THRESHOLD } from "../../constants";
 import {
   useStoryKeepUtils,
   handleToggleOn,
@@ -128,8 +129,16 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
 
   const handleScroll = useCallback(() => {
     if (headerRef.current) {
-      const scrollPosition = window.scrollY;
-      setHideElements(scrollPosition > 0);
+      const viewportHeight = window.innerHeight;
+      const scrollPosition =
+        window.scrollY || document.documentElement.scrollTop;
+      setHideElements(
+        scrollPosition === 0
+          ? false
+          : viewportHeight > STICKY_HEADER_THRESHOLD &&
+              document.documentElement.scrollHeight >
+                2 * STICKY_HEADER_THRESHOLD
+      );
     }
   }, []);
 

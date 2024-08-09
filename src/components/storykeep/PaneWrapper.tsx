@@ -1,4 +1,4 @@
-import { useState, useEffect, memo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
   paneInit,
@@ -202,4 +202,4 @@ const PaneWrapper = (props: { id: string }) => {
   );
 };
 
-export default memo(PaneWrapper);
+export default PaneWrapper;

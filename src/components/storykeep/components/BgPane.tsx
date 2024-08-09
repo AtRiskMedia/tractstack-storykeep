@@ -1,4 +1,3 @@
-import { memo } from "react";
 import { useStore } from "@nanostores/react";
 import { Svg } from "../../../components/panes/Svg";
 import { classNames } from "../../../utils/helpers";
@@ -196,4 +195,4 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
   );
 };
 
-export default memo(BgPane);
+export default BgPane;

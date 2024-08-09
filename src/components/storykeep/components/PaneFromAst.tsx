@@ -39,8 +39,7 @@ interface PaneFromAstProps {
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
-  queueUpdate: (updateFn: () => void) => void;
-  isUpdating: boolean;
+  queueUpdate: (id: string, updateFn: () => void) => void;
 }
 
 const EditableOuterWrapper = ({
@@ -124,7 +123,6 @@ const PaneFromAst = ({
   toolMode,
   toolAddMode,
   queueUpdate,
-  isUpdating,
 }: PaneFromAstProps) => {
   const thisAst = payload.ast[0];
 
@@ -248,7 +246,6 @@ const PaneFromAst = ({
           outerIdx={outerIdx}
           idx={idx}
           queueUpdate={queueUpdate}
-          isUpdating={isUpdating}
         />
       </div>
     );
@@ -290,7 +287,6 @@ const PaneFromAst = ({
             toolMode={toolMode}
             toolAddMode={toolAddMode}
             queueUpdate={queueUpdate}
-            isUpdating={isUpdating}
           />
         ))}
       </TagComponent>
@@ -317,6 +313,7 @@ const PaneFromAst = ({
             fragmentId={fragmentId}
             outerIdx={outerIdx}
             idx={idx}
+            queueUpdate={queueUpdate}
           >
             {child}
           </EraserWrapper>
@@ -347,6 +344,7 @@ const PaneFromAst = ({
             fragmentId={fragmentId}
             outerIdx={outerIdx}
             idx={idx}
+            queueUpdate={queueUpdate}
           >
             {child}
           </EraserWrapper>
@@ -396,13 +394,8 @@ const PaneFromAst = ({
       </a>
     );
     if (!showOverlay) return child;
+    // no eraser mode on internal links yet
     if (toolMode === `eraser`) return child;
-    // will add lateron
-    //return (
-    //  <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
-    //    {child}
-    //  </EraserWrapper>
-    //);
     if (toolMode === `styles`)
       return (
         <EditableInnerWrapper

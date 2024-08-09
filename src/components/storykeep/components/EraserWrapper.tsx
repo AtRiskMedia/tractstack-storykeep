@@ -7,6 +7,7 @@ import {
   removeElementFromMarkdown,
   updateHistory,
 } from "../../../utils/compositor/markdownUtils";
+import { cloneDeep } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
   paneId: string;
   outerIdx: number;
   idx: number | null;
+  queueUpdate: (id: string, updateFn: () => void) => void;
   children: ReactNode;
 }
 
@@ -22,31 +24,40 @@ const EraserWrapper = ({
   paneId,
   outerIdx,
   idx,
+  queueUpdate,
   children,
 }: Props) => {
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const $unsavedChanges = useStore(unsavedChangesStore);
+  const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
 
   const handleErase = () => {
-    const currentField = $paneFragmentMarkdown[fragmentId];
-    const newMarkdownEdit = removeElementFromMarkdown(
-      currentField.current,
-      outerIdx,
-      idx
-    );
+    queueUpdate(contentId, () => {
+      const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
+      console.log(`Erasing element at outerIdx: ${outerIdx}, idx: ${idx}`);
+      console.log(`Current markdown:`, currentField.current.markdown.body);
 
-    const now = Date.now();
-    const newHistory = updateHistory(currentField, now);
+      const newMarkdownEdit = removeElementFromMarkdown(
+        cloneDeep(currentField.current),
+        outerIdx,
+        idx
+      );
 
-    paneFragmentMarkdown.setKey(fragmentId, {
-      ...currentField,
-      current: newMarkdownEdit,
-      history: newHistory,
-    });
+      console.log(`New markdown after eraser:`, newMarkdownEdit.markdown.body);
 
-    unsavedChangesStore.setKey(paneId, {
-      ...$unsavedChanges[paneId],
-      paneFragmentMarkdown: true,
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+
+      paneFragmentMarkdown.setKey(fragmentId, {
+        ...cloneDeep(currentField),
+        current: newMarkdownEdit,
+        history: newHistory,
+      });
+
+      unsavedChangesStore.setKey(paneId, {
+        ...cloneDeep($unsavedChanges[paneId]),
+        paneFragmentMarkdown: true,
+      });
     });
   };
 

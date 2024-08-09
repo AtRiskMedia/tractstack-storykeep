@@ -1,4 +1,4 @@
-import {useRef, memo, useMemo, useState, useEffect, useCallback } from "react";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { classNames } from "../../utils/helpers";
 import {
@@ -37,7 +37,7 @@ type BgPaneFragment = BgPaneDatum & { type: "bgPane" };
 type BgColourFragment = BgColourDatum & { type: "bgColour" };
 type FragmentType = MarkdownFragment | BgPaneFragment | BgColourFragment;
 
-const Pane = memo((props: { id: string }) => {
+const Pane = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
   const [paneData, setPaneData] = useState({
@@ -110,6 +110,44 @@ const Pane = memo((props: { id: string }) => {
     }
   }, [id, $paneInit, memoizedPaneData]);
 
+  const [isUpdating, setIsUpdating] = useState(false);
+  const updateQueue = useRef<Array<{ id: string; updateFn: () => void }>>([]);
+  const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
+
+  const processQueue = useCallback(() => {
+    const updates = new Map<string, () => void>();
+    // Collect the latest update for each unique id
+    updateQueue.current.forEach(({ id, updateFn }) => {
+      updates.set(id, updateFn);
+    });
+    // Execute the updates
+    updates.forEach((updateFn, id) => {
+      console.log(`Executing update for ${id}`);
+      updateFn();
+    });
+    updateQueue.current = [];
+    console.log("Queue processed");
+    setIsUpdating(false);
+  }, []);
+
+  const queueUpdate = useCallback(
+    (id: string, updateFn: () => void) => {
+      // Cancel any existing debounce for this id
+      if (debounceTimers.current[id]) {
+        clearTimeout(debounceTimers.current[id]);
+      }
+      // Set a new debounce timer
+      debounceTimers.current[id] = setTimeout(() => {
+        updateQueue.current.push({ id, updateFn });
+        if (!isUpdating) {
+          setIsUpdating(true);
+          processQueue();
+        }
+      }, 300);
+    },
+    [isUpdating, processQueue]
+  );
+
   const renderFragment = useCallback(
     (fragmentId: string) => {
       const markdownFragment = $paneFragmentMarkdown[fragmentId]?.current as
@@ -143,7 +181,6 @@ const Pane = memo((props: { id: string }) => {
                 paneId={id}
                 slug={paneData.slug}
                 queueUpdate={queueUpdate}
-                isUpdating={isUpdating}
               />
             </div>
           );
@@ -170,33 +207,6 @@ const Pane = memo((props: { id: string }) => {
       $toolMode.value,
     ]
   );
-
-  const [isUpdating, setIsUpdating] = useState(false);
-  const updateQueue = useRef<(() => void)[]>([]);
-
-  const queueUpdate = useCallback(
-    (updateFn: () => void) => {
-      updateQueue.current.push(updateFn);
-      if (!isUpdating) {
-        void processQueue();
-      }
-    },
-    [isUpdating]
-  );
-
-  const processQueue = useCallback(async () => {
-    if (updateQueue.current.length === 0) {
-      setIsUpdating(false);
-      return;
-    }
-
-    setIsUpdating(true);
-    const nextUpdate = updateQueue.current.shift();
-    if (nextUpdate) {
-      nextUpdate();
-    }
-    setTimeout(processQueue, 0);
-  }, []);
 
   if (!isClient) return <div>Loading...</div>;
 
@@ -226,6 +236,6 @@ const Pane = memo((props: { id: string }) => {
       )}
     </div>
   );
-});
+};
 
 export default Pane;

@@ -359,6 +359,10 @@ export const tailwindToHex = (tailwindColor: string): string => {
   return "#FFFFFF"; // Default to white if color not found
 };
 
+export function cloneDeep<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 export function isDeepEqual(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) return true;
   if (

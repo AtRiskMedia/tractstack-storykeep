@@ -1,4 +1,4 @@
-import { memo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { paneInit, paneCodeHook, toolModeStore } from "../../store/storykeep";
 
@@ -31,4 +31,4 @@ const CodeHook = (props: { id: string }) => {
   );
 };
 
-export default memo(CodeHook);
+export default CodeHook;

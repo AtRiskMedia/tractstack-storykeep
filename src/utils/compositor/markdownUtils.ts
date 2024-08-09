@@ -1,7 +1,10 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
+import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
 import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../../constants";
+import { cloneDeep } from "../../utils/helpers";
 import type { ElementContent, Text, Root, RootContent } from "hast";
+import type { Content, Parent, List } from "mdast";
 import type {
   FieldWithHistory,
   HistoryEntry,
@@ -16,25 +19,17 @@ export function updateHistory(
   currentField: FieldWithHistory<MarkdownEditDatum>,
   now: number
 ): HistoryEntry<MarkdownEditDatum>[] {
-  const newHistory = [...currentField.history];
+  const newHistory = cloneDeep(currentField.history);
   const timeSinceLastUpdate = now - (newHistory[0]?.timestamp || 0);
-
-  console.log("Updating history", {
-    timeSinceLastUpdate,
-    currentHistoryLength: newHistory.length,
-  });
-
   if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
-    newHistory.unshift({ value: currentField.current, timestamp: now });
+    newHistory.unshift({
+      value: cloneDeep(currentField.current),
+      timestamp: now,
+    });
     if (newHistory.length > MAX_HISTORY_LENGTH) {
       newHistory.pop();
     }
-    console.log("History updated", {
-      newHistoryLength: newHistory.length,
-      latestEntry: newHistory[0].value.markdown.body,
-    });
   }
-
   return newHistory;
 }
 
@@ -225,31 +220,50 @@ export function removeElementFromMarkdown(
   idx: number | null
 ): MarkdownEditDatum {
   const newMarkdown = { ...markdownEdit };
-  const lines = newMarkdown.markdown.body.split("\n");
-  const htmlAst = newMarkdown.markdown.htmlAst;
+  const mdast = fromMarkdown(newMarkdown.markdown.body);
 
-  if (idx === null) {
-    // Remove entire block
-    lines.splice(outerIdx, 1);
-    htmlAst.children.splice(outerIdx, 1);
-  } else {
-    // Remove nested element (e.g., list item)
-    const block = lines[outerIdx].split("\n");
-    block.splice(idx, 1);
-    if (block.length === 0) {
-      lines.splice(outerIdx, 1);
-      htmlAst.children.splice(outerIdx, 1);
-    } else {
-      lines[outerIdx] = block.join("\n");
-      const childNode = htmlAst.children[outerIdx];
-      if ("children" in childNode) {
-        childNode.children.splice(idx, 1);
+  let currentBlockIndex = -1;
+
+  function removeNode(node: Content, index: number, parent: Parent): boolean {
+    if (node.type !== "text" && node.type !== "html") {
+      currentBlockIndex++;
+      if (currentBlockIndex === outerIdx) {
+        if (idx === null) {
+          parent.children.splice(index, 1);
+          return true; // Stop traversal
+        } else if (
+          node.type === "list" &&
+          (node as List).children &&
+          (node as List).children[idx]
+        ) {
+          (node as List).children.splice(idx, 1);
+          return true; // Stop traversal
+        }
+      }
+    }
+    return false; // Continue traversal
+  }
+
+  function traverseAndRemove(tree: Parent) {
+    const children = tree.children.slice();
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (removeNode(child, i, tree)) {
+        break;
+      }
+      if ("children" in child) {
+        traverseAndRemove(child as Parent);
       }
     }
   }
 
-  newMarkdown.markdown.body = lines.join("\n");
-  newMarkdown.markdown.htmlAst = htmlAst;
+  traverseAndRemove(mdast);
+
+  // Regenerate markdown from the updated AST
+  newMarkdown.markdown.body = toMarkdown(mdast);
+
+  // Update htmlAst
+  newMarkdown.markdown.htmlAst = cleanHtmlAst(toHast(mdast)) as Root;
 
   // Update OptionsPayloadDatum
   newMarkdown.payload.optionsPayload = reconcileOptionsPayload(

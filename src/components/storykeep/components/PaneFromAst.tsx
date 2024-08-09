@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
@@ -39,6 +39,8 @@ interface PaneFromAstProps {
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
+  queueUpdate: (updateFn: () => void) => void;
+  isUpdating: boolean;
 }
 
 const EditableOuterWrapper = ({
@@ -121,6 +123,8 @@ const PaneFromAst = ({
   markdownLookup,
   toolMode,
   toolAddMode,
+  queueUpdate,
+  isUpdating,
 }: PaneFromAstProps) => {
   const thisAst = payload.ast[0];
 
@@ -142,34 +146,6 @@ const PaneFromAst = ({
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
   const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
-
-  const [isUpdating, setIsUpdating] = useState(false);
-
-  const updateQueue = useRef<(() => void)[]>([]);
-
-  const queueUpdate = useCallback(
-    (updateFn: () => void) => {
-      updateQueue.current.push(updateFn);
-      if (!isUpdating) {
-        void processQueue();
-      }
-    },
-    [isUpdating]
-  );
-
-  const processQueue = useCallback(async () => {
-    if (updateQueue.current.length === 0) {
-      setIsUpdating(false);
-      return;
-    }
-
-    setIsUpdating(true);
-    const nextUpdate = updateQueue.current.shift();
-    if (nextUpdate) {
-      nextUpdate();
-    }
-    setTimeout(processQueue, 0);
-  }, []);
 
   // Callback fns for toolMode
   const handleToolModeClick = useCallback(() => {
@@ -313,6 +289,8 @@ const PaneFromAst = ({
             markdownLookup={markdownLookup}
             toolMode={toolMode}
             toolAddMode={toolAddMode}
+            queueUpdate={queueUpdate}
+            isUpdating={isUpdating}
           />
         ))}
       </TagComponent>
@@ -334,7 +312,12 @@ const PaneFromAst = ({
       // is this a blockquote (not currently implemented)
       if (toolMode === `eraser`)
         return (
-          <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+          <EraserWrapper
+            paneId={paneId}
+            fragmentId={fragmentId}
+            outerIdx={outerIdx}
+            idx={idx}
+          >
             {child}
           </EraserWrapper>
         );
@@ -359,7 +342,12 @@ const PaneFromAst = ({
     if (showOverlay) {
       if (toolMode === `eraser`)
         return (
-          <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+          <EraserWrapper
+            paneId={paneId}
+            fragmentId={fragmentId}
+            outerIdx={outerIdx}
+            idx={idx}
+          >
             {child}
           </EraserWrapper>
         );
@@ -380,6 +368,7 @@ const PaneFromAst = ({
       return (
         <InsertWrapper
           toolAddMode={toolAddMode}
+          paneId={paneId}
           fragmentId={fragmentId}
           outerIdx={outerIdx}
           idx={idx}

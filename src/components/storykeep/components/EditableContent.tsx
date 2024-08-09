@@ -168,12 +168,27 @@ const EditableContent = memo(
 
         if (event.ctrlKey && event.key === "z") {
           event.preventDefault();
+          console.log("Undo triggered", {
+            fragmentId,
+            historyLength: $paneFragmentMarkdown[fragmentId]?.history.length,
+          });
+
           if (!fragmentId) return false;
           const fragmentData = $paneFragmentMarkdown[fragmentId];
           if (!fragmentData || fragmentData.history.length === 0) return false;
 
           queueUpdate(() => {
             const [lastEntry, ...newHistory] = fragmentData.history;
+            console.log("Restoring from history", {
+              restoredContent: lastEntry.value.markdown.body,
+              newHistoryLength: newHistory.length,
+            });
+            console.log("Last entry markdown", {
+              markdown: lastEntry.value.markdown.body,
+              tag,
+              outerIdx,
+              idx,
+            });
             paneFragmentMarkdown.setKey(fragmentId, {
               ...fragmentData,
               current: lastEntry.value,
@@ -188,6 +203,8 @@ const EditableContent = memo(
             );
             setLocalContent(undoneContent);
             originalContentRef.current = undoneContent;
+
+            console.log("Local content updated", { undoneContent });
 
             const isUnsaved = !isDeepEqual(
               lastEntry.value,

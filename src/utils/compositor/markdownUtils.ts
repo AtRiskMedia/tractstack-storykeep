@@ -1,25 +1,58 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toHast } from "mdast-util-to-hast";
-import type { Element, Text, Root, RootContent } from "hast";
-import type { MarkdownLookup } from "../../types";
+import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../../constants";
+import type { ElementContent, Text, Root, RootContent } from "hast";
+import type {
+  FieldWithHistory,
+  HistoryEntry,
+  MarkdownEditDatum,
+  MarkdownLookup,
+  OptionsPayloadDatum,
+} from "../../types";
 
 type HastNode = RootContent | Root;
+
+export function updateHistory(
+  currentField: FieldWithHistory<MarkdownEditDatum>,
+  now: number
+): HistoryEntry<MarkdownEditDatum>[] {
+  const newHistory = [...currentField.history];
+  const timeSinceLastUpdate = now - (newHistory[0]?.timestamp || 0);
+
+  console.log("Updating history", {
+    timeSinceLastUpdate,
+    currentHistoryLength: newHistory.length,
+  });
+
+  if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
+    newHistory.unshift({ value: currentField.current, timestamp: now });
+    if (newHistory.length > MAX_HISTORY_LENGTH) {
+      newHistory.pop();
+    }
+    console.log("History updated", {
+      newHistoryLength: newHistory.length,
+      latestEntry: newHistory[0].value.markdown.body,
+    });
+  }
+
+  return newHistory;
+}
 
 export function cleanHtmlAst(node: HastNode): HastNode | null {
   if (node.type === "text") {
     // Remove text nodes that are just newlines
     return (node as Text).value !== `\n` ? node : null;
   } else if (node.type === "element" || node.type === "root") {
-    const element = node as Element | Root;
-    if ("children" in element) {
-      element.children = element.children
+    if ("children" in node) {
+      node.children = node.children
         .map(child => cleanHtmlAst(child as HastNode))
         .filter((child): child is RootContent => child !== null);
     }
-    return element;
+    return node;
   }
   return node;
 }
+
 export function markdownToHtmlAst(markdown: string): Root {
   const mdast = fromMarkdown(markdown);
   return cleanHtmlAst(toHast(mdast)) as Root;
@@ -185,3 +218,168 @@ export function getGlobalNth(
       return null;
   }
 }
+
+export function removeElementFromMarkdown(
+  markdownEdit: MarkdownEditDatum,
+  outerIdx: number,
+  idx: number | null
+): MarkdownEditDatum {
+  const newMarkdown = { ...markdownEdit };
+  const lines = newMarkdown.markdown.body.split("\n");
+  const htmlAst = newMarkdown.markdown.htmlAst;
+
+  if (idx === null) {
+    // Remove entire block
+    lines.splice(outerIdx, 1);
+    htmlAst.children.splice(outerIdx, 1);
+  } else {
+    // Remove nested element (e.g., list item)
+    const block = lines[outerIdx].split("\n");
+    block.splice(idx, 1);
+    if (block.length === 0) {
+      lines.splice(outerIdx, 1);
+      htmlAst.children.splice(outerIdx, 1);
+    } else {
+      lines[outerIdx] = block.join("\n");
+      const childNode = htmlAst.children[outerIdx];
+      if ("children" in childNode) {
+        childNode.children.splice(idx, 1);
+      }
+    }
+  }
+
+  newMarkdown.markdown.body = lines.join("\n");
+  newMarkdown.markdown.htmlAst = htmlAst;
+
+  // Update OptionsPayloadDatum
+  newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
+    newMarkdown.payload.optionsPayload,
+    outerIdx,
+    idx
+  );
+
+  return newMarkdown;
+}
+
+export function insertElementIntoMarkdown(
+  markdownEdit: MarkdownEditDatum,
+  newContent: string,
+  outerIdx: number,
+  idx: number | null
+): MarkdownEditDatum {
+  const newMarkdown = { ...markdownEdit };
+  const lines = newMarkdown.markdown.body.split("\n");
+  const htmlAst = newMarkdown.markdown.htmlAst;
+
+  if (idx === null) {
+    // Insert new block
+    lines.splice(outerIdx, 0, newContent);
+    htmlAst.children.splice(
+      outerIdx,
+      0,
+      markdownToHtmlAst(newContent).children[0] as ElementContent
+    );
+  } else {
+    // Insert nested element
+    const block = lines[outerIdx].split("\n");
+    block.splice(idx, 0, newContent);
+    lines[outerIdx] = block.join("\n");
+    const childNode = htmlAst.children[outerIdx];
+    if ("children" in childNode) {
+      childNode.children.splice(
+        idx,
+        0,
+        markdownToHtmlAst(newContent).children[0] as ElementContent
+      );
+    }
+  }
+
+  newMarkdown.markdown.body = lines.join("\n");
+  newMarkdown.markdown.htmlAst = htmlAst;
+
+  // Update OptionsPayloadDatum
+  newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
+    newMarkdown.payload.optionsPayload,
+    outerIdx,
+    idx
+  );
+
+  return newMarkdown;
+}
+
+function reconcileOptionsPayload(
+  optionsPayload: OptionsPayloadDatum,
+  outerIdx: number,
+  idx: number | null
+): OptionsPayloadDatum {
+  const newOptionsPayload = { ...optionsPayload };
+
+  Object.keys(newOptionsPayload.classNamesPayload).forEach(tag => {
+    if (newOptionsPayload.classNamesPayload[tag].override) {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      const newOverride: Record<string, any> = {};
+      Object.entries(newOptionsPayload.classNamesPayload[tag].override).forEach(
+        ([selector, overrides]) => {
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          const newOverrides: Record<string, any> = {};
+          Object.entries(overrides).forEach(([nth, value]) => {
+            const nthNum = parseInt(nth);
+            if (
+              nthNum < outerIdx ||
+              (idx !== null && nthNum === outerIdx && parseInt(nth) < idx)
+            ) {
+              newOverrides[nth] = value;
+            } else if (
+              nthNum > outerIdx ||
+              (idx !== null && nthNum === outerIdx && parseInt(nth) > idx)
+            ) {
+              newOverrides[String(nthNum - 1)] = value;
+            }
+          });
+          if (Object.keys(newOverrides).length > 0) {
+            newOverride[selector] = newOverrides;
+          }
+        }
+      );
+      newOptionsPayload.classNamesPayload[tag].override = newOverride;
+    }
+  });
+
+  return newOptionsPayload;
+}
+
+//function updateOptionsPayloadForInsert(
+//  optionsPayload: OptionsPayloadDatum,
+//  outerIdx: number,
+//  idx: number | null
+//): OptionsPayloadDatum {
+//  const newOptionsPayload = { ...optionsPayload };
+//
+//  Object.keys(newOptionsPayload.classNamesPayload).forEach(tag => {
+//    if (newOptionsPayload.classNamesPayload[tag].override) {
+//      /* eslint-disable @typescript-eslint/no-explicit-any */
+//      const newOverride: Record<string, any> = {};
+//      Object.entries(newOptionsPayload.classNamesPayload[tag].override).forEach(
+//        ([selector, overrides]) => {
+//          /* eslint-disable @typescript-eslint/no-explicit-any */
+//          const newOverrides: Record<string, any> = {};
+//          Object.entries(overrides).forEach(([nth, value]) => {
+//            const nthNum = parseInt(nth);
+//            if (
+//              nthNum < outerIdx ||
+//              (idx !== null && nthNum === outerIdx && parseInt(nth) < idx)
+//            ) {
+//              newOverrides[nth] = value;
+//            } else {
+//              newOverrides[String(nthNum + 1)] = value;
+//            }
+//          });
+//          newOverride[selector] = newOverrides;
+//        }
+//      );
+//      newOptionsPayload.classNamesPayload[tag].override = newOverride;
+//    }
+//  });
+//
+//  return newOptionsPayload;
+//}

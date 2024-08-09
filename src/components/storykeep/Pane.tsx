@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, useEffect, useCallback } from "react";
+import {useRef, memo, useMemo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { classNames } from "../../utils/helpers";
 import {
@@ -142,6 +142,8 @@ const Pane = memo((props: { id: string }) => {
                 paneHeight={paneData.paneHeight}
                 paneId={id}
                 slug={paneData.slug}
+                queueUpdate={queueUpdate}
+                isUpdating={isUpdating}
               />
             </div>
           );
@@ -168,6 +170,33 @@ const Pane = memo((props: { id: string }) => {
       $toolMode.value,
     ]
   );
+
+  const [isUpdating, setIsUpdating] = useState(false);
+  const updateQueue = useRef<(() => void)[]>([]);
+
+  const queueUpdate = useCallback(
+    (updateFn: () => void) => {
+      updateQueue.current.push(updateFn);
+      if (!isUpdating) {
+        void processQueue();
+      }
+    },
+    [isUpdating]
+  );
+
+  const processQueue = useCallback(async () => {
+    if (updateQueue.current.length === 0) {
+      setIsUpdating(false);
+      return;
+    }
+
+    setIsUpdating(true);
+    const nextUpdate = updateQueue.current.shift();
+    if (nextUpdate) {
+      nextUpdate();
+    }
+    setTimeout(processQueue, 0);
+  }, []);
 
   if (!isClient) return <div>Loading...</div>;
 

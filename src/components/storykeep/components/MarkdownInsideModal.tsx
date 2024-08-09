@@ -33,6 +33,8 @@ interface Props {
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
+  queueUpdate: (updateFn: () => void) => void;
+  isUpdating: boolean;
 }
 
 const MarkdownInsideModal = ({
@@ -46,6 +48,8 @@ const MarkdownInsideModal = ({
   markdownLookup,
   toolMode,
   toolAddMode,
+  queueUpdate,
+  isUpdating,
 }: Props) => {
   const $viewport = useStore(viewportStore) as { value: ViewportKey };
   const viewportKey: ViewportKey =
@@ -151,6 +155,8 @@ const MarkdownInsideModal = ({
               markdownLookup={markdownLookup}
               toolMode={toolMode}
               toolAddMode={toolAddMode}
+              queueUpdate={queueUpdate}
+              isUpdating={isUpdating}
             />
           ))}
       </div>

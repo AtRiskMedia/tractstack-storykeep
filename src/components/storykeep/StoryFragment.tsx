@@ -43,10 +43,8 @@ export const StoryFragment = (props: { id: string }) => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       if ((event as any).handledByComponent) {
-        console.log(`skip`);
         return;
       }
-      console.log(`handle?`);
 
       if (
         event.ctrlKey &&
@@ -54,11 +52,9 @@ export const StoryFragment = (props: { id: string }) => {
           "z" /* && ['eraser', 'insert'].includes($toolMode.value) */
       ) {
         event.preventDefault();
-        console.log(`handle__`);
 
         const targetPaneId = $lastInteractedPane;
         const interactedType = $lastInteractedType;
-        console.log(targetPaneId, interactedType, $visiblePanes[targetPaneId]);
         if (targetPaneId && $visiblePanes[targetPaneId]) {
           if (interactedType === "markdown") {
             if (targetPaneId) {
@@ -66,16 +62,16 @@ export const StoryFragment = (props: { id: string }) => {
                 paneMarkdownFragmentId.get()[targetPaneId]?.current;
               if (fragmentId) {
                 const currentField = paneFragmentMarkdown.get()[fragmentId];
-                console.log(`attempt undo`);
                 if (currentField && currentField.history.length > 0) {
                   // Perform undo operation
-                  console.log(`did undo`);
                   const [lastEntry, ...newHistory] = currentField.history;
                   paneFragmentMarkdown.setKey(fragmentId, {
                     ...currentField,
                     current: lastEntry.value,
                     history: newHistory,
                   });
+                  console.log(`redoValue`, lastEntry.value);
+                  console.log(`newHistory`, newHistory);
                   const isUnsaved = !isDeepEqual(
                     lastEntry.value,
                     currentField.original

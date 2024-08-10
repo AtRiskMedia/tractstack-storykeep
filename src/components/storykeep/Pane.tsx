@@ -121,12 +121,10 @@ const Pane = (props: { id: string }) => {
       updates.set(id, updateFn);
     });
     // Execute the updates
-    updates.forEach((updateFn, id) => {
-      console.log(`Executing update for ${id}`);
+    updates.forEach(updateFn => {
       updateFn();
     });
     updateQueue.current = [];
-    console.log("Queue processed");
     setIsUpdating(false);
   }, []);
 

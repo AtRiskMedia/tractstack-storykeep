@@ -22,11 +22,9 @@ export function updateHistory(
   currentField: FieldWithHistory<MarkdownEditDatum>,
   now: number
 ): HistoryEntry<MarkdownEditDatum>[] {
-  console.log(`updateHistory`);
   const newHistory = cloneDeep(currentField.history);
   const timeSinceLastUpdate = now - (newHistory[0]?.timestamp || 0);
   if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
-    console.log(`history updated`);
     newHistory.unshift({
       value: cloneDeep(currentField.current),
       timestamp: now,
@@ -35,7 +33,6 @@ export function updateHistory(
       newHistory.pop();
     }
   }
-  console.log(newHistory);
   return newHistory;
 }
 
@@ -171,6 +168,130 @@ export function getGlobalNth(
   }
 }
 
+export function reconcileOptionsPayload(
+  optionsPayload: OptionsPayloadDatum,
+  outerIdx: number,
+  idx: number | null,
+  markdownLookup: MarkdownLookup,
+  isInsertion: boolean,
+  insertedTag: string | null = null
+): OptionsPayloadDatum {
+  const newOptionsPayload = JSON.parse(
+    JSON.stringify(optionsPayload)
+  ) as OptionsPayloadDatum;
+
+  if (isInsertion) {
+    // Handle insertion
+    if (insertedTag) {
+      if (!newOptionsPayload.classNamesPayload[insertedTag]) {
+        newOptionsPayload.classNamesPayload[insertedTag] = {
+          classes: {},
+          count: 1,
+        };
+      } else {
+        newOptionsPayload.classNamesPayload[insertedTag].count =
+          (newOptionsPayload.classNamesPayload[insertedTag].count || 0) + 1;
+      }
+
+      // Adjust nth values for the inserted tag and subsequent tags of the same type
+      Object.keys(newOptionsPayload.classNamesPayload).forEach(tag => {
+        if (
+          tag === insertedTag &&
+          newOptionsPayload.classNamesPayload[tag].override
+        ) {
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          const newOverride: Record<string, any> = {};
+
+          if (newOptionsPayload.classNamesPayload[tag]?.override) {
+            Object.entries(
+              newOptionsPayload.classNamesPayload[tag].override || {}
+            ).forEach(([selector, overrides]) => {
+              /* eslint-disable @typescript-eslint/no-explicit-any */
+              const newOverrides: Record<string, any> = {};
+              Object.entries(overrides).forEach(([nth, value]) => {
+                const nthNum = parseInt(nth);
+                if (nthNum >= outerIdx) {
+                  newOverrides[String(nthNum + 1)] = value;
+                } else {
+                  newOverrides[nth] = value;
+                }
+              });
+              newOverride[selector] = newOverrides;
+            });
+          }
+          newOptionsPayload.classNamesPayload[tag].override = newOverride;
+        }
+      });
+    }
+  } else {
+    // Handle removal (keep existing removal logic)
+    const removedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "li";
+    const removedNth =
+      idx === null
+        ? markdownLookup.nthTagLookup[removedTag][outerIdx].nth
+        : idx;
+
+    const processTag = (tag: string, nthToRemove: number) => {
+      if (newOptionsPayload.classNamesPayload[tag]?.override) {
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        const newOverride: Record<string, any> = {};
+        const overrideValue =
+          newOptionsPayload?.classNamesPayload[tag]?.override ?? {};
+        if (overrideValue) {
+          Object.entries(overrideValue).forEach(([selector, overrides]) => {
+            /* eslint-disable @typescript-eslint/no-explicit-any */
+            const newOverrides: Record<string, any> = {};
+            Object.entries(overrides).forEach(([nth, value]) => {
+              const nthNum = parseInt(nth);
+              if (nthNum < nthToRemove) {
+                newOverrides[nth] = value;
+              } else if (nthNum > nthToRemove) {
+                newOverrides[String(nthNum - 1)] = value;
+              }
+            });
+            if (Object.keys(newOverrides).length > 0) {
+              newOverride[selector] = newOverrides;
+            }
+          });
+        }
+        if (Object.keys(newOverride).length > 0) {
+          newOptionsPayload.classNamesPayload[tag].override = newOverride;
+        } else {
+          delete newOptionsPayload.classNamesPayload[tag].override;
+        }
+      }
+
+      if (typeof newOptionsPayload.classNamesPayload[tag]?.count === "number") {
+        newOptionsPayload.classNamesPayload[tag].count =
+          (newOptionsPayload.classNamesPayload[tag].count || 0) - 1;
+        if ((newOptionsPayload?.classNamesPayload[tag]?.count ?? 0) <= 0) {
+          delete newOptionsPayload.classNamesPayload[tag].count;
+        }
+      }
+
+      if (Object.keys(newOptionsPayload.classNamesPayload[tag]).length === 0) {
+        delete newOptionsPayload.classNamesPayload[tag];
+      }
+    };
+
+    // Process the removed tag
+    processTag(removedTag, removedNth);
+
+    // Handle removal of the last li in ol or ul
+    if (idx !== null && removedTag === "li") {
+      const parentTag = markdownLookup.nthTag[outerIdx];
+      if (parentTag === "ol" || parentTag === "ul") {
+        const parentNth = markdownLookup.nthTagLookup[parentTag][outerIdx].nth;
+        if (newOptionsPayload.classNamesPayload[parentTag]?.count === 1) {
+          processTag(parentTag, parentNth);
+        }
+      }
+    }
+  }
+
+  return newOptionsPayload;
+}
+
 export function insertElementIntoMarkdown(
   markdownEdit: MarkdownEditDatum,
   newContent: string,
@@ -182,14 +303,16 @@ export function insertElementIntoMarkdown(
   const lines = newMarkdown.markdown.body.split("\n");
   const htmlAst = newMarkdown.markdown.htmlAst;
 
+  let insertedTag = null;
+
   if (idx === null) {
     // Insert new block
     lines.splice(outerIdx, 0, newContent);
-    htmlAst.children.splice(
-      outerIdx,
-      0,
-      markdownToHtmlAst(newContent).children[0] as ElementContent
-    );
+    const newNode = markdownToHtmlAst(newContent).children[0] as ElementContent;
+    htmlAst.children.splice(outerIdx, 0, newNode);
+    if ("tagName" in newNode) {
+      insertedTag = newNode.tagName;
+    }
   } else {
     // Insert nested element
     const block = lines[outerIdx].split("\n");
@@ -197,23 +320,25 @@ export function insertElementIntoMarkdown(
     lines[outerIdx] = block.join("\n");
     const childNode = htmlAst.children[outerIdx];
     if ("children" in childNode) {
-      childNode.children.splice(
-        idx,
-        0,
-        markdownToHtmlAst(newContent).children[0] as ElementContent
-      );
+      const newNode = markdownToHtmlAst(newContent)
+        .children[0] as ElementContent;
+      childNode.children.splice(idx, 0, newNode);
+      if ("tagName" in newNode) {
+        insertedTag = newNode.tagName;
+      }
     }
   }
 
   newMarkdown.markdown.body = lines.join("\n");
   newMarkdown.markdown.htmlAst = htmlAst;
 
-  // Update OptionsPayloadDatum
   newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
     newMarkdown.payload.optionsPayload,
     outerIdx,
     idx,
-    markdownLookup
+    markdownLookup,
+    true,
+    insertedTag
   );
 
   return newMarkdown;
@@ -268,86 +393,12 @@ export function removeElementFromMarkdown(
     newMarkdown.payload.optionsPayload,
     outerIdx,
     idx,
-    markdownLookup
+    markdownLookup,
+    false,
+    null
   );
 
   return newMarkdown;
-}
-
-export function reconcileOptionsPayload(
-  optionsPayload: OptionsPayloadDatum,
-  outerIdx: number,
-  idx: number | null,
-  markdownLookup: MarkdownLookup
-): OptionsPayloadDatum {
-  const newOptionsPayload = JSON.parse(
-    JSON.stringify(optionsPayload)
-  ) as OptionsPayloadDatum;
-
-  const removedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "li";
-  const removedNth =
-    idx === null ? markdownLookup.nthTagLookup[removedTag][outerIdx].nth : idx;
-
-  const processTag = (tag: string, nthToRemove: number) => {
-    if (newOptionsPayload.classNamesPayload[tag]?.override) {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      const newOverride: Record<string, any> = {};
-      const overrideValue =
-        newOptionsPayload?.classNamesPayload[tag]?.override ?? {};
-      if (overrideValue) {
-        Object.entries(overrideValue).forEach(([selector, overrides]) => {
-          /* eslint-disable @typescript-eslint/no-explicit-any */
-          const newOverrides: Record<string, any> = {};
-          Object.entries(overrides).forEach(([nth, value]) => {
-            const nthNum = parseInt(nth);
-            if (nthNum < nthToRemove) {
-              newOverrides[nth] = value;
-            } else if (nthNum > nthToRemove) {
-              newOverrides[String(nthNum - 1)] = value;
-            }
-          });
-          if (Object.keys(newOverrides).length > 0) {
-            newOverride[selector] = newOverrides;
-          }
-        });
-      }
-      if (Object.keys(newOverride).length > 0) {
-        newOptionsPayload.classNamesPayload[tag].override = newOverride;
-      } else {
-        if (newOptionsPayload.classNamesPayload[tag].override) {
-          delete newOptionsPayload.classNamesPayload[tag].override;
-        }
-      }
-    }
-
-    if (typeof newOptionsPayload.classNamesPayload[tag]?.count === `number`) {
-      newOptionsPayload.classNamesPayload[tag].count =
-        (newOptionsPayload.classNamesPayload[tag].count || 0) - 1;
-      if ((newOptionsPayload?.classNamesPayload[tag]?.count ?? 0) <= 0) {
-        delete newOptionsPayload.classNamesPayload[tag].count;
-      }
-    }
-
-    if (Object.keys(newOptionsPayload.classNamesPayload[tag]).length === 0) {
-      delete newOptionsPayload.classNamesPayload[tag];
-    }
-  };
-
-  // Process the removed tag
-  processTag(removedTag, removedNth);
-
-  // Handle removal of the last li in ol or ul
-  if (idx !== null && removedTag === "li") {
-    const parentTag = markdownLookup.nthTag[outerIdx];
-    if (parentTag === "ol" || parentTag === "ul") {
-      const parentNth = markdownLookup.nthTagLookup[parentTag][outerIdx].nth;
-      if (newOptionsPayload.classNamesPayload[parentTag]?.count === 1) {
-        processTag(parentTag, parentNth);
-      }
-    }
-  }
-
-  return newOptionsPayload;
 }
 
 export function markdownToHtmlAst(markdown: string): HastRoot {

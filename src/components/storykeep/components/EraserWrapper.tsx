@@ -41,23 +41,21 @@ const EraserWrapper = ({
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
       const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
-      const newMarkdownEdit = removeElementFromMarkdown(
-        cloneDeep(currentField.current),
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+      const newValue = removeElementFromMarkdown(
+        currentField.current,
         outerIdx,
         idx,
         markdownLookup
       );
-      const now = Date.now();
-      const newHistory = updateHistory(currentField, now);
-
       paneFragmentMarkdown.setKey(fragmentId, {
-        ...cloneDeep(currentField),
-        current: newMarkdownEdit,
+        ...currentField,
+        current: newValue,
         history: newHistory,
       });
-
       unsavedChangesStore.setKey(paneId, {
-        ...cloneDeep($unsavedChanges[paneId]),
+        ...$unsavedChanges[paneId],
         paneFragmentMarkdown: true,
       });
     });

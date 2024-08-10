@@ -8,6 +8,7 @@ import {
   updateHistory,
 } from "../../../utils/compositor/markdownUtils";
 import { toolAddModeTitles } from "../../../constants";
+import { cloneDeep } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
 
@@ -34,26 +35,23 @@ const InsertWrapper = ({
   const $unsavedChanges = useStore(unsavedChangesStore);
 
   const handleInsert = (position: "before" | "after") => {
-    const currentField = $paneFragmentMarkdown[fragmentId];
+    const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
+    const now = Date.now();
+    const newHistory = updateHistory(currentField, now);
     const newContent = `${toolAddModeTitles[toolAddMode]} content`;
     const insertIdx = position === "after" ? outerIdx + 1 : outerIdx;
-    const newMarkdownEdit = insertElementIntoMarkdown(
+    const newValue = insertElementIntoMarkdown(
       currentField.current,
       newContent,
       insertIdx,
       idx,
       markdownLookup
     );
-
-    const now = Date.now();
-    const newHistory = updateHistory(currentField, now);
-
     paneFragmentMarkdown.setKey(fragmentId, {
       ...currentField,
-      current: newMarkdownEdit,
+      current: newValue,
       history: newHistory,
     });
-
     unsavedChangesStore.setKey(paneId, {
       ...$unsavedChanges[paneId],
       paneFragmentMarkdown: true,

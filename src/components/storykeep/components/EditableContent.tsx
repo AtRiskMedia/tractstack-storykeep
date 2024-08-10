@@ -55,7 +55,6 @@ const EditableContent = ({
       if (!fragmentId) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
-      console.log(`updating markdown`);
       const fragmentData = $paneFragmentMarkdown[fragmentId];
       if (
         !fragmentData ||
@@ -63,7 +62,6 @@ const EditableContent = ({
         !fragmentData.current.markdown
       )
         return;
-
       const updatedMarkdown = updateMarkdownElement(
         fragmentData.current.markdown.body,
         newContent,
@@ -71,12 +69,9 @@ const EditableContent = ({
         outerIdx,
         idx
       );
-
       const updatedHtmlAst = markdownToHtmlAst(updatedMarkdown);
-
       const now = Date.now();
       const newHistory = updateHistory(fragmentData, now);
-
       const newValue = {
         ...fragmentData.current,
         markdown: {
@@ -118,7 +113,6 @@ const EditableContent = ({
   const handleEditingChange = useCallback(
     (editing: boolean) => {
       if (!editing && localContent !== originalContentRef.current) {
-        console.log(`updating content`);
         queueUpdate(contentId, () => {
           updateStore(localContent);
           originalContentRef.current = localContent;

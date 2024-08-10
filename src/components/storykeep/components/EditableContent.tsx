@@ -134,7 +134,7 @@ const EditableContent = ({
     [fragmentId, $paneFragmentMarkdown, tag, outerIdx, idx, queueUpdate]
   );
   return (
-    <div className="inline-block w-full">
+    <div className="w-full">
       <ContentEditableField
         id={`${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}-${paneId}`}
         value={localContent}

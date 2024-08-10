@@ -2,6 +2,8 @@ import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
   unsavedChangesStore,
+  lastInteractedTypeStore,
+  lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import {
   removeElementFromMarkdown,
@@ -9,6 +11,7 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import { cloneDeep } from "../../../utils/helpers";
 import type { ReactNode } from "react";
+import type { MarkdownLookup } from "../../../types";
 
 interface Props {
   fragmentId: string;
@@ -17,6 +20,7 @@ interface Props {
   idx: number | null;
   queueUpdate: (id: string, updateFn: () => void) => void;
   children: ReactNode;
+  markdownLookup: MarkdownLookup;
 }
 
 const EraserWrapper = ({
@@ -26,6 +30,7 @@ const EraserWrapper = ({
   idx,
   queueUpdate,
   children,
+  markdownLookup,
 }: Props) => {
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const $unsavedChanges = useStore(unsavedChangesStore);
@@ -33,18 +38,15 @@ const EraserWrapper = ({
 
   const handleErase = () => {
     queueUpdate(contentId, () => {
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(paneId);
       const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
-      console.log(`Erasing element at outerIdx: ${outerIdx}, idx: ${idx}`);
-      console.log(`Current markdown:`, currentField.current.markdown.body);
-
       const newMarkdownEdit = removeElementFromMarkdown(
         cloneDeep(currentField.current),
         outerIdx,
-        idx
+        idx,
+        markdownLookup
       );
-
-      console.log(`New markdown after eraser:`, newMarkdownEdit.markdown.body);
-
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
 

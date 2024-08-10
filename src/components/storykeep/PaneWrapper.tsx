@@ -5,6 +5,8 @@ import {
   paneCodeHook,
   toolModeStore,
   editModeStore,
+  lastInteractedPaneStore,
+  visiblePanesStore,
 } from "../../store/storykeep";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
@@ -87,13 +89,41 @@ const PaneWrapper = (props: { id: string }) => {
         $editMode.id === id
       ) {
         toggleOffEditModal();
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        (event as any).handledByComponent = true;
+      }
+
+      // Mark the event as handled by this component
+      //if (event.ctrlKey && event.key === "z") {
+      //  (event as any).handledByComponent = true;
+      //}
+    };
+
+    // Use capture phase to ensure this runs before global handler
+    paneElement?.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      paneElement?.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, [$editMode, id, paneElement]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visiblePanesStore.setKey(id, entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    if (paneElement) {
+      observer.observe(paneElement);
+    }
+
+    return () => {
+      if (paneElement) {
+        observer.unobserve(paneElement);
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [$editMode, id]);
+  }, [id, paneElement]);
 
   const toggleOffEditModal = () => {
     editModeStore.set(null);
@@ -118,6 +148,7 @@ const PaneWrapper = (props: { id: string }) => {
   };
 
   const handleClick = () => {
+    lastInteractedPaneStore.set(id);
     if ([`styles`, `settings`, `pane`].includes(toolMode))
       handleEditModeToggle();
   };
@@ -160,9 +191,7 @@ const PaneWrapper = (props: { id: string }) => {
 
   const Content = isCodeHook ? <CodeHook id={id} /> : <Pane id={id} />;
 
-  return ![`pane`, `settings`].includes(toolMode) ? (
-    Content
-  ) : (
+  return (
     <div
       ref={paneRef}
       onClick={handleClick}

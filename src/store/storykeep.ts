@@ -20,6 +20,10 @@ import type {
 } from "../types";
 import { toolAddModes } from "../constants";
 
+export const lastInteractedPaneStore = atom<string | null>(null);
+export const visiblePanesStore = map<Record<string, boolean>>({});
+export const lastInteractedTypeStore = atom<"markdown" | "bgpane" | null>(null);
+
 // all look-ups by ulid
 //
 

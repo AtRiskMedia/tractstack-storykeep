@@ -3,8 +3,6 @@ import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
 import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../../constants";
 import { cloneDeep } from "../../utils/helpers";
-import type { ElementContent, Text, Root, RootContent } from "hast";
-import type { Content, Parent, List } from "mdast";
 import type {
   FieldWithHistory,
   HistoryEntry,
@@ -12,16 +10,23 @@ import type {
   MarkdownLookup,
   OptionsPayloadDatum,
 } from "../../types";
-
-type HastNode = RootContent | Root;
+import type {
+  Root as HastRoot,
+  Element as HastElement,
+  Text as HastText,
+  ElementContent,
+} from "hast";
+import type { Root as MdastRoot, List } from "mdast";
 
 export function updateHistory(
   currentField: FieldWithHistory<MarkdownEditDatum>,
   now: number
 ): HistoryEntry<MarkdownEditDatum>[] {
+  console.log(`updateHistory`);
   const newHistory = cloneDeep(currentField.history);
   const timeSinceLastUpdate = now - (newHistory[0]?.timestamp || 0);
   if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
+    console.log(`history updated`);
     newHistory.unshift({
       value: cloneDeep(currentField.current),
       timestamp: now,
@@ -30,57 +35,9 @@ export function updateHistory(
       newHistory.pop();
     }
   }
+  console.log(newHistory);
   return newHistory;
 }
-
-export function cleanHtmlAst(node: HastNode): HastNode | null {
-  if (node.type === "text") {
-    // Remove text nodes that are just newlines
-    return (node as Text).value !== `\n` ? node : null;
-  } else if (node.type === "element" || node.type === "root") {
-    if ("children" in node) {
-      node.children = node.children
-        .map(child => cleanHtmlAst(child as HastNode))
-        .filter((child): child is RootContent => child !== null);
-    }
-    return node;
-  }
-  return node;
-}
-
-export function markdownToHtmlAst(markdown: string): Root {
-  const mdast = fromMarkdown(markdown);
-  return cleanHtmlAst(toHast(mdast)) as Root;
-}
-
-//export function renderNestedElement(element: Element | Text): string {
-//  if (element.type === 'element') {
-//    if (element.tagName === "a") {
-//      const href = element.properties?.href as string;
-//      const value = (element.children[0] as Text).value;
-//      return `[${value}](${href})`;
-//    } else if (element.tagName === "strong") {
-//      const value = (element.children[0] as Text).value;
-//      return `**${value}**`;
-//    }
-//    // Add more cases for other nested elements as needed
-//  }
-//  return (element as Text).value || '';
-//}
-
-//export function validateNestedElement(element: Element | Text): boolean {
-//  if ("tagName" in element) {
-//    if (element.tagName === "a") {
-//      return true;
-//    } else if (element.tagName === "strong") {
-//      return true;
-//    } else if (element.tagName === "img") {
-//      return true;
-//    }
-//    // Add more cases for other nested elements as needed
-//  }
-//  return false;
-//}
 
 function processMarkdownElement(
   lines: string[],
@@ -214,72 +171,12 @@ export function getGlobalNth(
   }
 }
 
-export function removeElementFromMarkdown(
-  markdownEdit: MarkdownEditDatum,
-  outerIdx: number,
-  idx: number | null
-): MarkdownEditDatum {
-  const newMarkdown = { ...markdownEdit };
-  const mdast = fromMarkdown(newMarkdown.markdown.body);
-
-  let currentBlockIndex = -1;
-
-  function removeNode(node: Content, index: number, parent: Parent): boolean {
-    if (node.type !== "text" && node.type !== "html") {
-      currentBlockIndex++;
-      if (currentBlockIndex === outerIdx) {
-        if (idx === null) {
-          parent.children.splice(index, 1);
-          return true; // Stop traversal
-        } else if (
-          node.type === "list" &&
-          (node as List).children &&
-          (node as List).children[idx]
-        ) {
-          (node as List).children.splice(idx, 1);
-          return true; // Stop traversal
-        }
-      }
-    }
-    return false; // Continue traversal
-  }
-
-  function traverseAndRemove(tree: Parent) {
-    const children = tree.children.slice();
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
-      if (removeNode(child, i, tree)) {
-        break;
-      }
-      if ("children" in child) {
-        traverseAndRemove(child as Parent);
-      }
-    }
-  }
-
-  traverseAndRemove(mdast);
-
-  // Regenerate markdown from the updated AST
-  newMarkdown.markdown.body = toMarkdown(mdast);
-
-  // Update htmlAst
-  newMarkdown.markdown.htmlAst = cleanHtmlAst(toHast(mdast)) as Root;
-
-  // Update OptionsPayloadDatum
-  newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
-    newMarkdown.payload.optionsPayload,
-    outerIdx,
-    idx
-  );
-
-  return newMarkdown;
-}
-
 export function insertElementIntoMarkdown(
   markdownEdit: MarkdownEditDatum,
   newContent: string,
   outerIdx: number,
-  idx: number | null
+  idx: number | null,
+  markdownLookup: MarkdownLookup
 ): MarkdownEditDatum {
   const newMarkdown = { ...markdownEdit };
   const lines = newMarkdown.markdown.body.split("\n");
@@ -315,85 +212,169 @@ export function insertElementIntoMarkdown(
   newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
     newMarkdown.payload.optionsPayload,
     outerIdx,
-    idx
+    idx,
+    markdownLookup
   );
 
   return newMarkdown;
 }
 
-function reconcileOptionsPayload(
+export function removeElementFromMarkdown(
+  markdownEdit: MarkdownEditDatum,
+  outerIdx: number,
+  idx: number | null,
+  markdownLookup: MarkdownLookup
+): MarkdownEditDatum {
+  const newMarkdown = { ...markdownEdit };
+  const mdast = fromMarkdown(newMarkdown.markdown.body) as MdastRoot;
+
+  // Filter out text nodes and get only block-level elements
+  const blockElements = mdast.children.filter(
+    node => node.type !== "text" && node.type !== "html"
+  );
+
+  if (outerIdx >= 0 && outerIdx < blockElements.length) {
+    const elementToRemove = blockElements[outerIdx];
+
+    if (idx === null) {
+      // Remove the entire block
+      mdast.children = mdast.children.filter(node => node !== elementToRemove);
+    } else if (
+      elementToRemove.type === "list" &&
+      Array.isArray((elementToRemove as List).children)
+    ) {
+      // Remove a specific list item
+      if (idx >= 0 && idx < (elementToRemove as List).children.length) {
+        (elementToRemove as List).children.splice(idx, 1);
+        if ((elementToRemove as List).children.length === 0) {
+          // If the list is now empty, remove the entire list
+          mdast.children = mdast.children.filter(
+            node => node !== elementToRemove
+          );
+        }
+      }
+    }
+  }
+
+  // Regenerate markdown from the updated AST
+  newMarkdown.markdown.body = toMarkdown(mdast);
+
+  // Update htmlAst
+  const hastRoot = toHast(mdast) as HastRoot;
+  newMarkdown.markdown.htmlAst = cleanHtmlAst(hastRoot) as HastRoot;
+
+  // Update OptionsPayloadDatum
+  newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
+    newMarkdown.payload.optionsPayload,
+    outerIdx,
+    idx,
+    markdownLookup
+  );
+
+  return newMarkdown;
+}
+
+export function reconcileOptionsPayload(
   optionsPayload: OptionsPayloadDatum,
   outerIdx: number,
-  idx: number | null
+  idx: number | null,
+  markdownLookup: MarkdownLookup
 ): OptionsPayloadDatum {
-  const newOptionsPayload = { ...optionsPayload };
+  const newOptionsPayload = JSON.parse(
+    JSON.stringify(optionsPayload)
+  ) as OptionsPayloadDatum;
 
-  Object.keys(newOptionsPayload.classNamesPayload).forEach(tag => {
-    if (newOptionsPayload.classNamesPayload[tag].override) {
+  const removedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "li";
+  const removedNth =
+    idx === null ? markdownLookup.nthTagLookup[removedTag][outerIdx].nth : idx;
+
+  const processTag = (tag: string, nthToRemove: number) => {
+    if (newOptionsPayload.classNamesPayload[tag]?.override) {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       const newOverride: Record<string, any> = {};
-      Object.entries(newOptionsPayload.classNamesPayload[tag].override).forEach(
-        ([selector, overrides]) => {
+      const overrideValue =
+        newOptionsPayload?.classNamesPayload[tag]?.override ?? {};
+      if (overrideValue) {
+        Object.entries(overrideValue).forEach(([selector, overrides]) => {
           /* eslint-disable @typescript-eslint/no-explicit-any */
           const newOverrides: Record<string, any> = {};
           Object.entries(overrides).forEach(([nth, value]) => {
             const nthNum = parseInt(nth);
-            if (
-              nthNum < outerIdx ||
-              (idx !== null && nthNum === outerIdx && parseInt(nth) < idx)
-            ) {
+            if (nthNum < nthToRemove) {
               newOverrides[nth] = value;
-            } else if (
-              nthNum > outerIdx ||
-              (idx !== null && nthNum === outerIdx && parseInt(nth) > idx)
-            ) {
+            } else if (nthNum > nthToRemove) {
               newOverrides[String(nthNum - 1)] = value;
             }
           });
           if (Object.keys(newOverrides).length > 0) {
             newOverride[selector] = newOverrides;
           }
+        });
+      }
+      if (Object.keys(newOverride).length > 0) {
+        newOptionsPayload.classNamesPayload[tag].override = newOverride;
+      } else {
+        if (newOptionsPayload.classNamesPayload[tag].override) {
+          delete newOptionsPayload.classNamesPayload[tag].override;
         }
-      );
-      newOptionsPayload.classNamesPayload[tag].override = newOverride;
+      }
     }
-  });
+
+    if (typeof newOptionsPayload.classNamesPayload[tag]?.count === `number`) {
+      newOptionsPayload.classNamesPayload[tag].count =
+        (newOptionsPayload.classNamesPayload[tag].count || 0) - 1;
+      if ((newOptionsPayload?.classNamesPayload[tag]?.count ?? 0) <= 0) {
+        delete newOptionsPayload.classNamesPayload[tag].count;
+      }
+    }
+
+    if (Object.keys(newOptionsPayload.classNamesPayload[tag]).length === 0) {
+      delete newOptionsPayload.classNamesPayload[tag];
+    }
+  };
+
+  // Process the removed tag
+  processTag(removedTag, removedNth);
+
+  // Handle removal of the last li in ol or ul
+  if (idx !== null && removedTag === "li") {
+    const parentTag = markdownLookup.nthTag[outerIdx];
+    if (parentTag === "ol" || parentTag === "ul") {
+      const parentNth = markdownLookup.nthTagLookup[parentTag][outerIdx].nth;
+      if (newOptionsPayload.classNamesPayload[parentTag]?.count === 1) {
+        processTag(parentTag, parentNth);
+      }
+    }
+  }
 
   return newOptionsPayload;
 }
 
-//function updateOptionsPayloadForInsert(
-//  optionsPayload: OptionsPayloadDatum,
-//  outerIdx: number,
-//  idx: number | null
-//): OptionsPayloadDatum {
-//  const newOptionsPayload = { ...optionsPayload };
-//
-//  Object.keys(newOptionsPayload.classNamesPayload).forEach(tag => {
-//    if (newOptionsPayload.classNamesPayload[tag].override) {
-//      /* eslint-disable @typescript-eslint/no-explicit-any */
-//      const newOverride: Record<string, any> = {};
-//      Object.entries(newOptionsPayload.classNamesPayload[tag].override).forEach(
-//        ([selector, overrides]) => {
-//          /* eslint-disable @typescript-eslint/no-explicit-any */
-//          const newOverrides: Record<string, any> = {};
-//          Object.entries(overrides).forEach(([nth, value]) => {
-//            const nthNum = parseInt(nth);
-//            if (
-//              nthNum < outerIdx ||
-//              (idx !== null && nthNum === outerIdx && parseInt(nth) < idx)
-//            ) {
-//              newOverrides[nth] = value;
-//            } else {
-//              newOverrides[String(nthNum + 1)] = value;
-//            }
-//          });
-//          newOverride[selector] = newOverrides;
-//        }
-//      );
-//      newOptionsPayload.classNamesPayload[tag].override = newOverride;
-//    }
-//  });
-//
-//  return newOptionsPayload;
-//}
+export function markdownToHtmlAst(markdown: string): HastRoot {
+  const mdast = fromMarkdown(markdown);
+  const hast = toHast(mdast) as HastRoot;
+  return ensureRoot(cleanHtmlAst(hast));
+}
+
+function ensureRoot(node: HastRoot | HastElement | HastText | null): HastRoot {
+  if (node && node.type === "root") {
+    return node;
+  }
+  return { type: "root", children: node ? [node] : [] };
+}
+
+export function cleanHtmlAst(
+  node: HastRoot | HastElement | HastText
+): HastRoot | HastElement | HastText | null {
+  if (node.type === "text") {
+    return node.value !== "\n" ? node : null;
+  } else if (node.type === "element" || node.type === "root") {
+    if ("children" in node) {
+      node.children = node.children
+        .map(child => cleanHtmlAst(child as HastElement | HastText))
+        .filter((child): child is HastElement | HastText => child !== null);
+    }
+    return node;
+  }
+  return node;
+}

@@ -9,7 +9,7 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import { toolAddModeTitles } from "../../../constants";
 import type { ReactNode } from "react";
-import type { ToolAddMode } from "../../../types";
+import type { MarkdownLookup, ToolAddMode } from "../../../types";
 
 interface Props {
   fragmentId: string;
@@ -18,6 +18,7 @@ interface Props {
   idx: number | null;
   toolAddMode: ToolAddMode;
   children: ReactNode;
+  markdownLookup: MarkdownLookup;
 }
 
 const InsertWrapper = ({
@@ -27,6 +28,7 @@ const InsertWrapper = ({
   idx,
   toolAddMode,
   children,
+  markdownLookup,
 }: Props) => {
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const $unsavedChanges = useStore(unsavedChangesStore);
@@ -39,7 +41,8 @@ const InsertWrapper = ({
       currentField.current,
       newContent,
       insertIdx,
-      idx
+      idx,
+      markdownLookup
     );
 
     const now = Date.now();

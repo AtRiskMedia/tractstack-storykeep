@@ -4,10 +4,21 @@ import {
   storyFragmentInit,
   storyFragmentPaneIds,
   storyFragmentTailwindBgColour,
+  paneMarkdownFragmentId,
+  paneFragmentMarkdown,
   viewportStore,
+  toolModeStore,
+  lastInteractedPaneStore,
+  lastInteractedTypeStore,
+  visiblePanesStore,
+  unsavedChangesStore,
 } from "../../store/storykeep";
 import PaneWrapper from "./PaneWrapper";
-import { classNames, handleEditorResize } from "../../utils/helpers";
+import {
+  classNames,
+  handleEditorResize,
+  isDeepEqual,
+} from "../../utils/helpers";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
@@ -22,6 +33,73 @@ export const StoryFragment = (props: { id: string }) => {
   );
   const paneIds = $storyFragmentPaneIds[id]?.current;
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
+  const $lastInteractedPane = useStore(lastInteractedPaneStore);
+  const $lastInteractedType = useStore(lastInteractedTypeStore);
+  const $visiblePanes = useStore(visiblePanesStore);
+  const $toolMode = useStore(toolModeStore);
+  const $unsavedChanges = useStore(unsavedChangesStore);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event: KeyboardEvent) => {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+      if ((event as any).handledByComponent) {
+        console.log(`skip`);
+        return;
+      }
+      console.log(`handle?`);
+
+      if (
+        event.ctrlKey &&
+        event.key ===
+          "z" /* && ['eraser', 'insert'].includes($toolMode.value) */
+      ) {
+        event.preventDefault();
+        console.log(`handle__`);
+
+        const targetPaneId = $lastInteractedPane;
+        const interactedType = $lastInteractedType;
+        console.log(targetPaneId, interactedType, $visiblePanes[targetPaneId]);
+        if (targetPaneId && $visiblePanes[targetPaneId]) {
+          if (interactedType === "markdown") {
+            if (targetPaneId) {
+              const fragmentId =
+                paneMarkdownFragmentId.get()[targetPaneId]?.current;
+              if (fragmentId) {
+                const currentField = paneFragmentMarkdown.get()[fragmentId];
+                console.log(`attempt undo`);
+                if (currentField && currentField.history.length > 0) {
+                  // Perform undo operation
+                  console.log(`did undo`);
+                  const [lastEntry, ...newHistory] = currentField.history;
+                  paneFragmentMarkdown.setKey(fragmentId, {
+                    ...currentField,
+                    current: lastEntry.value,
+                    history: newHistory,
+                  });
+                  const isUnsaved = !isDeepEqual(
+                    lastEntry.value,
+                    currentField.original
+                  );
+                  unsavedChangesStore.setKey(targetPaneId, {
+                    ...$unsavedChanges[targetPaneId],
+                    paneFragmentMarkdown: isUnsaved,
+                  });
+                }
+              }
+            }
+          } else if (interactedType === "bgpane") {
+            // Handle undo for bgpane
+            console.log("Undo for bgpane not yet implemented");
+          }
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, [$lastInteractedPane, $lastInteractedType, $visiblePanes, $toolMode]);
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) setIsClient(true);

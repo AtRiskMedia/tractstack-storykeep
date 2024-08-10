@@ -3,6 +3,8 @@ import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
+  lastInteractedPaneStore,
+  lastInteractedTypeStore,
 } from "../../../store/storykeep";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
@@ -146,12 +148,17 @@ const PaneFromAst = ({
   const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
 
   // Callback fns for toolMode
+  const updateLastInteracted = (paneId: string) => {
+    lastInteractedPaneStore.set(paneId);
+    lastInteractedTypeStore.set(`markdown`);
+  };
   const handleToolModeClick = useCallback(() => {
+    updateLastInteracted(paneId);
     console.log(
       `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
     );
     //handleToggleOn(false, thisId);
-  }, [toolMode, Tag, outerIdx, idx]);
+  }, [toolMode, paneId, Tag, outerIdx, idx]);
 
   // Extract class names
   const injectClassNames =
@@ -314,6 +321,7 @@ const PaneFromAst = ({
             outerIdx={outerIdx}
             idx={idx}
             queueUpdate={queueUpdate}
+            markdownLookup={markdownLookup}
           >
             {child}
           </EraserWrapper>
@@ -345,6 +353,7 @@ const PaneFromAst = ({
             outerIdx={outerIdx}
             idx={idx}
             queueUpdate={queueUpdate}
+            markdownLookup={markdownLookup}
           >
             {child}
           </EraserWrapper>
@@ -370,6 +379,7 @@ const PaneFromAst = ({
           fragmentId={fragmentId}
           outerIdx={outerIdx}
           idx={idx}
+          markdownLookup={markdownLookup}
         >
           {child}
         </InsertWrapper>

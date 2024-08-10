@@ -4,10 +4,11 @@ import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
   unsavedChangesStore,
+  lastInteractedTypeStore,
+  lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import {
   updateMarkdownElement,
-  extractMarkdownElement,
   markdownToHtmlAst,
   updateHistory,
 } from "../../../utils/compositor/markdownUtils";
@@ -52,6 +53,9 @@ const EditableContent = ({
   const updateStore = useCallback(
     (newContent: string) => {
       if (!fragmentId) return;
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(paneId);
+      console.log(`updating markdown`);
       const fragmentData = $paneFragmentMarkdown[fragmentId];
       if (
         !fragmentData ||
@@ -81,7 +85,6 @@ const EditableContent = ({
           htmlAst: updatedHtmlAst,
         },
       };
-
       paneFragmentMarkdown.setKey(fragmentId, {
         ...fragmentData,
         current: newValue,
@@ -115,6 +118,7 @@ const EditableContent = ({
   const handleEditingChange = useCallback(
     (editing: boolean) => {
       if (!editing && localContent !== originalContentRef.current) {
+        console.log(`updating content`);
         queueUpdate(contentId, () => {
           updateStore(localContent);
           originalContentRef.current = localContent;
@@ -132,39 +136,39 @@ const EditableContent = ({
         return false;
       }
 
-      if (event.ctrlKey && event.key === "z") {
-        event.preventDefault();
-        if (!fragmentId) return false;
-        const fragmentData = $paneFragmentMarkdown[fragmentId];
-        if (!fragmentData || fragmentData.history.length === 0) return false;
+      //if (event.ctrlKey && event.key === "z") {
+      //  event.preventDefault();
+      //  if (!fragmentId) return false;
+      //  const fragmentData = $paneFragmentMarkdown[fragmentId];
+      //  if (!fragmentData || fragmentData.history.length === 0) return false;
 
-        queueUpdate(contentId, () => {
-          const [lastEntry, ...newHistory] = fragmentData.history;
-          const undoneContent = extractMarkdownElement(
-            lastEntry.value.markdown.body,
-            tag,
-            outerIdx,
-            idx
-          );
-          setLocalContent(undoneContent);
-          originalContentRef.current = undoneContent;
-          paneFragmentMarkdown.setKey(fragmentId, {
-            ...fragmentData,
-            current: lastEntry.value,
-            history: newHistory,
-          });
-          const isUnsaved = !isDeepEqual(
-            lastEntry.value,
-            fragmentData.original
-          );
-          unsavedChangesStore.setKey(paneId, {
-            ...$unsavedChanges[paneId],
-            paneFragmentMarkdown: isUnsaved,
-          });
-        });
+      //  queueUpdate(contentId, () => {
+      //    const [lastEntry, ...newHistory] = fragmentData.history;
+      //    const undoneContent = extractMarkdownElement(
+      //      lastEntry.value.markdown.body,
+      //      tag,
+      //      outerIdx,
+      //      idx
+      //    );
+      //    setLocalContent(undoneContent);
+      //    originalContentRef.current = undoneContent;
+      //    paneFragmentMarkdown.setKey(fragmentId, {
+      //      ...fragmentData,
+      //      current: lastEntry.value,
+      //      history: newHistory,
+      //    });
+      //    const isUnsaved = !isDeepEqual(
+      //      lastEntry.value,
+      //      fragmentData.original
+      //    );
+      //    unsavedChangesStore.setKey(paneId, {
+      //      ...$unsavedChanges[paneId],
+      //      paneFragmentMarkdown: isUnsaved,
+      //    });
+      //  });
 
-        return false;
-      }
+      //  return false;
+      //}
 
       return true;
     },

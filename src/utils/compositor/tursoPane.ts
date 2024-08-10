@@ -3,6 +3,7 @@ import { toHast } from "mdast-util-to-hast";
 import { cleanHtmlAst } from "./markdownUtils";
 import type { Row } from "@libsql/client";
 import type { FileDatum, PaneDatum, FileNode } from "../../types";
+import type { Root } from "hast";
 
 export function cleanTursoPane(row: Row, files: FileNode[]) {
   const thisFiles = files?.map((f: FileNode, idx: number) => {
@@ -27,7 +28,7 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
       id: row.markdown_id,
       slug: `${row.slug}-markdown`,
       title: `Copy for ${row.slug}`,
-      htmlAst: cleanHtmlAst(toHast(fromMarkdown(row.markdown_body))),
+      htmlAst: cleanHtmlAst(toHast(fromMarkdown(row.markdown_body)) as Root),
     };
   if (
     typeof row?.id === `string` &&

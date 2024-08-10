@@ -249,7 +249,7 @@ export interface ClassNamesPayloadDatum {
   [key: string]: {
     classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumWrapper;
     count?: number;
-    override: {
+    override?: {
       [key: string]: Tuple[];
     };
   };

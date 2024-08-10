@@ -22,7 +22,7 @@ export const MS_BETWEEN_UNDO = 10000;
 export const MAX_LENGTH_CONTENT = 10000;
 
 export const SHORT_SCREEN_THRESHOLD = 600;
-export const STICKY_HEADER_THRESHOLD = 600;
+export const STICKY_HEADER_THRESHOLD = 500;
 
 export const toolAddModes = [
   "paragraph",

@@ -40,6 +40,7 @@ const InsertWrapper = ({
     const newHistory = updateHistory(currentField, now);
     const newContent = `${toolAddModeTitles[toolAddMode]} content`;
     const insertIdx = position === "after" ? outerIdx + 1 : outerIdx;
+    console.log(`will need to insert based on toolAddMode:${toolAddMode}`);
     const newValue = insertElementIntoMarkdown(
       currentField.current,
       newContent,
@@ -52,6 +53,7 @@ const InsertWrapper = ({
       current: newValue,
       history: newHistory,
     });
+    // assumes this is now unsaved
     unsavedChangesStore.setKey(paneId, {
       ...$unsavedChanges[paneId],
       paneFragmentMarkdown: true,

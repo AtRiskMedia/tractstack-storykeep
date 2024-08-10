@@ -9,6 +9,7 @@ import type {
   MarkdownEditDatum,
   MarkdownLookup,
   OptionsPayloadDatum,
+  Tuple,
 } from "../../types";
 import type {
   Root as HastRoot,
@@ -174,117 +175,147 @@ export function reconcileOptionsPayload(
   idx: number | null,
   markdownLookup: MarkdownLookup,
   isInsertion: boolean,
-  insertedTag: string | null = null
+  insertedTag: string | null
 ): OptionsPayloadDatum {
-  const newOptionsPayload = JSON.parse(
+  const newOptionsPayload: OptionsPayloadDatum = JSON.parse(
     JSON.stringify(optionsPayload)
-  ) as OptionsPayloadDatum;
+  );
 
-  if (isInsertion) {
-    // Handle insertion
-    if (insertedTag) {
-      if (!newOptionsPayload.classNamesPayload[insertedTag]) {
-        newOptionsPayload.classNamesPayload[insertedTag] = {
-          classes: {},
-          count: 1,
-        };
-      } else {
-        newOptionsPayload.classNamesPayload[insertedTag].count =
-          (newOptionsPayload.classNamesPayload[insertedTag].count || 0) + 1;
-      }
+  const processTag = (
+    tag: string,
+    nthToAffect: number,
+    isIncrement: boolean
+  ) => {
+    if (!newOptionsPayload.classNamesPayload[tag]) {
+      newOptionsPayload.classNamesPayload[tag] = { classes: {} };
+    }
 
-      // Adjust nth values for the inserted tag and subsequent tags of the same type
-      Object.keys(newOptionsPayload.classNamesPayload).forEach(tag => {
-        if (
-          tag === insertedTag &&
-          newOptionsPayload.classNamesPayload[tag].override
-        ) {
-          /* eslint-disable @typescript-eslint/no-explicit-any */
-          const newOverride: Record<string, any> = {};
+    const tagPayload = newOptionsPayload.classNamesPayload[tag];
 
-          if (newOptionsPayload.classNamesPayload[tag]?.override) {
-            Object.entries(
-              newOptionsPayload.classNamesPayload[tag].override || {}
-            ).forEach(([selector, overrides]) => {
-              /* eslint-disable @typescript-eslint/no-explicit-any */
-              const newOverrides: Record<string, any> = {};
-              Object.entries(overrides).forEach(([nth, value]) => {
-                const nthNum = parseInt(nth);
-                if (nthNum >= outerIdx) {
-                  newOverrides[String(nthNum + 1)] = value;
-                } else {
-                  newOverrides[nth] = value;
-                }
-              });
-              newOverride[selector] = newOverrides;
-            });
+    if (tagPayload.override) {
+      const newOverride: { [key: string]: Tuple[] } = {};
+      Object.entries(tagPayload.override).forEach(([selector, overrides]) => {
+        const newOverrides: Tuple[] = [];
+        Object.entries(overrides).forEach(([nth, value]) => {
+          const nthNum = parseInt(nth);
+          if (isIncrement) {
+            if (nthNum >= nthToAffect) {
+              newOverrides[nthNum + 1] = value as Tuple;
+            } else {
+              newOverrides[nthNum] = value as Tuple;
+            }
+          } else {
+            if (nthNum < nthToAffect) {
+              newOverrides[nthNum] = value as Tuple;
+            } else if (nthNum > nthToAffect) {
+              newOverrides[nthNum - 1] = value as Tuple;
+            }
           }
-          newOptionsPayload.classNamesPayload[tag].override = newOverride;
+        });
+        if (newOverrides.length > 0) {
+          newOverride[selector] = newOverrides;
         }
       });
+      if (Object.keys(newOverride).length > 0) {
+        tagPayload.override = newOverride;
+      } else {
+        delete tagPayload.override;
+      }
     }
-  } else {
-    // Handle removal (keep existing removal logic)
-    const removedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "li";
-    const removedNth =
-      idx === null
-        ? markdownLookup.nthTagLookup[removedTag][outerIdx].nth
-        : idx;
 
-    const processTag = (tag: string, nthToRemove: number) => {
-      if (newOptionsPayload.classNamesPayload[tag]?.override) {
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        const newOverride: Record<string, any> = {};
-        const overrideValue =
-          newOptionsPayload?.classNamesPayload[tag]?.override ?? {};
-        if (overrideValue) {
-          Object.entries(overrideValue).forEach(([selector, overrides]) => {
-            /* eslint-disable @typescript-eslint/no-explicit-any */
-            const newOverrides: Record<string, any> = {};
-            Object.entries(overrides).forEach(([nth, value]) => {
-              const nthNum = parseInt(nth);
-              if (nthNum < nthToRemove) {
-                newOverrides[nth] = value;
-              } else if (nthNum > nthToRemove) {
-                newOverrides[String(nthNum - 1)] = value;
-              }
-            });
-            if (Object.keys(newOverrides).length > 0) {
-              newOverride[selector] = newOverrides;
-            }
-          });
-        }
-        if (Object.keys(newOverride).length > 0) {
-          newOptionsPayload.classNamesPayload[tag].override = newOverride;
-        } else {
-          delete newOptionsPayload.classNamesPayload[tag].override;
-        }
+    if (typeof tagPayload.count === "number") {
+      tagPayload.count += isIncrement ? 1 : -1;
+      if (tagPayload.count <= 0) {
+        delete tagPayload.count;
       }
+    } else if (isIncrement) {
+      tagPayload.count = 1;
+    }
 
-      if (typeof newOptionsPayload.classNamesPayload[tag]?.count === "number") {
-        newOptionsPayload.classNamesPayload[tag].count =
-          (newOptionsPayload.classNamesPayload[tag].count || 0) - 1;
-        if ((newOptionsPayload?.classNamesPayload[tag]?.count ?? 0) <= 0) {
-          delete newOptionsPayload.classNamesPayload[tag].count;
-        }
-      }
+    if (
+      Object.keys(tagPayload).length === 1 &&
+      "classes" in tagPayload &&
+      Object.keys(tagPayload.classes).length === 0
+    ) {
+      delete newOptionsPayload.classNamesPayload[tag];
+    }
+  };
 
-      if (Object.keys(newOptionsPayload.classNamesPayload[tag]).length === 0) {
-        delete newOptionsPayload.classNamesPayload[tag];
-      }
-    };
+  const handleListItemInsertion = (parentTag: string) => {
+    if (!newOptionsPayload.classNamesPayload[parentTag]) {
+      newOptionsPayload.classNamesPayload[parentTag] = {
+        classes: {},
+        count: 1,
+      };
+    } else {
+      const parentPayload = newOptionsPayload.classNamesPayload[parentTag];
+      parentPayload.count = (parentPayload.count || 0) + 1;
+    }
+  };
 
-    // Process the removed tag
-    processTag(removedTag, removedNth);
+  if (isInsertion) {
+    if (insertedTag === "img") {
+      const liNth =
+        idx === null
+          ? Object.keys(markdownLookup.listItemsLookup[outerIdx] || {}).length
+          : idx;
+      const imgNth = Object.keys(
+        markdownLookup.imagesLookup[outerIdx] || {}
+      ).length;
 
-    // Handle removal of the last li in ol or ul
-    if (idx !== null && removedTag === "li") {
+      processTag("li", liNth, true);
+      processTag("img", imgNth, true);
+
       const parentTag = markdownLookup.nthTag[outerIdx];
       if (parentTag === "ol" || parentTag === "ul") {
-        const parentNth = markdownLookup.nthTagLookup[parentTag][outerIdx].nth;
-        if (newOptionsPayload.classNamesPayload[parentTag]?.count === 1) {
-          processTag(parentTag, parentNth);
+        handleListItemInsertion(parentTag);
+      }
+    } else {
+      const affectedTag = insertedTag || "li";
+      const affectedNth =
+        idx === null
+          ? markdownLookup.nthTagLookup[affectedTag]?.[outerIdx]?.nth || 0
+          : idx;
+
+      processTag(affectedTag, affectedNth, true);
+
+      if (affectedTag === "li") {
+        const parentTag = markdownLookup.nthTag[outerIdx];
+        if (parentTag === "ol" || parentTag === "ul") {
+          handleListItemInsertion(parentTag);
         }
+      }
+    }
+  } else {
+    const affectedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "li";
+    const affectedNth =
+      idx === null
+        ? markdownLookup.nthTagLookup[affectedTag]?.[outerIdx]?.nth || 0
+        : idx;
+
+    processTag(affectedTag, affectedNth, false);
+
+    if (idx !== null && affectedTag === "li") {
+      const parentTag = markdownLookup.nthTag[outerIdx];
+      if (parentTag === "ul" || parentTag === "ol") {
+        const parentPayload = newOptionsPayload.classNamesPayload[parentTag];
+        if (
+          parentPayload &&
+          typeof parentPayload.count === "number" &&
+          parentPayload.count === 1
+        ) {
+          processTag(
+            parentTag,
+            markdownLookup.nthTagLookup[parentTag][outerIdx].nth,
+            false
+          );
+        }
+      }
+
+      const imgGlobalNth = getGlobalNth("img", idx, outerIdx, markdownLookup);
+      if (imgGlobalNth !== null) {
+        const imgNth = markdownLookup.imagesLookup[outerIdx][idx];
+        processTag("img", imgNth, false);
       }
     }
   }

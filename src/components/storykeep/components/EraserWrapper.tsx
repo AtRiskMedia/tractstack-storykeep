@@ -9,7 +9,7 @@ import {
   removeElementFromMarkdown,
   updateHistory,
 } from "../../../utils/compositor/markdownUtils";
-import { cloneDeep } from "../../../utils/helpers";
+import { cloneDeep, isDeepEqual } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 import type { MarkdownLookup } from "../../../types";
 
@@ -54,9 +54,10 @@ const EraserWrapper = ({
         current: newValue,
         history: newHistory,
       });
+      const isUnsaved = !isDeepEqual(newValue, currentField.original);
       unsavedChangesStore.setKey(paneId, {
         ...$unsavedChanges[paneId],
-        paneFragmentMarkdown: true,
+        paneFragmentMarkdown: isUnsaved,
       });
     });
   };

@@ -70,8 +70,6 @@ export const StoryFragment = (props: { id: string }) => {
                     current: lastEntry.value,
                     history: newHistory,
                   });
-                  console.log(`redoValue`, lastEntry.value);
-                  console.log(`newHistory`, newHistory);
                   const isUnsaved = !isDeepEqual(
                     lastEntry.value,
                     currentField.original

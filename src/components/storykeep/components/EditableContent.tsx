@@ -129,55 +129,21 @@ const EditableContent = ({
         event.currentTarget.blur();
         return false;
       }
-
-      //if (event.ctrlKey && event.key === "z") {
-      //  event.preventDefault();
-      //  if (!fragmentId) return false;
-      //  const fragmentData = $paneFragmentMarkdown[fragmentId];
-      //  if (!fragmentData || fragmentData.history.length === 0) return false;
-
-      //  queueUpdate(contentId, () => {
-      //    const [lastEntry, ...newHistory] = fragmentData.history;
-      //    const undoneContent = extractMarkdownElement(
-      //      lastEntry.value.markdown.body,
-      //      tag,
-      //      outerIdx,
-      //      idx
-      //    );
-      //    setLocalContent(undoneContent);
-      //    originalContentRef.current = undoneContent;
-      //    paneFragmentMarkdown.setKey(fragmentId, {
-      //      ...fragmentData,
-      //      current: lastEntry.value,
-      //      history: newHistory,
-      //    });
-      //    const isUnsaved = !isDeepEqual(
-      //      lastEntry.value,
-      //      fragmentData.original
-      //    );
-      //    unsavedChangesStore.setKey(paneId, {
-      //      ...$unsavedChanges[paneId],
-      //      paneFragmentMarkdown: isUnsaved,
-      //    });
-      //  });
-
-      //  return false;
-      //}
-
       return true;
     },
     [fragmentId, $paneFragmentMarkdown, tag, outerIdx, idx, queueUpdate]
   );
-
   return (
-    <ContentEditableField
-      id={`${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}-${paneId}`}
-      value={localContent}
-      onChange={handleEdit}
-      onEditingChange={handleEditingChange}
-      onKeyDown={handleKeyDown}
-      className={classes}
-    />
+    <div className="inline-block w-full">
+      <ContentEditableField
+        id={`${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}-${paneId}`}
+        value={localContent}
+        onChange={handleEdit}
+        onEditingChange={handleEditingChange}
+        onKeyDown={handleKeyDown}
+        className={classes}
+      />
+    </div>
   );
 };
 

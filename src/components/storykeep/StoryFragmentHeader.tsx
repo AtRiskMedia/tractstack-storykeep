@@ -137,7 +137,7 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
           ? false
           : viewportHeight > STICKY_HEADER_THRESHOLD &&
               document.documentElement.scrollHeight >
-                2 * STICKY_HEADER_THRESHOLD
+                3 * STICKY_HEADER_THRESHOLD
       );
     }
   }, []);

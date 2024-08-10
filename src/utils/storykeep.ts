@@ -390,6 +390,7 @@ export function initStoryKeep() {
   }
 
   function handleScroll(): void {
+    handleHeaderBehavior();
     if (window.innerWidth >= BREAKPOINTS.xl) {
       adjustEditPanePosition();
     }

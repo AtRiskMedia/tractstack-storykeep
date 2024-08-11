@@ -52,17 +52,17 @@ export const toolAddModeTitles: Record<ToolAddMode, string> = {
   aside: "Aside Text",
 };
 
-export const toolAddModeInsert: Record<ToolAddMode, string> = {
+export const toolAddModeInsertDefault: Record<ToolAddMode, string> = {
   paragraph: "...",
   h2: "## title",
   h3: "### subtitle",
   h4: "#### section title",
   image: "* ![Descriptive title](filename)",
-  yt: "``` youtube(tag|title)",
-  bunny: "``` bunny(id|title)",
-  belief: "``` belief(BeliefTag|likert|question)",
-  identify: "``` identifyAs(BeliefTag|TARGET_VALUE|question)",
-  toggle: "``` toggle(BeliefTag|likert|question)",
+  yt: "* `youtube(tag|title)`",
+  bunny: "* `bunny(id|title)`",
+  belief: "* `belief(BeliefTag|likert|question)`",
+  identify: "* `identifyAs(BeliefTag|TARGET_VALUE|question)`",
+  toggle: "* `toggle(BeliefTag|likert|question)`",
   aside: "1. ...",
 };
 

@@ -11,6 +11,7 @@ import type {
   MarkdownLookupObj,
   OptionsPayloadDatum,
   Tuple,
+  ToolAddMode,
 } from "../../types";
 import type {
   Root as HastRoot,
@@ -18,6 +19,50 @@ import type {
   Text as HastText,
 } from "hast";
 import type { Root as MdastRoot, List, ListItem } from "mdast";
+
+export function allowTagInsert(
+  toolAddMode: ToolAddMode,
+  outerIdx: number,
+  idx: number | null,
+  markdownLookup: MarkdownLookup
+) {
+  console.log(`allowTagInsert`, toolAddMode, outerIdx, markdownLookup);
+  const outerTag = markdownLookup.nthTag[outerIdx];
+  const innerCount =
+    typeof idx === `number` &&
+    idx >= 0 &&
+    markdownLookup.listItemsLookup &&
+    markdownLookup.listItemsLookup[outerIdx] &&
+    Object.keys(markdownLookup.listItemsLookup[outerIdx]).length;
+  console.log(outerTag, innerCount);
+
+  switch (toolAddMode) {
+    case `paragraph`:
+      break;
+    case `h2`:
+      break;
+    case `h3`:
+      break;
+    case `h4`:
+      break;
+    case `image`:
+      break;
+    case `yt`:
+      break;
+    case `bunny`:
+      break;
+    case `belief`:
+      break;
+    case `identify`:
+      break;
+    case `toggle`:
+      break;
+    case `aside`:
+      break;
+  }
+
+  return { before: true, after: true };
+}
 
 export function updateHistory(
   currentField: FieldWithHistory<MarkdownEditDatum>,

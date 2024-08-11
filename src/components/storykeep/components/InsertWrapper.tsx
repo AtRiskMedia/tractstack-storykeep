@@ -9,7 +9,7 @@ import {
   insertElementIntoMarkdown,
   updateHistory,
 } from "../../../utils/compositor/markdownUtils";
-import { toolAddModeTitles } from "../../../constants";
+import { toolAddModeTitles, toolAddModeInsert } from "../../../constants";
 import { cloneDeep } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
@@ -46,7 +46,8 @@ const InsertWrapper = ({
       const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
-      const newContent = `${toolAddModeTitles[toolAddMode]} content`;
+      //const newContent = `${toolAddModeTitles[toolAddMode]} content`;
+      const newContent = toolAddModeInsert[toolAddMode];
       console.log(
         `this currently assumes you're inserting block level, e.g. p, h1`,
         position

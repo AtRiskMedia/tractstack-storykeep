@@ -8,6 +8,7 @@ import type {
   HistoryEntry,
   MarkdownEditDatum,
   MarkdownLookup,
+  MarkdownLookupObj,
   OptionsPayloadDatum,
   Tuple,
 } from "../../types";
@@ -15,9 +16,8 @@ import type {
   Root as HastRoot,
   Element as HastElement,
   Text as HastText,
-  ElementContent,
 } from "hast";
-import type { Root as MdastRoot, List } from "mdast";
+import type { Root as MdastRoot, List, ListItem } from "mdast";
 
 export function updateHistory(
   currentField: FieldWithHistory<MarkdownEditDatum>,
@@ -34,6 +34,7 @@ export function updateHistory(
       newHistory.pop();
     }
   }
+  //console.log(`newHistory`, newHistory);
   return newHistory;
 }
 
@@ -169,17 +170,58 @@ export function getGlobalNth(
   }
 }
 
+function getNthOfHighestLessThan(
+  lookupObj: MarkdownLookupObj,
+  affectedNth: number,
+  position: "before" | "after"
+) {
+  const filtered =
+    position === `before`
+      ? Object.fromEntries(
+          Object.entries(lookupObj).filter(
+            ([key]) => parseInt(key) < affectedNth
+          )
+        )
+      : Object.fromEntries(
+          Object.entries(lookupObj).filter(
+            ([key]) => parseInt(key) <= affectedNth
+          )
+        );
+  if (filtered) {
+    const lastKey = Object.keys(filtered).pop();
+    if (lastKey) {
+      const lastElement = filtered[lastKey]?.nth;
+      if (lastElement >= 0) return lastElement;
+    }
+  }
+  return 0;
+}
+
 export function reconcileOptionsPayload(
   optionsPayload: OptionsPayloadDatum,
   outerIdx: number,
   idx: number | null,
   markdownLookup: MarkdownLookup,
   isInsertion: boolean,
-  insertedTag: string | null
+  insertedTag: string | null,
+  position: "before" | "after"
 ): OptionsPayloadDatum {
   const newOptionsPayload: OptionsPayloadDatum = JSON.parse(
     JSON.stringify(optionsPayload)
   );
+
+  const getNthChild = (tag: string) => {
+    const tagLookup = markdownLookup.nthTagLookup[tag];
+    const outerTag = markdownLookup.nthTag[outerIdx];
+    if (!tagLookup) return 0;
+    const highestSibling = getNthOfHighestLessThan(
+      tagLookup,
+      outerIdx,
+      position
+    );
+    if (position === `after` || outerTag !== tag) return highestSibling + 1;
+    return highestSibling;
+  };
 
   const processTag = (
     tag: string,
@@ -199,7 +241,10 @@ export function reconcileOptionsPayload(
         Object.entries(overrides).forEach(([nth, value]) => {
           const nthNum = parseInt(nth);
           if (isIncrement) {
-            if (nthNum >= nthToAffect) {
+            if (
+              (position === `before` && nthNum >= nthToAffect) ||
+              nthNum > nthToAffect
+            ) {
               newOverrides[nthNum + 1] = value as Tuple;
             } else {
               newOverrides[nthNum] = value as Tuple;
@@ -241,53 +286,38 @@ export function reconcileOptionsPayload(
     }
   };
 
-  const handleListItemInsertion = (parentTag: string) => {
-    if (!newOptionsPayload.classNamesPayload[parentTag]) {
-      newOptionsPayload.classNamesPayload[parentTag] = {
-        classes: {},
-        count: 1,
-      };
-    } else {
-      const parentPayload = newOptionsPayload.classNamesPayload[parentTag];
-      parentPayload.count = (parentPayload.count || 0) + 1;
-    }
-  };
-
   if (isInsertion) {
     if (insertedTag === "img") {
       const liNth =
         idx === null
           ? Object.keys(markdownLookup.listItemsLookup[outerIdx] || {}).length
           : idx;
-      const imgNth = Object.keys(
-        markdownLookup.imagesLookup[outerIdx] || {}
-      ).length;
+      const imgNth = getNthChild("img");
 
       processTag("li", liNth, true);
       processTag("img", imgNth, true);
 
       const parentTag = markdownLookup.nthTag[outerIdx];
       if (parentTag === "ol" || parentTag === "ul") {
-        handleListItemInsertion(parentTag);
+        const parentNth = getNthChild(parentTag);
+        processTag(parentTag, parentNth, true);
       }
     } else {
-      const affectedTag = insertedTag || "li";
-      const affectedNth =
-        idx === null
-          ? markdownLookup.nthTagLookup[affectedTag]?.[outerIdx]?.nth || 0
-          : idx;
+      const affectedTag = insertedTag || "p";
+      const affectedNth = getNthChild(affectedTag);
 
       processTag(affectedTag, affectedNth, true);
 
       if (affectedTag === "li") {
         const parentTag = markdownLookup.nthTag[outerIdx];
         if (parentTag === "ol" || parentTag === "ul") {
-          handleListItemInsertion(parentTag);
+          const parentNth = getNthChild(parentTag);
+          processTag(parentTag, parentNth, true);
         }
       }
     }
   } else {
-    const affectedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "li";
+    const affectedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "p";
     const affectedNth =
       idx === null
         ? markdownLookup.nthTagLookup[affectedTag]?.[outerIdx]?.nth || 0
@@ -328,40 +358,53 @@ export function insertElementIntoMarkdown(
   newContent: string,
   outerIdx: number,
   idx: number | null,
+  position: "before" | "after",
   markdownLookup: MarkdownLookup
 ): MarkdownEditDatum {
   const newMarkdown = { ...markdownEdit };
-  const lines = newMarkdown.markdown.body.split("\n");
-  const htmlAst = newMarkdown.markdown.htmlAst;
+  //console.log(`was`, JSON.stringify(newMarkdown.markdown.body));
+
+  // Parse the existing markdown to mdast
+  const mdast = fromMarkdown(newMarkdown.markdown.body);
 
   let insertedTag = null;
 
   if (idx === null) {
     // Insert new block
-    lines.splice(outerIdx, 0, newContent);
-    const newNode = markdownToHtmlAst(newContent).children[0] as ElementContent;
-    htmlAst.children.splice(outerIdx, 0, newNode);
-    if ("tagName" in newNode) {
+    const newNode = fromMarkdown(newContent).children[0];
+    const adjustedOuterIdx = position === "after" ? outerIdx + 1 : outerIdx;
+    mdast.children.splice(adjustedOuterIdx, 0, newNode);
+    if ("tagName" in newNode && typeof newNode.tagName === `string`) {
       insertedTag = newNode.tagName;
     }
   } else {
     // Insert nested element
-    const block = lines[outerIdx].split("\n");
-    block.splice(idx, 0, newContent);
-    lines[outerIdx] = block.join("\n");
-    const childNode = htmlAst.children[outerIdx];
-    if ("children" in childNode) {
-      const newNode = markdownToHtmlAst(newContent)
-        .children[0] as ElementContent;
-      childNode.children.splice(idx, 0, newNode);
-      if ("tagName" in newNode) {
-        insertedTag = newNode.tagName;
+    console.log(
+      `this doesn't yet work properly ... and must account for position`
+    );
+    const parentNode = mdast.children[outerIdx];
+    if (parentNode.type === "list" && Array.isArray(parentNode.children)) {
+      let newNode = fromMarkdown(newContent).children[0];
+      if (newNode.type !== "listItem") {
+        newNode = {
+          type: "listItem",
+          children: [newNode],
+        } as ListItem;
       }
+      const adjustedIdx = position === "after" ? idx + 1 : idx;
+      parentNode.children.splice(adjustedIdx, 0, newNode as ListItem);
+      insertedTag = "li";
     }
   }
 
-  newMarkdown.markdown.body = lines.join("\n");
-  newMarkdown.markdown.htmlAst = htmlAst;
+  // Convert mdast back to markdown
+  newMarkdown.markdown.body = toMarkdown(mdast);
+  //console.log(`becomes`, JSON.stringify(newMarkdown.markdown.body));
+
+  // Update htmlAst
+  newMarkdown.markdown.htmlAst = cleanHtmlAst(
+    toHast(mdast) as HastRoot
+  ) as HastRoot;
 
   newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
     newMarkdown.payload.optionsPayload,
@@ -369,8 +412,10 @@ export function insertElementIntoMarkdown(
     idx,
     markdownLookup,
     true,
-    insertedTag
+    insertedTag,
+    position
   );
+  console.log(`becomes`, newMarkdown.payload.optionsPayload.classNamesPayload);
 
   return newMarkdown;
 }
@@ -426,7 +471,8 @@ export function removeElementFromMarkdown(
     idx,
     markdownLookup,
     false,
-    null
+    null,
+    "before"
   );
 
   return newMarkdown;

@@ -257,9 +257,10 @@ export const StoryKeepStore = (props: {
                         ...paneMarkdownFragmentId.get(),
                         [payload.id]: createFieldWithHistory(paneFragmentId),
                       });
-                      //console.log(`MarkdownEditDatum to store`,
-                      //  paneFragmentMarkdown.get()[paneFragmentId]
-                      //)
+                      console.log(
+                        `${payload.slug}:MarkdownEditDatum`,
+                        paneFragmentMarkdown.get()[paneFragmentId]
+                      );
                       break;
                     default:
                       console.log(

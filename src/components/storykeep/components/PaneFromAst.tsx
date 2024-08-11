@@ -167,11 +167,11 @@ const PaneFromAst = ({
       : typeof thisClassNames[Tag] === `string`
         ? (thisClassNames[Tag] as string)
         : typeof thisClassNames[Tag] === `object` &&
-            outerGlobalNth &&
+            typeof outerGlobalNth === `number` &&
             thisClassNames[Tag].length >= outerGlobalNth + 1
           ? (thisClassNames[Tag][outerGlobalNth] as string)
           : typeof thisClassNames[Tag] === `object` &&
-              globalNth &&
+              typeof globalNth === `number` &&
               !outerGlobalNth &&
               thisClassNames[Tag].length >= globalNth + 1
             ? (thisClassNames[Tag][globalNth] as string)
@@ -329,7 +329,7 @@ const PaneFromAst = ({
       const tip = isImage
         ? `Edit this image`
         : isWidget
-          ? `Edit this widget`
+          ? `Configure this widget`
           : isTextContainerItem
             ? `Edit this text`
             : `UNKNOWN`;
@@ -359,7 +359,7 @@ const PaneFromAst = ({
           </EraserWrapper>
         );
 
-      const tip = toolMode === `styles` ? `Make pretty` : ``;
+      const tip = toolMode === `styles` ? `Click to update style/design` : ``;
       if (tip)
         return (
           <EditableOuterWrapper
@@ -379,6 +379,7 @@ const PaneFromAst = ({
           fragmentId={fragmentId}
           outerIdx={outerIdx}
           idx={idx}
+          queueUpdate={queueUpdate}
           markdownLookup={markdownLookup}
         >
           {child}

@@ -4,13 +4,24 @@ import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
-import { toolModeStore, toolAddModeStore } from "../../../store/storykeep";
+import { toolAddModeTitles } from "../../../constants";
+import {
+  toolModeStore,
+  toolAddModeStore,
+  paneFragmentMarkdown,
+  paneMarkdownFragmentId,
+} from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
+import {
+  insertElementIntoMarkdown,
+  updateHistory,
+} from "../../../utils/compositor/markdownUtils";
 import type {
   MarkdownDatum,
   MarkdownPaneDatum,
   FileNode,
   BgPaneDatum,
+  ToolAddMode,
 } from "../../../types";
 
 interface Props {
@@ -57,89 +68,140 @@ const MarkdownWrapper = ({
     gridArea: "1/1/1/1",
   };
 
-  // has modal shape?
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
+  const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
+  const isEmptyMarkdown =
+    $paneFragmentMarkdown[fragmentId].current.markdown.body === ``;
+  const mustIntercept = isEmptyMarkdown && toolMode === `insert`;
+
   const isModal =
     thisPayload.isModal &&
     typeof thisPayload?.optionsPayload?.modal !== `undefined`;
 
-  // uses textShapeOutside
   const hasTextShapeOutside =
     thisPayload.textShapeOutsideMobile !== `none` ||
     thisPayload.textShapeOutsideTablet !== `none` ||
     thisPayload.textShapeOutsideDesktop !== `none`;
 
-  // generate markdown global lookup
   const markdownLookup =
     markdown?.htmlAst && generateMarkdownLookup(markdown.htmlAst);
 
-  if (isModal && thisModalPayload) {
+  const handleInsert = () => {
+    const newContent = `${toolAddModeTitles[toolAddMode as ToolAddMode]} content`;
+    queueUpdate(fragmentId, () => {
+      const currentField = $paneFragmentMarkdown[fragmentId];
+      const newMarkdownEdit = insertElementIntoMarkdown(
+        currentField.current,
+        newContent,
+        0,
+        null,
+        "before",
+        markdownLookup
+      );
+
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+
+      paneFragmentMarkdown.setKey(fragmentId, {
+        ...currentField,
+        current: newMarkdownEdit,
+        history: newHistory,
+      });
+    });
+  };
+
+  const renderContent = () => {
+    if (isModal && thisModalPayload) {
+      return (
+        <MarkdownInsideModal
+          payload={thisPayload}
+          markdown={markdown}
+          files={files}
+          paneHeight={paneHeight}
+          modalPayload={thisModalPayload}
+          paneId={paneId}
+          slug={slug}
+          markdownLookup={markdownLookup}
+          toolMode={toolMode}
+          toolAddMode={toolAddMode}
+          queueUpdate={queueUpdate}
+        />
+      );
+    } else if (!isModal && hasTextShapeOutside) {
+      return (
+        <MarkdownInsidePane
+          payload={thisPayload}
+          markdown={markdown}
+          files={files}
+          paneHeight={paneHeight}
+          paneId={paneId}
+          slug={slug}
+          markdownLookup={markdownLookup}
+          toolMode={toolMode}
+          toolAddMode={toolAddMode}
+          queueUpdate={queueUpdate}
+        />
+      );
+    } else if (!isModal && !hasTextShapeOutside) {
+      return (
+        <MarkdownPane
+          payload={thisPayload}
+          markdown={markdown}
+          files={files}
+          paneId={paneId}
+          slug={slug}
+          markdownLookup={markdownLookup}
+          toolMode={toolMode}
+          toolAddMode={toolAddMode}
+          queueUpdate={queueUpdate}
+        />
+      );
+    }
+    return null;
+  };
+
+  if (mustIntercept) {
     return (
-      <div
-        className={classNames(hidden, `h-fit-contents`)}
-        id={`t8k-${thisPayload.id}-modal-container`}
-      >
+      <div className="min-h-[200px] w-full relative">
+        <button
+          className="relative z-103 w-full h-full bg-mygreen/20 hover:bg-mygreen/50 pointer-events-auto min-h-[200px]"
+          title={`Add ${toolAddModeTitles[toolAddMode as ToolAddMode]}`}
+          onClick={handleInsert}
+        >
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+             text-black bg-mywhite p-2.5 rounded-sm shadow-md
+             text-xl md:text-3xl font-action mx-6"
+          >
+            Add {toolAddModeTitles[toolAddMode as ToolAddMode]}
+          </div>
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={classNames(hidden, `h-fit-contents`)}
+      id={`t8k-${thisPayload.id}-modal-container`}
+    >
+      {isModal && thisModalPayload && (
         <div
           className="relative w-full h-full justify-self-start"
           style={paneFragmentStyle}
         >
           <Modal payload={thisPayload} modalPayload={thisModalPayload} />
         </div>
-        <div
-          className="relative w-full h-full justify-self-start"
-          style={paneFragmentStyle}
-        >
-          <MarkdownInsideModal
-            payload={thisPayload}
-            markdown={markdown}
-            files={files}
-            paneHeight={paneHeight}
-            modalPayload={thisModalPayload}
-            paneId={paneId}
-            slug={slug}
-            markdownLookup={markdownLookup}
-            toolMode={toolMode}
-            toolAddMode={toolAddMode}
-            queueUpdate={queueUpdate}
-          />
-        </div>
+      )}
+      <div
+        className="relative w-full h-full justify-self-start"
+        style={paneFragmentStyle}
+      >
+        {renderContent()}
       </div>
-    );
-  }
-
-  if (!isModal && hasTextShapeOutside) {
-    return (
-      <MarkdownInsidePane
-        payload={thisPayload}
-        markdown={markdown}
-        files={files}
-        paneHeight={paneHeight}
-        paneId={paneId}
-        slug={slug}
-        markdownLookup={markdownLookup}
-        toolMode={toolMode}
-        toolAddMode={toolAddMode}
-        queueUpdate={queueUpdate}
-      />
-    );
-  }
-
-  if (!isModal && !hasTextShapeOutside) {
-    return (
-      <MarkdownPane
-        payload={thisPayload}
-        markdown={markdown}
-        files={files}
-        paneId={paneId}
-        slug={slug}
-        markdownLookup={markdownLookup}
-        toolMode={toolMode}
-        toolAddMode={toolAddMode}
-        queueUpdate={queueUpdate}
-      />
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 export default MarkdownWrapper;

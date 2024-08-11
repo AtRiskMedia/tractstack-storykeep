@@ -49,6 +49,7 @@ const EraserWrapper = ({
         idx,
         markdownLookup
       );
+      console.log(`after edit`, newValue);
       paneFragmentMarkdown.setKey(fragmentId, {
         ...currentField,
         current: newValue,

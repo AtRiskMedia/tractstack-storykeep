@@ -3,7 +3,7 @@ import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
   ComputerDesktopIcon,
-  ArrowsPointingOutIcon,
+  ViewfinderCircleIcon,
 } from "@heroicons/react/24/outline";
 import { debounce } from "../../../utils/helpers";
 
@@ -24,7 +24,7 @@ const ViewportSelector = ({
   const viewportButtons = [
     {
       key: "auto",
-      Icon: ArrowsPointingOutIcon,
+      Icon: ViewfinderCircleIcon,
       title: "Auto or responsive view",
     },
     {

@@ -211,7 +211,6 @@ const Pane = (props: { id: string }) => {
   const bgColourStyle = paneData.bgColour
     ? { backgroundColor: paneData.bgColour }
     : {};
-  const toolMode = $toolMode.value || ``;
 
   return (
     <div className="relative">
@@ -229,9 +228,6 @@ const Pane = (props: { id: string }) => {
       >
         {$paneFragmentIds[id].current.map(renderFragment)}
       </div>
-      {toolMode !== "text" && (
-        <div className="absolute inset-0 w-full h-full z-50" />
-      )}
     </div>
   );
 };

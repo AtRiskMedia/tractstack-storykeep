@@ -7,6 +7,7 @@ import { ToggleBelief } from "@components/widgets/ToggleBelief";
 import { AstToButton } from "@components/panes/AstToButton";
 import { lispLexer } from "../../utils/concierge/lispLexer";
 import { preParseAction } from "../../utils/concierge/preParseAction";
+import { getGlobalNth } from "../../utils/compositor/markdownUtils";
 import type { ButtonData, FileNode, MarkdownLookup } from "../../types";
 
 interface Props {
@@ -35,49 +36,12 @@ const {
 
 const thisAst = payload.ast.at(0);
 const Tag = thisAst?.tagName || thisAst?.type;
-const outerLookup =
+const globalNth = getGlobalNth(Tag, idx, outerIdx, markdownLookup);
+const outerGlobalNth =
   [`p`, `ul`, `ol`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) &&
   markdownLookup?.nthTagLookup[Tag] &&
   markdownLookup.nthTagLookup[Tag][outerIdx] &&
   markdownLookup.nthTagLookup[Tag][outerIdx].nth;
-let globalNth: number | undefined = undefined;
-
-if (typeof idx === `number`) {
-  switch (Tag) {
-    case `li`:
-      if (
-        markdownLookup?.listItemsLookup &&
-        markdownLookup.listItemsLookup[outerIdx] &&
-        typeof markdownLookup.listItemsLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.listItemsLookup[outerIdx][idx];
-      break;
-    case `img`:
-      if (
-        markdownLookup?.imagesLookup &&
-        markdownLookup.imagesLookup[outerIdx] &&
-        typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.imagesLookup[outerIdx][idx];
-      break;
-    case `code`:
-      if (
-        markdownLookup?.codeItemsLookup &&
-        markdownLookup.codeItemsLookup[outerIdx] &&
-        typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.codeItemsLookup[outerIdx][idx];
-      break;
-    case `a`:
-      if (
-        markdownLookup?.linksLookup &&
-        markdownLookup.linksLookup[outerIdx] &&
-        typeof markdownLookup.linksLookup[outerIdx][idx] === `number`
-      )
-        globalNth = markdownLookup.linksLookup[outerIdx][idx];
-      break;
-  }
-}
 
 const injectClassNames =
   typeof thisAst?.tagName === `undefined`
@@ -85,12 +49,12 @@ const injectClassNames =
     : typeof thisClassNames[Tag] === `string`
       ? (thisClassNames[Tag] as string)
       : typeof thisClassNames[Tag] === `object` &&
-          outerLookup &&
-          thisClassNames[Tag].length >= outerLookup + 1
-        ? (thisClassNames[Tag][outerLookup] as string)
-        : !outerLookup &&
-            typeof thisClassNames[Tag] === `object` &&
-            globalNth &&
+          typeof outerGlobalNth === `number` &&
+          thisClassNames[Tag].length >= outerGlobalNth + 1
+        ? (thisClassNames[Tag][outerGlobalNth] as string)
+        : typeof thisClassNames[Tag] === `object` &&
+            typeof globalNth === `number` &&
+            !outerGlobalNth &&
             thisClassNames[Tag].length >= globalNth + 1
           ? (thisClassNames[Tag][globalNth] as string)
           : typeof thisClassNames[Tag] === `object`

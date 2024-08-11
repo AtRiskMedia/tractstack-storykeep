@@ -215,13 +215,13 @@ const PaneWrapper = (props: { id: string }) => {
           {isHovered && (
             <div
               className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-               bg-white p-2.5 rounded-md shadow-md
+               text-black bg-mywhite p-2.5 rounded-sm shadow-md
                text-xl md:text-3xl font-action mx-6"
             >
               {$editMode?.id === id ? (
-                <span>Close settings pane</span>
+                <span>click to close panel</span>
               ) : (
-                <span>Edit settings on this pane</span>
+                <span>click for design &amp; set-up options</span>
               )}
             </div>
           )}

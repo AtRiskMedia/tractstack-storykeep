@@ -54,6 +54,9 @@ export interface MarkdownLookup {
   nthTag: { [key: number]: string };
   nthTagLookup: { [key: string]: { [key: number]: { nth: number } } };
 }
+export interface MarkdownLookupObj {
+  [key: string | number]: { nth: number };
+}
 
 export type ToolMode =
   | "insert"

@@ -36,7 +36,6 @@ export const StoryFragment = (props: { id: string }) => {
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
   const $lastInteractedType = useStore(lastInteractedTypeStore);
   const $visiblePanes = useStore(visiblePanesStore);
-  const $toolMode = useStore(toolModeStore);
   const $unsavedChanges = useStore(unsavedChangesStore);
 
   useEffect(() => {
@@ -46,11 +45,11 @@ export const StoryFragment = (props: { id: string }) => {
         return;
       }
 
-      if (
-        event.ctrlKey &&
-        event.key ===
-          "z" /* && ['eraser', 'insert'].includes($toolMode.value) */
-      ) {
+      if (event.key === `Escape`) {
+        event.preventDefault();
+        toolModeStore.set({ value: `text` });
+      }
+      if (event.ctrlKey && event.key === "z") {
         event.preventDefault();
 
         const targetPaneId = $lastInteractedPane;
@@ -93,7 +92,7 @@ export const StoryFragment = (props: { id: string }) => {
     return () => {
       document.removeEventListener("keydown", handleGlobalKeyDown);
     };
-  }, [$lastInteractedPane, $lastInteractedType, $visiblePanes, $toolMode]);
+  }, [$lastInteractedPane, $lastInteractedType, $visiblePanes]);
 
   useEffect(() => {
     if ($storyFragmentInit[id]?.init) setIsClient(true);

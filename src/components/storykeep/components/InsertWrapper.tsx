@@ -2,6 +2,8 @@ import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
   unsavedChangesStore,
+  lastInteractedTypeStore,
+  lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import {
   insertElementIntoMarkdown,
@@ -17,6 +19,7 @@ interface Props {
   paneId: string;
   outerIdx: number;
   idx: number | null;
+  queueUpdate: (id: string, updateFn: () => void) => void;
   toolAddMode: ToolAddMode;
   children: ReactNode;
   markdownLookup: MarkdownLookup;
@@ -27,36 +30,47 @@ const InsertWrapper = ({
   paneId,
   outerIdx,
   idx,
+  queueUpdate,
   toolAddMode,
   children,
   markdownLookup,
 }: Props) => {
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
   const $unsavedChanges = useStore(unsavedChangesStore);
+  const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
 
   const handleInsert = (position: "before" | "after") => {
-    const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
-    const now = Date.now();
-    const newHistory = updateHistory(currentField, now);
-    const newContent = `${toolAddModeTitles[toolAddMode]} content`;
-    const insertIdx = position === "after" ? outerIdx + 1 : outerIdx;
-    console.log(`will need to insert based on toolAddMode:${toolAddMode}`);
-    const newValue = insertElementIntoMarkdown(
-      currentField.current,
-      newContent,
-      insertIdx,
-      idx,
-      markdownLookup
-    );
-    paneFragmentMarkdown.setKey(fragmentId, {
-      ...currentField,
-      current: newValue,
-      history: newHistory,
-    });
-    // assumes this is now unsaved
-    unsavedChangesStore.setKey(paneId, {
-      ...$unsavedChanges[paneId],
-      paneFragmentMarkdown: true,
+    queueUpdate(contentId, () => {
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(paneId);
+      const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+      const newContent = `${toolAddModeTitles[toolAddMode]} content`;
+      console.log(
+        `this currently assumes you're inserting block level, e.g. p, h1`,
+        position
+      );
+      console.log(`will need to insert based on toolAddMode:${toolAddMode}`);
+      const newValue = insertElementIntoMarkdown(
+        currentField.current,
+        newContent,
+        outerIdx,
+        idx,
+        position,
+        markdownLookup
+      );
+      console.log(`after edit`, newValue);
+      paneFragmentMarkdown.setKey(fragmentId, {
+        ...currentField,
+        current: newValue,
+        history: newHistory,
+      });
+      // safely assumes this is new/unsaved
+      unsavedChangesStore.setKey(paneId, {
+        ...$unsavedChanges[paneId],
+        paneFragmentMarkdown: true,
+      });
     });
   };
 

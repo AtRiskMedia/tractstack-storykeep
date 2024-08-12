@@ -27,7 +27,7 @@ import type {
   MarkdownEditDatum,
   ToolMode,
   ToolAddMode,
-  Viewport,
+  ViewportAuto,
 } from "../../types";
 
 type FragmentType = MarkdownEditDatum | BgPaneDatum | BgColourDatum;
@@ -36,7 +36,7 @@ const Pane = (props: {
   id: string;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
-  viewportKey: Viewport;
+  viewportKey: ViewportAuto;
 }) => {
   const { id, toolMode, toolAddMode, viewportKey } = props;
   const [isClient, setIsClient] = useState(false);

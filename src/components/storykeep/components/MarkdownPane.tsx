@@ -8,7 +8,7 @@ import type {
   MarkdownDatum,
   MarkdownLookup,
   OptionsPayloadDatum,
-  Viewport,
+  ViewportAuto,
   ToolMode,
   ToolAddMode,
 } from "../../../types";
@@ -25,7 +25,7 @@ interface Props {
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
-  viewportKey: Viewport;
+  viewportKey: ViewportAuto;
   queueUpdate: (id: string, updateFn: () => void) => void;
 }
 

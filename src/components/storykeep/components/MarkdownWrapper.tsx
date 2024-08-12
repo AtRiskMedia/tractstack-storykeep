@@ -23,7 +23,7 @@ import type {
   BgPaneDatum,
   ToolAddMode,
   ToolMode,
-  Viewport,
+  ViewportAuto,
 } from "../../../types";
 
 interface Props {
@@ -36,7 +36,7 @@ interface Props {
   markdownFragmentId: string | null;
   slug: string;
   queueUpdate: (id: string, updateFn: () => void) => void;
-  viewportKey: Viewport;
+  viewportKey: ViewportAuto;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
 }

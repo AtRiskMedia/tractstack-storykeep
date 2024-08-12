@@ -9,7 +9,7 @@ import type {
   MaskOptionsDatum,
   ShapeOptionsDatum,
   OptionsPayloadDatum,
-  Viewport,
+  ViewportAuto,
   //ToolMode,
 } from "../../../types";
 
@@ -19,7 +19,7 @@ const BgPane = ({
   //toolMode,
 }: {
   payload: BgPaneDatum;
-  viewportKey: Viewport;
+  viewportKey: ViewportAuto;
   //toolMode: ToolMode;
 }) => {
   const optionsPayload = payload.optionsPayload;

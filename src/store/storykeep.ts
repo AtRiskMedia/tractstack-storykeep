@@ -38,6 +38,11 @@ export const temporaryErrorsStore = map<
   Record<string, Record<StoreKey, boolean>>
 >({});
 export const activeEditModalStore = atom<"desktop" | "mobile" | null>(null);
+export const viewportAutoStore = map<{
+  value: "mobile" | "tablet" | "desktop";
+}>({
+  value: "mobile",
+});
 export const viewportStore = map<{
   value: "auto" | "mobile" | "tablet" | "desktop";
 }>({

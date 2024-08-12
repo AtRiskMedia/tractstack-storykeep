@@ -13,6 +13,9 @@ import {
   storyFragmentSlug,
   storyFragmentPaneIds,
   paneFragmentIds,
+  viewportStore,
+  toolModeStore,
+  toolAddModeStore,
   // Add other stores here
   //
 } from "../../store/storykeep";
@@ -23,6 +26,7 @@ import {
   handleToggleOff,
 } from "../../utils/storykeep";
 import { debounce } from "../../utils/helpers";
+import type { ToolMode, ToolAddMode } from "../../types";
 //import { tursoClient } from "../../api/tursoClient";
 //import {
 //  UnauthorizedError,
@@ -32,21 +36,38 @@ import { debounce } from "../../utils/helpers";
 
 export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
   // helpers
-  const {
-    isEditing,
-    updateStoreField,
-    handleEditingChange,
-    viewport,
-    setViewport,
-    toolMode,
-    setToolMode,
-    toolAddMode,
-    setToolAddMode,
-    handleUndo,
-  } = useStoryKeepUtils(id);
+  const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
+    useStoryKeepUtils(id);
 
   // required stores
   const $editMode = useStore(editModeStore);
+  const $viewport = useStore(viewportStore);
+  const viewport = $viewport.value;
+  const { value: toolMode } = useStore(toolModeStore);
+  const { value: toolAddMode } = useStore(toolAddModeStore);
+
+  const setViewport = (
+    newViewport: "auto" | "mobile" | "tablet" | "desktop"
+  ) => {
+    viewportStore.set({ value: newViewport });
+    const newViewportKey =
+      newViewport !== "auto"
+        ? newViewport
+        : typeof window !== "undefined" && window.innerWidth >= 1368
+          ? "desktop"
+          : typeof window !== "undefined" && window.innerWidth >= 768
+            ? "tablet"
+            : "mobile";
+    viewportAutoStore.set({ value: newViewportKey });
+  };
+
+  const setToolMode = (newToolMode: ToolMode) => {
+    toolModeStore.set({ value: newToolMode });
+  };
+
+  const setToolAddMode = (newToolAddMode: ToolAddMode) => {
+    toolAddModeStore.set({ value: newToolAddMode });
+  };
   const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
   const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
@@ -63,7 +84,6 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
           Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
         )
     );
-
     return storyFragmentChanges || paneChanges || paneFragmentChanges;
   }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
   const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
@@ -164,32 +184,8 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
     <div className="w-full" ref={headerRef}>
       <div className="w-full my-2">
         <div
-          className={`flex flex-wrap items-center gap-y-2 gap-x-4 ${hideElements ? `justify-around` : `justify-end`}`}
+          className={`flex flex-wrap items-center gap-y-2 gap-x-4 justify-around`}
         >
-          <div
-            className="mr-auto pr-12"
-            style={{ display: hideElements ? "none" : "block" }}
-          >
-            <div className="flex flex-nowrap">
-              <object
-                type="image/svg+xml"
-                data="/custom/logo.svg"
-                className="h-5 w-auto pointer-events-none mr-2"
-                aria-label="Logo"
-              >
-                Logo
-              </object>
-              <h1 className="text-xl font-bold font-action">
-                the website builder that converts
-              </h1>
-            </div>
-          </div>
-
-          <ViewportSelector
-            viewport={viewport}
-            setViewport={setViewport}
-            hideElements={hideElements}
-          />
           <ToolModeSelector
             toolMode={toolMode}
             setToolMode={setToolMode}
@@ -201,11 +197,16 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
               setToolAddMode={setToolAddMode}
             />
           ) : null}
+          <ViewportSelector
+            viewport={viewport}
+            setViewport={setViewport}
+            hideElements={hideElements}
+          />
 
           <div className="inline">
             <button
               type="button"
-              className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+              className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
               onClick={handleEditModeToggle}
             >
               Settings
@@ -215,14 +216,14 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
               <a
                 data-astro-reload
                 href={`/${$storyFragmentSlug[id]?.original}/edit`}
-                className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
               >
                 Cancel
               </a>
             ) : (
               <a
                 href={`/${$storyFragmentSlug[id]?.original}`}
-                className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
               >
                 Close
               </a>
@@ -231,7 +232,7 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
             {hasUnsavedChanges ? (
               <button
                 type="button"
-                className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-mywhite hover:text-myorange hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+                className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
                 disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
               >
                 Save

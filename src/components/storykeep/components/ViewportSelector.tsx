@@ -1,14 +1,13 @@
-import { useEffect, useState } from "react";
 import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
   ComputerDesktopIcon,
   ViewfinderCircleIcon,
 } from "@heroicons/react/24/outline";
-import { debounce } from "../../../utils/helpers";
+import type { ViewportKey } from "../../../types";
 
 interface ViewportSelectorProps {
-  viewport: "auto" | "mobile" | "tablet" | "desktop";
+  viewport: ViewportKey;
   setViewport: (viewport: "auto" | "mobile" | "tablet" | "desktop") => void;
   hideElements?: boolean;
 }
@@ -18,7 +17,6 @@ const ViewportSelector = ({
   setViewport,
   hideElements,
 }: ViewportSelectorProps) => {
-  const [width, setWidth] = useState(0);
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
   const viewportButtons = [
@@ -44,19 +42,6 @@ const ViewportSelector = ({
     },
   ] as const;
 
-  useEffect(() => {
-    const handleResize = debounce(() => {
-      const mainContent = document.getElementById(`storykeep`) as HTMLElement;
-      setWidth(mainContent.offsetWidth);
-    }, 100);
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
     <div>
       <div className="flex items-center">
@@ -70,9 +55,9 @@ const ViewportSelector = ({
         >
           {viewport !== `auto`
             ? viewport
-            : width < 800
+            : window.innerWidth < 800
               ? `mobile`
-              : width <= 1367
+              : window.innerWidth <= 1367
                 ? `tablet`
                 : `desktop`}
         </span>

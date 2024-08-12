@@ -11,6 +11,7 @@ import {
   visiblePanesStore,
   unsavedChangesStore,
   viewportStore,
+  viewportAutoStore,
   toolModeStore,
   toolAddModeStore,
 } from "../../store/storykeep";
@@ -19,8 +20,8 @@ import {
   classNames,
   handleEditorResize,
   isDeepEqual,
+  debounce,
 } from "../../utils/helpers";
-import type { Viewport } from "../../types";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
@@ -42,14 +43,34 @@ export const StoryFragment = (props: { id: string }) => {
   const $toolAddMode = useStore(toolAddModeStore);
   const toolAddMode = $toolAddMode.value || ``;
   const $viewport = useStore(viewportStore);
-  const viewportKey: Viewport =
+  const [viewportKey, setViewportKey] = useState(
     $viewport?.value && $viewport.value !== "auto"
       ? $viewport.value
       : typeof window !== "undefined" && window.innerWidth >= 1368
         ? "desktop"
         : typeof window !== "undefined" && window.innerWidth >= 768
           ? "tablet"
-          : "mobile";
+          : "mobile"
+  );
+
+  useEffect(() => {
+    const handleResize = debounce(() => {
+      const newViewportKey =
+        $viewport?.value && $viewport.value !== "auto"
+          ? $viewport.value
+          : typeof window !== "undefined" && window.innerWidth >= 1368
+            ? "desktop"
+            : typeof window !== "undefined" && window.innerWidth >= 768
+              ? "tablet"
+              : "mobile";
+      setViewportKey(newViewportKey);
+      viewportAutoStore.set({ value: newViewportKey });
+    }, 100);
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [$viewport]);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -133,7 +154,7 @@ export const StoryFragment = (props: { id: string }) => {
         `min-w-[1368px]`,
         `max-w-[1920px]`
       );
-      switch (viewportKey) {
+      switch ($viewport.value) {
         case "mobile":
           outerDiv.classList.add(`min-w-[500px]`, `max-w-[780px]`);
           break;
@@ -143,9 +164,11 @@ export const StoryFragment = (props: { id: string }) => {
         case "desktop":
           outerDiv.classList.add(`min-w-[1368px]`, `max-w-[1920px]`);
           break;
+        case "auto":
+          break;
       }
     }
-  }, [viewportKey]);
+  }, [$viewport]);
 
   if (!isClient) return <div>Loading...</div>;
 
@@ -155,11 +178,11 @@ export const StoryFragment = (props: { id: string }) => {
       className={classNames(
         tailwindBgColour ? tailwindBgColour : `bg-white`,
         `overflow-hidden`,
-        viewportKey === `mobile`
+        $viewport.value === `mobile`
           ? `min-w-[500px] max-w-[800px]`
-          : viewportKey === `tablet`
+          : $viewport.value === `tablet`
             ? `min-w-[1024px] max-w-[1367px]`
-            : viewportKey === `desktop`
+            : $viewport.value === `desktop`
               ? `min-w-[1368px] max-w-[1920px]`
               : ``
       )}

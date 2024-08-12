@@ -15,7 +15,7 @@ import {
   handleToggleOff,
 } from "../../utils/storykeep";
 import type { ReactNode } from "react";
-import type { Viewport, ToolMode, ToolAddMode } from "../../types";
+import type { ViewportAuto, ToolMode, ToolAddMode } from "../../types";
 
 const InsertTopBottomWrapper = ({
   children,
@@ -55,7 +55,7 @@ const InsertTopBottomWrapper = ({
 
 const PaneWrapper = (props: {
   id: string;
-  viewportKey: Viewport;
+  viewportKey: ViewportAuto;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
 }) => {

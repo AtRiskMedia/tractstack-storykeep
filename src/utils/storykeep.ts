@@ -1,12 +1,8 @@
-import { useStore } from "@nanostores/react";
 import { useCallback, useState, useRef } from "react";
 import {
   unsavedChangesStore,
   uncleanDataStore,
   temporaryErrorsStore,
-  viewportStore,
-  toolModeStore,
-  toolAddModeStore,
   storyFragmentTitle,
   storyFragmentSlug,
   storyFragmentTailwindBgColour,
@@ -25,8 +21,6 @@ import type {
   StoreMapType,
   FieldWithHistory,
   ValidationFunction,
-  ToolAddMode,
-  ToolMode,
   HistoryEntry,
 } from "../types";
 
@@ -92,24 +86,6 @@ export const useStoryKeepUtils = (id: string) => {
   const lastUpdateTimeRef = useRef<Record<StoreKey, number>>(
     initializeLastUpdateTime(storeMap)
   );
-
-  const { value: viewport } = useStore(viewportStore);
-  const { value: toolMode } = useStore(toolModeStore);
-  const { value: toolAddMode } = useStore(toolAddModeStore);
-
-  const setViewport = (
-    newViewport: "auto" | "mobile" | "tablet" | "desktop"
-  ) => {
-    viewportStore.set({ value: newViewport });
-  };
-
-  const setToolMode = (newToolMode: ToolMode) => {
-    toolModeStore.set({ value: newToolMode });
-  };
-
-  const setToolAddMode = (newToolAddMode: ToolAddMode) => {
-    toolAddModeStore.set({ value: newToolAddMode });
-  };
 
   const setTemporaryError = useCallback(
     (storeKey: StoreKey) => {
@@ -256,12 +232,6 @@ export const useStoryKeepUtils = (id: string) => {
     updateStoreField,
     handleUndo,
     handleEditingChange,
-    viewport,
-    setViewport,
-    toolMode,
-    setToolMode,
-    toolAddMode,
-    setToolAddMode,
   };
 };
 

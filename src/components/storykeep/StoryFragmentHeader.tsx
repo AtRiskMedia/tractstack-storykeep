@@ -185,7 +185,9 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
         <div
           className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
         >
-          <div className="flex flex-wrap">
+        <div
+          className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
+        >
             <ToolModeSelector
               toolMode={toolMode}
               setToolMode={setToolMode}

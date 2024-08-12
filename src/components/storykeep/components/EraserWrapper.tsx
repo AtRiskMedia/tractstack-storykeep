@@ -32,7 +32,6 @@ const EraserWrapper = ({
   children,
   markdownLookup,
 }: Props) => {
-  console.log(`ERASERWRAPPER`, paneId, fragmentId);
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [fragmentId],
   });
@@ -52,7 +51,6 @@ const EraserWrapper = ({
         idx,
         markdownLookup
       );
-      console.log(`after edit`, newValue);
       paneFragmentMarkdown.setKey(fragmentId, {
         ...currentField,
         current: newValue,

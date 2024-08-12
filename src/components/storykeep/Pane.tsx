@@ -109,6 +109,7 @@ const Pane = (props: {
         Math.floor((1080 * Number($paneHeightRatioTablet[id]?.current)) / 100),
         Math.floor((1920 * Number($paneHeightRatioDesktop[id]?.current)) / 100),
       ] as [number, number, number],
+      // these custom tailwind won't work in StoryKeep layout; will have to inject via styles
       paneHeightRatio: classNames(
         paneHeightRatioMobile
           ? `h-[calc(var(--scale)*${paneHeightRatioMobilePx}px)] xs:h-[calc(var(--scale)*${paneHeightRatioMobilePx}px)]`
@@ -120,6 +121,7 @@ const Pane = (props: {
           ? `xl:h-[calc(var(--scale)*${paneHeightRatioDesktopPx}px)]`
           : ``
       ),
+      // these custom tailwind won't work in StoryKeep layout; will have to inject via styles
       paneHeightOffset: classNames(
         $paneHeightOffsetMobile[id]?.current !== undefined
           ? `mt-[calc(var(--scale)*${Math.floor((600 * ($paneHeightOffsetMobile[id]?.current ?? 0)) / 100)}px)] xs:mt-[calc(var(--scale)*${Math.floor((600 * ($paneHeightOffsetMobile[id]?.current ?? 1)) / 100)}px)]`
@@ -164,6 +166,7 @@ const Pane = (props: {
       $paneMarkdownFragmentId,
       $paneFragmentBgPane,
       toolMode,
+      toolAddMode,
       viewportKey,
     ]
   );

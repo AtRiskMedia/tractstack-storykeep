@@ -26,7 +26,6 @@ export function allowTagInsert(
   idx: number | null,
   markdownLookup: MarkdownLookup
 ) {
-  console.log(`allowTagInsert`, toolAddMode, outerIdx, markdownLookup);
   const outerTag = markdownLookup.nthTag[outerIdx];
   const innerCount =
     typeof idx === `number` &&
@@ -34,7 +33,6 @@ export function allowTagInsert(
     markdownLookup.listItemsLookup &&
     markdownLookup.listItemsLookup[outerIdx] &&
     Object.keys(markdownLookup.listItemsLookup[outerIdx]).length;
-  console.log(outerTag, innerCount);
 
   switch (toolAddMode) {
     case `paragraph`:
@@ -361,40 +359,46 @@ export function reconcileOptionsPayload(
         }
       }
     }
+  } else if (typeof idx === `number`) {
+    // remove inner element
+    //
+    // was the entire block deleted?
+    const siblings = markdownLookup.listItemsLookup[outerIdx];
+    const siblingsCount = siblings && Object.keys(siblings).length;
+    const parentTag = markdownLookup.nthTag[outerIdx];
+    // if last li in block; must account for removed parent
+    if (parentTag === "ul" || parentTag === "ol") {
+      const parentPayload = newOptionsPayload.classNamesPayload[parentTag];
+      if (
+        parentPayload &&
+        typeof parentPayload.count === "number" &&
+        siblingsCount === 1
+      ) {
+        processTag(
+          parentTag,
+          markdownLookup.nthTagLookup[parentTag][outerIdx].nth,
+          false
+        );
+      }
+    }
+    const imgGlobalNth = getGlobalNth("img", idx, outerIdx, markdownLookup);
+    // if img...
+    if (imgGlobalNth !== null) {
+      const imgNth = markdownLookup.imagesLookup[outerIdx][idx];
+      processTag("img", imgNth, false);
+    }
+    // now handle li
+    const listItemNth = markdownLookup.listItemsLookup[outerIdx][idx];
+    processTag(`li`, listItemNth, false);
   } else {
-    const affectedTag = idx === null ? markdownLookup.nthTag[outerIdx] : "p";
+    // remove block element
+    const affectedTag = markdownLookup.nthTag[outerIdx];
     const affectedNth =
       idx === null
         ? markdownLookup.nthTagLookup[affectedTag]?.[outerIdx]?.nth || 0
         : idx;
-
     processTag(affectedTag, affectedNth, false);
-
-    if (idx !== null && affectedTag === "li") {
-      const parentTag = markdownLookup.nthTag[outerIdx];
-      if (parentTag === "ul" || parentTag === "ol") {
-        const parentPayload = newOptionsPayload.classNamesPayload[parentTag];
-        if (
-          parentPayload &&
-          typeof parentPayload.count === "number" &&
-          parentPayload.count === 1
-        ) {
-          processTag(
-            parentTag,
-            markdownLookup.nthTagLookup[parentTag][outerIdx].nth,
-            false
-          );
-        }
-      }
-
-      const imgGlobalNth = getGlobalNth("img", idx, outerIdx, markdownLookup);
-      if (imgGlobalNth !== null) {
-        const imgNth = markdownLookup.imagesLookup[outerIdx][idx];
-        processTag("img", imgNth, false);
-      }
-    }
   }
-
   return newOptionsPayload;
 }
 
@@ -407,11 +411,7 @@ export function insertElementIntoMarkdown(
   markdownLookup: MarkdownLookup
 ): MarkdownEditDatum {
   const newMarkdown = { ...markdownEdit };
-  //console.log(`was`, JSON.stringify(newMarkdown.markdown.body));
-
-  // Parse the existing markdown to mdast
   const mdast = fromMarkdown(newMarkdown.markdown.body);
-
   let insertedTag = null;
 
   if (idx === null) {
@@ -442,15 +442,10 @@ export function insertElementIntoMarkdown(
     }
   }
 
-  // Convert mdast back to markdown
   newMarkdown.markdown.body = toMarkdown(mdast);
-  //console.log(`becomes`, JSON.stringify(newMarkdown.markdown.body));
-
-  // Update htmlAst
   newMarkdown.markdown.htmlAst = cleanHtmlAst(
     toHast(mdast) as HastRoot
   ) as HastRoot;
-
   newMarkdown.payload.optionsPayload = reconcileOptionsPayload(
     newMarkdown.payload.optionsPayload,
     outerIdx,

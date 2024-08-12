@@ -14,10 +14,9 @@ import {
   storyFragmentPaneIds,
   paneFragmentIds,
   viewportStore,
+  viewportAutoStore,
   toolModeStore,
   toolAddModeStore,
-  // Add other stores here
-  //
 } from "../../store/storykeep";
 import { STICKY_HEADER_THRESHOLD } from "../../constants";
 import {
@@ -184,19 +183,23 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
     <div className="w-full" ref={headerRef}>
       <div className="w-full my-2">
         <div
-          className={`flex flex-wrap items-center gap-y-2 gap-x-4 justify-around`}
+          className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
         >
-          <ToolModeSelector
-            toolMode={toolMode}
-            setToolMode={setToolMode}
-            hideElements={hideElements}
-          />
-          {toolMode === `insert` ? (
-            <ToolAddModeSelector
-              toolAddMode={toolAddMode}
-              setToolAddMode={setToolAddMode}
+          <div className="flex flex-wrap">
+            <ToolModeSelector
+              toolMode={toolMode}
+              setToolMode={setToolMode}
+              hideElements={hideElements}
             />
-          ) : null}
+            {toolMode === `insert` ? (
+              <div className="ml-4">
+                <ToolAddModeSelector
+                  toolAddMode={toolAddMode}
+                  setToolAddMode={setToolAddMode}
+                />
+              </div>
+            ) : null}
+          </div>
           <ViewportSelector
             viewport={viewport}
             setViewport={setViewport}

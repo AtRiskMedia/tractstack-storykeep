@@ -23,7 +23,7 @@ const ViewportSelector = ({
     {
       key: "auto",
       Icon: ViewfinderCircleIcon,
-      title: "Auto or responsive view",
+      title: "Responsive view (default)",
     },
     {
       key: "mobile",
@@ -46,12 +46,12 @@ const ViewportSelector = ({
     <div>
       <div className="flex items-center">
         <span
-          className={`mr-2 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
+          className={`mr-1 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
         >
           Designing for:
         </span>
         <span
-          className={`font-bold text-xl text-myblue pr-4 ${hideElements ? `hidden md:block` : ``}`}
+          className={`font-bold text-xl text-myblue pr-2.5 ${hideElements ? `hidden md:block` : ``}`}
         >
           {viewport !== `auto`
             ? viewport

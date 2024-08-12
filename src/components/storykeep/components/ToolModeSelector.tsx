@@ -19,12 +19,12 @@ const ToolModeSelector = ({
     <div>
       <div className="flex items-center">
         <span
-          className={`mr-2 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
+          className={`mr-1 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
         >
-          Current tool:
+          Mode:
         </span>
         <span
-          className={`font-bold text-xl text-myblue pr-4 ${hideElements ? `hidden md:block` : ``}`}
+          className={`font-bold text-xl text-myblue pr-2.5 ${hideElements ? `hidden md:block` : ``}`}
         >
           {toolMode}
         </span>

@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useStore } from "@nanostores/react";
 import MarkdownPane from "./MarkdownPane";
 import MarkdownInsidePane from "./MarkdownInsidePane";
@@ -6,10 +7,9 @@ import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
 import { toolAddModeTitles } from "../../../constants";
 import {
-  toolModeStore,
-  toolAddModeStore,
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
+  unsavedChangesStore,
 } from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
@@ -22,6 +22,8 @@ import type {
   FileNode,
   BgPaneDatum,
   ToolAddMode,
+  ToolMode,
+  Viewport,
 } from "../../../types";
 
 interface Props {
@@ -30,8 +32,13 @@ interface Props {
   files: FileNode[];
   paneHeight: [number, number, number];
   paneId: string;
+  paneFragmentIds: string[];
+  markdownFragmentId: string | null;
   slug: string;
   queueUpdate: (id: string, updateFn: () => void) => void;
+  viewportKey: Viewport;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
 }
 
 const MarkdownWrapper = ({
@@ -40,13 +47,15 @@ const MarkdownWrapper = ({
   files,
   paneHeight,
   paneId,
+  paneFragmentIds,
+  markdownFragmentId,
   slug,
   queueUpdate,
+  viewportKey,
+  toolMode,
+  toolAddMode,
 }: Props) => {
-  const $toolMode = useStore(toolModeStore);
-  const toolMode = $toolMode.value || ``;
-  const $toolAddMode = useStore(toolAddModeStore);
-  const toolAddMode = $toolAddMode.value || ``;
+  if (!markdownFragmentId) return null;
   const thisPayload = payload as MarkdownPaneDatum;
   const thisModalPayload =
     thisPayload.isModal &&
@@ -68,11 +77,15 @@ const MarkdownWrapper = ({
     gridArea: "1/1/1/1",
   };
 
-  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
+    keys: [paneId],
+  });
   const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
-  const isEmptyMarkdown =
-    $paneFragmentMarkdown[fragmentId].current.markdown.body === ``;
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
+    keys: [fragmentId],
+  });
+  const isEmptyMarkdown = markdown.body === ``;
   const mustIntercept = isEmptyMarkdown && toolMode === `insert`;
 
   const isModal =
@@ -84,8 +97,10 @@ const MarkdownWrapper = ({
     thisPayload.textShapeOutsideTablet !== `none` ||
     thisPayload.textShapeOutsideDesktop !== `none`;
 
-  const markdownLookup =
-    markdown?.htmlAst && generateMarkdownLookup(markdown.htmlAst);
+  const markdownLookup = useMemo(
+    () => markdown?.htmlAst && generateMarkdownLookup(markdown.htmlAst),
+    [markdown?.htmlAst]
+  );
 
   const handleInsert = () => {
     const newContent = `${toolAddModeTitles[toolAddMode as ToolAddMode]} content`;
@@ -99,14 +114,16 @@ const MarkdownWrapper = ({
         "before",
         markdownLookup
       );
-
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
-
       paneFragmentMarkdown.setKey(fragmentId, {
         ...currentField,
         current: newMarkdownEdit,
         history: newHistory,
+      });
+      unsavedChangesStore.setKey(paneId, {
+        ...$unsavedChanges[paneId],
+        paneFragmentMarkdown: true,
       });
     });
   };
@@ -121,10 +138,13 @@ const MarkdownWrapper = ({
           paneHeight={paneHeight}
           modalPayload={thisModalPayload}
           paneId={paneId}
+          paneFragmentIds={paneFragmentIds}
+          markdownFragmentId={markdownFragmentId}
           slug={slug}
           markdownLookup={markdownLookup}
           toolMode={toolMode}
           toolAddMode={toolAddMode}
+          viewportKey={viewportKey}
           queueUpdate={queueUpdate}
         />
       );
@@ -136,10 +156,13 @@ const MarkdownWrapper = ({
           files={files}
           paneHeight={paneHeight}
           paneId={paneId}
+          paneFragmentIds={paneFragmentIds}
+          markdownFragmentId={markdownFragmentId}
           slug={slug}
           markdownLookup={markdownLookup}
           toolMode={toolMode}
           toolAddMode={toolAddMode}
+          viewportKey={viewportKey}
           queueUpdate={queueUpdate}
         />
       );
@@ -150,10 +173,13 @@ const MarkdownWrapper = ({
           markdown={markdown}
           files={files}
           paneId={paneId}
+          paneFragmentIds={paneFragmentIds}
+          markdownFragmentId={markdownFragmentId}
           slug={slug}
           markdownLookup={markdownLookup}
           toolMode={toolMode}
           toolAddMode={toolAddMode}
+          viewportKey={viewportKey}
           queueUpdate={queueUpdate}
         />
       );
@@ -191,7 +217,11 @@ const MarkdownWrapper = ({
           className="relative w-full h-full justify-self-start"
           style={paneFragmentStyle}
         >
-          <Modal payload={thisPayload} modalPayload={thisModalPayload} />
+          <Modal
+            payload={thisPayload}
+            modalPayload={thisModalPayload}
+            viewportKey={viewportKey}
+          />
         </div>
       )}
       <div

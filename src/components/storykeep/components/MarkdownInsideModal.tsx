@@ -1,17 +1,15 @@
-import { useStore } from "@nanostores/react";
 import PaneFromAst from "./PaneFromAst";
 import { SvgInsideLeftModal } from "../../panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "../../panes/SvgInsideRightModal";
 import { classNames } from "../../../utils/helpers";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
-import { viewportStore } from "../../../store/storykeep";
 import type {
   FileNode,
   MarkdownDatum,
   MarkdownPaneDatum,
   MarkdownLookup,
   OptionsPayloadDatum,
-  ViewportKey,
+  Viewport,
   ToolMode,
   ToolAddMode,
 } from "../../../types";
@@ -29,10 +27,13 @@ interface Props {
     };
   };
   paneId: string;
+  paneFragmentIds: string[];
+  markdownFragmentId: string;
   slug: string;
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
+  viewportKey: Viewport;
   queueUpdate: (id: string, updateFn: () => void) => void;
 }
 
@@ -43,22 +44,16 @@ const MarkdownInsideModal = ({
   paneHeight,
   modalPayload,
   paneId,
+  paneFragmentIds,
+  markdownFragmentId,
   slug,
   markdownLookup,
   toolMode,
   toolAddMode,
+  viewportKey,
   queueUpdate,
 }: Props) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto"
-      ? $viewport.value
-      : typeof window !== "undefined" && window.innerWidth >= 1368
-        ? "desktop"
-        : typeof window !== "undefined" && window.innerWidth >= 768
-          ? "tablet"
-          : "mobile";
-
+  if (!markdownFragmentId) return null;
   const optionsPayload = payload.optionsPayload;
   const optionsPayloadDatum: OptionsPayloadDatum =
     optionsPayload && reduceClassNamesPayload(optionsPayload);
@@ -137,6 +132,7 @@ const MarkdownInsideModal = ({
           .map((thisAstPayload: any, idx: number) => (
             <PaneFromAst
               key={idx}
+              markdown={markdown}
               payload={{
                 ...astPayload,
                 ast: [thisAstPayload],
@@ -147,6 +143,8 @@ const MarkdownInsideModal = ({
                 }
               }
               paneId={paneId}
+              paneFragmentIds={paneFragmentIds}
+              markdownFragmentId={markdownFragmentId}
               slug={slug}
               idx={null}
               outerIdx={idx}

@@ -29,7 +29,7 @@ export const PaneSettings = (props: { id: string; payload: DatumPayload }) => {
   console.log(payload);
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
-  const $paneFragmentIds = useStore(paneFragmentIds);
+  const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
   //const $paneIsContextPane = useStore(paneIsContextPane);
   //const $paneHeightOffsetDesktop = useStore(paneHeightOffsetDesktop);
   //const $paneHeightOffsetTablet = useStore(paneHeightOffsetTablet);

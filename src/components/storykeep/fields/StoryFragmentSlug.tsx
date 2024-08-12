@@ -26,9 +26,9 @@ const StoryFragmentSlug = ({
   updateStoreField,
   handleUndo,
 }: StoryFragmentSlugProps) => {
-  const $storyFragmentSlug = useStore(storyFragmentSlug);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $temporaryErrors = useStore(temporaryErrorsStore);
+  const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
 
   return (
     <>

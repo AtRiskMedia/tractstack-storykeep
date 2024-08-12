@@ -32,8 +32,11 @@ const EraserWrapper = ({
   children,
   markdownLookup,
 }: Props) => {
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
-  const $unsavedChanges = useStore(unsavedChangesStore);
+  console.log(`ERASERWRAPPER`, paneId, fragmentId);
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
+    keys: [fragmentId],
+  });
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
   const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
 
   const handleErase = () => {

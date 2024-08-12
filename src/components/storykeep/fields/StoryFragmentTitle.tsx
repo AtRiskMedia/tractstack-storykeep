@@ -26,9 +26,9 @@ const StoryFragmentTitle = ({
   updateStoreField,
   handleUndo,
 }: StoryFragmentTitleProps) => {
-  const $storyFragmentTitle = useStore(storyFragmentTitle);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $temporaryErrors = useStore(temporaryErrorsStore);
+  const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
 
   return (
     <>

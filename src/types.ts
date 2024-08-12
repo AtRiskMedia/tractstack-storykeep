@@ -219,6 +219,7 @@ export interface BgPaneDatum extends PaneFragmentDatum {
 }
 
 export type ViewportKey = "mobile" | "tablet" | "desktop" | "auto" | null;
+export type Viewport = "mobile" | "tablet" | "desktop";
 
 export type TupleValue = string | number | boolean;
 export type Tuple =

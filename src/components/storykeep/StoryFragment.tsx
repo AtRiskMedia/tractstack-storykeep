@@ -6,12 +6,13 @@ import {
   storyFragmentTailwindBgColour,
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
-  viewportStore,
-  toolModeStore,
   lastInteractedPaneStore,
   lastInteractedTypeStore,
   visiblePanesStore,
   unsavedChangesStore,
+  viewportStore,
+  toolModeStore,
+  toolAddModeStore,
 } from "../../store/storykeep";
 import PaneWrapper from "./PaneWrapper";
 import {
@@ -19,24 +20,36 @@ import {
   handleEditorResize,
   isDeepEqual,
 } from "../../utils/helpers";
+import type { Viewport } from "../../types";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
-  const $viewport = useStore(viewportStore);
-  const viewportKey =
-    $viewport?.value && $viewport.value !== `auto` ? $viewport.value : null;
   const [isClient, setIsClient] = useState(false);
-  const $storyFragmentInit = useStore(storyFragmentInit);
-  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds);
+  const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
+  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
   const $storyFragmentTailwindBgColour = useStore(
-    storyFragmentTailwindBgColour
+    storyFragmentTailwindBgColour,
+    { keys: [id] }
   );
   const paneIds = $storyFragmentPaneIds[id]?.current;
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
   const $lastInteractedType = useStore(lastInteractedTypeStore);
   const $visiblePanes = useStore(visiblePanesStore);
-  const $unsavedChanges = useStore(unsavedChangesStore);
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
+  const $toolMode = useStore(toolModeStore);
+  const toolMode = $toolMode.value || ``;
+  const $toolAddMode = useStore(toolAddModeStore);
+  const toolAddMode = $toolAddMode.value || ``;
+  const $viewport = useStore(viewportStore);
+  const viewportKey: Viewport =
+    $viewport?.value && $viewport.value !== "auto"
+      ? $viewport.value
+      : typeof window !== "undefined" && window.innerWidth >= 1368
+        ? "desktop"
+        : typeof window !== "undefined" && window.innerWidth >= 768
+          ? "tablet"
+          : "mobile";
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -152,7 +165,13 @@ export const StoryFragment = (props: { id: string }) => {
       )}
     >
       {paneIds.map((paneId: string) => (
-        <PaneWrapper key={paneId} id={paneId} />
+        <PaneWrapper
+          key={paneId}
+          id={paneId}
+          viewportKey={viewportKey}
+          toolMode={toolMode}
+          toolAddMode={toolAddMode}
+        />
       ))}
     </div>
   );

@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
-  paneMarkdownFragmentId,
   unsavedChangesStore,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
@@ -21,6 +20,7 @@ interface EditableContentProps {
   content: string;
   tag: string;
   paneId: string;
+  markdownFragmentId: string;
   classes: string;
   outerIdx: number;
   idx: number | null;
@@ -31,19 +31,20 @@ const EditableContent = ({
   content,
   tag,
   paneId,
+  markdownFragmentId,
   classes,
   outerIdx,
   idx,
   queueUpdate,
 }: EditableContentProps) => {
-  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
-  const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
-  const $unsavedChanges = useStore(unsavedChangesStore);
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
+    keys: [markdownFragmentId],
+  });
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
 
   const [localContent, setLocalContent] = useState(content);
   const originalContentRef = useRef(content);
-  const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
+  const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${markdownFragmentId}`;
 
   useEffect(() => {
     setLocalContent(content);
@@ -52,10 +53,10 @@ const EditableContent = ({
 
   const updateStore = useCallback(
     (newContent: string) => {
-      if (!fragmentId) return;
+      if (!markdownFragmentId) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
-      const fragmentData = $paneFragmentMarkdown[fragmentId];
+      const fragmentData = $paneFragmentMarkdown[markdownFragmentId];
       if (
         !fragmentData ||
         !fragmentData.current ||
@@ -81,7 +82,7 @@ const EditableContent = ({
         },
       };
       console.log(`after edit`, [updatedMarkdown], newValue);
-      paneFragmentMarkdown.setKey(fragmentId, {
+      paneFragmentMarkdown.setKey(markdownFragmentId, {
         ...fragmentData,
         current: newValue,
         history: newHistory,
@@ -93,7 +94,7 @@ const EditableContent = ({
       });
     },
     [
-      fragmentId,
+      markdownFragmentId,
       tag,
       outerIdx,
       idx,
@@ -132,7 +133,7 @@ const EditableContent = ({
       }
       return true;
     },
-    [fragmentId, $paneFragmentMarkdown, tag, outerIdx, idx, queueUpdate]
+    [markdownFragmentId, $paneFragmentMarkdown, tag, outerIdx, idx, queueUpdate]
   );
   return (
     <div className="w-full">

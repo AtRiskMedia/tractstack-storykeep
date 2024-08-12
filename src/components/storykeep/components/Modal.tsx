@@ -1,7 +1,6 @@
-import { useStore } from "@nanostores/react";
+import { useMemo } from "react";
 import SvgModal from "./SvgModal";
 import { classNames } from "../../../utils/helpers";
-import { viewportStore } from "../../../store/storykeep";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
 import type {
   ClassNamesPayloadValue,
@@ -25,6 +24,7 @@ interface Props {
       paddingTop: number;
     };
   };
+  viewportKey: ViewportKey;
 }
 
 const getClassString = (
@@ -39,13 +39,12 @@ const getClassString = (
   return "";
 };
 
-const Modal = ({ payload, modalPayload }: Props) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
+const Modal = ({ payload, modalPayload, viewportKey }: Props) => {
   const optionsPayload = payload.optionsPayload;
-  const optionsPayloadDatum: OptionsPayloadDatum =
-    optionsPayload && reduceClassNamesPayload(optionsPayload);
+  const optionsPayloadDatum: OptionsPayloadDatum = useMemo(
+    () => optionsPayload && reduceClassNamesPayload(optionsPayload),
+    [optionsPayload]
+  );
   const baseClasses: { [key: string]: string } = {
     mobile:
       viewportKey === "mobile" ? "grid" : viewportKey ? "hidden" : "md:hidden",

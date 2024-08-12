@@ -1,9 +1,7 @@
-import { useStore } from "@nanostores/react";
 import { Svg } from "../../../components/panes/Svg";
 import { classNames } from "../../../utils/helpers";
 import { svgImageMask } from "../../../utils/compositor/svgImageMask";
 import { cleanShapeOptionsDatum } from "../../../utils/compositor/shapeOptionsDatum";
-import { viewportStore } from "../../../store/storykeep";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
 import type {
   BgPaneDatum,
@@ -11,13 +9,19 @@ import type {
   MaskOptionsDatum,
   ShapeOptionsDatum,
   OptionsPayloadDatum,
-  ViewportKey,
+  Viewport,
+  //ToolMode,
 } from "../../../types";
 
-const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
+const BgPane = ({
+  payload,
+  viewportKey,
+  //toolMode,
+}: {
+  payload: BgPaneDatum;
+  viewportKey: Viewport;
+  //toolMode: ToolMode;
+}) => {
   const optionsPayload = payload.optionsPayload;
   const optionsPayloadDatum: OptionsPayloadDatum | undefined =
     optionsPayload &&

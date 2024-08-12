@@ -1,8 +1,5 @@
 import { useCallback } from "react";
-import { useStore } from "@nanostores/react";
 import {
-  paneFragmentMarkdown,
-  paneMarkdownFragmentId,
   lastInteractedPaneStore,
   lastInteractedTypeStore,
 } from "../../../store/storykeep";
@@ -22,6 +19,7 @@ import type {
   ButtonData,
   FileNode,
   MarkdownLookup,
+  MarkdownDatum,
   ToolAddMode,
   ToolMode,
 } from "../../../types";
@@ -33,8 +31,11 @@ interface PaneFromAstProps {
     imageData: FileNode[];
     buttonData: { [key: string]: ButtonData };
   };
+  markdown: MarkdownDatum;
   thisClassNames: { [key: string]: string | string[] };
   paneId: string;
+  paneFragmentIds: string[];
+  markdownFragmentId: string;
   slug: string;
   idx: number | null;
   outerIdx: number;
@@ -116,8 +117,11 @@ const EditableInnerElementWrapper = ({
 
 const PaneFromAst = ({
   payload,
+  markdown,
   thisClassNames,
   paneId,
+  paneFragmentIds,
+  markdownFragmentId,
   slug,
   idx = null,
   outerIdx,
@@ -142,9 +146,6 @@ const PaneFromAst = ({
   const showOverlay2 = [`insert`].includes(toolMode);
   const noOverlay = !showOverlay && !showOverlay2;
   const globalNth = getGlobalNth(Tag, idx, outerIdx, markdownLookup);
-  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
-  const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
   const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
 
   // Callback fns for toolMode
@@ -233,22 +234,19 @@ const PaneFromAst = ({
 
   // if editable as text
   if (
+    markdown &&
     toolMode === `text` &&
     ([`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) ||
       isTextContainerItem)
   ) {
-    const content = extractMarkdownElement(
-      $paneFragmentMarkdown[fragmentId].current.markdown.body,
-      Tag,
-      outerIdx,
-      idx
-    );
+    const content = extractMarkdownElement(markdown.body, Tag, outerIdx, idx);
     return (
       <div className="hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-mylightgrey/20 outline outline-2 outline-dotted outline-mylightgrey/20 outline-offset-[-2px]">
         <EditableContent
           content={content}
           tag={Tag}
           paneId={paneId}
+          markdownFragmentId={markdownFragmentId}
           classes={injectClassNames}
           outerIdx={outerIdx}
           idx={idx}
@@ -285,8 +283,11 @@ const PaneFromAst = ({
           <PaneFromAst
             key={childIdx}
             payload={{ ...payload, ast: [p] }}
+            markdown={markdown}
             thisClassNames={thisClassNames}
             paneId={paneId}
+            paneFragmentIds={paneFragmentIds}
+            markdownFragmentId={markdownFragmentId}
             slug={slug}
             idx={!idx ? childIdx : idx}
             outerIdx={outerIdx}
@@ -317,7 +318,7 @@ const PaneFromAst = ({
         return (
           <EraserWrapper
             paneId={paneId}
-            fragmentId={fragmentId}
+            fragmentId={markdownFragmentId}
             outerIdx={outerIdx}
             idx={idx}
             queueUpdate={queueUpdate}
@@ -349,7 +350,7 @@ const PaneFromAst = ({
         return (
           <EraserWrapper
             paneId={paneId}
-            fragmentId={fragmentId}
+            fragmentId={markdownFragmentId}
             outerIdx={outerIdx}
             idx={idx}
             queueUpdate={queueUpdate}
@@ -376,7 +377,7 @@ const PaneFromAst = ({
         <InsertWrapper
           toolAddMode={toolAddMode}
           paneId={paneId}
-          fragmentId={fragmentId}
+          fragmentId={markdownFragmentId}
           outerIdx={outerIdx}
           idx={idx}
           queueUpdate={queueUpdate}
@@ -440,7 +441,7 @@ const PaneFromAst = ({
     if (toolMode === `eraser`) return child;
     // will add lateron
     //return (
-    //  <EraserWrapper fragmentId={fragmentId} outerIdx={outerIdx} idx={idx}>
+    //  <EraserWrapper fragmentId={markdownFragmentId} outerIdx={outerIdx} idx={idx}>
     //    {child}
     //  </EraserWrapper>
     //);

@@ -1,17 +1,16 @@
-import { useStore } from "@nanostores/react";
+import { useMemo } from "react";
 import PaneFromAst from "./PaneFromAst";
 import { SvgInsideLeft } from "../../panes/SvgInsideLeft";
 import { SvgInsideRight } from "../../panes/SvgInsideRight";
 import { classNames } from "../../../utils/helpers";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
-import { viewportStore } from "../../../store/storykeep";
 import type {
   FileNode,
   MarkdownDatum,
   MarkdownPaneDatum,
   MarkdownLookup,
   OptionsPayloadDatum,
-  ViewportKey,
+  Viewport,
   ToolMode,
   ToolAddMode,
 } from "../../../types";
@@ -22,10 +21,13 @@ interface Props {
   files: FileNode[];
   paneHeight: [number, number, number];
   paneId: string;
+  paneFragmentIds: string[];
+  markdownFragmentId: string | null;
   slug: string;
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
+  viewportKey: Viewport;
   queueUpdate: (id: string, updateFn: () => void) => void;
 }
 
@@ -35,25 +37,21 @@ const MarkdownInsidePane = ({
   files,
   paneHeight,
   paneId,
+  paneFragmentIds,
+  markdownFragmentId,
   slug,
   markdownLookup,
   toolMode,
   toolAddMode,
+  viewportKey,
   queueUpdate,
 }: Props) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto"
-      ? $viewport.value
-      : typeof window !== "undefined" && window.innerWidth >= 1368
-        ? "desktop"
-        : typeof window !== "undefined" && window.innerWidth >= 768
-          ? "tablet"
-          : "mobile";
-
+  if (!markdownFragmentId) return null;
   const optionsPayload = payload.optionsPayload;
-  const optionsPayloadDatum: OptionsPayloadDatum =
-    optionsPayload && reduceClassNamesPayload(optionsPayload);
+  const optionsPayloadDatum: OptionsPayloadDatum = useMemo(
+    () => optionsPayload && reduceClassNamesPayload(optionsPayload),
+    [optionsPayload]
+  );
 
   if (payload.hiddenViewports.includes(viewportKey)) return null;
 
@@ -131,12 +129,15 @@ const MarkdownInsidePane = ({
                 ...astPayload,
                 ast: [thisAstPayload],
               }}
+              markdown={markdown}
               thisClassNames={
                 injectClassNames as {
                   [key: string]: string | string[];
                 }
               }
               paneId={paneId}
+              paneFragmentIds={paneFragmentIds}
+              markdownFragmentId={markdownFragmentId}
               slug={slug}
               idx={null}
               outerIdx={idx}

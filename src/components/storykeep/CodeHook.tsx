@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { paneInit, paneCodeHook, toolModeStore } from "../../store/storykeep";
+import { paneInit, paneCodeHook } from "../../store/storykeep";
+import type { ToolMode, ViewportKey } from "../../types";
 
-const CodeHook = (props: { id: string }) => {
-  const { id } = props;
+const CodeHook = (props: {
+  id: string;
+  toolMode: ToolMode;
+  viewportKey: ViewportKey;
+}) => {
+  const { id, toolMode /* viewportKey */ } = props;
   const [isClient, setIsClient] = useState(false);
-  const $paneInit = useStore(paneInit);
-  const $paneCodeHook = useStore(paneCodeHook);
+  const $paneInit = useStore(paneInit, { keys: [id] });
+  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const slug = $paneCodeHook[id].current?.target || id;
-  const $toolMode = useStore(toolModeStore);
-  const toolMode = $toolMode.value || ``;
 
   useEffect(() => {
     if ($paneInit[id]?.init) {

@@ -47,9 +47,9 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
 
   // required stores
   const $editMode = useStore(editModeStore);
-  const $unsavedChanges = useStore(unsavedChangesStore);
-  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds);
-  const $paneFragmentIds = useStore(paneFragmentIds);
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
+  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
+  const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
   const hasUnsavedChanges = useMemo(() => {
     const storyFragmentChanges = Object.values($unsavedChanges[id] || {}).some(
       Boolean
@@ -66,9 +66,9 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
 
     return storyFragmentChanges || paneChanges || paneFragmentChanges;
   }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $storyFragmentInit = useStore(storyFragmentInit);
-  const $storyFragmentSlug = useStore(storyFragmentSlug);
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
+  const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
   // Add other useStore hooks as needed
   //
 

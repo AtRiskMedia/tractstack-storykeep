@@ -26,9 +26,11 @@ const StoryFragmentSocialImagePath = ({
   updateStoreField,
   handleUndo,
 }: StoryFragmentSocialImagePathProps) => {
-  const $storyFragmentSocialImagePath = useStore(storyFragmentSocialImagePath);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $temporaryErrors = useStore(temporaryErrorsStore);
+  const $storyFragmentSocialImagePath = useStore(storyFragmentSocialImagePath, {
+    keys: [id],
+  });
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
 
   return (
     <>

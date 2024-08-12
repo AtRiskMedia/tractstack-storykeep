@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
   paneInit,
   paneCodeHook,
-  toolModeStore,
-  editModeStore,
   lastInteractedPaneStore,
   visiblePanesStore,
+  editModeStore,
 } from "../../store/storykeep";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
@@ -16,6 +15,7 @@ import {
   handleToggleOff,
 } from "../../utils/storykeep";
 import type { ReactNode } from "react";
+import type { Viewport, ToolMode, ToolAddMode } from "../../types";
 
 const InsertTopBottomWrapper = ({
   children,
@@ -53,15 +53,17 @@ const InsertTopBottomWrapper = ({
   );
 };
 
-const PaneWrapper = (props: { id: string }) => {
-  const { id } = props;
+const PaneWrapper = (props: {
+  id: string;
+  viewportKey: Viewport;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
+}) => {
+  const { id, toolMode, toolAddMode, viewportKey } = props;
   const [isClient, setIsClient] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const $paneInit = useStore(paneInit);
-  const $paneCodeHook = useStore(paneCodeHook);
-  const $toolMode = useStore(toolModeStore);
+  const $paneInit = useStore(paneInit, { keys: [id] });
+  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const $editMode = useStore(editModeStore);
-  const toolMode = $toolMode.value || ``;
   const isCodeHook = typeof $paneCodeHook[id] === `object`;
   const [paneElement, setPaneElement] = useState<HTMLDivElement | null>(null);
 
@@ -92,38 +94,13 @@ const PaneWrapper = (props: { id: string }) => {
         /* eslint-disable @typescript-eslint/no-explicit-any */
         (event as any).handledByComponent = true;
       }
-
-      // Mark the event as handled by this component
-      //if (event.ctrlKey && event.key === "z") {
-      //  (event as any).handledByComponent = true;
-      //}
     };
-
     // Use capture phase to ensure this runs before global handler
     paneElement?.addEventListener("keydown", handleKeyDown, true);
     return () => {
       paneElement?.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [$editMode, id, paneElement]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        visiblePanesStore.setKey(id, entry.isIntersecting);
-      },
-      { threshold: 0.1 }
-    );
-
-    if (paneElement) {
-      observer.observe(paneElement);
-    }
-
-    return () => {
-      if (paneElement) {
-        observer.unobserve(paneElement);
-      }
-    };
-  }, [id, paneElement]);
 
   const toggleOffEditModal = () => {
     editModeStore.set(null);
@@ -166,6 +143,7 @@ const PaneWrapper = (props: { id: string }) => {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        visiblePanesStore.setKey(id, entry.isIntersecting);
         if (!entry.isIntersecting) {
           const currentEditMode = editModeStore.get();
           if (
@@ -177,7 +155,7 @@ const PaneWrapper = (props: { id: string }) => {
           }
         }
       },
-      { threshold: 0 }
+      { threshold: 0.1 }
     );
 
     observer.observe(paneElement);
@@ -187,18 +165,23 @@ const PaneWrapper = (props: { id: string }) => {
     };
   }, [paneElement, id, $editMode]);
 
+  const Content = useMemo(() => {
+    return isCodeHook ? (
+      <CodeHook id={id} toolMode={toolMode} viewportKey={viewportKey} />
+    ) : (
+      <Pane
+        id={id}
+        toolMode={toolMode}
+        toolAddMode={toolAddMode}
+        viewportKey={viewportKey}
+      />
+    );
+  }, [id, isCodeHook, toolMode, toolAddMode, viewportKey]);
+
   if (!isClient) return <div>Loading...</div>;
 
-  const Content = isCodeHook ? <CodeHook id={id} /> : <Pane id={id} />;
-
   return (
-    <div
-      ref={paneRef}
-      onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative"
-    >
+    <div ref={paneRef} onClick={handleClick} className="relative">
       {toolMode === `pane` ? (
         <InsertTopBottomWrapper onInsertClick={handleInsertClick}>
           {Content}
@@ -208,23 +191,21 @@ const PaneWrapper = (props: { id: string }) => {
       )}
       {toolMode === `settings` && (
         <div
-          className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
-            isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
-          }`}
+          className="absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out 
+                   bg-transparent group-hover:bg-[rgba(167,177,183,0.85)]"
         >
-          {isHovered && (
-            <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-               text-black bg-mywhite p-2.5 rounded-sm shadow-md
-               text-xl md:text-3xl font-action mx-6"
-            >
-              {$editMode?.id === id ? (
-                <span>click to close panel</span>
-              ) : (
-                <span>click for design &amp; set-up options</span>
-              )}
-            </div>
-          )}
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+                        text-black bg-mywhite p-2.5 rounded-sm shadow-md
+                        text-xl md:text-3xl font-action mx-6
+                        opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            {$editMode?.id === id ? (
+              <span>click to close panel</span>
+            ) : (
+              <span>click for design &amp; set-up options</span>
+            )}
+          </div>
         </div>
       )}
     </div>

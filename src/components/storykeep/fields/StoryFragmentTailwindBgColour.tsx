@@ -18,7 +18,8 @@ const StoryFragmentTailwindBgColour = ({
   handleUndo,
 }: StoryFragmentTailwindBgColourProps) => {
   const $storyFragmentTailwindBgColour = useStore(
-    storyFragmentTailwindBgColour
+    storyFragmentTailwindBgColour,
+    { keys: [id] }
   );
 
   const [localValue, setLocalValue] = useState(

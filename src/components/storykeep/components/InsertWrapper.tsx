@@ -39,8 +39,10 @@ const InsertWrapper = ({
   children,
   markdownLookup,
 }: Props) => {
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown);
-  const $unsavedChanges = useStore(unsavedChangesStore);
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
+    keys: [fragmentId],
+  });
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
   const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
   const allowTag = allowTagInsert(toolAddMode, outerIdx, idx, markdownLookup);
   // need fn for allowTag

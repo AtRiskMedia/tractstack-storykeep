@@ -26,7 +26,7 @@ const StoryFragmentMenuId = ({
   payload,
 }: StoryFragmentMenuIdProps) => {
   const menus = payload;
-  const $storyFragmentMenuId = useStore(storyFragmentMenuId);
+  const $storyFragmentMenuId = useStore(storyFragmentMenuId, { keys: [id] });
 
   const [query, setQuery] = useState("");
 

@@ -38,14 +38,14 @@ const payload = await getDatumPayload();
   >
     <StoryKeepStore client:only="react" storyfragment={storyfragment} />
     <header
-      class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-screen"
+      class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-full"
       id="main-header"
     >
       <StoryFragmentHeader client:only="react" id={storyfragment.id} />
     </header>
 
-    <div id="storykeep" class="bg-white overflow-auto mx-auto">
-      <main id="website-content" class="overflow-auto w-screen">
+    <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
+      <main id="website-content" class="overflow-auto w-full">
         <StoryFragment id={storyfragment.id} client:only="react" />
       </main>
     </div>

@@ -4,16 +4,20 @@ import {
   ComputerDesktopIcon,
   ViewfinderCircleIcon,
 } from "@heroicons/react/24/outline";
-import type { ViewportKey } from "../../../types";
+import type { ViewportAuto, ViewportKey } from "../../../types";
 
 interface ViewportSelectorProps {
+  viewportKey: ViewportAuto;
   viewport: ViewportKey;
+  auto: boolean;
   setViewport: (viewport: "auto" | "mobile" | "tablet" | "desktop") => void;
   hideElements?: boolean;
 }
 
 const ViewportSelector = ({
   viewport,
+  viewportKey,
+  auto,
   setViewport,
   hideElements,
 }: ViewportSelectorProps) => {
@@ -53,13 +57,7 @@ const ViewportSelector = ({
         <span
           className={`font-bold text-xl text-myblue pr-2.5 ${hideElements ? `hidden md:block` : ``}`}
         >
-          {viewport !== `auto`
-            ? viewport
-            : window.innerWidth < 800
-              ? `mobile`
-              : window.innerWidth <= 1367
-                ? `tablet`
-                : `desktop`}
+          {!auto ? viewport : viewportKey}
         </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">
           {viewportButtons.map(({ key, Icon, title }, index) => (
@@ -69,7 +67,7 @@ const ViewportSelector = ({
               title={title}
               className={classNames(
                 "hover:bg-myorange/50 hover:text-black",
-                viewport === key
+                (key === `auto` && auto) || (viewport === key && !auto)
                   ? "bg-myblue text-white"
                   : "bg-mylightgrey/20 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",
                 "relative inline-flex items-center px-3 py-2",

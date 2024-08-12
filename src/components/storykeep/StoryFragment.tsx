@@ -11,7 +11,8 @@ import {
   visiblePanesStore,
   unsavedChangesStore,
   viewportStore,
-  viewportAutoStore,
+  viewportKeyStore,
+  viewportSetStore,
   toolModeStore,
   toolAddModeStore,
 } from "../../store/storykeep";
@@ -22,6 +23,7 @@ import {
   isDeepEqual,
   debounce,
 } from "../../utils/helpers";
+import type { ViewportKey } from "../../types";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
@@ -43,34 +45,37 @@ export const StoryFragment = (props: { id: string }) => {
   const $toolAddMode = useStore(toolAddModeStore);
   const toolAddMode = $toolAddMode.value || ``;
   const $viewport = useStore(viewportStore);
-  const [viewportKey, setViewportKey] = useState(
-    $viewport?.value && $viewport.value !== "auto"
-      ? $viewport.value
-      : typeof window !== "undefined" && window.innerWidth >= 1368
-        ? "desktop"
-        : typeof window !== "undefined" && window.innerWidth >= 768
-          ? "tablet"
-          : "mobile"
-  );
+  const $viewportKey = useStore(viewportKeyStore);
+  const viewportKey = $viewportKey.value;
+  const $viewportSet = useStore(viewportSetStore);
 
   useEffect(() => {
     const handleResize = debounce(() => {
-      const newViewportKey =
-        $viewport?.value && $viewport.value !== "auto"
-          ? $viewport.value
-          : typeof window !== "undefined" && window.innerWidth >= 1368
-            ? "desktop"
-            : typeof window !== "undefined" && window.innerWidth >= 768
-              ? "tablet"
-              : "mobile";
-      setViewportKey(newViewportKey);
-      viewportAutoStore.set({ value: newViewportKey });
+      if (!$viewportSet) {
+        const previewElement = document.getElementById("storykeep-preview");
+        const scrollBarOffset =
+          window.innerWidth - document.documentElement.clientWidth;
+        const previewWidth = previewElement?.clientWidth || 0;
+        const adjustedWidth =
+          previewWidth +
+          scrollBarOffset *
+            (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
+        let newViewportKey: ViewportKey;
+        if (adjustedWidth <= 800) {
+          newViewportKey = `mobile`;
+        } else if (adjustedWidth <= 1367) {
+          newViewportKey = `tablet`;
+        } else {
+          newViewportKey = `desktop`;
+        }
+        viewportKeyStore.set({ value: newViewportKey });
+      }
     }, 100);
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [$viewport]);
+  }, []);
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
@@ -133,6 +138,24 @@ export const StoryFragment = (props: { id: string }) => {
   }, [id, $storyFragmentInit]);
 
   useEffect(() => {
+    // set initial viewportKey based on width of screen (assumes Viewport=auto)
+    const scrollBarOffset =
+      window.innerWidth - document.documentElement.clientWidth;
+    const previewWidth = window.innerWidth;
+    const adjustedWidth =
+      previewWidth +
+      scrollBarOffset *
+        (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
+    let newViewportKey: ViewportKey;
+    if (adjustedWidth <= 800) {
+      newViewportKey = `mobile`;
+    } else if (adjustedWidth <= 1367) {
+      newViewportKey = `tablet`;
+    } else {
+      newViewportKey = `desktop`;
+    }
+    viewportKeyStore.set({ value: newViewportKey });
+
     // Slight delay to ensure styles are applied
     const timerId = setTimeout(() => {
       const cleanup = handleEditorResize();
@@ -179,7 +202,7 @@ export const StoryFragment = (props: { id: string }) => {
         tailwindBgColour ? tailwindBgColour : `bg-white`,
         `overflow-hidden`,
         $viewport.value === `mobile`
-          ? `min-w-[500px] max-w-[800px]`
+          ? `min-w-[500px] max-w-[780px]`
           : $viewport.value === `tablet`
             ? `min-w-[1024px] max-w-[1367px]`
             : $viewport.value === `desktop`

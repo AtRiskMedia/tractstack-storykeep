@@ -248,7 +248,7 @@ const Pane = (props: {
           return null;
       }
     },
-    [id, memoizedPaneData, queueUpdate,viewportKey,toolMode,toolAddMode]
+    [id, memoizedPaneData, queueUpdate, viewportKey, toolMode, toolAddMode]
   );
 
   if (!isClient) return <div>Loading...</div>;

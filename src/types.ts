@@ -218,7 +218,7 @@ export interface BgPaneDatum extends PaneFragmentDatum {
   optionsPayload: OptionsPayloadDatum;
 }
 
-export type ViewportKey = "mobile" | "tablet" | "desktop" | "auto" | null;
+export type ViewportKey = "mobile" | "tablet" | "desktop" | "auto";
 export type ViewportAuto = "mobile" | "tablet" | "desktop";
 
 export type TupleValue = string | number | boolean;

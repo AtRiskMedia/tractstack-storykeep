@@ -53,6 +53,7 @@ function getScrollBarWidth() {
 export function handleResize() {
   const scrollBarWidth = getScrollBarWidth();
   const innerWidth = window.innerWidth;
+  //console.log(`innerWidth`, innerWidth);
   const thisScale =
     innerWidth < 801
       ? (innerWidth - scrollBarWidth) / 600
@@ -70,15 +71,14 @@ export function handleEditorResize() {
     // Calculate scrollbar width
     const scrollBarOffset =
       window.innerWidth - document.documentElement.clientWidth;
-
     // Get the actual width of the preview element
     const previewWidth = previewElement.clientWidth;
-
     // Adjust the width to account for the scrollbar
-    const adjustedWidth = previewWidth + scrollBarOffset;
-
+    const adjustedWidth =
+      previewWidth +
+      scrollBarOffset *
+        (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
     let baseWidth;
-
     // Use adjustedWidth for breakpoint checks
     if (adjustedWidth <= 800) {
       baseWidth = 600;
@@ -87,15 +87,11 @@ export function handleEditorResize() {
     } else {
       baseWidth = 1920;
     }
-
     // Use the actual previewWidth for scale calculation
     const thisScale = previewWidth / baseWidth;
-
     previewElement.style.setProperty(`--scale`, thisScale.toString());
   });
-
   resizeObserver.observe(previewElement);
-
   // Clean up function
   return () => {
     resizeObserver.disconnect();

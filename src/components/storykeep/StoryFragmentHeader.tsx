@@ -14,7 +14,8 @@ import {
   storyFragmentPaneIds,
   paneFragmentIds,
   viewportStore,
-  viewportAutoStore,
+  viewportKeyStore,
+  viewportSetStore,
   toolModeStore,
   toolAddModeStore,
 } from "../../store/storykeep";
@@ -40,24 +41,28 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
 
   // required stores
   const $editMode = useStore(editModeStore);
+  const $viewportSet = useStore(viewportSetStore);
   const $viewport = useStore(viewportStore);
+  const $viewportKey = useStore(viewportKeyStore);
   const viewport = $viewport.value;
+  const viewportKey = $viewportKey.value;
   const { value: toolMode } = useStore(toolModeStore);
   const { value: toolAddMode } = useStore(toolAddModeStore);
 
   const setViewport = (
     newViewport: "auto" | "mobile" | "tablet" | "desktop"
   ) => {
-    viewportStore.set({ value: newViewport });
     const newViewportKey =
-      newViewport !== "auto"
+      newViewport !== `auto`
         ? newViewport
         : typeof window !== "undefined" && window.innerWidth >= 1368
           ? "desktop"
           : typeof window !== "undefined" && window.innerWidth >= 768
             ? "tablet"
             : "mobile";
-    viewportAutoStore.set({ value: newViewportKey });
+    viewportSetStore.set(newViewport !== `auto`);
+    viewportStore.set({ value: newViewport });
+    viewportKeyStore.set({ value: newViewportKey });
   };
 
   const setToolMode = (newToolMode: ToolMode) => {
@@ -88,9 +93,6 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
   const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
   const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
   const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
-  // Add other useStore hooks as needed
-  //
-
   const [isClient, setIsClient] = useState(false);
   const [hideElements, setHideElements] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -168,10 +170,8 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
 
   useEffect(() => {
     window.addEventListener("scroll", debouncedHandleScroll);
-
     // Call handleScroll immediately to set initial state
     handleScroll();
-
     return () => {
       window.removeEventListener("scroll", debouncedHandleScroll);
     };
@@ -185,9 +185,9 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
         <div
           className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
         >
-        <div
-          className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
-        >
+          <div
+            className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
+          >
             <ToolModeSelector
               toolMode={toolMode}
               setToolMode={setToolMode}
@@ -204,6 +204,8 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
           </div>
           <ViewportSelector
             viewport={viewport}
+            viewportKey={viewportKey}
+            auto={!$viewportSet}
             setViewport={setViewport}
             hideElements={hideElements}
           />

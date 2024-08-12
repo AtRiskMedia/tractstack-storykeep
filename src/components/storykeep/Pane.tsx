@@ -248,7 +248,7 @@ const Pane = (props: {
           return null;
       }
     },
-    [id, memoizedPaneData, queueUpdate]
+    [id, memoizedPaneData, queueUpdate,viewportKey,toolMode,toolAddMode]
   );
 
   if (!isClient) return <div>Loading...</div>;
@@ -274,7 +274,7 @@ const Pane = (props: {
         {memoizedPaneData.fragments.map(renderFragment)}
       </div>
       {toolMode === "settings" && (
-        <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center group z-104">
+        <div className="absolute inset-0 hover:bg-mylightgrey hover:bg-opacity-85 flex items-center justify-center group z-104">
           <div className="relative">
             <div className="bg-white p-4 rounded invisible group-hover:visible">
               <h2 className="text-xl font-bold mb-2">Click for Settings</h2>

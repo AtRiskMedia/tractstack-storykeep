@@ -36,17 +36,17 @@ const payload = await getDatumPayload();
     class="m-0 p-0 flex flex-col bg-mylightgrey/10 w-full"
     style="background-image: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(255,255,255, 0.5) 10px, rgba(255,255,255, 0.5) 20px );"
   >
-    <StoryKeepStore client:load storyfragment={storyfragment} />
+    <StoryKeepStore client:only storyfragment={storyfragment} />
     <header
-      class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-full"
+      class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-screen"
       id="main-header"
     >
-      <StoryFragmentHeader client:load id={storyfragment.id} />
+      <StoryFragmentHeader client:only id={storyfragment.id} />
     </header>
 
     <div id="storykeep" class="bg-white overflow-auto mx-auto">
-      <main id="website-content" class="overflow-auto w-full">
-        <StoryFragment id={storyfragment.id} client:load />
+      <main id="website-content" class="overflow-auto w-screen">
+        <StoryFragment id={storyfragment.id} client:only />
       </main>
     </div>
 
@@ -54,14 +54,14 @@ const payload = await getDatumPayload();
       id="edit-pane"
       class="fixed right-0 top-0 bottom-0 w-1/3 bg-slate-100 border-l border-gray-300 p-4 overflow-y-auto transition-all duration-300 ease-in-out transform translate-x-full overflow-y-auto"
     >
-      <EditModal client:load type="desktop" payload={payload} />
+      <EditModal client:only type="desktop" payload={payload} />
     </div>
 
     <div
       id="edit-modal-mobile"
       class="fixed bottom-0 left-0 right-0 bg-slate-100 shadow-md z-40 transition-all duration-300 ease-in-out transform translate-y-full overflow-y-auto"
     >
-      <EditModal client:load type="mobile" payload={payload} />
+      <EditModal client:only type="mobile" payload={payload} />
     </div>
   </div>
 

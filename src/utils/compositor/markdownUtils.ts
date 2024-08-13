@@ -20,6 +20,35 @@ import type {
 } from "hast";
 import type { Root as MdastRoot, List, ListItem } from "mdast";
 
+export function allowTagErase(
+  outerIdx: number,
+  idx: number | null,
+  markdownLookup: MarkdownLookup
+) {
+  const parentTag = markdownLookup.nthTag[outerIdx];
+  const ulBefore = outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] === `ul`
+  const ulAfter = outerIdx + 1 > Object.keys(markdownLookup.nthTag).length && markdownLookup.nthTag[outerIdx + 1] === `ul`
+  const olBefore = outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] === `ol`
+  const olAfter = outerIdx + 1 > Object.keys(markdownLookup.nthTag).length && markdownLookup.nthTag[outerIdx + 1] === `ol`
+  if ([`p`, `h2`, `h3`, `h4`].includes(parentTag) ||
+    ([`ol`, `ul`].includes(parentTag) && typeof idx === `number` &&
+      Object.keys(markdownLookup.listItemsLookup[outerIdx]).length > 1
+    )) {
+    // must check that removing this element doesn't collapse ol or ul
+    return !(ulBefore && ulAfter) && !(olBefore && olAfter)
+  }
+  if ([`ol`, `ul`].includes(parentTag) && typeof idx === `number`) {
+    // li with siblings
+    return true
+  }
+  if (typeof idx !== `number`) {
+    // unknown case
+    console.log(`?? on erase`, parentTag, outerIdx, idx, markdownLookup)
+    return false
+  }
+  return false
+}
+
 export function allowTagInsert(
   toolAddMode: ToolAddMode,
   outerIdx: number,
@@ -250,15 +279,15 @@ function getNthOfHighestLessThan(
   const filtered =
     position === `before`
       ? Object.fromEntries(
-          Object.entries(lookupObj).filter(
-            ([key]) => parseInt(key) < affectedNth
-          )
+        Object.entries(lookupObj).filter(
+          ([key]) => parseInt(key) < affectedNth
         )
+      )
       : Object.fromEntries(
-          Object.entries(lookupObj).filter(
-            ([key]) => parseInt(key) <= affectedNth
-          )
-        );
+        Object.entries(lookupObj).filter(
+          ([key]) => parseInt(key) <= affectedNth
+        )
+      );
   if (filtered) {
     const lastKey = Object.keys(filtered).pop();
     if (lastKey) {

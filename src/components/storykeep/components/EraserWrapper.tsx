@@ -8,6 +8,7 @@ import {
 import {
   removeElementFromMarkdown,
   updateHistory,
+  allowTagErase
 } from "../../../utils/compositor/markdownUtils";
 import { cloneDeep, isDeepEqual } from "../../../utils/helpers";
 import type { ReactNode } from "react";
@@ -37,6 +38,7 @@ const EraserWrapper = ({
   });
   const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
   const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
+  const allowTag = allowTagErase(outerIdx, idx, markdownLookup);
 
   const handleErase = () => {
     queueUpdate(contentId, () => {
@@ -64,6 +66,7 @@ const EraserWrapper = ({
     });
   };
 
+  if (!allowTag) return children
   return (
     <span className="relative">
       {children}
@@ -71,7 +74,7 @@ const EraserWrapper = ({
         onClick={handleErase}
         title="Delete this!"
         className="absolute inset-0 w-full h-full z-101 hover:bg-myorange hover:bg-opacity-20 hover:outline-white/20
-                   outline outline-2 outline-dashed outline-myorange/50 outline-offset-[-2px]
+                   outline-2 outline-dashed outline-myorange/50 outline-offset-[-2px]
                    mix-blend-exclusion cursor-pointer"
       />
     </span>

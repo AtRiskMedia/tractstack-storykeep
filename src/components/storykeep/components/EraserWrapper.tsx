@@ -8,7 +8,7 @@ import {
 import {
   removeElementFromMarkdown,
   updateHistory,
-  allowTagErase
+  allowTagErase,
 } from "../../../utils/compositor/markdownUtils";
 import { cloneDeep, isDeepEqual } from "../../../utils/helpers";
 import type { ReactNode } from "react";
@@ -66,7 +66,7 @@ const EraserWrapper = ({
     });
   };
 
-  if (!allowTag) return children
+  if (!allowTag) return children;
   return (
     <span className="relative">
       {children}

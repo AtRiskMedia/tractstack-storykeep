@@ -89,6 +89,9 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
     parentNth: number,
     childNth: number
   ) {
+    //console.log(
+    //  `${type} globalNth:${globalNth} parentNth:${parentNth} childNth:${childNth}`
+    //);
     markdownLookup[type][globalNth] = { parentNth, childNth };
     const lookupType = `${type}Lookup` as `${typeof type}Lookup`;
     if (!markdownLookup[lookupType][parentNth]) {

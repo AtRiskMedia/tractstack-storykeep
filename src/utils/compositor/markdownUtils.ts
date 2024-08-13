@@ -38,11 +38,12 @@ export function allowTagInsert(
     case `p`:
     case `h2`:
     case `h3`:
-    case `h4`:
+    case `h4`: {
       if (typeof idx !== `number`) return { before: true, after: true };
-        const siblings =
-          Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
-      return { before: idx===0, after: idx===siblings };
+      const siblings =
+        Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
+      return { before: idx === 0, after: idx === siblings };
+    }
     case `img`:
       break;
     case `yt`:
@@ -284,18 +285,30 @@ export function reconcileOptionsPayload(
 
   const getLiNth = (outerIdx: number, idx?: number) => {
     if (outerIdx === 0 && typeof idx !== `number`) return 0;
-    const adjustedIdx = position === `before` ? outerIdx - 1 : outerIdx;
+    const adjustedIdx =
+      typeof idx === `number` && position === `before`
+        ? outerIdx - 1
+        : typeof idx === `number`
+          ? outerIdx + 1
+          : outerIdx;
     let highestSibling = 0;
     if (typeof idx !== `number`) {
-      markdownLookup?.listItems &&
-        Object.keys(markdownLookup.listItems).forEach(key => {
+      markdownLookup?.listItemsLookup &&
+        Object.keys(markdownLookup.listItemsLookup).forEach((key: string) => {
           const i = parseInt(key);
           if (!isNaN(i)) {
-            const item = markdownLookup.listItems[i];
-            if (item && adjustedIdx < item.parentNth) {
-              highestSibling = !highestSibling
-                ? item.childNth
-                : Math.min(highestSibling, item.childNth);
+            if (
+              (position === `before` && adjustedIdx > i) ||
+              (position === `after` && adjustedIdx >= i)
+            ) {
+              const item = markdownLookup.listItemsLookup[i];
+              if (item) {
+                Object.keys(item).forEach((key: string) => {
+                  highestSibling = !highestSibling
+                    ? item[parseInt(key)]
+                    : Math.max(highestSibling, item[parseInt(key)]);
+                });
+              }
             }
           }
         });
@@ -395,7 +408,10 @@ export function reconcileOptionsPayload(
         const parentNth = getParentNth(parentTag);
         processTag(parentTag, parentNth, true);
       }
-    } else if (typeof idx !== `number`) {
+    } else if (
+      typeof idx !== `number` ||
+      (insertedTag && [`p`, `h2`, `h3`, `h4`].includes(insertedTag))
+    ) {
       if (toolAddMode === `aside`) {
         const parentNth = getParentNth(`ol`);
         processTag(`ol`, parentNth, true);
@@ -465,15 +481,15 @@ export function insertElementIntoMarkdown(
   position: "before" | "after",
   markdownLookup: MarkdownLookup
 ): MarkdownEditDatum {
-  console.log(newContent, toolAddMode, outerIdx, idx, position);
   const newMarkdown = { ...markdownEdit };
   const mdast = fromMarkdown(newMarkdown.markdown.body);
   const parentTag = markdownLookup.nthTag[outerIdx];
   let insertedTag: string = toolAddMode;
 
-  if (typeof idx !== `number` || ([`ol`,`ul`].includes(parentTag) 
-&& [`p`,`h2`,`h3`,`h4`].includes(toolAddMode)
-  )
+  if (
+    typeof idx !== `number` ||
+    ([`ol`, `ul`].includes(parentTag) &&
+      [`p`, `h2`, `h3`, `h4`].includes(toolAddMode))
   ) {
     // Insert new block
     const newNode = fromMarkdown(newContent).children[0];
@@ -502,7 +518,6 @@ export function insertElementIntoMarkdown(
   }
 
   newMarkdown.markdown.body = toMarkdown(mdast);
-  console.log([newMarkdown.markdown.body]);
   newMarkdown.markdown.htmlAst = cleanHtmlAst(
     toHast(mdast) as HastRoot
   ) as HastRoot;
@@ -516,11 +531,11 @@ export function insertElementIntoMarkdown(
     toolAddMode,
     position
   );
-  console.log(
-    `payload becomes`,
-    newMarkdown.payload.optionsPayload.classNamesPayload
-  );
-  console.log(`markdown becomes`, newMarkdown.markdown);
+  //console.log(
+  //  `payload becomes`,
+  //  newMarkdown.payload.optionsPayload.classNamesPayload
+  //);
+  //console.log(`markdown becomes`, newMarkdown.markdown.body);
 
   return newMarkdown;
 }

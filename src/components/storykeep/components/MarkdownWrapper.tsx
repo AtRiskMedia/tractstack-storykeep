@@ -5,9 +5,7 @@ import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
-import { toolAddModeTitles,
-  toolAddModeInsertDefault
-} from "../../../constants";
+import { toolAddModeTitles } from "../../../constants";
 import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
@@ -115,19 +113,17 @@ const MarkdownWrapper = ({
       const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
-      const newContent = toolAddModeInsertDefault[toolAddMode];
       const newAsideContainer = toolAddMode === `aside`;
       // wrap inside ol if new text container
       const thisNewContent = newAsideContainer
         ? `1. ${newContent}`
         : newContent;
-      const thisIdx = newAsideContainer ? null : idx;
       const newValue = insertElementIntoMarkdown(
         currentField.current,
         thisNewContent,
         toolAddMode,
         0,
-        thisIdx,
+        null,
         `before`,
         markdownLookup
       );

@@ -5,17 +5,22 @@ import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
-import { toolAddModeTitles } from "../../../constants";
+import { toolAddModeTitles,
+  toolAddModeInsertDefault
+} from "../../../constants";
 import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
   unsavedChangesStore,
+  lastInteractedTypeStore,
+  lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   insertElementIntoMarkdown,
   updateHistory,
 } from "../../../utils/compositor/markdownUtils";
+import { cloneDeep } from "../../../utils/helpers";
 import type {
   MarkdownDatum,
   MarkdownPaneDatum,
@@ -105,22 +110,33 @@ const MarkdownWrapper = ({
   const handleInsert = () => {
     const newContent = `${toolAddModeTitles[toolAddMode as ToolAddMode]} content`;
     queueUpdate(fragmentId, () => {
-      const currentField = $paneFragmentMarkdown[fragmentId];
-      const newMarkdownEdit = insertElementIntoMarkdown(
-        currentField.current,
-        newContent,
-        0,
-        null,
-        "before",
-        markdownLookup
-      );
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(paneId);
+      const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
+      const newContent = toolAddModeInsertDefault[toolAddMode];
+      const newAsideContainer = toolAddMode === `aside`;
+      // wrap inside ol if new text container
+      const thisNewContent = newAsideContainer
+        ? `1. ${newContent}`
+        : newContent;
+      const thisIdx = newAsideContainer ? null : idx;
+      const newValue = insertElementIntoMarkdown(
+        currentField.current,
+        thisNewContent,
+        toolAddMode,
+        0,
+        thisIdx,
+        `before`,
+        markdownLookup
+      );
       paneFragmentMarkdown.setKey(fragmentId, {
         ...currentField,
-        current: newMarkdownEdit,
+        current: newValue,
         history: newHistory,
       });
+      // safely assumes this is new/unsaved
       unsavedChangesStore.setKey(paneId, {
         ...$unsavedChanges[paneId],
         paneFragmentMarkdown: true,

@@ -25,11 +25,11 @@ export const SHORT_SCREEN_THRESHOLD = 600;
 export const STICKY_HEADER_THRESHOLD = 600;
 
 export const toolAddModes = [
-  "paragraph",
+  "p",
   "h2",
   "h3",
   "h4",
-  "image",
+  "img",
   "yt",
   "bunny",
   "belief",
@@ -39,11 +39,11 @@ export const toolAddModes = [
 ] as const;
 
 export const toolAddModeTitles: Record<ToolAddMode, string> = {
-  paragraph: "Paragraph",
+  p: "Paragraph",
   h2: "Heading 2",
   h3: "Heading 3",
   h4: "Heading 4",
-  image: "Image",
+  img: "Image",
   yt: "YouTube Video",
   bunny: "Bunny Video",
   belief: "Belief Select",
@@ -53,17 +53,17 @@ export const toolAddModeTitles: Record<ToolAddMode, string> = {
 };
 
 export const toolAddModeInsertDefault: Record<ToolAddMode, string> = {
-  paragraph: "...",
+  p: "...",
   h2: "## title",
   h3: "### subtitle",
   h4: "#### section title",
-  image: "* ![Descriptive title](filename)",
+  img: "* ![Descriptive title](filename)",
   yt: "* `youtube(tag|title)`",
   bunny: "* `bunny(id|title)`",
   belief: "* `belief(BeliefTag|likert|question)`",
   identify: "* `identifyAs(BeliefTag|TARGET_VALUE|question)`",
   toggle: "* `toggle(BeliefTag|likert|question)`",
-  aside: "1. ...",
+  aside: "...",
 };
 
 export const toolModes: ToolMode[] = [

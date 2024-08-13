@@ -26,24 +26,24 @@ export function allowTagInsert(
   idx: number | null,
   markdownLookup: MarkdownLookup
 ) {
-  const outerTag = markdownLookup.nthTag[outerIdx];
-  const innerCount =
-    typeof idx === `number` &&
-    idx >= 0 &&
-    markdownLookup.listItemsLookup &&
-    markdownLookup.listItemsLookup[outerIdx] &&
-    Object.keys(markdownLookup.listItemsLookup[outerIdx]).length;
+  //const outerTag = markdownLookup.nthTag[outerIdx];
+  //const innerCount =
+  //  typeof idx === `number` &&
+  //  idx >= 0 &&
+  //  markdownLookup.listItemsLookup &&
+  //  markdownLookup.listItemsLookup[outerIdx] &&
+  //  Object.keys(markdownLookup.listItemsLookup[outerIdx]).length;
 
   switch (toolAddMode) {
-    case `paragraph`:
-      break;
+    case `p`:
     case `h2`:
-      break;
     case `h3`:
-      break;
     case `h4`:
-      break;
-    case `image`:
+      if (typeof idx !== `number`) return { before: true, after: true };
+        const siblings =
+          Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
+      return { before: idx===0, after: idx===siblings };
+    case `img`:
       break;
     case `yt`:
       break;
@@ -55,11 +55,39 @@ export function allowTagInsert(
       break;
     case `toggle`:
       break;
-    case `aside`:
-      break;
+    case `aside`: {
+      const parentTag = markdownLookup.nthTag[outerIdx];
+      // is this already ol ?
+      if (typeof idx === `number` && parentTag === `ol`)
+        return { before: true, after: true };
+      if (typeof idx !== `number`) {
+        // check for adjascent ol
+        const parentBeforeTag =
+          outerIdx === 0 ||
+          (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ol`);
+        const parentAfterTag =
+          outerIdx < Object.keys(markdownLookup.nthTag).length &&
+          markdownLookup.nthTag[outerIdx + 1] !== `ol`;
+        return { before: parentBeforeTag, after: parentAfterTag };
+      } else {
+        // nested ul > li, allow insert before and after
+        const siblings =
+          Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
+        const parentBeforeTag =
+          outerIdx === 0 ||
+          (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ol`);
+        const parentAfterTag =
+          outerIdx < Object.keys(markdownLookup.nthTag).length &&
+          markdownLookup.nthTag[outerIdx + 1] !== `ol`;
+        return {
+          before: idx === 0 && parentBeforeTag,
+          after: idx === siblings && parentAfterTag,
+        };
+      }
+    }
   }
 
-  return { before: true, after: true };
+  return { before: false, after: false };
 }
 
 export function updateHistory(
@@ -247,13 +275,36 @@ export function reconcileOptionsPayload(
   markdownLookup: MarkdownLookup,
   isInsertion: boolean,
   insertedTag: string | null,
+  toolAddMode: ToolAddMode,
   position: "before" | "after"
 ): OptionsPayloadDatum {
   const newOptionsPayload: OptionsPayloadDatum = JSON.parse(
     JSON.stringify(optionsPayload)
   );
 
-  const getNthChild = (tag: string) => {
+  const getLiNth = (outerIdx: number, idx?: number) => {
+    if (outerIdx === 0 && typeof idx !== `number`) return 0;
+    const adjustedIdx = position === `before` ? outerIdx - 1 : outerIdx;
+    let highestSibling = 0;
+    if (typeof idx !== `number`) {
+      markdownLookup?.listItems &&
+        Object.keys(markdownLookup.listItems).forEach(key => {
+          const i = parseInt(key);
+          if (!isNaN(i)) {
+            const item = markdownLookup.listItems[i];
+            if (item && adjustedIdx < item.parentNth) {
+              highestSibling = !highestSibling
+                ? item.childNth
+                : Math.min(highestSibling, item.childNth);
+            }
+          }
+        });
+      return highestSibling;
+    }
+    return markdownLookup.listItemsLookup[outerIdx][idx];
+  };
+
+  const getParentNth = (tag: string) => {
     const tagLookup = markdownLookup.nthTagLookup[tag];
     const outerTag = markdownLookup.nthTag[outerIdx];
     if (!tagLookup) return 0;
@@ -331,42 +382,45 @@ export function reconcileOptionsPayload(
 
   if (isInsertion) {
     if (insertedTag === "img") {
+      console.log(`****************this needs work!`);
       const liNth =
         idx === null
           ? Object.keys(markdownLookup.listItemsLookup[outerIdx] || {}).length
           : idx;
-      const imgNth = getNthChild("img");
-
+      const imgNth = getParentNth("img");
       processTag("li", liNth, true);
       processTag("img", imgNth, true);
-
       const parentTag = markdownLookup.nthTag[outerIdx];
       if (parentTag === "ol" || parentTag === "ul") {
-        const parentNth = getNthChild(parentTag);
+        const parentNth = getParentNth(parentTag);
         processTag(parentTag, parentNth, true);
       }
+    } else if (typeof idx !== `number`) {
+      if (toolAddMode === `aside`) {
+        const parentNth = getParentNth(`ol`);
+        processTag(`ol`, parentNth, true);
+        const liNth = getLiNth(outerIdx);
+        processTag(`li`, liNth, true);
+      } else if (insertedTag) {
+        const affectedNth = getParentNth(insertedTag);
+        processTag(insertedTag, affectedNth, true);
+      }
     } else {
-      const affectedTag = insertedTag || "p";
-      const affectedNth = getNthChild(affectedTag);
-
-      processTag(affectedTag, affectedNth, true);
-
-      if (affectedTag === "li") {
-        const parentTag = markdownLookup.nthTag[outerIdx];
-        if (parentTag === "ol" || parentTag === "ul") {
-          const parentNth = getNthChild(parentTag);
-          processTag(parentTag, parentNth, true);
-        }
+      const liNth = getLiNth(outerIdx, idx);
+      processTag(`li`, liNth, true);
+      const parentTag = markdownLookup.nthTag[outerIdx];
+      if (parentTag === "ol" || parentTag === "ul") {
+        const parentNth = getParentNth(parentTag);
+        processTag(parentTag, parentNth, true);
       }
     }
   } else if (typeof idx === `number`) {
-    // remove inner element
-    //
-    // was the entire block deleted?
+    // remove inner element...
+    // case 1: was the entire block deleted?
+    // if last li in block; must account for removed parent
     const siblings = markdownLookup.listItemsLookup[outerIdx];
     const siblingsCount = siblings && Object.keys(siblings).length;
     const parentTag = markdownLookup.nthTag[outerIdx];
-    // if last li in block; must account for removed parent
     if (parentTag === "ul" || parentTag === "ol") {
       const parentPayload = newOptionsPayload.classNamesPayload[parentTag];
       if (
@@ -405,16 +459,22 @@ export function reconcileOptionsPayload(
 export function insertElementIntoMarkdown(
   markdownEdit: MarkdownEditDatum,
   newContent: string,
+  toolAddMode: ToolAddMode,
   outerIdx: number,
   idx: number | null,
   position: "before" | "after",
   markdownLookup: MarkdownLookup
 ): MarkdownEditDatum {
+  console.log(newContent, toolAddMode, outerIdx, idx, position);
   const newMarkdown = { ...markdownEdit };
   const mdast = fromMarkdown(newMarkdown.markdown.body);
-  let insertedTag = null;
+  const parentTag = markdownLookup.nthTag[outerIdx];
+  let insertedTag: string = toolAddMode;
 
-  if (idx === null) {
+  if (typeof idx !== `number` || ([`ol`,`ul`].includes(parentTag) 
+&& [`p`,`h2`,`h3`,`h4`].includes(toolAddMode)
+  )
+  ) {
     // Insert new block
     const newNode = fromMarkdown(newContent).children[0];
     const adjustedOuterIdx = position === "after" ? outerIdx + 1 : outerIdx;
@@ -422,11 +482,10 @@ export function insertElementIntoMarkdown(
     if ("tagName" in newNode && typeof newNode.tagName === `string`) {
       insertedTag = newNode.tagName;
     }
+    // override if new aside text container
+    if (toolAddMode === `aside`) insertedTag = "li";
   } else {
     // Insert nested element
-    console.log(
-      `this doesn't yet work properly ... and must account for position`
-    );
     const parentNode = mdast.children[outerIdx];
     if (parentNode.type === "list" && Array.isArray(parentNode.children)) {
       let newNode = fromMarkdown(newContent).children[0];
@@ -443,6 +502,7 @@ export function insertElementIntoMarkdown(
   }
 
   newMarkdown.markdown.body = toMarkdown(mdast);
+  console.log([newMarkdown.markdown.body]);
   newMarkdown.markdown.htmlAst = cleanHtmlAst(
     toHast(mdast) as HastRoot
   ) as HastRoot;
@@ -453,9 +513,14 @@ export function insertElementIntoMarkdown(
     markdownLookup,
     true,
     insertedTag,
+    toolAddMode,
     position
   );
-  console.log(`becomes`, newMarkdown.payload.optionsPayload.classNamesPayload);
+  console.log(
+    `payload becomes`,
+    newMarkdown.payload.optionsPayload.classNamesPayload
+  );
+  console.log(`markdown becomes`, newMarkdown.markdown);
 
   return newMarkdown;
 }
@@ -512,6 +577,7 @@ export function removeElementFromMarkdown(
     markdownLookup,
     false,
     null,
+    `p`,
     "before"
   );
 

@@ -45,8 +45,6 @@ const InsertWrapper = ({
   const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
   const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
   const allowTag = allowTagInsert(toolAddMode, outerIdx, idx, markdownLookup);
-  // need fn for allowTag
-  //console.log(`INSERT CHECK`,allowTag);
 
   const handleInsert = (position: "before" | "after") => {
     queueUpdate(contentId, () => {
@@ -56,20 +54,22 @@ const InsertWrapper = ({
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
       const newContent = toolAddModeInsertDefault[toolAddMode];
-      console.log(
-        `this currently assumes you're inserting block level, e.g. p, h1`,
-        position,
-        newContent
-      );
+      const parentTag = markdownLookup.nthTag[outerIdx];
+      const newAsideContainer = toolAddMode === `aside` && parentTag !== `ol`;
+      // wrap inside ol if new text container
+      const thisNewContent = newAsideContainer
+        ? `1. ${newContent}`
+        : newContent;
+      const thisIdx = newAsideContainer ? null : idx;
       const newValue = insertElementIntoMarkdown(
         currentField.current,
-        newContent,
+        thisNewContent,
+        toolAddMode,
         outerIdx,
-        idx,
+        thisIdx,
         position,
         markdownLookup
       );
-      console.log(`after edit`, newValue);
       paneFragmentMarkdown.setKey(fragmentId, {
         ...currentField,
         current: newValue,

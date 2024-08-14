@@ -17,6 +17,7 @@ import {
   toolAddModeStore,
 } from "../../store/storykeep";
 import PaneWrapper from "./PaneWrapper";
+import DesignNewPane from "./components/DesignNewPane";
 import {
   classNames,
   handleEditorResize,
@@ -35,6 +36,8 @@ export const StoryFragment = (props: { id: string }) => {
     { keys: [id] }
   );
   const paneIds = $storyFragmentPaneIds[id]?.current;
+  const [thisPaneIds, setThisPaneIds] = useState<string[]>(paneIds);
+  const [shouldScroll, setShouldScroll] = useState<number | null>(null);
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
   const $lastInteractedType = useStore(lastInteractedTypeStore);
@@ -48,6 +51,42 @@ export const StoryFragment = (props: { id: string }) => {
   const $viewportKey = useStore(viewportKeyStore);
   const viewportKey = $viewportKey.value;
   const $viewportSet = useStore(viewportSetStore);
+
+  const insertPane = (paneId: string, position: `above` | `below`) => {
+    const index = paneIds.indexOf(paneId);
+    if (index >= 0) {
+      const newPaneIds = [...paneIds];
+      const insertIndex = position === "above" ? index : index + 1;
+      newPaneIds.splice(insertIndex, 0, "insert");
+      setThisPaneIds(newPaneIds);
+      setShouldScroll(insertIndex);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof shouldScroll === `number`) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(
+          `design-new-pane-${shouldScroll}`
+        );
+        if (element) {
+          const elementRect = element.getBoundingClientRect();
+          const absoluteElementTop = elementRect.top + window.pageYOffset;
+          const middleOfElement =
+            absoluteElementTop -
+            window.innerHeight / 2 +
+            elementRect.height / 2;
+          window.scrollTo({
+            top: middleOfElement,
+            behavior: "smooth",
+          });
+        }
+        setShouldScroll(null);
+      }, 100);
+
+      return () => clearTimeout(timer);
+    }
+  }, [shouldScroll]);
 
   useEffect(() => {
     const handleResize = debounce(() => {
@@ -210,14 +249,22 @@ export const StoryFragment = (props: { id: string }) => {
               : ``
       )}
     >
-      {paneIds.map((paneId: string) => (
-        <PaneWrapper
-          key={paneId}
-          id={paneId}
-          viewportKey={viewportKey}
-          toolMode={toolMode}
-          toolAddMode={toolAddMode}
-        />
+      {thisPaneIds.map((paneId: string, idx: number) => (
+        <div key={paneId}>
+          {paneId === `insert` ? (
+            <div id={`design-new-pane-${idx}`}>
+              <DesignNewPane index={idx} id={id} />
+            </div>
+          ) : (
+            <PaneWrapper
+              id={paneId}
+              viewportKey={viewportKey}
+              insertPane={insertPane}
+              toolMode={toolMode}
+              toolAddMode={toolAddMode}
+            />
+          )}
+        </div>
       ))}
     </div>
   );

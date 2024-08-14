@@ -29,7 +29,7 @@ export const PaneAstStyles = (props: {
   targetId: PaneAstTargetId;
 }) => {
   const { id, targetId } = props;
-  console.log(targetId);
+  console.log(id, targetId);
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
   const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });

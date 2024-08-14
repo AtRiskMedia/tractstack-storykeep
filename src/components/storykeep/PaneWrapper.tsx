@@ -17,36 +17,36 @@ import {
 import type { ReactNode } from "react";
 import type { ViewportAuto, ToolMode, ToolAddMode } from "../../types";
 
-const InsertTopBottomWrapper = ({
+const InsertAboveBelowWrapper = ({
   children,
   onInsertClick,
 }: {
   children: ReactNode;
-  onInsertClick: (position: "top" | "bottom") => void;
+  onInsertClick: (position: "above" | "below") => void;
 }) => {
   return (
     <div className="relative group">
       {children}
-      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
+      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top mix-blend-exclusion">
         <div
-          onClick={() => onInsertClick("top")}
+          onClick={() => onInsertClick("above")}
           title="Insert new Pane above this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-b hover:from-mylightgrey/85 hover:via-mylightgrey/85 hover:to-transparent
+                     hover:bg-gradient-to-b hover:from-white/25 hover:via-white/25 hover:to-transparent
                      mix-blend-exclusion
-                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
-                     before:bg-mylightgrey/50 hover:before:bg-mylightgrey"
+                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1
+                     before:border-t-4 before:border-dotted before:border-white/25 hover:before:border-white"
         />
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
+      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom mix-blend-exclusion">
         <div
-          onClick={() => onInsertClick("bottom")}
+          onClick={() => onInsertClick("below")}
           title="Insert new Pane below this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-t hover:from-mylightgrey/85 hover:via-mylightgrey/85 hover:to-transparent
+                     hover:bg-gradient-to-t hover:from-white/25 hover:via-white/25 hover:to-transparent
                      mix-blend-exclusion
-                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
-                     after:bg-mylightgrey/50 hover:after:bg-mylightgrey"
+                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1
+                     after:border-b-4 after:border-dotted after:border-white/25 hover:after:border-white"
         />
       </div>
     </div>
@@ -56,10 +56,11 @@ const InsertTopBottomWrapper = ({
 const PaneWrapper = (props: {
   id: string;
   viewportKey: ViewportAuto;
+  insertPane: (paneId: string, position: `above` | `below`) => void;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
 }) => {
-  const { id, toolMode, toolAddMode, viewportKey } = props;
+  const { id, toolMode, toolAddMode, viewportKey, insertPane } = props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
@@ -126,14 +127,14 @@ const PaneWrapper = (props: {
 
   const handleClick = () => {
     lastInteractedPaneStore.set(id);
-    if ([`settings`, `pane`].includes(toolMode)) {
+    if (toolMode === `settings`) {
       handleEditModeToggle();
     }
   };
 
-  const handleInsertClick = (position: "top" | "bottom") => {
+  const handleInsertClick = (position: "above" | "below") => {
     if (toolMode === "pane") {
-      console.log(`TODO: Insert pane ${position}`);
+      insertPane(id, position);
     }
   };
 
@@ -184,9 +185,9 @@ const PaneWrapper = (props: {
   return (
     <div ref={paneRef} onClick={handleClick} className="relative">
       {toolMode === `pane` ? (
-        <InsertTopBottomWrapper onInsertClick={handleInsertClick}>
+        <InsertAboveBelowWrapper onInsertClick={handleInsertClick}>
           {Content}
-        </InsertTopBottomWrapper>
+        </InsertAboveBelowWrapper>
       ) : (
         Content
       )}

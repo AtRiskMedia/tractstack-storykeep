@@ -69,7 +69,7 @@ export const EditModal = ({ type }: EditModalProps) => {
   };
 
   if (!isClient || $activeEditModal !== type) return null;
-  console.log(`editMode:`, $editMode);
+
   return (
     <div className="relative">
       <div className="absolute right-4 top-4">

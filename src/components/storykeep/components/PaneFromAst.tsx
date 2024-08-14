@@ -155,9 +155,6 @@ const PaneFromAst = ({
   };
   const handleToolModeClick = useCallback(() => {
     updateLastInteracted(paneId);
-    console.log(
-      `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
-    );
     editModeStore.set({
       id: paneId,
       mode: `styles`,

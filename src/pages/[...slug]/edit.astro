@@ -38,7 +38,7 @@ const payload = await getDatumPayload();
   >
     <StoryKeepStore client:only="react" storyfragment={storyfragment} />
     <header
-      class="z-10 bg-white shadow-md px-4 flex justify-between items-center w-full"
+      class="z-10 bg-mywhite shadow-md px-4 flex justify-between items-center w-full"
       id="main-header"
     >
       <StoryFragmentHeader client:only="react" id={storyfragment.id} />
@@ -59,7 +59,7 @@ const payload = await getDatumPayload();
 
     <div
       id="edit-modal-mobile"
-      class="fixed bottom-0 left-0 right-0 bg-white shadow-md border-t-4 border-dotted border-black/20 z-40 transition-all duration-300 ease-in-out transform translate-y-full overflow-y-auto"
+      class="fixed bottom-0 left-0 right-0 bg-myoffwhite shadow-md border-t-4 border-dotted border-black/20 z-40 transition-all duration-300 ease-in-out transform translate-y-full overflow-y-auto"
     >
       <EditModal client:only="react" type="mobile" />
     </div>

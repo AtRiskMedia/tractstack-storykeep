@@ -102,11 +102,7 @@ export const StoryFragmentHeader = memo(({ id }: { id: string }) => {
 
   const handleEditModeToggle = () => {
     if ($editMode?.mode === `settings`) {
-      editModeStore.set({
-        id,
-        mode: ``,
-        type: `storyfragment`,
-      });
+      editModeStore.set(null);
       handleToggleOff(true);
     } else {
       editModeStore.set({

@@ -15,6 +15,7 @@ import {
   viewportSetStore,
   toolModeStore,
   toolAddModeStore,
+  editModeStore,
 } from "../../store/storykeep";
 import PaneWrapper from "./PaneWrapper";
 import DesignNewPane from "./components/DesignNewPane";
@@ -51,6 +52,7 @@ export const StoryFragment = (props: { id: string }) => {
   const $viewportKey = useStore(viewportKeyStore);
   const viewportKey = $viewportKey.value;
   const $viewportSet = useStore(viewportSetStore);
+  const $editMode = useStore(editModeStore);
 
   const cancelInsert = () => {
     setShouldScroll(null);
@@ -239,45 +241,50 @@ export const StoryFragment = (props: { id: string }) => {
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div
-      id="storykeep-preview"
-      className={classNames(
-        tailwindBgColour ? tailwindBgColour : `bg-white`,
-        `overflow-hidden`,
-        $viewport.value === `mobile`
-          ? `min-w-[500px] max-w-[780px]`
-          : $viewport.value === `tablet`
-            ? `min-w-[1024px] max-w-[1367px]`
-            : $viewport.value === `desktop`
-              ? `min-w-[1368px] max-w-[1920px]`
-              : ``
+    <>
+      {$editMode?.mode === `settings` && (
+        <div className="fixed inset-0 bg-black/85 z-[8999]"></div>
       )}
-    >
-      {thisPaneIds.map((paneId: string, idx: number) => (
-        <div key={paneId}>
-          {paneId === `insert` ? (
-            <div id={`design-new-pane-${idx}`}>
-              <DesignNewPane
-                id={id}
-                index={idx}
-                cancelInsert={cancelInsert}
-                tailwindBgColour={
-                  tailwindBgColour ? tailwindBgColour : `bg-white`
-                }
+      <div
+        id="storykeep-preview"
+        className={classNames(
+          tailwindBgColour ? tailwindBgColour : `bg-white`,
+          `overflow-hidden`,
+          $viewport.value === `mobile`
+            ? `min-w-[500px] max-w-[780px]`
+            : $viewport.value === `tablet`
+              ? `min-w-[1024px] max-w-[1367px]`
+              : $viewport.value === `desktop`
+                ? `min-w-[1368px] max-w-[1920px]`
+                : ``
+        )}
+      >
+        {thisPaneIds.map((paneId: string, idx: number) => (
+          <div key={paneId}>
+            {paneId === `insert` ? (
+              <div id={`design-new-pane-${idx}`}>
+                <DesignNewPane
+                  id={id}
+                  index={idx}
+                  cancelInsert={cancelInsert}
+                  tailwindBgColour={
+                    tailwindBgColour ? tailwindBgColour : `bg-white`
+                  }
+                />
+              </div>
+            ) : (
+              <PaneWrapper
+                id={paneId}
+                viewportKey={viewportKey}
+                insertPane={insertPane}
+                toolMode={toolMode}
+                toolAddMode={toolAddMode}
+                isDesigningNew={thisPaneIds.length !== paneIds.length}
               />
-            </div>
-          ) : (
-            <PaneWrapper
-              id={paneId}
-              viewportKey={viewportKey}
-              insertPane={insertPane}
-              toolMode={toolMode}
-              toolAddMode={toolAddMode}
-              isDesigningNew={thisPaneIds.length !== paneIds.length}
-            />
-          )}
-        </div>
-      ))}
-    </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   );
 };

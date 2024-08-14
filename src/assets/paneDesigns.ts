@@ -44,7 +44,7 @@ export const paneDesigns: PaneDesign[] = [
                   textSIZE: ["3xl", "5xl"],
                 },
               },
-                h3: {
+              h3: {
                 classes: {
                   fontSTYLE: ["bold"],
                   textCOLOR: ["myblue"],
@@ -61,7 +61,7 @@ export const paneDesigns: PaneDesign[] = [
                 classes: {
                   textCOLOR: ["mydarkgrey"],
                   textSIZE: ["lg", "xl"],
-                  my: [3,4],
+                  my: [3, 4],
                 },
               },
             },
@@ -106,7 +106,7 @@ export const paneDesigns: PaneDesign[] = [
                   textSIZE: ["3xl", "5xl"],
                 },
               },
-                h3: {
+              h3: {
                 classes: {
                   fontSTYLE: ["bold"],
                   textCOLOR: ["myblue"],
@@ -123,7 +123,7 @@ export const paneDesigns: PaneDesign[] = [
                 classes: {
                   textCOLOR: ["mydarkgrey"],
                   textSIZE: ["lg", "xl"],
-                  my: [3,4],
+                  my: [3, 4],
                 },
               },
             },
@@ -296,7 +296,7 @@ export const paneDesigns: PaneDesign[] = [
                 classes: {
                   textCOLOR: ["mydarkgrey"],
                   textSIZE: ["lg", "xl"],
-                  my: [3,4],
+                  my: [3, 4],
                 },
               },
               h2: {
@@ -306,7 +306,7 @@ export const paneDesigns: PaneDesign[] = [
                   textSIZE: ["3xl", "5xl"],
                 },
               },
-                h3: {
+              h3: {
                 classes: {
                   fontSTYLE: ["bold"],
                   textCOLOR: ["myblue"],

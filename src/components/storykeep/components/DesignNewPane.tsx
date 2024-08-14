@@ -135,18 +135,15 @@ const DesignNewPane = ({
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
-          {
-              selectedDesign
-            ?
-            (
-          <button
-            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
-            onClick={() => console.log(`coming soon!`)}
-            aria-label="Use this Design"
-          >
-            <CheckIcon className="h-5 w-5" />
-          </button>
-          ):null}
+          {selectedDesign ? (
+            <button
+              className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
+              onClick={() => console.log(`coming soon!`)}
+              aria-label="Use this Design"
+            >
+              <CheckIcon className="h-5 w-5" />
+            </button>
+          ) : null}
         </div>
       </div>
       {selectedDesign && (

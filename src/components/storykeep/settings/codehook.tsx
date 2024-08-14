@@ -1,14 +1,10 @@
 import { useStore } from "@nanostores/react";
 import { paneCodeHook } from "../../../store/storykeep";
-import type { DatumPayload } from "../../../types";
 
-export const CodeHookSettings = (props: {
-  id: string;
-  payload: DatumPayload;
-}) => {
-  const { id, payload } = props;
+export const CodeHookSettings = (props: { id: string }) => {
+  const { id } = props;
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
-  console.log($paneCodeHook[id].current, payload);
+  console.log($paneCodeHook[id].current);
 
   return <p>Code Hook: {id}</p>;
 };

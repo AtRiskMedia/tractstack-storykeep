@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { useStore } from "@nanostores/react";
 import {
   lastInteractedPaneStore,
   lastInteractedTypeStore,

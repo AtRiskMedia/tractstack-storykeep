@@ -22,9 +22,14 @@ import {
   //paneHeldBeliefs,
   //paneWithheldBeliefs,
 } from "../../../store/storykeep";
+import type { PaneAstTargetId } from "../../../types";
 
-export const PaneSettings = (props: { id: string }) => {
-  const { id } = props;
+export const PaneAstStyles = (props: {
+  id: string;
+  targetId: PaneAstTargetId;
+}) => {
+  const { id, targetId } = props;
+  console.log(targetId);
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
   const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
@@ -49,7 +54,7 @@ export const PaneSettings = (props: { id: string }) => {
 
   return (
     <>
-      <p>Pane: {id}</p>
+      <p>Pane Ast Styles: {id}</p>
       <ul>
         <li>{$paneTitle[id].current}</li>
         <li>{$paneSlug[id].current}</li>

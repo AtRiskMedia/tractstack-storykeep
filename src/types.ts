@@ -103,6 +103,12 @@ export interface ToggleEditModalEvent extends Event {
   };
 }
 
+export type PaneAstTargetId = {
+  outerIdx: number;
+  idx: number | null;
+  tag: "p" | "h2" | "h3" | "h4" | "li";
+};
+
 export type EditModeValue = {
   id: string;
   mode: string;
@@ -114,11 +120,7 @@ export type EditModeValue = {
     | "resource"
     | "menu"
     | "file";
-  targetId?: {
-    outerIdx: number;
-    idx: number | null;
-    tag: "p" | "h2" | "h3" | "h4" | "ol" | "ul" | "li" | "img" | "code";
-  };
+  targetId?: PaneAstTargetId;
 };
 
 export type StoreMapType = {

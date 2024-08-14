@@ -1,15 +1,11 @@
 import StoryFragmentTailwindBgColour from "../fields/StoryFragmentTailwindBgColour";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
-import type { DatumPayload } from "../../../types";
 
 import StoryFragmentSocialImagePath from "../fields/StoryFragmentSocialImagePath";
 import StoryFragmentMenu from "../fields/StoryFragmentMenu";
 
-export const StoryFragmentSettings = (props: {
-  id: string;
-  payload: DatumPayload;
-}) => {
-  const { id, payload } = props;
+export const StoryFragmentSettings = (props: { id: string }) => {
+  const { id } = props;
 
   // helpers
   const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
@@ -29,7 +25,8 @@ export const StoryFragmentSettings = (props: {
         handleEditingChange={handleEditingChange}
         updateStoreField={updateStoreField}
         handleUndo={handleUndo}
-        payload={payload.menus}
+        payload={[]}
+        // this needs to pull from nanostore
       />
 
       <StoryFragmentSocialImagePath

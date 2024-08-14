@@ -11,15 +11,14 @@ import {
 import { StoryFragmentSettings } from "./settings/storyfragment";
 import { CodeHookSettings } from "./settings/codehook";
 import { PaneSettings } from "./settings/pane";
+import { PaneAstStyles } from "./settings/styles";
 import { handleToggleOff } from "../../utils/storykeep";
-import type { DatumPayload } from "../../types";
 
 interface EditModalProps {
   type: "desktop" | "mobile";
-  payload: DatumPayload;
 }
 
-export const EditModal = ({ type, payload }: EditModalProps) => {
+export const EditModal = ({ type }: EditModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
   const $storyFragmentInit = useStore(storyFragmentInit);
@@ -81,12 +80,15 @@ export const EditModal = ({ type, payload }: EditModalProps) => {
       <div className="p-6">
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
-          <StoryFragmentSettings id={$editMode.id} payload={payload} />
+          <StoryFragmentSettings id={$editMode.id} />
         ) : $editMode?.type === `pane` && $editMode?.mode === `codehook` ? (
-          <CodeHookSettings id={$editMode.id} payload={payload} />
-        ) : null}
-        {$editMode?.type === `pane` && $editMode?.mode === `settings` ? (
-          <PaneSettings id={$editMode.id} payload={payload} />
+          <CodeHookSettings id={$editMode.id} />
+        ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
+          <PaneSettings id={$editMode.id} />
+        ) : $editMode?.type === `pane` &&
+          $editMode?.mode === `styles` &&
+          typeof $editMode.targetId !== `undefined` ? (
+          <PaneAstStyles id={$editMode.id} targetId={$editMode.targetId} />
         ) : null}
       </div>
     </div>

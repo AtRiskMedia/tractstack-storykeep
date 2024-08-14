@@ -114,6 +114,11 @@ export type EditModeValue = {
     | "resource"
     | "menu"
     | "file";
+  targetId?: {
+    outerIdx: number;
+    idx: number | null;
+    tag: "p" | "h2" | "h3" | "h4" | "ol" | "ul" | "li" | "img" | "code";
+  };
 };
 
 export type StoreMapType = {

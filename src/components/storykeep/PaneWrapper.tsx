@@ -126,13 +126,14 @@ const PaneWrapper = (props: {
 
   const handleClick = () => {
     lastInteractedPaneStore.set(id);
-    if ([`styles`, `settings`, `pane`].includes(toolMode))
+    if ([`settings`, `pane`].includes(toolMode)) {
       handleEditModeToggle();
+    }
   };
 
   const handleInsertClick = (position: "top" | "bottom") => {
     if (toolMode === "pane") {
-      console.log(`Insert pane ${position}`);
+      console.log(`TODO: Insert pane ${position}`);
     }
   };
 

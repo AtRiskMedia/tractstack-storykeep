@@ -1,7 +1,9 @@
 import { useCallback } from "react";
+import { useStore } from "@nanostores/react";
 import {
   lastInteractedPaneStore,
   lastInteractedTypeStore,
+  editModeStore,
 } from "../../../store/storykeep";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
@@ -13,7 +15,7 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
-//import { handleToggleOn } from "../../../utils/storykeep";
+import { handleToggleOn } from "../../../utils/storykeep";
 import type { MouseEvent, ReactNode } from "react";
 import type {
   ButtonData,
@@ -131,10 +133,9 @@ const PaneFromAst = ({
   queueUpdate,
 }: PaneFromAstProps) => {
   const thisAst = payload.ast[0];
-
   const Tag = thisAst?.tagName || thisAst?.type;
   const outerGlobalNth =
-    [`p`, `ul`, `ol`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) &&
+    [`p`, `ul`, `ol`, `h2`, `h3`, `h4`].includes(Tag) &&
     markdownLookup?.nthTagLookup[Tag] &&
     markdownLookup.nthTagLookup[Tag][outerIdx] &&
     markdownLookup.nthTagLookup[Tag][outerIdx].nth;
@@ -158,8 +159,14 @@ const PaneFromAst = ({
     console.log(
       `Edit ${toolMode}: ${Tag} at outerIdx: ${outerIdx}, idx: ${idx}`
     );
-    //handleToggleOn(false, thisId);
-  }, [toolMode, paneId, Tag, outerIdx, idx]);
+    editModeStore.set({
+      id: paneId,
+      mode: `styles`,
+      type: `pane`,
+      targetId: { outerIdx, idx, tag: Tag },
+    });
+    handleToggleOn(false, thisId);
+  }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);
 
   // Extract class names
   const injectClassNames =
@@ -257,22 +264,7 @@ const PaneFromAst = ({
   }
 
   // if set-up for recursive handling
-  if (
-    [
-      "p",
-      "em",
-      "strong",
-      "ol",
-      "ul",
-      "li",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-    ].includes(Tag)
-  ) {
+  if (["p", "em", "strong", "ol", "ul", "li", "h2", "h3", "h4"].includes(Tag)) {
     const TagComponent =
       Tag !== `p`
         ? (Tag as keyof JSX.IntrinsicElements)

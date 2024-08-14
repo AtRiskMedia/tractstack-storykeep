@@ -59,8 +59,10 @@ const PaneWrapper = (props: {
   insertPane: (paneId: string, position: `above` | `below`) => void;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
+  isDesigningNew: boolean;
 }) => {
-  const { id, toolMode, toolAddMode, viewportKey, insertPane } = props;
+  const { id, toolMode, toolAddMode, viewportKey, insertPane, isDesigningNew } =
+    props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
@@ -184,7 +186,7 @@ const PaneWrapper = (props: {
 
   return (
     <div ref={paneRef} onClick={handleClick} className="relative">
-      {toolMode === `pane` ? (
+      {toolMode === `pane` && !isDesigningNew ? (
         <InsertAboveBelowWrapper onInsertClick={handleInsertClick}>
           {Content}
         </InsertAboveBelowWrapper>

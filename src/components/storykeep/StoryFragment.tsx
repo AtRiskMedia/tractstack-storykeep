@@ -262,6 +262,7 @@ export const StoryFragment = (props: { id: string }) => {
               insertPane={insertPane}
               toolMode={toolMode}
               toolAddMode={toolAddMode}
+              isDesigningNew={thisPaneIds.length !== paneIds.length}
             />
           )}
         </div>

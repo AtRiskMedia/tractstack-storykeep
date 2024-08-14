@@ -103,6 +103,17 @@ export interface ToggleEditModalEvent extends Event {
   };
 }
 
+export interface PaneDesign {
+  id: string;
+  name: string;
+  description: string;
+  payload: {
+    markdown: MarkdownEditDatum;
+    bgPane?: BgPaneDatum;
+    bgColour?: BgColourDatum;
+  };
+}
+
 export type PaneAstTargetId = {
   outerIdx: number;
   idx: number | null;

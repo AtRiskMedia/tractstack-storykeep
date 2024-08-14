@@ -81,7 +81,7 @@ const EditableContent = ({
           htmlAst: updatedHtmlAst,
         },
       };
-      console.log(`after edit`, [updatedMarkdown], newValue);
+      //console.log(`after edit`, [updatedMarkdown], newValue);
       paneFragmentMarkdown.setKey(markdownFragmentId, {
         ...fragmentData,
         current: newValue,

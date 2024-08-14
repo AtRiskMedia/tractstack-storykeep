@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import {
+XMarkIcon
+} from "@heroicons/react/24/outline";
+
+import {
   editModeStore,
   paneInit,
   storyFragmentInit,
@@ -68,10 +72,13 @@ export const EditModal = ({ type, payload }: EditModalProps) => {
   };
 
   if (!isClient || $activeEditModal !== type) return null;
-
+console.log(`editMode:`,$editMode)
   return (
-    <div className="m-2">
-      <div className="border border-myblue border-2 p-6 border-dotted">
+      <div className="relative">
+      <div className="absolute right-4 top-4">
+        <button title="Close panel" onClick={()=>toggleOffEditModal()}><XMarkIcon className="w-4 h-4 text-black/50 hover:text-black" /></button>
+      </div>
+    <div className="p-6">
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
           <StoryFragmentSettings id={$editMode.id} payload={payload} />

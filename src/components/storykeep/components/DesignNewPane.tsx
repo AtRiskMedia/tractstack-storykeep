@@ -5,6 +5,7 @@ import {
   ChevronUpDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  XMarkIcon,
 } from "@heroicons/react/20/solid";
 import { paneDesigns } from "../../../assets/paneDesigns";
 import type { PaneDesign } from "../../../types";
@@ -12,10 +13,12 @@ import type { PaneDesign } from "../../../types";
 const DesignNewPane = ({
   id,
   index,
+  cancelInsert,
   tailwindBgColour,
 }: {
   id: string;
   index: number;
+  cancelInsert: () => void;
   tailwindBgColour: string;
 }) => {
   console.log(`insert into pos:${index} storyfragment:${id}`);
@@ -42,8 +45,8 @@ const DesignNewPane = ({
   };
 
   return (
-    <div className="py-6 bg-white shadow-md rounded-lg">
-      <div className="px-6 flex items-center space-x-4 mb-4">
+    <div className="py-6 bg-mywhite shadow-inner">
+      <div className="px-6 flex justify-center space-x-4 mb-4">
         <div className="flex-grow max-w-sm">
           <Combobox
             as="div"
@@ -56,7 +59,7 @@ const DesignNewPane = ({
             }}
           >
             <Combobox.Label className="block text-sm font-medium text-mydarkgrey mb-1">
-              Select Design
+              Select design to use
             </Combobox.Label>
             <div className="relative">
               <Combobox.Input
@@ -110,21 +113,40 @@ const DesignNewPane = ({
             </div>
           </Combobox>
         </div>
-        <div className="flex items-stretch h-[40px] space-x-2">
+        <div className="flex items-stretch h-[50px] space-x-2">
           <button
-            className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full flex flex-col justify-center"
+            className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("prev")}
             aria-label="Previous design"
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full flex flex-col justify-center"
+            className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("next")}
             aria-label="Next design"
           >
             <ChevronRightIcon className="h-5 w-5" />
           </button>
+          <button
+            className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange/20 hover:text-black transition-colors h-full flex flex-col justify-center"
+            onClick={() => cancelInsert()}
+            aria-label="Cancel"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+          {
+              selectedDesign
+            ?
+            (
+          <button
+            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
+            onClick={() => console.log(`coming soon!`)}
+            aria-label="Use this Design"
+          >
+            <CheckIcon className="h-5 w-5" />
+          </button>
+          ):null}
         </div>
       </div>
       {selectedDesign && (

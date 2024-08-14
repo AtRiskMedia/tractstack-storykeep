@@ -12,11 +12,11 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "titleText",
     name: "Title with paragraph",
-    description: "Includes heading 2 and paragraph styles",
+    description: "Standard fare; heading and paragraph styles",
     payload: {
       markdown: {
         markdown: {
-          body: "## title\n...\n",
+          body: `## title\n\n...\n`,
           id: ulid(),
           slug: "title-with-paragraph",
           title: "Title with paragraph",
@@ -40,16 +40,28 @@ export const paneDesigns: PaneDesign[] = [
               h2: {
                 classes: {
                   fontSTYLE: ["bold"],
-                  rotate: ["!1"],
                   textCOLOR: ["myblue"],
                   textSIZE: ["3xl", "5xl"],
+                },
+              },
+                h3: {
+                classes: {
+                  fontSTYLE: ["bold"],
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["xl", "3xl"],
+                },
+              },
+              h4: {
+                classes: {
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["xl", "2xl"],
                 },
               },
               p: {
                 classes: {
                   textCOLOR: ["mydarkgrey"],
                   textSIZE: ["lg", "xl"],
-                  my: [3],
+                  my: [3,4],
                 },
               },
             },
@@ -62,11 +74,11 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "text",
     name: "Paragraphs",
-    description: "Includes paragraph styles only",
+    description: "Standard fare; heading and paragraph styles",
     payload: {
       markdown: {
         markdown: {
-          body: "...\n",
+          body: `...\n`,
           id: ulid(),
           slug: "paragraphs",
           title: "Paragraphs",
@@ -87,11 +99,31 @@ export const paneDesigns: PaneDesign[] = [
                   { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
                 ],
               },
+              h2: {
+                classes: {
+                  fontSTYLE: ["bold"],
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["3xl", "5xl"],
+                },
+              },
+                h3: {
+                classes: {
+                  fontSTYLE: ["bold"],
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["xl", "3xl"],
+                },
+              },
+              h4: {
+                classes: {
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["xl", "2xl"],
+                },
+              },
               p: {
                 classes: {
                   textCOLOR: ["mydarkgrey"],
                   textSIZE: ["lg", "xl"],
-                  my: [3],
+                  my: [3,4],
                 },
               },
             },
@@ -108,7 +140,7 @@ export const paneDesigns: PaneDesign[] = [
     payload: {
       markdown: {
         markdown: {
-          body: "## catchy title\n",
+          body: `## catchy title\n`,
           id: ulid(),
           slug: "modal-with-title",
           title: "Modal with title",
@@ -156,11 +188,11 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "fancy",
     name: "Fancy title section",
-    description: "The works; includes shapes and heading 2 + paragraph styles",
+    description: "The works *includes shapes and heading 2 + paragraph styles",
     payload: {
       markdown: {
         markdown: {
-          body: "## fancy title\n...\n",
+          body: `## fancy title\n\n...\n`,
           id: ulid(),
           slug: "fancy-title-section",
           title: "Fancy title section",
@@ -230,7 +262,7 @@ export const paneDesigns: PaneDesign[] = [
     payload: {
       markdown: {
         markdown: {
-          body: "...\n",
+          body: `...\n`,
           id: ulid(),
           slug: "bordered-paragraphs",
           title: "Bordered paragraphs",
@@ -264,7 +296,27 @@ export const paneDesigns: PaneDesign[] = [
                 classes: {
                   textCOLOR: ["mydarkgrey"],
                   textSIZE: ["lg", "xl"],
-                  my: [3],
+                  my: [3,4],
+                },
+              },
+              h2: {
+                classes: {
+                  fontSTYLE: ["bold"],
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["3xl", "5xl"],
+                },
+              },
+                h3: {
+                classes: {
+                  fontSTYLE: ["bold"],
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["xl", "3xl"],
+                },
+              },
+              h4: {
+                classes: {
+                  textCOLOR: ["myblue"],
+                  textSIZE: ["xl", "2xl"],
                 },
               },
             },
@@ -281,7 +333,7 @@ export const paneDesigns: PaneDesign[] = [
     payload: {
       markdown: {
         markdown: {
-          body: "",
+          body: ``,
           id: ulid(),
           slug: "transition-shape",
           title: "Transition Shape",

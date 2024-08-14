@@ -52,6 +52,10 @@ export const StoryFragment = (props: { id: string }) => {
   const viewportKey = $viewportKey.value;
   const $viewportSet = useStore(viewportSetStore);
 
+  const cancelInsert = () => {
+    setShouldScroll(null);
+    setThisPaneIds(paneIds);
+  };
   const insertPane = (paneId: string, position: `above` | `below`) => {
     const index = paneIds.indexOf(paneId);
     if (index >= 0) {
@@ -254,11 +258,12 @@ export const StoryFragment = (props: { id: string }) => {
           {paneId === `insert` ? (
             <div id={`design-new-pane-${idx}`}>
               <DesignNewPane
+                id={id}
+                index={idx}
+                cancelInsert={cancelInsert}
                 tailwindBgColour={
                   tailwindBgColour ? tailwindBgColour : `bg-white`
                 }
-                index={idx}
-                id={id}
               />
             </div>
           ) : (

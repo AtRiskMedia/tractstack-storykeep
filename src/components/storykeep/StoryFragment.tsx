@@ -253,7 +253,13 @@ export const StoryFragment = (props: { id: string }) => {
         <div key={paneId}>
           {paneId === `insert` ? (
             <div id={`design-new-pane-${idx}`}>
-              <DesignNewPane index={idx} id={id} />
+              <DesignNewPane
+                tailwindBgColour={
+                  tailwindBgColour ? tailwindBgColour : `bg-white`
+                }
+                index={idx}
+                id={id}
+              />
             </div>
           ) : (
             <PaneWrapper

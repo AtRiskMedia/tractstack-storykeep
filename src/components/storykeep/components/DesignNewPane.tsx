@@ -7,19 +7,22 @@ import {
   ChevronRightIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
+import PreviewPane from "./PreviewPane";
 import { paneDesigns } from "../../../assets/paneDesigns";
-import type { PaneDesign } from "../../../types";
+import type { PaneDesign, ViewportKey } from "../../../types";
 
 const DesignNewPane = ({
   id,
   index,
   cancelInsert,
   tailwindBgColour,
+  viewportKey,
 }: {
   id: string;
   index: number;
   cancelInsert: () => void;
   tailwindBgColour: string;
+  viewportKey: ViewportKey;
 }) => {
   console.log(`insert into pos:${index} storyfragment:${id}`);
   const [query, setQuery] = useState("");
@@ -117,14 +120,14 @@ const DesignNewPane = ({
           <button
             className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("prev")}
-            aria-label="Previous design"
+            title="Previous design"
           >
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
             className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("next")}
-            aria-label="Next design"
+            title="Next design"
           >
             <ChevronRightIcon className="h-5 w-5" />
           </button>
@@ -132,6 +135,7 @@ const DesignNewPane = ({
             className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange/20 hover:text-black transition-colors h-full flex flex-col justify-center"
             onClick={() => cancelInsert()}
             aria-label="Cancel"
+            title="Cancel"
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
@@ -140,6 +144,7 @@ const DesignNewPane = ({
               className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
               onClick={() => console.log(`coming soon!`)}
               aria-label="Use this Design"
+              title="Use this Design"
             >
               <CheckIcon className="h-5 w-5" />
             </button>
@@ -148,15 +153,16 @@ const DesignNewPane = ({
       </div>
       {selectedDesign && (
         <div
-          className="
-outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
+          className="outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
           my-4 bg-myblue/20 py-4 rounded-lg"
           style={{
             backgroundImage:
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
           }}
         >
-          <div className={`${tailwindBgColour} h-60`}></div>
+          <div className={`${tailwindBgColour}`}>
+            <PreviewPane design={selectedDesign} viewportKey={viewportKey} />
+          </div>
         </div>
       )}
     </div>

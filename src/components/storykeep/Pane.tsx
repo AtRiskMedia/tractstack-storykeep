@@ -84,20 +84,6 @@ const Pane = (props: {
   const [isUpdating, setIsUpdating] = useState(false);
   const updateQueue = useRef<Array<{ id: string; updateFn: () => void }>>([]);
   const debounceTimers = useRef<Record<string, NodeJS.Timeout>>({});
-
-  const paneHeightRatioDesktopPx =
-    Number($paneHeightRatioDesktop[id].current) == 0
-      ? 1920
-      : Math.floor((1920 * Number($paneHeightRatioDesktop[id].current)) / 100);
-  const paneHeightRatioTabletPx =
-    Number($paneHeightRatioTablet[id].current) == 0
-      ? 1080
-      : Math.floor((1080 * Number($paneHeightRatioTablet[id].current)) / 100);
-  const paneHeightRatioMobilePx =
-    Number($paneHeightRatioMobile[id].current) == 0
-      ? 600
-      : Math.floor((600 * Number($paneHeightRatioMobile[id].current)) / 100);
-
   const memoizedPaneData = useMemo(
     () => ({
       slug: $paneSlug[id]?.current,
@@ -109,32 +95,6 @@ const Pane = (props: {
         Math.floor((1080 * Number($paneHeightRatioTablet[id]?.current)) / 100),
         Math.floor((1920 * Number($paneHeightRatioDesktop[id]?.current)) / 100),
       ] as [number, number, number],
-      // these custom tailwind won't work in StoryKeep layout; will have to inject via styles
-      paneHeightRatio: classNames(
-        paneHeightRatioMobile
-          ? `h-[calc(var(--scale)*${paneHeightRatioMobilePx}px)] xs:h-[calc(var(--scale)*${paneHeightRatioMobilePx}px)]`
-          : ``,
-        paneHeightRatioTablet
-          ? `md:h-[calc(var(--scale)*${paneHeightRatioTabletPx}px)]`
-          : ``,
-        paneHeightRatioDesktop
-          ? `xl:h-[calc(var(--scale)*${paneHeightRatioDesktopPx}px)]`
-          : ``
-      ),
-      // these custom tailwind won't work in StoryKeep layout; will have to inject via styles
-      paneHeightOffset: classNames(
-        $paneHeightOffsetMobile[id]?.current !== undefined
-          ? `mt-[calc(var(--scale)*${Math.floor((600 * ($paneHeightOffsetMobile[id]?.current ?? 0)) / 100)}px)] xs:mt-[calc(var(--scale)*${Math.floor((600 * ($paneHeightOffsetMobile[id]?.current ?? 1)) / 100)}px)]`
-          : ``,
-        $paneHeightOffsetTablet[id]?.current !== undefined
-          ? `md:mt-[calc(var(--scale)*${Math.floor(
-              (1080 * ($paneHeightOffsetTablet[id]?.current ?? 1)) / 100
-            )}px)]`
-          : ``,
-        $paneHeightOffsetDesktop[id]?.current !== undefined
-          ? `xl:mt-[calc(var(--scale)*${Math.floor((1920 * ($paneHeightOffsetDesktop[id]?.current ?? 1)) / 100)}px)]`
-          : ``
-      ),
       bgColour:
         fragmentIds
           .map(fragmentId => $paneFragmentBgColour[fragmentId]?.current)
@@ -263,8 +223,6 @@ const Pane = (props: {
         id={`pane-inner-${id}`}
         style={bgColourStyle}
         className={classNames(
-          memoizedPaneData.paneHeightRatio,
-          memoizedPaneData.paneHeightOffset,
           memoizedPaneData.hasMaxHScreen ? `max-h-screen` : ``,
           memoizedPaneData.hasOverflowHidden ? `overflow-hidden` : ``,
           `grid`,

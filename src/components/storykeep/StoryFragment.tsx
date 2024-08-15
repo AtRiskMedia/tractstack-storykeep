@@ -270,6 +270,7 @@ export const StoryFragment = (props: { id: string }) => {
                   tailwindBgColour={
                     tailwindBgColour ? tailwindBgColour : `bg-white`
                   }
+                  viewportKey={viewportKey}
                 />
               </div>
             ) : (

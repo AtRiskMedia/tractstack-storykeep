@@ -103,15 +103,41 @@ export interface ToggleEditModalEvent extends Event {
   };
 }
 
+export interface PaneDesignMarkdown {
+  type: string;
+  markdownBody: string;
+  textShapeOutsideDesktop: string;
+  textShapeOutsideTablet: string;
+  textShapeOutsideMobile: string;
+  imageMaskShapeDesktop: string;
+  imageMaskShapeTablet: string;
+  imageMaskShapeMobile: string;
+  isModal: boolean;
+  hiddenViewports: string;
+  optionsPayload: OptionsPayloadDatum;
+}
+export interface PaneDesignBgPane {
+  type: string;
+  shapeMobile: string;
+  shapeTablet: string;
+  shapeDesktop: string;
+  hiddenViewports: string;
+  optionsPayload: OptionsPayloadDatum;
+}
 export interface PaneDesign {
   id: string;
   name: string;
   description: string;
-  payload: {
-    markdown: MarkdownEditDatum;
-    bgPane?: BgPaneDatum;
-    bgColour?: BgColourDatum;
+  panePayload: {
+    heightOffsetDesktop: number;
+    heightOffsetTablet: number;
+    heightOffsetMobile: number;
+    heightRatioDesktop: string;
+    heightRatioTablet: string;
+    heightRatioMobile: string;
+    bgColour: string | boolean;
   };
+  fragments: (PaneDesignBgPane | PaneDesignMarkdown)[];
 }
 
 export type PaneAstTargetId = {
@@ -322,11 +348,9 @@ export interface MarkdownEditDatum {
 
 export interface MarkdownPaneDatum extends PaneFragmentDatum {
   type: `markdown`;
-  imageMaskShape: string;
   imageMaskShapeDesktop?: string;
   imageMaskShapeTablet?: string;
   imageMaskShapeMobile?: string;
-  textShapeOutside: string;
   textShapeOutsideDesktop?: string;
   textShapeOutsideTablet?: string;
   textShapeOutsideMobile?: string;

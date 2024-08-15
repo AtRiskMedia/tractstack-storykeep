@@ -67,7 +67,7 @@ const MarkdownInsideModal = ({
         ? payload.textShapeOutsideTablet
         : viewportKey === `mobile`
           ? payload.textShapeOutsideMobile
-          : payload.textShapeOutside;
+          : null;
 
   const astPayload = {
     ast: markdown.htmlAst.children,

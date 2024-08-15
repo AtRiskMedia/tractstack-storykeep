@@ -76,7 +76,7 @@ const Modal = ({ payload, modalPayload, viewportKey }: Props) => {
             ? payload.textShapeOutsideTablet
             : _viewportKey === `mobile`
               ? payload.textShapeOutsideMobile
-              : payload.textShapeOutside;
+              : null;
       const thisId = `${_viewportKey}-${shapeName}-modal`;
 
       const injectClassNames =

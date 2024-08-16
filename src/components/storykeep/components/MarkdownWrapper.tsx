@@ -78,6 +78,20 @@ const MarkdownWrapper = ({
     : `grid`;
   const paneFragmentStyle = {
     gridArea: "1/1/1/1",
+    height:
+      viewportKey === `mobile` && paneHeight[0] === 0
+        ? `auto`
+        : viewportKey === `mobile`
+          ? `calc(var(--scale)*${paneHeight[0]}px)`
+          : viewportKey === `tablet` && paneHeight[1] === 0
+            ? `auto`
+            : viewportKey === `tablet`
+              ? `calc(var(--scale)*${paneHeight[1]}px)`
+              : viewportKey === `desktop` && paneHeight[2] === 0
+                ? `auto`
+                : viewportKey === `desktop`
+                  ? `calc(var(--scale)*${paneHeight[2]}px)`
+                  : `auto`,
   };
 
   const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
@@ -222,7 +236,7 @@ const MarkdownWrapper = ({
   return (
     <div
       className={classNames(hidden, `h-fit-contents`)}
-      id={`t8k-${thisPayload.id}-modal-container`}
+      id={`t8k-${markdownFragmentId}-modal-container`}
     >
       {isModal && thisModalPayload && (
         <div

@@ -38,7 +38,7 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
         ? payload.textShapeOutsideTablet
         : viewportKey === `mobile`
           ? payload.textShapeOutsideMobile
-          : payload.textShapeOutside;
+          : null;
   const thisId = `${viewportKey}-${payload.id}-modal`;
 
   // check for tailwind classes

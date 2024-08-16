@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/20/solid";
 import PreviewPane from "./PreviewPane";
 import { paneDesigns } from "../../../assets/paneDesigns";
-import type { PaneDesign, ViewportKey } from "../../../types";
+import type { PaneDesign, ViewportAuto } from "../../../types";
 
 const DesignNewPane = ({
   id,
@@ -22,7 +22,7 @@ const DesignNewPane = ({
   index: number;
   cancelInsert: () => void;
   tailwindBgColour: string;
-  viewportKey: ViewportKey;
+  viewportKey: ViewportAuto;
 }) => {
   console.log(`insert into pos:${index} storyfragment:${id}`);
   const [query, setQuery] = useState("");

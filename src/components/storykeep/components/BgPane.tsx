@@ -100,7 +100,7 @@ const BgPane = ({
     switch (artpackMode) {
       case `break`: {
         return {
-          id: `${_viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${thisId}`,
           artpackMode,
           styles: { fill: (artpack && artpack?.svgFill) || `none` },
           shapeName: `${artpackCollection}${artpackImage}`,
@@ -111,7 +111,7 @@ const BgPane = ({
           shapeName && svgImageMask(shapeName, thisId, _viewportKey);
         if (!maskSvg) return null;
         return {
-          id: `${_viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${thisId}`,
           artpackMode,
           classNamesParent,
           styles: {
@@ -128,7 +128,7 @@ const BgPane = ({
 
       default:
         return {
-          id: `${_viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${thisId}`,
           shapeName,
           classNamesParent,
         };

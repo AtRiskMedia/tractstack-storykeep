@@ -121,8 +121,6 @@ export const StoryKeepStore = (props: {
         // Process Panes
         fragment.panesPayload.forEach((payload: PaneDatum) => {
           if (!paneInit.get()[payload.id]?.init) {
-            console.log(`pane ${payload.id}`);
-            console.log(payload);
             paneInit.set({
               ...paneInit.get(),
               [payload.id]: { init: true },
@@ -233,8 +231,6 @@ export const StoryKeepStore = (props: {
                   paneFragment: BgPaneDatum | BgColourDatum | MarkdownPaneDatum
                 ) => {
                   const paneFragmentId = ulid();
-                  console.log(`${paneFragment.type}, ${paneFragmentId}`);
-                  console.log(paneFragment);
                   switch (paneFragment.type) {
                     case `bgColour`:
                       paneFragmentBgColour.set({
@@ -261,10 +257,6 @@ export const StoryKeepStore = (props: {
                         ...paneMarkdownFragmentId.get(),
                         [payload.id]: createFieldWithHistory(paneFragmentId),
                       });
-                      //console.log(
-                      //  `${payload.slug}:MarkdownEditDatum`,
-                      //  paneFragmentMarkdown.get()[paneFragmentId]
-                      //);
                       break;
                     default:
                       console.log(

@@ -77,7 +77,7 @@ export const StoryFragment = (props: { id: string }) => {
         );
         if (element) {
           const elementRect = element.getBoundingClientRect();
-          const absoluteElementTop = elementRect.top + window.pageYOffset;
+          const absoluteElementTop = elementRect.top + window.scrollY;
           const middleOfElement =
             absoluteElementTop -
             window.innerHeight / 2 +

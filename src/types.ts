@@ -118,6 +118,7 @@ export interface PaneDesignMarkdown {
 }
 export interface PaneDesignBgPane {
   type: string;
+  shape?: string;
   shapeMobile: string;
   shapeTablet: string;
   shapeDesktop: string;
@@ -361,8 +362,7 @@ export interface MarkdownPaneDatum extends PaneFragmentDatum {
 }
 
 export interface PaneOptionsPayload {
-  id: string;
-  paneFragmentsPayload?: BgPaneDatum[] | BgColourDatum[] | MarkdownPaneDatum[];
+  paneFragmentsPayload?: (BgPaneDatum | BgColourDatum | MarkdownPaneDatum)[];
   impressions?: ImpressionDatum[];
   codeHook?: CodeHookDatum;
   hiddenPane?: boolean;

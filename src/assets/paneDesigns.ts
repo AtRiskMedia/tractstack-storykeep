@@ -156,12 +156,12 @@ export const paneDesigns: PaneDesign[] = [
       {
         type: "markdown",
         markdownBody: `## catchy title\n`,
-        imageMaskShapeDesktop: "modal1",
-        imageMaskShapeTablet: "modal1",
-        imageMaskShapeMobile: "modal2",
-        textShapeOutsideDesktop: "none",
-        textShapeOutsideTablet: "none",
-        textShapeOutsideMobile: "none",
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "modal1",
+        textShapeOutsideTablet: "modal1",
+        textShapeOutsideMobile: "modal2",
         isModal: true,
         hiddenViewports: "none",
         optionsPayload: {

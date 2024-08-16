@@ -36,15 +36,16 @@ const DesignNewPane = ({
           design.name.toLowerCase().includes(query.toLowerCase())
         );
 
-const cycleDesign = (direction: "next" | "prev") => {
-  setCurrentIndex(prevIndex => {
-    const newIndex = direction === "next"
-      ? (prevIndex + 1) % paneDesigns.length
-      : (prevIndex - 1 + paneDesigns.length) % paneDesigns.length;
-    setSelectedDesign(paneDesigns[newIndex]);
-    return newIndex;
-  });
-};
+  const cycleDesign = (direction: "next" | "prev") => {
+    setCurrentIndex(prevIndex => {
+      const newIndex =
+        direction === "next"
+          ? (prevIndex + 1) % paneDesigns.length
+          : (prevIndex - 1 + paneDesigns.length) % paneDesigns.length;
+      setSelectedDesign(paneDesigns[newIndex]);
+      return newIndex;
+    });
+  };
 
   return (
     <div className="py-6 bg-mywhite shadow-inner">

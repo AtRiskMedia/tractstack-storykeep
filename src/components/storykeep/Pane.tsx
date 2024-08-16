@@ -175,6 +175,7 @@ const Pane = (props: {
               style={{ gridArea: "1/1/1/1" }}
             >
               <MarkdownWrapper
+                readonly={false}
                 payload={fragment.payload}
                 markdown={fragment.markdown}
                 files={memoizedPaneData.files}

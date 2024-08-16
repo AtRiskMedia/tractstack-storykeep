@@ -133,7 +133,7 @@ const MarkdownInsideModal = ({
           .filter((e: any) => !(e?.type === `text` && e?.value === `\n`))
           .map((thisAstPayload: any, idx: number) => (
             <PaneFromAst
-          readonly={readonly}
+              readonly={readonly}
               key={idx}
               markdown={markdown}
               payload={{

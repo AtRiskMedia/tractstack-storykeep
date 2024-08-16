@@ -63,7 +63,7 @@ export const toolAddModeInsertDefault: Record<ToolAddMode, string> = {
   belief: "* `belief(BeliefTag|likert|question)`",
   identify: "* `identifyAs(BeliefTag|TARGET_VALUE|question)`",
   toggle: "* `toggle(BeliefTag|likert|question)`",
-  aside: "...",
+  aside: "1. ...",
 };
 
 export const toolModes: ToolMode[] = [

@@ -144,9 +144,10 @@ const PaneFromAst = ({
     Tag === `li` &&
     markdownLookup?.nthTag[outerIdx] &&
     markdownLookup.nthTag[outerIdx] === `ol`;
-  const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode) && !readonly;
+  const showOverlay =
+    [`text`, `styles`, `eraser`].includes(toolMode) && !readonly;
   const showInsertOverlay = [`insert`].includes(toolMode) && !readonly;
-  const noOverlay = readonly || ( !showOverlay && !showInsertOverlay);
+  const noOverlay = readonly || (!showOverlay && !showInsertOverlay);
   const globalNth = getGlobalNth(Tag, idx, outerIdx, markdownLookup);
   const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
 
@@ -272,6 +273,7 @@ const PaneFromAst = ({
       <TagComponent className={injectClassNames}>
         {thisAst?.children?.map((p: any, childIdx: number) => (
           <PaneFromAst
+            readonly={readonly}
             key={childIdx}
             payload={{ ...payload, ast: [p] }}
             markdown={markdown}

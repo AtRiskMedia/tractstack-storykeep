@@ -5,13 +5,17 @@ import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
-import { toolAddModeTitles } from "../../../constants";
+import {
+  toolAddModeTitles,
+  toolAddModeInsertDefault,
+} from "../../../constants";
 import {
   paneFragmentMarkdown,
   paneMarkdownFragmentId,
   unsavedChangesStore,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  toolModeStore,
 } from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
@@ -122,21 +126,16 @@ const MarkdownWrapper = ({
   );
 
   const handleInsert = () => {
-    const newContent = `${toolAddModeTitles[toolAddMode as ToolAddMode]} content`;
     queueUpdate(fragmentId, () => {
+      const newContent = toolAddModeInsertDefault[toolAddMode as ToolAddMode];
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
       const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
-      const newAsideContainer = toolAddMode === `aside`;
-      // wrap inside ol if new text container
-      const thisNewContent = newAsideContainer
-        ? `1. ${newContent}`
-        : newContent;
       const newValue = insertElementIntoMarkdown(
         currentField.current,
-        thisNewContent,
+        newContent,
         toolAddMode,
         0,
         null,
@@ -153,6 +152,7 @@ const MarkdownWrapper = ({
         ...$unsavedChanges[paneId],
         paneFragmentMarkdown: true,
       });
+      toolModeStore.set({ value: `text` });
     });
   };
 

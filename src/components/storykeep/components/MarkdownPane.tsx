@@ -99,7 +99,7 @@ const MarkdownPane = ({
     .filter((e: Nodes) => !(e?.type === `text` && e?.value === `\n`))
     .map((thisAstPayload: Nodes, idx: number) => (
       <PaneFromAst
-          readonly={readonly}
+        readonly={readonly}
         key={idx}
         payload={{
           ...astPayload,

@@ -20,7 +20,7 @@ const CodeHook = (props: {
     }
   }, [id, $paneInit]);
 
-  if (!isClient) return <div>Loading...</div>;
+  if (!isClient) return null;
 
   return (
     <div style={{ position: "relative" }}>

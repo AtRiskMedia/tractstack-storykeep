@@ -178,7 +178,7 @@ const PaneWrapper = (props: {
     );
   }, [id, isCodeHook, toolMode, toolAddMode, viewportKey]);
 
-  if (!isClient) return <div>Loading...</div>;
+  if (!isClient) return null;
 
   return (
     <div ref={paneRef} onClick={handleClick} className="relative">

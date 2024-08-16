@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useState } from "react";
-import type { CSSProperties, KeyboardEvent } from "react";
+import type { CSSProperties, KeyboardEvent, ClipboardEvent } from "react";
 
 interface ContentEditableFieldProps {
   id: string;
@@ -39,6 +39,16 @@ const ContentEditableField = ({
     },
     [onKeyDown]
   );
+
+  const handlePaste = useCallback((event: ClipboardEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const text = event.clipboardData.getData("text/plain");
+    const sanitizedText = text
+      .replace(/[\r\n]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    document.execCommand("insertText", false, sanitizedText);
+  }, []);
 
   const setCursorPosition = useCallback(
     (element: HTMLElement, position: number) => {
@@ -109,7 +119,7 @@ const ContentEditableField = ({
         setEditing(false);
         onEditingChange(false);
       }, 100); // 100ms delay
-      // this is needed for the isEditing helpful info pop-ups
+      // this is needed to prevent race in the isEditing helpful info pop-ups
     };
 
     const element = contentEditableRef.current;
@@ -132,6 +142,7 @@ const ContentEditableField = ({
       onInput={handleContentChange}
       onFocus={handleFocus}
       onBlur={handleBlur}
+      onPaste={handlePaste}
       onKeyDown={onKeyDown ? handleKeyDown : undefined}
       style={{
         ...style,

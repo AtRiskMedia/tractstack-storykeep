@@ -211,7 +211,7 @@ const Pane = (props: {
     [id, memoizedPaneData, queueUpdate, viewportKey, toolMode, toolAddMode]
   );
 
-  if (!isClient) return <div>Loading...</div>;
+  if (!isClient) return null;
 
   const bgColourStyle = memoizedPaneData.bgColour
     ? { backgroundColor: memoizedPaneData.bgColour }

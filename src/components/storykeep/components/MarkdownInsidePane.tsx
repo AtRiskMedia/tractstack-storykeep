@@ -16,6 +16,7 @@ import type {
 } from "../../../types";
 
 interface Props {
+  readonly: boolean;
   payload: MarkdownPaneDatum;
   markdown: MarkdownDatum;
   files: FileNode[];
@@ -32,6 +33,7 @@ interface Props {
 }
 
 const MarkdownInsidePane = ({
+  readonly,
   payload,
   markdown,
   files,
@@ -124,6 +126,7 @@ const MarkdownInsidePane = ({
           .filter((e: any) => !(e?.type === `text` && e?.value === `\n`))
           .map((thisAstPayload: any, idx: number) => (
             <PaneFromAst
+          readonly={readonly}
               key={idx}
               payload={{
                 ...astPayload,

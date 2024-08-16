@@ -27,7 +27,7 @@ const DesignNewPane = ({
   console.log(`insert into pos:${index} storyfragment:${id}`);
   const [query, setQuery] = useState("");
   const [selectedDesign, setSelectedDesign] = useState<PaneDesign | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [, setCurrentIndex] = useState(0);
 
   const filteredDesigns =
     query === ""
@@ -36,16 +36,15 @@ const DesignNewPane = ({
           design.name.toLowerCase().includes(query.toLowerCase())
         );
 
-  const cycleDesign = (direction: "next" | "prev") => {
-    if (direction === "next") {
-      setCurrentIndex(prevIndex => (prevIndex + 1) % paneDesigns.length);
-    } else {
-      setCurrentIndex(
-        prevIndex => (prevIndex - 1 + paneDesigns.length) % paneDesigns.length
-      );
-    }
-    setSelectedDesign(paneDesigns[currentIndex]);
-  };
+const cycleDesign = (direction: "next" | "prev") => {
+  setCurrentIndex(prevIndex => {
+    const newIndex = direction === "next"
+      ? (prevIndex + 1) % paneDesigns.length
+      : (prevIndex - 1 + paneDesigns.length) % paneDesigns.length;
+    setSelectedDesign(paneDesigns[newIndex]);
+    return newIndex;
+  });
+};
 
   return (
     <div className="py-6 bg-mywhite shadow-inner">

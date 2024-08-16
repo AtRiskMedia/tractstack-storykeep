@@ -32,8 +32,9 @@ const InsertAboveBelowWrapper = ({
           onClick={() => onInsertClick("above")}
           title="Insert new Pane above this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-b hover:from-white/25 hover:via-white/25 hover:to-transparent
-                     mix-blend-exclusion"
+                     hover:bg-white/10
+                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-4
+                     before:border-t-4 before:border-dashed before:border-white/25 hover:before:border-white"
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom mix-blend-exclusion">
@@ -41,8 +42,9 @@ const InsertAboveBelowWrapper = ({
           onClick={() => onInsertClick("below")}
           title="Insert new Pane below this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-t hover:from-white/25 hover:via-white/25 hover:to-transparent
-                     mix-blend-exclusion"
+                     hover:bg-white/10
+                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-4
+                     after:border-b-4 after:border-dashed after:border-white/25 hover:after:border-white"
         />
       </div>
     </div>

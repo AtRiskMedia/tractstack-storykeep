@@ -87,6 +87,7 @@ const PreviewPaneRenderer = ({
                 style={{ gridArea: "1/1/1/1" }}
               >
                 <MarkdownWrapper
+                  readonly={true}
                   payload={fragment}
                   markdown={markdown}
                   files={files}

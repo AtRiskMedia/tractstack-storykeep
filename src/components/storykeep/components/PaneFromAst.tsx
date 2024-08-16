@@ -26,6 +26,7 @@ import type {
 } from "../../../types";
 
 interface PaneFromAstProps {
+  readonly: boolean;
   payload: {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     ast: any[];
@@ -117,6 +118,7 @@ const EditableInnerElementWrapper = ({
 };
 
 const PaneFromAst = ({
+  readonly,
   payload,
   markdown,
   thisClassNames,
@@ -142,9 +144,9 @@ const PaneFromAst = ({
     Tag === `li` &&
     markdownLookup?.nthTag[outerIdx] &&
     markdownLookup.nthTag[outerIdx] === `ol`;
-  const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode);
-  const showOverlay2 = [`insert`].includes(toolMode);
-  const noOverlay = !showOverlay && !showOverlay2;
+  const showOverlay = [`text`, `styles`, `eraser`].includes(toolMode) && !readonly;
+  const showInsertOverlay = [`insert`].includes(toolMode) && !readonly;
+  const noOverlay = readonly || ( !showOverlay && !showInsertOverlay);
   const globalNth = getGlobalNth(Tag, idx, outerIdx, markdownLookup);
   const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
 
@@ -237,6 +239,7 @@ const PaneFromAst = ({
 
   // if editable as text
   if (
+    !readonly &&
     markdown &&
     toolMode === `text` &&
     ([`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) ||
@@ -360,7 +363,7 @@ const PaneFromAst = ({
           </EditableOuterWrapper>
         );
     }
-    if (showOverlay2) {
+    if (showInsertOverlay) {
       return (
         <InsertWrapper
           toolAddMode={toolAddMode}

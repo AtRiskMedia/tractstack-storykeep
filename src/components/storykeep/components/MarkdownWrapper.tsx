@@ -30,6 +30,7 @@ import type {
 } from "../../../types";
 
 interface Props {
+  readonly: boolean;
   payload: MarkdownPaneDatum | BgPaneDatum;
   markdown: MarkdownDatum;
   files: FileNode[];
@@ -45,6 +46,7 @@ interface Props {
 }
 
 const MarkdownWrapper = ({
+  readonly,
   payload,
   markdown,
   files,
@@ -158,6 +160,7 @@ const MarkdownWrapper = ({
     if (isModal && thisModalPayload) {
       return (
         <MarkdownInsideModal
+          readonly={readonly}
           payload={thisPayload}
           markdown={markdown}
           files={files}
@@ -177,6 +180,7 @@ const MarkdownWrapper = ({
     } else if (!isModal && hasTextShapeOutside) {
       return (
         <MarkdownInsidePane
+          readonly={readonly}
           payload={thisPayload}
           markdown={markdown}
           files={files}
@@ -195,6 +199,7 @@ const MarkdownWrapper = ({
     } else if (!isModal && !hasTextShapeOutside) {
       return (
         <MarkdownPane
+          readonly={readonly}
           payload={thisPayload}
           markdown={markdown}
           files={files}

@@ -133,9 +133,14 @@ const MarkdownWrapper = ({
       const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);
+      const newAsideContainer = toolAddMode === `aside`;
+      // wrap inside ol if new text container
+      const thisNewContent = newAsideContainer
+        ? `1. ${newContent}`
+        : newContent;
       const newValue = insertElementIntoMarkdown(
         currentField.current,
-        newContent,
+        thisNewContent,
         toolAddMode,
         0,
         null,

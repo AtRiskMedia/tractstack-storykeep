@@ -302,9 +302,9 @@ export function initStoryKeep() {
           websiteContent.classList.add("hidden");
         } else {
           editModalMobile.style.top = "auto";
-          editModalMobile.style.height = `${window.innerHeight / 3}px`;
+          editModalMobile.style.height = `${window.innerHeight / 2.5}px`;
           websiteContent.classList.remove("hidden");
-          websiteContent.style.paddingBottom = `${window.innerHeight / 3}px`;
+          websiteContent.style.paddingBottom = `${window.innerHeight / 2.5}px`;
         }
         editModalMobile.style.transform = "translateY(0)";
       } else {

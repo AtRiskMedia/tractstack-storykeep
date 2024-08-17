@@ -128,7 +128,6 @@ export interface PaneDesignBgPane {
 export interface PaneDesign {
   id: string;
   name: string;
-  description: string;
   panePayload: {
     heightOffsetDesktop: number;
     heightOffsetTablet: number;
@@ -159,6 +158,8 @@ export type EditModeValue = {
     | "menu"
     | "file";
   targetId?: PaneAstTargetId;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  payload?: any;
 };
 
 export type StoreMapType = {

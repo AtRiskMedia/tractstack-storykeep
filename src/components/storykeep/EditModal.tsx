@@ -11,6 +11,7 @@ import {
 import { StoryFragmentSettings } from "./settings/storyfragment";
 import { CodeHookSettings } from "./settings/codehook";
 import { PaneSettings } from "./settings/pane";
+import { PaneInsert } from "./settings/paneInsert";
 import { PaneAstStyles } from "./settings/styles";
 import { handleToggleOff } from "../../utils/storykeep";
 
@@ -27,6 +28,7 @@ export const EditModal = ({ type }: EditModalProps) => {
 
   useEffect(() => {
     if (
+      ($editMode?.type === `pane` && $editMode?.mode === `insert`) ||
       ($editMode?.type === `storyfragment` &&
         $storyFragmentInit[$editMode.id].init) ||
       ($editMode?.type === `pane` && $paneInit[$editMode.id].init)
@@ -64,6 +66,14 @@ export const EditModal = ({ type }: EditModalProps) => {
   }, [$editMode]);
 
   const toggleOffEditModal = () => {
+    if (
+      $editMode?.type === `pane` &&
+      $editMode?.mode === `insert` &&
+      typeof $editMode?.payload !== `undefined`
+    ) {
+      const cancelInsert = $editMode?.payload?.cancelInsert;
+      if (cancelInsert) cancelInsert();
+    }
     editModeStore.set(null);
     handleToggleOff();
   };
@@ -83,6 +93,10 @@ export const EditModal = ({ type }: EditModalProps) => {
           <StoryFragmentSettings id={$editMode.id} />
         ) : $editMode?.type === `pane` && $editMode?.mode === `codehook` ? (
           <CodeHookSettings id={$editMode.id} />
+        ) : $editMode?.type === `pane` &&
+          $editMode?.mode === `insert` &&
+          typeof $editMode?.payload !== `undefined` ? (
+          <PaneInsert id={$editMode.id} payload={$editMode.payload} />
         ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
           <PaneSettings id={$editMode.id} />
         ) : $editMode?.type === `pane` &&

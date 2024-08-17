@@ -9,6 +9,8 @@ import {
 } from "@heroicons/react/20/solid";
 import PreviewPane from "./PreviewPane";
 import { paneDesigns } from "../../../assets/paneDesigns";
+import { editModeStore } from "../../../store/storykeep";
+import { handleToggleOn } from "../../../utils/storykeep";
 import type { PaneDesign, ViewportAuto } from "../../../types";
 
 const DesignNewPane = ({
@@ -24,9 +26,11 @@ const DesignNewPane = ({
   tailwindBgColour: string;
   viewportKey: ViewportAuto;
 }) => {
-  console.log(`insert into pos:${index} storyfragment:${id}`);
   const [query, setQuery] = useState("");
-  const [selectedDesign, setSelectedDesign] = useState<PaneDesign | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [selectedDesign, setSelectedDesign] = useState<PaneDesign>(
+    paneDesigns[0]
+  );
   const [, setCurrentIndex] = useState(0);
 
   const filteredDesigns =
@@ -47,8 +51,25 @@ const DesignNewPane = ({
     });
   };
 
+  const handleInsert = () => {
+    setSaving(true);
+    console.log(`handleInsert`);
+    editModeStore.set({
+      id,
+      mode: "insert",
+      type: "pane",
+      payload: {
+        storyFragment: id,
+        index,
+        selectedDesign,
+        cancelInsert,
+      },
+    });
+    handleToggleOn(false, `pane-insert`);
+  };
+
   return (
-    <div className="py-6 bg-mywhite shadow-inner">
+    <div id="pane-insert" className="py-6 bg-mywhite shadow-inner">
       <div className="px-6 flex justify-center space-x-4 mb-4">
         <div className="flex-grow max-w-sm">
           <Combobox
@@ -120,6 +141,7 @@ const DesignNewPane = ({
           <button
             className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("prev")}
+            disabled={saving}
             title="Previous design"
           >
             <ChevronLeftIcon className="h-5 w-5" />
@@ -127,6 +149,7 @@ const DesignNewPane = ({
           <button
             className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("next")}
+            disabled={saving}
             title="Next design"
           >
             <ChevronRightIcon className="h-5 w-5" />
@@ -134,6 +157,7 @@ const DesignNewPane = ({
           <button
             className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange/20 hover:text-black transition-colors h-full flex flex-col justify-center"
             onClick={() => cancelInsert()}
+            disabled={saving}
             aria-label="Cancel"
             title="Cancel"
           >
@@ -142,7 +166,8 @@ const DesignNewPane = ({
           {selectedDesign ? (
             <button
               className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
-              onClick={() => console.log(`coming soon!`)}
+              onClick={() => handleInsert()}
+              disabled={saving}
               aria-label="Use this Design"
               title="Use this Design"
             >

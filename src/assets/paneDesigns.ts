@@ -12,7 +12,6 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "titleText",
     name: "Title with paragraph",
-    description: "Standard fare; heading and paragraph styles",
     panePayload: {
       heightOffsetDesktop: 0,
       heightOffsetTablet: 0,
@@ -76,8 +75,7 @@ export const paneDesigns: PaneDesign[] = [
   },
   {
     id: "text",
-    name: "Paragraphs",
-    description: "Standard fare; heading and paragraph styles",
+    name: "Just text starter",
     panePayload: {
       heightOffsetDesktop: 0,
       heightOffsetTablet: 0,
@@ -142,7 +140,6 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "modal",
     name: "Modal with title",
-    description: "Pick a modal; includes heading 2 styles",
     panePayload: {
       heightOffsetDesktop: 0,
       heightOffsetTablet: 0,
@@ -197,7 +194,6 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "fancy",
     name: "Fancy title section",
-    description: "The works *includes shapes and heading 2 + paragraph styles",
     panePayload: {
       heightOffsetDesktop: 0,
       heightOffsetTablet: 0,
@@ -288,7 +284,6 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "borderedText",
     name: "Bordered paragraphs",
-    description: "Includes parent and paragraph styles",
     panePayload: {
       heightOffsetDesktop: 0,
       heightOffsetTablet: 0,
@@ -362,7 +357,6 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks",
     name: "Transition Shape",
-    description: "Add some personality...",
     panePayload: {
       heightOffsetDesktop: 0,
       heightOffsetTablet: 0,

@@ -117,6 +117,8 @@ export const PaneInsert = (props: {
               Insert this Pane
             </button>
           ) : null}
+        </div>
+        <div className="w-full mt-4">
           <button
             type="button"
             onClick={toggleOff}

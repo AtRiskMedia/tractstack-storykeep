@@ -273,6 +273,18 @@ export const StoryFragment = (props: { id: string }) => {
                   viewportKey={viewportKey}
                 />
               </div>
+            ) : thisPaneIds.length !== paneIds.length && paneId !== `insert` ? (
+              <div className="relative">
+                <div className="absolute inset-0 bg-black/85 z-[8999]"></div>
+                <PaneWrapper
+                  id={paneId}
+                  viewportKey={viewportKey}
+                  insertPane={insertPane}
+                  toolMode={toolMode}
+                  toolAddMode={toolAddMode}
+                  isDesigningNew={thisPaneIds.length !== paneIds.length}
+                />
+              </div>
             ) : (
               <PaneWrapper
                 id={paneId}

@@ -8,6 +8,8 @@ import {
   storyFragmentTailwindBgColour,
   storyFragmentMenuId,
   storyFragmentSocialImagePath,
+  paneTitle,
+  paneSlug,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -34,6 +36,8 @@ const storeMap: StoreMapType = {
   storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
   storyFragmentSocialImagePath: storyFragmentSocialImagePath,
   storyFragmentMenuId: storyFragmentMenuId,
+  paneTitle: paneTitle,
+  paneSlug: paneSlug,
   // Add other stores here
 };
 
@@ -46,6 +50,9 @@ const preValidationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
     value.length <= 80 &&
     /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?[\w-]*\.?(?:png|jpg)?$/.test(value),
   storyFragmentMenuId: (value: string) => value.length <= 32,
+  paneTitle: (value: string) => value.length <= 80,
+  paneSlug: (value: string) =>
+    value.length === 0 || (value.length <= 50 && /^[a-z0-9-]*$/.test(value)),
   // Add more pre-validation functions for other fields as needed
 };
 
@@ -64,6 +71,11 @@ const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
       /^\/?([\w-.]+(?:\/[\w-.]+)*\/)?[\w-]+\.(?:png|jpg)$/.test(value)),
   storyFragmentMenuId: (value: string) =>
     value.length > 0 && value.length <= 32,
+  paneTitle: (value: string) => value.length > 0 && value.length <= 80,
+  paneSlug: (value: string) =>
+    value.length > 0 &&
+    value.length <= 50 &&
+    /^[a-z](?:[a-z0-9-]*[a-z0-9])?$/.test(value),
   // Add more validation functions for other fields as needed
 };
 

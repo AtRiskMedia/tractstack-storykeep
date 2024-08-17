@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { ulid } from "ulid";
 
 import {
   editModeStore,
@@ -83,7 +84,10 @@ export const EditModal = ({ type }: EditModalProps) => {
   return (
     <div className="relative">
       <div className="absolute right-4 top-4">
-        <button title="Close panel" onClick={() => toggleOffEditModal()}>
+        <button
+          title={$editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`}
+          onClick={() => toggleOffEditModal()}
+        >
           <XMarkIcon className="w-4 h-4 text-black/50 hover:text-black" />
         </button>
       </div>
@@ -96,7 +100,12 @@ export const EditModal = ({ type }: EditModalProps) => {
         ) : $editMode?.type === `pane` &&
           $editMode?.mode === `insert` &&
           typeof $editMode?.payload !== `undefined` ? (
-          <PaneInsert id={$editMode.id} payload={$editMode.payload} />
+          <PaneInsert
+            storyFragmentId={$editMode.id}
+            paneId={ulid()}
+            payload={$editMode.payload}
+            toggleOff={toggleOffEditModal}
+          />
         ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
           <PaneSettings id={$editMode.id} />
         ) : $editMode?.type === `pane` &&

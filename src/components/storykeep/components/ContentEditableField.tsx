@@ -30,6 +30,10 @@ const ContentEditableField = ({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        return false;
+      }
       if (onKeyDown) {
         const shouldContinue = onKeyDown(event);
         if (!shouldContinue) {
@@ -39,16 +43,6 @@ const ContentEditableField = ({
     },
     [onKeyDown]
   );
-
-  const handlePaste = useCallback((event: ClipboardEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const text = event.clipboardData.getData("text/plain");
-    const sanitizedText = text
-      .replace(/[\r\n]+/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    document.execCommand("insertText", false, sanitizedText);
-  }, []);
 
   const setCursorPosition = useCallback(
     (element: HTMLElement, position: number) => {
@@ -88,6 +82,31 @@ const ContentEditableField = ({
       }
     }
   }, [onChange, internalValue, setCursorPosition]);
+
+  const handlePaste = useCallback(
+    (event: ClipboardEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      const text = event.clipboardData.getData("text/plain");
+      const sanitizedText = text
+        .replace(/[\r\n]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(sanitizedText));
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        // Trigger the change handler
+        handleContentChange();
+      }
+    },
+    [handleContentChange]
+  );
 
   const handleFocus = useCallback(() => {
     onEditingChange?.(true);
@@ -143,7 +162,7 @@ const ContentEditableField = ({
       onFocus={handleFocus}
       onBlur={handleBlur}
       onPaste={handlePaste}
-      onKeyDown={onKeyDown ? handleKeyDown : undefined}
+      onKeyDown={handleKeyDown}
       style={{
         ...style,
         minHeight: "1em",

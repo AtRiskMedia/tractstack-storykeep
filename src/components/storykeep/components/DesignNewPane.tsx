@@ -53,7 +53,6 @@ const DesignNewPane = ({
 
   const handleInsert = () => {
     setSaving(true);
-    console.log(`handleInsert`);
     editModeStore.set({
       id,
       mode: "insert",
@@ -139,7 +138,7 @@ const DesignNewPane = ({
         </div>
         <div className="flex items-stretch h-[50px] space-x-2">
           <button
-            className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
+            className="bg-mylightgrey disabled:hover:bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("prev")}
             disabled={saving}
             title="Previous design"
@@ -147,7 +146,7 @@ const DesignNewPane = ({
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
+            className="bg-mylightgrey disabled:hover:bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("next")}
             disabled={saving}
             title="Next design"
@@ -155,7 +154,7 @@ const DesignNewPane = ({
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange/20 hover:text-black transition-colors h-full flex flex-col justify-center"
+            className="bg-myblue disabled:hover:bg-myblue disabled:hover:text-white text-white rounded-lg p-2 py-1 hover:bg-myorange/20 hover:text-black transition-colors h-full flex flex-col justify-center"
             onClick={() => cancelInsert()}
             disabled={saving}
             aria-label="Cancel"
@@ -165,7 +164,7 @@ const DesignNewPane = ({
           </button>
           {selectedDesign ? (
             <button
-              className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
+              className="bg-myorange disabled:hover:bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
               onClick={() => handleInsert()}
               disabled={saving}
               aria-label="Use this Design"

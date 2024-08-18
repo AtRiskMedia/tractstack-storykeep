@@ -379,7 +379,7 @@ export interface PaneDatum {
   slug: string;
   created: Date;
   changed: Date | null;
-  markdown: MarkdownDatum;
+  markdown: MarkdownDatum | false;
   optionsPayload: PaneOptionsPayload;
   isContextPane: boolean;
   heightOffsetDesktop: number;

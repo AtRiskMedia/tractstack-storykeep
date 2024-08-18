@@ -79,7 +79,7 @@ const PreviewPaneRenderer = ({
                 <BgPane payload={fragment} viewportKey={viewportKey} />
               </div>
             );
-          } else if (fragment.type === `markdown`) {
+          } else if (fragment.type === `markdown` && markdown) {
             return (
               <div
                 key={idx}

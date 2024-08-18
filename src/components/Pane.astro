@@ -15,6 +15,7 @@ interface Props {
 }
 
 const { payload, slug } = Astro.props;
+console.log(1, payload.markdown);
 
 // - if paneHeightRatio[Desktop|Tablet|Mobile], calculate height and inject
 const paneHeightRatioDesktop =
@@ -107,7 +108,7 @@ const paneFragments =
             style={paneFragmentStyle}
           >
             {f.type === `bgPane` ? <BgPane payload={f as BgPaneDatum} /> : null}
-            {f.type === `markdown` ? (
+            {f.type === `markdown` && payload.markdown ? (
               <MarkdownWrapper
                 payload={f}
                 markdown={payload.markdown}

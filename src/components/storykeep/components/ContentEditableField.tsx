@@ -47,7 +47,12 @@ const ContentEditableField = ({
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "Enter") {
+      if (onKeyDown) {
+        const shouldContinue = onKeyDown(event);
+        if (!shouldContinue) {
+          event.preventDefault();
+        }
+      } else if (event.key === "Enter") {
         event.preventDefault();
         return false;
       }
@@ -70,12 +75,6 @@ const ContentEditableField = ({
           event.preventDefault();
           insertTextAtCursor(event.key.toLowerCase());
           return false;
-        }
-      }
-      if (onKeyDown) {
-        const shouldContinue = onKeyDown(event);
-        if (!shouldContinue) {
-          event.preventDefault();
         }
       }
     },

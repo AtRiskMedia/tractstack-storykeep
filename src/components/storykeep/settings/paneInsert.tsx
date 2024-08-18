@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ulid } from "ulid";
+import preparePreviewPane from "../../../utils/compositor/preparePreviewPane";
 import { useStore } from "@nanostores/react";
 import {
   toolModeStore,
@@ -111,38 +112,38 @@ export const PaneInsert = (props: {
     return handleEditingChange(storeKey, editing);
   };
   const handleSave = () => {
-    console.log(`insert new pane: ${paneId}`, payload);
+    const paneData = preparePreviewPane(payload.selectedDesign);
     const newPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
     newPaneIds.splice(payload.index, 0, paneId);
     const paneStores = [
-      { store: paneIsContextPane, value: false },
+      { store: paneIsContextPane, value: paneData.isContextPane },
       {
         store: paneHeightOffsetDesktop,
-        value: payload.selectedDesign.panePayload.heightOffsetDesktop,
+        value: paneData.heightOffsetDesktop,
       },
       {
         store: paneHeightOffsetMobile,
-        value: payload.selectedDesign.panePayload.heightOffsetMobile,
+        value: paneData.heightOffsetMobile,
       },
       {
         store: paneFiles,
-        value: [],
+        value: paneData.files,
       },
       {
         store: paneHeightOffsetTablet,
-        value: payload.selectedDesign.panePayload.heightOffsetTablet,
+        value: paneData.heightOffsetTablet,
       },
       {
         store: paneHeightRatioDesktop,
-        value: payload.selectedDesign.panePayload.heightRatioDesktop,
+        value: paneData.heightRatioDesktop,
       },
       {
         store: paneHeightRatioMobile,
-        value: payload.selectedDesign.panePayload.heightRatioMobile,
+        value: paneData.heightRatioMobile,
       },
       {
         store: paneHeightRatioTablet,
-        value: payload.selectedDesign.panePayload.heightRatioTablet,
+        value: paneData.heightRatioTablet,
       },
       {
         store: paneIsHiddenPane,
@@ -173,69 +174,70 @@ export const PaneInsert = (props: {
         /* eslint-disable @typescript-eslint/no-explicit-any */
       } as any);
     });
-
     // Process PaneFragments
-    const thisPaneFragmentIds =
-      payload.selectedDesign.fragments.forEach(
-        (paneFragment: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) => {
-          const paneFragmentId = ulid();
-          switch (paneFragment.type) {
-            case `bgColour`:
-              paneFragmentBgColour.set({
-                ...paneFragmentBgColour.get(),
-                [paneFragmentId]: createFieldWithHistory(paneFragment),
-              });
-              break;
-            case `bgPane`:
-              paneFragmentBgPane.set({
-                ...paneFragmentBgPane.get(),
-                [paneFragmentId]: createFieldWithHistory(paneFragment),
-              });
-              break;
-            case `markdown`:
+    const thisPaneFragmentIds = paneData?.optionsPayload?.paneFragmentsPayload
+      ?.map((paneFragment: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) => {
+        const paneFragmentId = ulid();
+        switch (paneFragment.type) {
+          case `bgColour`:
+            paneFragmentBgColour.set({
+              ...paneFragmentBgColour.get(),
+              [paneFragmentId]: createFieldWithHistory(paneFragment),
+            });
+            return paneFragmentId;
+          case `bgPane`:
+            paneFragmentBgPane.set({
+              ...paneFragmentBgPane.get(),
+              [paneFragmentId]: createFieldWithHistory(paneFragment),
+            });
+            return paneFragmentId;
+          case `markdown`:
+            if (paneData.markdown) {
               paneFragmentMarkdown.set({
                 ...paneFragmentMarkdown.get(),
                 [paneFragmentId]: createFieldWithHistory({
-                  markdown: payload.markdown,
+                  markdown: paneData.markdown,
                   payload: paneFragment,
                   type: `markdown`,
                 }),
               });
               paneMarkdownFragmentId.set({
                 ...paneMarkdownFragmentId.get(),
-                [payload.id]: createFieldWithHistory(paneFragmentId),
+                [paneId]: createFieldWithHistory(paneFragmentId),
               });
-              break;
-            default:
-              console.log(
-                `ERROR: Unknown paneFragment ${JSON.stringify(paneFragment)}`
-              );
-          }
-          // this needs to be done differently...
-          //const paneFragmentKeys: StoreKey[] = [
-          //  "paneFragmentBgColour",
-          //  "paneFragmentBgPane",
-          //  "paneFragmentMarkdown",
-          //];
-          //const emptyPaneFragment = paneFragmentKeys.reduce(
-          //  (acc, key) => ({ ...acc, [key]: false }),
-          //  {} as Record<StoreKey, boolean>
-          //);
-          //unsavedChangesStore.setKey(paneFragmentId, emptyPaneFragment);
-          //uncleanDataStore.setKey(paneFragmentId, emptyPaneFragment);
-          //temporaryErrorsStore.setKey(
-          //  paneFragmentId,
-          //  emptyPaneFragment
-          //);
-          return paneFragmentId;
+            } else console.log(`ERROR constructing markdown`, paneData);
+            return paneFragmentId;
+          default:
+            console.log(
+              `ERROR: Unknown paneFragment ${JSON.stringify(paneFragment)}`
+            );
+            return null;
         }
-      ) || [];
-
+        // this needs to be done differently...
+        //const paneFragmentKeys: StoreKey[] = [
+        //  "paneFragmentBgColour",
+        //  "paneFragmentBgPane",
+        //  "paneFragmentMarkdown",
+        //];
+        //const emptyPaneFragment = paneFragmentKeys.reduce(
+        //  (acc, key) => ({ ...acc, [key]: false }),
+        //  {} as Record<StoreKey, boolean>
+        //);
+        //unsavedChangesStore.setKey(paneFragmentId, emptyPaneFragment);
+        //uncleanDataStore.setKey(paneFragmentId, emptyPaneFragment);
+        //temporaryErrorsStore.setKey(
+        //  paneFragmentId,
+        //  emptyPaneFragment
+        //);
+      })
+      .filter((item): item is string => item !== null);
     // link pane fragments to pane
-    paneFragmentIds.set({
-      ...paneFragmentIds.get(),
-      [paneId]: createFieldWithHistory(thisPaneFragmentIds),
-    });
+    if (thisPaneFragmentIds)
+      paneFragmentIds.set({
+        ...paneFragmentIds.get(),
+        [paneId]: createFieldWithHistory(thisPaneFragmentIds),
+      });
+    else console.log(`ERROR constructing markdown`, paneData);
     // init pane
     paneInit.set({
       ...paneInit.get(),

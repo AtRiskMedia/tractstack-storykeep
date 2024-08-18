@@ -233,18 +233,20 @@ export const StoryKeepStore = (props: {
                       });
                       break;
                     case `markdown`:
-                      paneFragmentMarkdown.set({
-                        ...paneFragmentMarkdown.get(),
-                        [paneFragmentId]: createFieldWithHistory({
-                          markdown: payload.markdown,
-                          payload: paneFragment,
-                          type: `markdown`,
-                        }),
-                      });
-                      paneMarkdownFragmentId.set({
-                        ...paneMarkdownFragmentId.get(),
-                        [payload.id]: createFieldWithHistory(paneFragmentId),
-                      });
+                      if (payload.markdown) {
+                        paneFragmentMarkdown.set({
+                          ...paneFragmentMarkdown.get(),
+                          [paneFragmentId]: createFieldWithHistory({
+                            markdown: payload.markdown,
+                            payload: paneFragment,
+                            type: `markdown`,
+                          }),
+                        });
+                        paneMarkdownFragmentId.set({
+                          ...paneMarkdownFragmentId.get(),
+                          [payload.id]: createFieldWithHistory(paneFragmentId),
+                        });
+                      }
                       break;
                     default:
                       console.log(

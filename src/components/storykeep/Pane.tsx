@@ -130,7 +130,6 @@ const Pane = (props: {
       viewportKey,
     ]
   );
-  console.log(id, memoizedPaneData);
 
   useEffect(() => {
     if ($paneInit[id]?.init) setIsClient(true);
@@ -178,7 +177,7 @@ const Pane = (props: {
               <MarkdownWrapper
                 readonly={false}
                 payload={fragment.payload}
-                markdown={fragment.markdown}
+                markdown={fragment.markdown!}
                 files={memoizedPaneData.files}
                 paneHeight={memoizedPaneData.paneHeight}
                 paneId={id}

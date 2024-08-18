@@ -27,7 +27,7 @@ import {
   handleToggleOff,
 } from "../../utils/storykeep";
 import { cleanString, debounce } from "../../utils/helpers";
-import type {StoreKey, ContentMap, ToolMode, ToolAddMode } from "../../types";
+import type { StoreKey, ContentMap, ToolMode, ToolAddMode } from "../../types";
 //import { tursoClient } from "../../api/tursoClient";
 //import {
 //  UnauthorizedError,

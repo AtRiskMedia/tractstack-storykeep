@@ -41,6 +41,14 @@ const storeMap: StoreMapType = {
   // Add other stores here
 };
 
+export function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
+  return {
+    current: value,
+    original: value,
+    history: [],
+  };
+}
+
 const preValidationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   storyFragmentTailwindBgColour: (value: string) => value.length <= 20,
   storyFragmentTitle: (value: string) => value.length <= 80,
@@ -91,7 +99,7 @@ const initializeLastUpdateTime = (
   );
 };
 
-export const useStoryKeepUtils = (id: string) => {
+export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   const [isEditing, setIsEditing] = useState<
     Partial<Record<StoreKey, boolean>>
   >({});
@@ -119,7 +127,10 @@ export const useStoryKeepUtils = (id: string) => {
     const store = storeMap[storeKey];
     if (!store) return false;
 
-    const isValid = isValidValue(storeKey, newValue);
+    const isValid =
+      isValidValue(storeKey, newValue) &&
+      usedSlugs &&
+      !usedSlugs.includes(newValue);
     const isPreValid = isPreValidValue(storeKey, newValue);
     if (!isPreValid) {
       // don't save to undo if preValid fails

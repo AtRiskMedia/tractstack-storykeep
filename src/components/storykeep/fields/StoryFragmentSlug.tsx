@@ -51,6 +51,7 @@ const StoryFragmentSlug = ({
             }
             placeholder="Enter slug here"
             className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+            hyphenate={true}
           />
           {($uncleanData[id]?.storyFragmentSlug ||
             $temporaryErrors[id]?.storyFragmentSlug) && (
@@ -83,6 +84,7 @@ const StoryFragmentSlug = ({
           <li className="pr-6 py-2">
             Avoid numbers and dates unless necessary.
           </li>
+          <li className="pr-6 py-2 font-bold">No Duplicates!</li>
         </ul>
       )}
     </>

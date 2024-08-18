@@ -10,6 +10,7 @@ interface ContentEditableFieldProps {
   onKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => boolean;
   placeholder?: string;
   style?: CSSProperties;
+  hyphenate?: boolean;
 }
 
 const ContentEditableField = ({
@@ -21,6 +22,7 @@ const ContentEditableField = ({
   className,
   placeholder = "",
   style = {},
+  hyphenate = false,
 }: ContentEditableFieldProps) => {
   const contentEditableRef = useRef<HTMLDivElement>(null);
   const cursorPositionRef = useRef<number>(0);
@@ -28,11 +30,47 @@ const ContentEditableField = ({
   const isInitialMount = useRef(true);
   const [editing, setEditing] = useState(false);
 
+  const insertTextAtCursor = useCallback((text: string) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+      const textNode = document.createTextNode(text);
+      range.insertNode(textNode);
+      range.setStartAfter(textNode);
+      range.setEndAfter(textNode);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      handleContentChange();
+    }
+  }, []);
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (event.key === "Enter") {
         event.preventDefault();
         return false;
+      }
+      if (hyphenate) {
+        if (event.key === " ") {
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            if (range.startOffset > 0) {
+              event.preventDefault();
+              insertTextAtCursor("-");
+              return false;
+            }
+          }
+        } else if (
+          event.key.length === 1 &&
+          event.key >= "A" &&
+          event.key <= "Z"
+        ) {
+          event.preventDefault();
+          insertTextAtCursor(event.key.toLowerCase());
+          return false;
+        }
       }
       if (onKeyDown) {
         const shouldContinue = onKeyDown(event);

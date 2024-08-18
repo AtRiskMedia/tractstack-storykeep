@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ulid } from "ulid";
-
 import {
   editModeStore,
   paneInit,
@@ -15,12 +14,14 @@ import { PaneSettings } from "./settings/pane";
 import { PaneInsert } from "./settings/paneInsert";
 import { PaneAstStyles } from "./settings/styles";
 import { handleToggleOff } from "../../utils/storykeep";
+import type { ContentMap } from "../../types";
 
 interface EditModalProps {
   type: "desktop" | "mobile";
+  contentMap: ContentMap[];
 }
 
-export const EditModal = ({ type }: EditModalProps) => {
+export const EditModal = ({ type, contentMap }: EditModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
   const $storyFragmentInit = useStore(storyFragmentInit);
@@ -105,6 +106,7 @@ export const EditModal = ({ type }: EditModalProps) => {
             paneId={ulid()}
             payload={$editMode.payload}
             toggleOff={toggleOffEditModal}
+            contentMap={contentMap}
           />
         ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
           <PaneSettings id={$editMode.id} />

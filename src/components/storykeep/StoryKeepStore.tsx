@@ -36,24 +36,17 @@ import {
   uncleanDataStore,
   temporaryErrorsStore,
 } from "../../store/storykeep";
+import { createFieldWithHistory } from "../../utils/storykeep";
 import type {
   StoreKey,
   StoryFragmentDatum,
   PaneDatum,
-  FieldWithHistory,
   BgPaneDatum,
   BgColourDatum,
   MarkdownPaneDatum,
   ImpressionDatum,
+  BeliefDatum,
 } from "../../types";
-
-function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
-  return {
-    current: value,
-    original: value,
-    history: [],
-  };
-}
 
 export const StoryKeepStore = (props: {
   storyfragment: StoryFragmentDatum;
@@ -199,23 +192,19 @@ export const StoryKeepStore = (props: {
               });
             }
 
-            if (payload?.optionsPayload?.heldBeliefs?.length) {
-              paneHeldBeliefs.set({
-                ...paneHeldBeliefs.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.heldBeliefs
-                ),
-              });
-            }
+            paneHeldBeliefs.set({
+              ...paneHeldBeliefs.get(),
+              [payload.id]: createFieldWithHistory(
+                payload.optionsPayload.heldBeliefs || ([] as BeliefDatum[])
+              ),
+            });
 
-            if (payload?.optionsPayload?.withheldBeliefs?.length) {
-              paneWithheldBeliefs.set({
-                ...paneWithheldBeliefs.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.withheldBeliefs
-                ),
-              });
-            }
+            paneWithheldBeliefs.set({
+              ...paneWithheldBeliefs.get(),
+              [payload.id]: createFieldWithHistory(
+                payload.optionsPayload.withheldBeliefs || ([] as BeliefDatum[])
+              ),
+            });
 
             if (payload?.files) {
               paneFiles.set({

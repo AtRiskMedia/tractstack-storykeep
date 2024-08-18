@@ -5,21 +5,52 @@ import {
   paneTitle,
   paneSlug,
   uncleanDataStore,
+  paneMarkdownFragmentId,
+  paneIsContextPane,
+  paneHeightOffsetDesktop,
+  paneHeightOffsetMobile,
+  paneHeightOffsetTablet,
+  paneHeightRatioDesktop,
+  paneHeightRatioMobile,
+  paneHeightRatioTablet,
+  paneFragmentIds,
+  paneFragmentMarkdown,
+  paneFragmentBgPane,
+  paneFragmentBgColour,
+  paneIsHiddenPane,
+  paneHasOverflowHidden,
+  paneHasMaxHScreen,
+  paneFiles,
+  paneCodeHook,
+  paneImpression,
+  paneHeldBeliefs,
+  paneWithheldBeliefs,
 } from "../../../store/storykeep";
 import { cleanString } from "../../../utils/helpers";
-import { useStoryKeepUtils } from "../../../utils/storykeep";
+import {
+  createFieldWithHistory,
+  useStoryKeepUtils,
+} from "../../../utils/storykeep";
 import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
-import type { StoreKey } from "../../../types";
+import type {
+  BgPaneDatum,
+  BgColourDatum,
+  MarkdownPaneDatum,
+  ContentMap,
+  StoreKey,
+  BeliefDatum,
+} from "../../../types";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 export const PaneInsert = (props: {
   storyFragmentId: string;
   paneId: string;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   payload: any;
+  contentMap: ContentMap[];
   toggleOff: () => void;
 }) => {
-  const { storyFragmentId, paneId, payload, toggleOff } = props;
+  const { contentMap, storyFragmentId, paneId, payload, toggleOff } = props;
   const [isClient, setIsClient] = useState(false);
   const $uncleanData = useStore(uncleanDataStore, { keys: [paneId] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
@@ -27,8 +58,11 @@ export const PaneInsert = (props: {
   });
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
+  const usedSlugs = contentMap
+    .filter(item => item.type === "Pane")
+    .map(item => item.slug);
   const { updateStoreField, handleEditingChange, handleUndo } =
-    useStoryKeepUtils(paneId);
+    useStoryKeepUtils(paneId, usedSlugs);
   const newPaneIds = [
     ...($storyFragmentPaneIds[storyFragmentId]?.current || []),
   ];
@@ -69,12 +103,75 @@ export const PaneInsert = (props: {
     return handleEditingChange(storeKey, editing);
   };
   const handleSave = () => {
-    console.log(`insert!`, payload);
+    console.log(`insert new pane: ${paneId}`, payload);
     const newPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
     newPaneIds.splice(payload.index, 0, paneId);
-    console.log(newPaneIds);
-    console.log(
-      `must ingest new pane into store; then update storyFragmentPaneIds`
+    const paneStores = [
+      { store: paneIsContextPane, value: false },
+      {
+        store: paneHeightOffsetDesktop,
+        value: payload.selectedDesign.panePayload.heightOffsetDesktop,
+      },
+      {
+        store: paneHeightOffsetMobile,
+        value: payload.selectedDesign.panePayload.heightOffsetMobile,
+      },
+      {
+        store: paneHeightOffsetTablet,
+        value: payload.selectedDesign.panePayload.heightOffsetTablet,
+      },
+      {
+        store: paneHeightRatioDesktop,
+        value: payload.selectedDesign.panePayload.heightRatioDesktop,
+      },
+      {
+        store: paneHeightRatioMobile,
+        value: payload.selectedDesign.panePayload.heightRatioMobile,
+      },
+      {
+        store: paneHeightRatioTablet,
+        value: payload.selectedDesign.panePayload.heightRatioTablet,
+      },
+      {
+        store: paneIsHiddenPane,
+        value: false,
+      },
+      {
+        store: paneHasOverflowHidden,
+        value: false,
+      },
+      {
+        store: paneHasMaxHScreen,
+        value: false,
+      },
+      {
+        store: paneHeldBeliefs,
+        value: [] as BeliefDatum[],
+      },
+      {
+        store: paneWithheldBeliefs,
+        value: [] as BeliefDatum[],
+      },
+    ];
+    paneStores.forEach(({ store, value }) => {
+      store.set({
+        ...store.get(),
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        [paneId]: createFieldWithHistory(value as any),
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+      } as any);
+      console.log(`setting:`, value, store.get()[paneId].current);
+    });
+    payload.selectedDesign.fragments.forEach(
+      (f: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) => {
+        if (f.type === `markdown`) {
+          console.log(`must ingest markdown paneFragment:`, f);
+        } else if (f.type === `bgPane`) {
+          console.log(`must ingest bgPane paneFragment:`, f);
+        } else if (f.type === `bgColour`) {
+          console.log(`must ingest bgColour paneFragment:`, f);
+        }
+      }
     );
   };
 
@@ -107,7 +204,14 @@ export const PaneInsert = (props: {
             handleUndo={handleUndo}
           />
         </div>
-        <div className="mt-4 flex gap-x-4">
+        <div className="w-full mt-4 flex gap-x-6">
+          <button
+            type="button"
+            onClick={toggleOff}
+            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack"
+          >
+            Cancel
+          </button>
           {!$uncleanData[paneId].paneSlug && !$uncleanData[paneId].paneTitle ? (
             <button
               type="button"
@@ -117,15 +221,6 @@ export const PaneInsert = (props: {
               Insert this Pane
             </button>
           ) : null}
-        </div>
-        <div className="w-full mt-4">
-          <button
-            type="button"
-            onClick={toggleOff}
-            className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack"
-          >
-            Cancel
-          </button>
         </div>
       </div>
     </div>

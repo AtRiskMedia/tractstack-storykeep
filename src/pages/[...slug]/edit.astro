@@ -1,10 +1,14 @@
 ---
-import { getStoryFragmentBySlug /* getDatumPayload */ } from "../../api/turso";
+import {
+  getContentMap,
+  getStoryFragmentBySlug /* getDatumPayload */,
+} from "../../api/turso";
 import Layout from "@layouts/StoryKeep.astro";
 import { EditModal } from "@components/storykeep/EditModal";
 import { StoryFragment } from "@components/storykeep/StoryFragment";
 import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
 import { StoryFragmentHeader } from "@components/storykeep/StoryFragmentHeader";
+import type { ContentMap } from "../../types";
 
 // which storyfragment?
 const { slug } = Astro.params;
@@ -20,6 +24,8 @@ const storyfragment = await getStoryFragmentBySlug(slug);
 if (!storyfragment) {
   return Astro.redirect("/404");
 }
+
+const contentMap: ContentMap[] = await getContentMap();
 
 // get full datum payload (resources, files, tractstacks, menus)
 //const payload = await getDatumPayload();
@@ -41,7 +47,12 @@ if (!storyfragment) {
       class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
       id="main-header"
     >
-      <StoryFragmentHeader client:only="react" id={storyfragment.id} />
+      <StoryFragmentHeader
+        client:only="react"
+        id={storyfragment.id}
+        slug={storyfragment.slug}
+        contentMap={contentMap}
+      />
     </header>
 
     <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
@@ -54,14 +65,14 @@ if (!storyfragment) {
       id="edit-pane"
       class="fixed right-0 top-0 bottom-0 w-1/3 bg-mywhite border-l-4 border-dotted border-black/20 p-4 overflow-y-auto transition-all duration-300 ease-in-out transform translate-x-full overflow-y-auto"
     >
-      <EditModal client:only="react" type="desktop" />
+      <EditModal client:only="react" type="desktop" contentMap={contentMap} />
     </div>
 
     <div
       id="edit-modal-mobile"
       class="fixed bottom-0 left-0 right-0 bg-mywhite shadow-inner border-t-4 border-dotted border-black/20 z-40 transition-all duration-300 ease-in-out transform translate-y-full overflow-y-auto"
     >
-      <EditModal client:only="react" type="mobile" />
+      <EditModal client:only="react" type="mobile" contentMap={contentMap} />
     </div>
   </div>
 

@@ -17,12 +17,14 @@ const DesignNewPane = ({
   id,
   index,
   cancelInsert,
+  doInsert,
   tailwindBgColour,
   viewportKey,
 }: {
   id: string;
   index: number;
   cancelInsert: () => void;
+  doInsert: (newPaneIds: string[]) => void;
   tailwindBgColour: string;
   viewportKey: ViewportAuto;
 }) => {
@@ -62,6 +64,7 @@ const DesignNewPane = ({
         index,
         selectedDesign,
         cancelInsert,
+        doInsert,
       },
     });
     handleToggleOn(false, `pane-insert`);

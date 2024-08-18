@@ -118,7 +118,6 @@ export const StoryKeepStore = (props: {
               ...paneInit.get(),
               [payload.id]: { init: true },
             });
-
             // Initialize Pane stores
             const paneStores = [
               { store: paneTitle, value: payload.title },
@@ -252,22 +251,22 @@ export const StoryKeepStore = (props: {
                         `ERROR: Unknown paneFragment ${JSON.stringify(paneFragment)}`
                       );
                   }
-                  const paneFragmentKeys: StoreKey[] = [
-                    "paneFragmentBgColour",
-                    "paneFragmentBgPane",
-                    "paneFragmentMarkdown",
-                  ];
-                  const emptyPaneFragment = paneFragmentKeys.reduce(
-                    (acc, key) => ({ ...acc, [key]: false }),
-                    {} as Record<StoreKey, boolean>
-                  );
-
-                  unsavedChangesStore.setKey(paneFragmentId, emptyPaneFragment);
-                  uncleanDataStore.setKey(paneFragmentId, emptyPaneFragment);
-                  temporaryErrorsStore.setKey(
-                    paneFragmentId,
-                    emptyPaneFragment
-                  );
+                  // this needs to be done differently...
+                  //const paneFragmentKeys: StoreKey[] = [
+                  //  "paneFragmentBgColour",
+                  //  "paneFragmentBgPane",
+                  //  "paneFragmentMarkdown",
+                  //];
+                  //const emptyPaneFragment = paneFragmentKeys.reduce(
+                  //  (acc, key) => ({ ...acc, [key]: false }),
+                  //  {} as Record<StoreKey, boolean>
+                  //);
+                  //unsavedChangesStore.setKey(paneFragmentId, emptyPaneFragment);
+                  //uncleanDataStore.setKey(paneFragmentId, emptyPaneFragment);
+                  //temporaryErrorsStore.setKey(
+                  //  paneFragmentId,
+                  //  emptyPaneFragment
+                  //);
                   return paneFragmentId;
                 }
               ) || [];

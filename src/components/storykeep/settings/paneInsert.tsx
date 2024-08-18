@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
+import { ulid } from "ulid";
 import { useStore } from "@nanostores/react";
 import {
+  toolModeStore,
   storyFragmentPaneIds,
+  paneInit,
   paneTitle,
   paneSlug,
   uncleanDataStore,
@@ -21,8 +24,6 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneFiles,
-  paneCodeHook,
-  paneImpression,
   paneHeldBeliefs,
   paneWithheldBeliefs,
 } from "../../../store/storykeep";
@@ -49,8 +50,10 @@ export const PaneInsert = (props: {
   payload: any;
   contentMap: ContentMap[];
   toggleOff: () => void;
+  doInsert: (newPaneIds: string[]) => void | null;
 }) => {
-  const { contentMap, storyFragmentId, paneId, payload, toggleOff } = props;
+  const { doInsert, contentMap, storyFragmentId, paneId, payload, toggleOff } =
+    props;
   const [isClient, setIsClient] = useState(false);
   const $uncleanData = useStore(uncleanDataStore, { keys: [paneId] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
@@ -94,11 +97,16 @@ export const PaneInsert = (props: {
   const handleInterceptEdit = (storeKey: StoreKey, editing: boolean) => {
     if (storeKey === `paneTitle` && $paneSlug[paneId].current === ``) {
       const clean = cleanString($paneTitle[paneId].current).substring(0, 50);
+      const newVal = !usedSlugs.includes(clean) ? clean : ``;
       uncleanDataStore.setKey(paneId, {
         ...(uncleanDataStore.get()[paneId] || {}),
-        [`paneSlug`]: clean.length === 0,
+        [`paneSlug`]: newVal.length === 0,
       });
-      paneSlug.setKey(paneId, { current: clean, original: clean, history: [] });
+      paneSlug.setKey(paneId, {
+        current: newVal,
+        original: newVal,
+        history: [],
+      });
     }
     return handleEditingChange(storeKey, editing);
   };
@@ -115,6 +123,10 @@ export const PaneInsert = (props: {
       {
         store: paneHeightOffsetMobile,
         value: payload.selectedDesign.panePayload.heightOffsetMobile,
+      },
+      {
+        store: paneFiles,
+        value: [],
       },
       {
         store: paneHeightOffsetTablet,
@@ -160,19 +172,84 @@ export const PaneInsert = (props: {
         [paneId]: createFieldWithHistory(value as any),
         /* eslint-disable @typescript-eslint/no-explicit-any */
       } as any);
-      console.log(`setting:`, value, store.get()[paneId].current);
     });
-    payload.selectedDesign.fragments.forEach(
-      (f: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) => {
-        if (f.type === `markdown`) {
-          console.log(`must ingest markdown paneFragment:`, f);
-        } else if (f.type === `bgPane`) {
-          console.log(`must ingest bgPane paneFragment:`, f);
-        } else if (f.type === `bgColour`) {
-          console.log(`must ingest bgColour paneFragment:`, f);
+
+    // Process PaneFragments
+    const thisPaneFragmentIds =
+      payload.selectedDesign.fragments.forEach(
+        (paneFragment: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) => {
+          const paneFragmentId = ulid();
+          switch (paneFragment.type) {
+            case `bgColour`:
+              paneFragmentBgColour.set({
+                ...paneFragmentBgColour.get(),
+                [paneFragmentId]: createFieldWithHistory(paneFragment),
+              });
+              break;
+            case `bgPane`:
+              paneFragmentBgPane.set({
+                ...paneFragmentBgPane.get(),
+                [paneFragmentId]: createFieldWithHistory(paneFragment),
+              });
+              break;
+            case `markdown`:
+              paneFragmentMarkdown.set({
+                ...paneFragmentMarkdown.get(),
+                [paneFragmentId]: createFieldWithHistory({
+                  markdown: payload.markdown,
+                  payload: paneFragment,
+                  type: `markdown`,
+                }),
+              });
+              paneMarkdownFragmentId.set({
+                ...paneMarkdownFragmentId.get(),
+                [payload.id]: createFieldWithHistory(paneFragmentId),
+              });
+              break;
+            default:
+              console.log(
+                `ERROR: Unknown paneFragment ${JSON.stringify(paneFragment)}`
+              );
+          }
+          // this needs to be done differently...
+          //const paneFragmentKeys: StoreKey[] = [
+          //  "paneFragmentBgColour",
+          //  "paneFragmentBgPane",
+          //  "paneFragmentMarkdown",
+          //];
+          //const emptyPaneFragment = paneFragmentKeys.reduce(
+          //  (acc, key) => ({ ...acc, [key]: false }),
+          //  {} as Record<StoreKey, boolean>
+          //);
+          //unsavedChangesStore.setKey(paneFragmentId, emptyPaneFragment);
+          //uncleanDataStore.setKey(paneFragmentId, emptyPaneFragment);
+          //temporaryErrorsStore.setKey(
+          //  paneFragmentId,
+          //  emptyPaneFragment
+          //);
+          return paneFragmentId;
         }
-      }
-    );
+      ) || [];
+
+    // link pane fragments to pane
+    paneFragmentIds.set({
+      ...paneFragmentIds.get(),
+      [paneId]: createFieldWithHistory(thisPaneFragmentIds),
+    });
+    // init pane
+    paneInit.set({
+      ...paneInit.get(),
+      [paneId]: { init: true },
+    });
+    // finally update storyfragment paneIds
+    storyFragmentPaneIds.set({
+      ...storyFragmentPaneIds.get(),
+      [storyFragmentId]: createFieldWithHistory(newPaneIds),
+    });
+    // and close edit mode
+    toolModeStore.set({ value: `text` });
+    if (doInsert) doInsert(newPaneIds);
+    toggleOff();
   };
 
   if (!isClient) return <div>Loading...</div>;

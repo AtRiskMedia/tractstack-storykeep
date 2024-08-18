@@ -11,6 +11,7 @@ import {
   uncleanDataStore,
   storyFragmentInit,
   storyFragmentSlug,
+  storyFragmentTitle,
   storyFragmentPaneIds,
   paneFragmentIds,
   viewportStore,
@@ -25,8 +26,8 @@ import {
   handleToggleOn,
   handleToggleOff,
 } from "../../utils/storykeep";
-import { debounce } from "../../utils/helpers";
-import type { ContentMap, ToolMode, ToolAddMode } from "../../types";
+import { cleanString, debounce } from "../../utils/helpers";
+import type {StoreKey, ContentMap, ToolMode, ToolAddMode } from "../../types";
 //import { tursoClient } from "../../api/tursoClient";
 //import {
 //  UnauthorizedError,
@@ -52,6 +53,8 @@ export const StoryFragmentHeader = memo(
       useStoryKeepUtils(id, usedSlugs);
 
     // required stores
+
+    const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
     const $editMode = useStore(editModeStore);
     const $viewportSet = useStore(viewportSetStore);
     const $viewport = useStore(viewportStore);
@@ -126,6 +129,29 @@ export const StoryFragmentHeader = memo(
         });
         handleToggleOn(true);
       }
+    };
+
+    const handleInterceptEdit = (storeKey: StoreKey, editing: boolean) => {
+      if (
+        storeKey === `storyFragmentTitle` &&
+        $storyFragmentSlug[id].current === ``
+      ) {
+        const clean = cleanString($storyFragmentTitle[id].current).substring(
+          0,
+          50
+        );
+        const newVal = !usedSlugs.includes(clean) ? clean : ``;
+        uncleanDataStore.setKey(id, {
+          ...(uncleanDataStore.get()[id] || {}),
+          [`storyFragmentSlug`]: newVal.length === 0,
+        });
+        storyFragmentSlug.setKey(id, {
+          current: newVal,
+          original: newVal,
+          history: [],
+        });
+      }
+      return handleEditingChange(storeKey, editing);
     };
 
     //useEffect(() => {
@@ -261,7 +287,7 @@ export const StoryFragmentHeader = memo(
             <StoryFragmentTitle
               id={id}
               isEditing={isEditing}
-              handleEditingChange={handleEditingChange}
+              handleEditingChange={handleInterceptEdit}
               updateStoreField={updateStoreField}
               handleUndo={handleUndo}
             />

@@ -37,7 +37,7 @@ export const StoryFragment = (props: { id: string }) => {
     { keys: [id] }
   );
   const paneIds = $storyFragmentPaneIds[id]?.current;
-  const [thisPaneIds, setThisPaneIds] = useState<string[]>(paneIds);
+  const [thisPaneIds, setThisPaneIds] = useState<string[] | null>(null);
   const [shouldScroll, setShouldScroll] = useState<number | null>(null);
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
@@ -58,6 +58,9 @@ export const StoryFragment = (props: { id: string }) => {
     setShouldScroll(null);
     setThisPaneIds(paneIds);
   };
+  const doInsert = (newPaneIds: string[]) => {
+    setThisPaneIds(newPaneIds);
+  };
   const insertPane = (paneId: string, position: `above` | `below`) => {
     const index = paneIds.indexOf(paneId);
     if (index >= 0) {
@@ -68,6 +71,10 @@ export const StoryFragment = (props: { id: string }) => {
       setShouldScroll(insertIndex);
     }
   };
+
+  useEffect(() => {
+    setThisPaneIds(paneIds);
+  }, [paneIds]);
 
   useEffect(() => {
     if (typeof shouldScroll === `number`) {
@@ -238,7 +245,7 @@ export const StoryFragment = (props: { id: string }) => {
     }
   }, [$viewport]);
 
-  if (!isClient) return <div>Loading...</div>;
+  if (!isClient || !thisPaneIds) return <div>Loading...</div>;
 
   return (
     <>
@@ -267,6 +274,7 @@ export const StoryFragment = (props: { id: string }) => {
                   id={id}
                   index={idx}
                   cancelInsert={cancelInsert}
+                  doInsert={doInsert}
                   tailwindBgColour={
                     tailwindBgColour ? tailwindBgColour : `bg-white`
                   }

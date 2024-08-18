@@ -129,8 +129,9 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
 
     const isValid =
       isValidValue(storeKey, newValue) &&
-      usedSlugs &&
-      !usedSlugs.includes(newValue);
+      ([`paneSlug`, `storyFragmentSlug`].includes(storeKey)
+        ? usedSlugs && !usedSlugs.includes(newValue)
+        : true);
     const isPreValid = isPreValidValue(storeKey, newValue);
     if (!isPreValid) {
       // don't save to undo if preValid fails

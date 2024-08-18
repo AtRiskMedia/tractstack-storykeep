@@ -106,6 +106,7 @@ export const EditModal = ({ type, contentMap }: EditModalProps) => {
             paneId={ulid()}
             payload={$editMode.payload}
             toggleOff={toggleOffEditModal}
+            doInsert={$editMode?.payload?.doInsert}
             contentMap={contentMap}
           />
         ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (

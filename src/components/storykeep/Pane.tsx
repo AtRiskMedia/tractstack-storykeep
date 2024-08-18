@@ -130,6 +130,7 @@ const Pane = (props: {
       viewportKey,
     ]
   );
+  console.log(id, memoizedPaneData);
 
   useEffect(() => {
     if ($paneInit[id]?.init) setIsClient(true);

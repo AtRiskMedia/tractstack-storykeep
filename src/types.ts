@@ -43,7 +43,7 @@ interface IndexedItem {
 }
 
 export type Tag =
-  | "pane"
+  | "parent"
   | "p"
   | "h2"
   | "h3"

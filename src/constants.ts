@@ -34,7 +34,7 @@ export const tagTitles: Record<Tag, string> = {
   li: `List Item`,
   ol: "Outer Container",
   ul: "Outer Container",
-  pane: "Pane Styles",
+  parent: "Pane Styles",
 };
 
 export const toolAddModes = [

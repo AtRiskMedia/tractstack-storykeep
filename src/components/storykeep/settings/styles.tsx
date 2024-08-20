@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   paneMarkdownFragmentId,
@@ -24,6 +25,7 @@ export const PaneAstStyles = (props: {
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
+  const [parentLayer, setParentLayer] = useState(0);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [id],
   });
@@ -37,6 +39,13 @@ export const PaneAstStyles = (props: {
     generateMarkdownLookup(markdownDatum.markdown.htmlAst);
   const thisTag = markdownLookup.nthTag[targetId.outerIdx];
   const thisTagTitle = tagTitles[thisTag];
+  const hasTextShapeOutside =
+    (markdownDatum.payload.textShapeOutsideDesktop &&
+      markdownDatum.payload.textShapeOutsideDesktop !== `none`) ||
+    (markdownDatum.payload.textShapeOutsideTablet &&
+      markdownDatum.payload.textShapeOutsideTablet !== `none`) ||
+    (markdownDatum.payload.textShapeOutsideMobile &&
+      markdownDatum.payload.textShapeOutsideMobile !== `none`);
   const isListItem =
     typeof targetId.idx === `number`
       ? typeof markdownLookup.listItemsLookup[targetId.outerIdx] === `object` &&
@@ -57,30 +66,52 @@ export const PaneAstStyles = (props: {
         typeof markdownLookup.imagesLookup[targetId.outerIdx][targetId.idx] ===
           `number`
       : null;
-  const imageClassNamesPayload = isImage
-    ? markdownDatum.payload.optionsPayload.classNamesPayload.img
-    : null;
-  const codeItemClassNamesPayload = isCodeItem
-    ? markdownDatum.payload.optionsPayload.classNamesPayload.code
-    : null;
-  console.log(markdownDatum);
-  const listItemClassNamesPayload = isListItem
-    ? markdownDatum.payload.optionsPayload.classNamesPayload.li
-    : null;
-  const outerTagClassNamesPayload = isImage
-    ? markdownDatum.payload.optionsPayload.classNamesPayload.img
-    : markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
-  console.log(markdownDatum.payload.optionsPayload.classNamesPayload);
-  console.log(markdownLookup);
-  console.log(
-    outerTagClassNamesPayload,
-    listItemClassNamesPayload,
-    codeItemClassNamesPayload,
-    imageClassNamesPayload
+  const parentClassNamesPayload =
+    markdownDatum.payload.optionsPayload.classNamesPayload.parent;
+  const parentLayers =
+    (!hasTextShapeOutside &&
+      parentClassNamesPayload &&
+      Object.keys(parentClassNamesPayload).length) ||
+    false;
+  const imageClassNamesPayload =
+    markdownDatum.payload.optionsPayload.classNamesPayload.img;
+  const codeItemClassNamesPayload =
+    markdownDatum.payload.optionsPayload.classNamesPayload.code;
+  const listItemClassNamesPayload =
+    markdownDatum.payload.optionsPayload.classNamesPayload.li;
+  const outerTagClassNamesPayload =
+    markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
+  const classNamesPayload =
+    activeTag === `img`
+      ? imageClassNamesPayload
+      : activeTag === `code`
+        ? codeItemClassNamesPayload
+        : activeTag === `li`
+          ? listItemClassNamesPayload
+          : activeTag === `parent`
+            ? parentClassNamesPayload
+            : outerTagClassNamesPayload;
+
+  const ClassTag = (className: string) => (
+    <div key={className} className="flex items-center">
+      <button
+        className="text-sm py-1 pl-1.5 pr-2.5 bg-white text-black rounded-md hover:bg-myblue hover:text-white"
+        title="Adjust style"
+        onClick={() => setSelectedStyle(className)}
+      >
+        {tailwindClasses[className].title}
+      </button>
+      <button
+        className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange"
+        title="Remove style"
+        onClick={() => console.log(`remove`, className, targetId)}
+      >
+        <XMarkIcon className="w-3 h-5" />
+      </button>
+    </div>
   );
 
   useEffect(() => {
-    console.log(`set-up tabs`);
     const thisTabs: StyleTab[] = [];
     if (isImage) thisTabs.push({ name: `Image`, tag: `img` });
     else if (isCodeItem) thisTabs.push({ name: `Widget`, tag: `code` });
@@ -90,9 +121,12 @@ export const PaneAstStyles = (props: {
       thisTabs.push({ name: `List Item`, tag: `li` });
       thisTabs.push({ name: `List Container`, tag: thisTag });
     }
-    thisTabs.push({ name: `Pane Styles`, tag: `pane` });
+    if (!hasTextShapeOutside)
+      thisTabs.push({ name: `Pane Styles`, tag: `parent` });
     setTabs(thisTabs);
     setActiveTag(thisTabs[0].tag);
+    setSelectedStyle(null);
+    setParentLayer(0);
   }, [id, targetId]);
 
   if (!tabs) return null;
@@ -100,10 +134,10 @@ export const PaneAstStyles = (props: {
     <div
       className={classNames(
         `flex`,
-        type === `mobile` ? `flex-nowrap gap-x-6 gap-y-2` : `flex-wrap`
+        type === `mobile` ? `flex-nowrap gap-x-12 gap-y-2` : `flex-wrap`
       )}
     >
-      <div className={classNames(type === `mobile` ? `w-5/12` : `w-full`)}>
+      <div className={classNames(type === `mobile` ? `max-w-5/12` : `w-full`)}>
         <nav aria-label="Tabs" className="flex space-x-4 mb-1">
           {tabs.map((tab: StyleTab, idx: number) => (
             <button
@@ -122,28 +156,73 @@ export const PaneAstStyles = (props: {
           ))}
         </nav>
         <hr />
-        <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-          {Object.keys(outerTagClassNamesPayload?.classes || []).map(
-            className => (
-              <button
-                key={className}
-                className="text-sm py-1 px-1.5 bg-mylightgrey/20 text-black rounded-md hover:bg-myorange/20"
-                onClick={() => setSelectedStyle(className)}
-              >
-                {tailwindClasses[className].title}
-              </button>
-            )
-          )}
-        </div>
-        <div className="my-6">Add new style selectbox</div>
+        {activeTag !== `parent` && (
+          <>
+            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              {classNamesPayload?.classes &&
+              Object.keys(classNamesPayload.classes).length ? (
+                Object.keys(classNamesPayload.classes).map(className =>
+                  ClassTag(className)
+                )
+              ) : (
+                <span>No styles</span>
+              )}
+            </div>
+            <div className="my-6">todo: Add new style selectbox</div>
+          </>
+        )}
+
+        {activeTag === `parent` && (
+          <>
+            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              Layers:
+              {parentClassNamesPayload?.classes &&
+                Object.keys(parentClassNamesPayload?.classes).map(
+                  (_, idx: number) => (
+                    <span
+                      key={idx}
+                      onClick={() => setParentLayer(idx)}
+                      className={classNames(
+                        "text-sm py-1 px-1.5 rounded-md",
+                        idx !== parentLayer
+                          ? "text-mydarkgrey bg-mylightgrey/20 hover:bg-myorange/20"
+                          : "text-black font-bold"
+                      )}
+                    >
+                      {idx}
+                    </span>
+                  )
+                )}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              {parentClassNamesPayload?.classes &&
+              Array.isArray(parentClassNamesPayload?.classes) ? (
+                Object.keys(parentClassNamesPayload?.classes[parentLayer]).map(
+                  className => ClassTag(className)
+                )
+              ) : (
+                <span>No styles</span>
+              )}
+            </div>
+            <div className="my-6">
+              todo: Add new style selectbox; add/remove layer --${parentLayers}
+            </div>
+          </>
+        )}
       </div>
-      {selectedStyle ? (
-        <div
-          className={classNames(type === `mobile` ? `w-5/12` : `w-full mt-8`)}
-        >
-          Selected style: {selectedStyle}
-        </div>
-      ) : null}
+      <div
+        className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mt-8`)}
+      >
+        {selectedStyle ? (
+          <h4 className="text-lg italic">
+            Styles on: <strong>{tailwindClasses[selectedStyle].title}</strong>
+          </h4>
+        ) : (
+          <h4 className="text-md font-bold text-mydarkgrey">
+            ... select which style to adjust; or add new ones!
+          </h4>
+        )}
+      </div>
     </div>
   );
   //return (

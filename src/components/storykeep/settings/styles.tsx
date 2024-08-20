@@ -34,7 +34,6 @@ export const PaneAstStyles = (props: {
     keys: [markdownFragmentId],
   });
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
-  console.log(markdownDatum);
   const hasModal = markdownDatum.payload.isModal;
   const markdownLookup =
     markdownDatum?.markdown?.htmlAst &&
@@ -97,7 +96,7 @@ export const PaneAstStyles = (props: {
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">
       <button
-        className="text-sm py-1 pl-1.5 pr-2.5 bg-white text-black rounded-md hover:bg-myblue hover:text-white"
+        className="text-sm py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-myblue hover:text-white"
         title="Adjust style"
         onClick={() => setSelectedStyle(className)}
       >
@@ -233,7 +232,7 @@ export const PaneAstStyles = (props: {
         className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mt-8`)}
       >
         {selectedStyle ? (
-          <h4 className="text-lg italic">
+          <h4 className="text-lg">
             Styles on: <strong>{tailwindClasses[selectedStyle].title}</strong>
           </h4>
         ) : (

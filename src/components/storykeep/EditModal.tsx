@@ -114,7 +114,11 @@ export const EditModal = ({ type, contentMap }: EditModalProps) => {
         ) : $editMode?.type === `pane` &&
           $editMode?.mode === `styles` &&
           typeof $editMode.targetId !== `undefined` ? (
-          <PaneAstStyles id={$editMode.id} targetId={$editMode.targetId} />
+          <PaneAstStyles
+            id={$editMode.id}
+            targetId={$editMode.targetId}
+            type={type}
+          />
         ) : null}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
@@ -7,8 +7,13 @@ import {
 } from "../../../store/storykeep";
 import { classNames } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
-import { toolAddModeTitles } from "../../../constants";
-import type { ToolAddMode, PaneAstTargetId } from "../../../types";
+import { tagTitles } from "../../../constants";
+import type { PaneAstTargetId, Tag } from "../../../types";
+
+interface StyleTab {
+  name: string;
+  tag: Tag;
+}
 
 export const PaneAstStyles = (props: {
   id: string;
@@ -16,7 +21,9 @@ export const PaneAstStyles = (props: {
   type: "desktop" | "mobile";
 }) => {
   const { id, targetId, type } = props;
+  const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [id],
   });
@@ -25,39 +32,108 @@ export const PaneAstStyles = (props: {
     keys: [markdownFragmentId],
   });
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
-  console.log(targetId, markdownDatum);
   const markdownLookup =
     markdownDatum?.markdown?.htmlAst &&
     generateMarkdownLookup(markdownDatum.markdown.htmlAst);
-  const thisTag = markdownLookup.nthTag[targetId.outerIdx] as ToolAddMode;
-  const thisClassNamesPayload =
-    markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
+  const thisTag = markdownLookup.nthTag[targetId.outerIdx];
+  const thisTagTitle = tagTitles[thisTag];
+  const isListItem =
+    typeof targetId.idx === `number`
+      ? typeof markdownLookup.listItemsLookup[targetId.outerIdx] === `object` &&
+        typeof markdownLookup.listItemsLookup[targetId.outerIdx][
+          targetId.idx
+        ] === `number`
+      : null;
+  const isCodeItem =
+    typeof targetId.idx === `number`
+      ? typeof markdownLookup.codeItemsLookup[targetId.outerIdx] === `object` &&
+        typeof markdownLookup.codeItemsLookup[targetId.outerIdx][
+          targetId.idx
+        ] === `number`
+      : null;
+  const isImage =
+    typeof targetId.idx === `number`
+      ? typeof markdownLookup.imagesLookup[targetId.outerIdx] === `object` &&
+        typeof markdownLookup.imagesLookup[targetId.outerIdx][targetId.idx] ===
+          `number`
+      : null;
+  const imageClassNamesPayload = isImage
+    ? markdownDatum.payload.optionsPayload.classNamesPayload.img
+    : null;
+  const codeItemClassNamesPayload = isCodeItem
+    ? markdownDatum.payload.optionsPayload.classNamesPayload.code
+    : null;
+  console.log(markdownDatum);
+  const listItemClassNamesPayload = isListItem
+    ? markdownDatum.payload.optionsPayload.classNamesPayload.li
+    : null;
+  const outerTagClassNamesPayload = isImage
+    ? markdownDatum.payload.optionsPayload.classNamesPayload.img
+    : markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
+  console.log(markdownDatum.payload.optionsPayload.classNamesPayload);
   console.log(markdownLookup);
-  console.log(thisTag, toolAddModeTitles[thisTag]);
-  console.log(thisClassNamesPayload);
-  console.log(thisTag);
+  console.log(
+    outerTagClassNamesPayload,
+    listItemClassNamesPayload,
+    codeItemClassNamesPayload,
+    imageClassNamesPayload
+  );
 
+  useEffect(() => {
+    console.log(`set-up tabs`);
+    const thisTabs: StyleTab[] = [];
+    if (isImage) thisTabs.push({ name: `Image`, tag: `img` });
+    else if (isCodeItem) thisTabs.push({ name: `Widget`, tag: `code` });
+    else if (thisTagTitle && !isListItem)
+      thisTabs.push({ name: thisTagTitle, tag: thisTag });
+    if (isListItem) {
+      thisTabs.push({ name: `List Item`, tag: `li` });
+      thisTabs.push({ name: `List Container`, tag: thisTag });
+    }
+    thisTabs.push({ name: `Pane Styles`, tag: `pane` });
+    setTabs(thisTabs);
+    setActiveTag(thisTabs[0].tag);
+  }, [id, targetId]);
+
+  if (!tabs) return null;
   return (
     <div
       className={classNames(
         `flex`,
-        type === `mobile` ? `flex-nowrap gap-x-6` : `flex-wrap`
+        type === `mobile` ? `flex-nowrap gap-x-6 gap-y-2` : `flex-wrap`
       )}
     >
       <div className={classNames(type === `mobile` ? `w-5/12` : `w-full`)}>
-        <h4 className="font-bold mb-2">
-          Styles on this {toolAddModeTitles[thisTag]}
-        </h4>
-        <div className="flex flex-wrap gap-x-3">
-          {Object.keys(thisClassNamesPayload.classes || []).map(className => (
+        <nav aria-label="Tabs" className="flex space-x-4 mb-1">
+          {tabs.map((tab: StyleTab, idx: number) => (
             <button
-              key={className}
-              className="py-2 px-2 bg-mylightgrey/20 text-black rounded-md"
-              onClick={() => setSelectedStyle(className)}
+              key={idx}
+              aria-current={tab.tag === activeTag ? "page" : undefined}
+              onClick={() => setActiveTag(tab.tag)}
+              className={classNames(
+                tab.tag === activeTag
+                  ? "text-black font-bold"
+                  : "text-mydarkgrey hover:text-myorange",
+                "text-sm"
+              )}
             >
-              {tailwindClasses[className].title}
+              {tab.name}
             </button>
           ))}
+        </nav>
+        <hr />
+        <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+          {Object.keys(outerTagClassNamesPayload?.classes || []).map(
+            className => (
+              <button
+                key={className}
+                className="text-sm py-1 px-1.5 bg-mylightgrey/20 text-black rounded-md hover:bg-myorange/20"
+                onClick={() => setSelectedStyle(className)}
+              >
+                {tailwindClasses[className].title}
+              </button>
+            )
+          )}
         </div>
         <div className="my-6">Add new style selectbox</div>
       </div>

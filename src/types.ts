@@ -42,6 +42,18 @@ interface IndexedItem {
   childNth: number;
 }
 
+export type Tag =
+  | "pane"
+  | "p"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "img"
+  | "li"
+  | "ol"
+  | "ul"
+  | "code";
+
 export interface MarkdownLookup {
   images: { [key: number]: IndexedItem };
   codeItems: { [key: number]: IndexedItem };
@@ -51,7 +63,7 @@ export interface MarkdownLookup {
   codeItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   listItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   linksLookup: { [parentNth: number]: { [childNth: number]: number } };
-  nthTag: { [key: number]: string };
+  nthTag: { [key: number]: Tag };
   nthTagLookup: { [key: string]: { [key: number]: { nth: number } } };
 }
 export interface MarkdownLookupObj {

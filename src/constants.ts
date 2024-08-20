@@ -6,7 +6,7 @@ import {
   PlusCircleIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
-import type { ToolMode, ToolAddMode } from "./types";
+import type { Tag, ToolMode, ToolAddMode } from "./types";
 
 export const CONCIERGE_SYNC_INTERVAL = 4000;
 export const THRESHOLD_READ = import.meta.env.PUBLIC_THRESHOLD_READ || 42000;
@@ -23,6 +23,19 @@ export const MAX_LENGTH_CONTENT = 10000;
 
 export const SHORT_SCREEN_THRESHOLD = 600;
 export const STICKY_HEADER_THRESHOLD = 600;
+
+export const tagTitles: Record<Tag, string> = {
+  p: "Paragraph",
+  h2: "Heading 2",
+  h3: "Heading 3",
+  h4: "Heading 4",
+  img: "Image",
+  code: "Widget",
+  li: `List Item`,
+  ol: "Outer Container",
+  ul: "Outer Container",
+  pane: "Pane Styles",
+};
 
 export const toolAddModes = [
   "p",

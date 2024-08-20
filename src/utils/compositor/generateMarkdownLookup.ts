@@ -1,5 +1,5 @@
 import type { Root, Element, Text, RootContent, ElementContent } from "hast";
-import type { MarkdownLookup } from "../../types";
+import type { Tag, MarkdownLookup } from "../../types";
 
 export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
   const markdownLookup: MarkdownLookup = {
@@ -24,7 +24,7 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
   function processRootNode(node: Element | Text, parentNth: number) {
     if ("tagName" in node) {
       // Add to nthTag and nthTagLookup
-      markdownLookup.nthTag[globalTagIndex] = node.tagName;
+      markdownLookup.nthTag[globalTagIndex] = node.tagName as string as Tag;
       if (!markdownLookup.nthTagLookup[node.tagName]) {
         markdownLookup.nthTagLookup[node.tagName] = {};
       }

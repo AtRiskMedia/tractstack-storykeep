@@ -34,6 +34,8 @@ export const PaneAstStyles = (props: {
     keys: [markdownFragmentId],
   });
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
+  console.log(markdownDatum);
+  const hasModal = markdownDatum.payload.isModal;
   const markdownLookup =
     markdownDatum?.markdown?.htmlAst &&
     generateMarkdownLookup(markdownDatum.markdown.htmlAst);
@@ -68,6 +70,8 @@ export const PaneAstStyles = (props: {
       : null;
   const parentClassNamesPayload =
     markdownDatum.payload.optionsPayload.classNamesPayload.parent;
+  const modalClassNamesPayload =
+    markdownDatum.payload.optionsPayload.classNamesPayload.modal;
   const parentLayers =
     (!hasTextShapeOutside &&
       parentClassNamesPayload &&
@@ -88,9 +92,7 @@ export const PaneAstStyles = (props: {
         ? codeItemClassNamesPayload
         : activeTag === `li`
           ? listItemClassNamesPayload
-          : activeTag === `parent`
-            ? parentClassNamesPayload
-            : outerTagClassNamesPayload;
+          : outerTagClassNamesPayload;
 
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">
@@ -121,6 +123,7 @@ export const PaneAstStyles = (props: {
       thisTabs.push({ name: `List Item`, tag: `li` });
       thisTabs.push({ name: `List Container`, tag: thisTag });
     }
+    if (hasModal) thisTabs.push({ name: `Modal Styles`, tag: `modal` });
     if (!hasTextShapeOutside)
       thisTabs.push({ name: `Pane Styles`, tag: `parent` });
     setTabs(thisTabs);
@@ -130,6 +133,7 @@ export const PaneAstStyles = (props: {
   }, [id, targetId]);
 
   if (!tabs) return null;
+
   return (
     <div
       className={classNames(
@@ -156,7 +160,7 @@ export const PaneAstStyles = (props: {
           ))}
         </nav>
         <hr />
-        {activeTag !== `parent` && (
+        {activeTag && ![`parent`, `modal`].includes(activeTag) && (
           <>
             <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
               {classNamesPayload?.classes &&
@@ -207,6 +211,21 @@ export const PaneAstStyles = (props: {
             <div className="my-6">
               todo: Add new style selectbox; add/remove layer --${parentLayers}
             </div>
+          </>
+        )}
+
+        {activeTag === `modal` && (
+          <>
+            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              {modalClassNamesPayload?.classes ? (
+                Object.keys(modalClassNamesPayload?.classes).map(className =>
+                  ClassTag(className)
+                )
+              ) : (
+                <span>No styles</span>
+              )}
+            </div>
+            <div className="my-6">todo: Add new style selectbox</div>
           </>
         )}
       </div>

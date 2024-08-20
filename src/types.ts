@@ -43,6 +43,7 @@ interface IndexedItem {
 }
 
 export type Tag =
+  | "modal"
   | "parent"
   | "p"
   | "h2"

@@ -165,11 +165,9 @@ export const paneDesigns: PaneDesign[] = [
           classNamesPayload: {
             modal: {
               classes: {
-                0: {
-                  fill: ["mywhite"],
-                  strokeCOLOR: ["black"],
-                  strokeSIZE: [2],
-                },
+                fill: ["mywhite"],
+                strokeCOLOR: ["black"],
+                strokeSIZE: [2],
               },
             },
             h2: {

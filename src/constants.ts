@@ -35,6 +35,7 @@ export const tagTitles: Record<Tag, string> = {
   ol: "Outer Container",
   ul: "Outer Container",
   parent: "Pane Styles",
+  modal: "Modal Styles",
 };
 
 export const toolAddModes = [

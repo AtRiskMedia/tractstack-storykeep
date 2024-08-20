@@ -225,24 +225,25 @@ export const reduceClassNamesPayload = (
   if (classes.modal && classes.modal.classes) {
     const modalClasses = classes.modal.classes;
     // Check if modalClasses is an object with numbered keys
-    if (
-      typeof modalClasses === "object" &&
-      Object.keys(modalClasses).every(key => !isNaN(Number(key)))
-    ) {
-      // If so, use the first (and likely only) numbered key
-      const firstKey = Object.keys(modalClasses)[0];
-      const [all, mobile, tablet, desktop] = processClassesForViewports(
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        (modalClasses as any)[firstKey] as ClassNamesPayloadValue,
-        undefined
-      );
-      optionsPayload.classNamesModal = {
-        all: all[0] || "",
-        mobile: mobile[0] || "",
-        tablet: tablet[0] || "",
-        desktop: desktop[0] || "",
-      };
-    } else {
+    // SHOULD NO LONGER BE REQ'D; was schema set by gatsby-tractstack-storykeep prototype
+    //if (
+    //  typeof modalClasses === "object" &&
+    //  Object.keys(modalClasses).every(key => !isNaN(Number(key)))
+    //) {
+    //  // If so, use the first (and likely only) numbered key
+    //  const firstKey = Object.keys(modalClasses)[0];
+    //  const [all, mobile, tablet, desktop] = processClassesForViewports(
+    //    /* eslint-disable @typescript-eslint/no-explicit-any */
+    //    (modalClasses as any)[firstKey] as ClassNamesPayloadValue,
+    //    undefined
+    //  );
+    //  optionsPayload.classNamesModal = {
+    //    all: all[0] || "",
+    //    mobile: mobile[0] || "",
+    //    tablet: tablet[0] || "",
+    //    desktop: desktop[0] || "",
+    //  };
+    //} else {
       // If it's already in the expected format, process it directly
       const [all, mobile, tablet, desktop] = processClassesForViewports(
         modalClasses as ClassNamesPayloadValue,
@@ -254,7 +255,7 @@ export const reduceClassNamesPayload = (
         tablet: tablet[0] || "",
         desktop: desktop[0] || "",
       };
-    }
+    //}
   }
 
   // Process button classes

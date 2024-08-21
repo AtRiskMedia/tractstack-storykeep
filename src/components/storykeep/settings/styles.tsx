@@ -120,7 +120,7 @@ export const PaneAstStyles = (props: {
       {!confirm || confirm !== className ? (
         <>
           <button
-            className="peer text-md py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-myblue hover:text-white shadow"
+            className="peer text-md py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-yellow-300 shadow"
             title="Adjust style"
             onClick={() => setSelectedStyle(className)}
           >
@@ -129,7 +129,7 @@ export const PaneAstStyles = (props: {
               : className}
           </button>
           <button
-            className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange/50 peer-hover:invisible shadow"
+            className="ml-[-0.5rem] p-1 bg-myorange/20 text-black font-bold rounded-full hover:bg-myorange/50 peer-hover:invisible shadow"
             title="Remove style"
             onClick={() => removeStyle(className)}
           >
@@ -139,7 +139,7 @@ export const PaneAstStyles = (props: {
       ) : (
         <>
           <button
-            className="text-md py-1 pl-1.5 pr-3 bg-myorange/20 text-black rounded-md hover:bg-myblue hover:text-white"
+            className="text-md py-1 pl-1.5 pr-3 bg-myorange/20 text-black rounded-md hover:bg-yellow-300"
             title="Remove style"
             onClick={() => removeStyle(className)}
           >
@@ -331,28 +331,34 @@ export const PaneAstStyles = (props: {
                   select box
                 </div>
               </div>
-              <div className="flex items-center my-6">
-                <Switch
-                  checked={enabled}
-                  onChange={setEnabled}
-                  className={`${
-                    enabled ? "bg-myorange" : "bg-mydarkgrey"
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                >
-                  <span
+
+              {tabs.length &&
+              ![`Pane Styles`, `Modal Styles`].includes(
+                tagTitles[tabs.at(0)!.tag]
+              ) ? (
+                <div className="flex items-center my-6">
+                  <Switch
+                    checked={enabled}
+                    onChange={setEnabled}
                     className={`${
-                      enabled ? "translate-x-6" : "translate-x-1"
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />
-                </Switch>
-                <span className="ml-3">
-                  <span className="text-md text-black">
-                    {!enabled
-                      ? `Default style (applies to all)`
-                      : `Style applies to this element only`}
+                      enabled ? "bg-myorange" : "bg-mydarkgrey"
+                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+                  >
+                    <span
+                      className={`${
+                        enabled ? "translate-x-6" : "translate-x-1"
+                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                    />
+                  </Switch>
+                  <span className="ml-3">
+                    <span className="text-md text-black">
+                      {!enabled
+                        ? `Styles applied to all ${tagTitles[tabs.at(0)!.tag]}s (in this pane)`
+                        : `Style override (on this ${tagTitles[tabs.at(0)!.tag]})`}
+                    </span>
                   </span>
-                </span>
-              </div>
+                </div>
+              ) : null}
             </div>
           </div>
         ) : null}

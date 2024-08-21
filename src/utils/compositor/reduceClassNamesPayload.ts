@@ -244,23 +244,24 @@ export const reduceClassNamesPayload = (
     //    desktop: desktop[0] || "",
     //  };
     //} else {
-      // If it's already in the expected format, process it directly
-      const [all, mobile, tablet, desktop] = processClassesForViewports(
-        modalClasses as ClassNamesPayloadValue,
-        undefined
-      );
-      optionsPayload.classNamesModal = {
-        all: all[0] || "",
-        mobile: mobile[0] || "",
-        tablet: tablet[0] || "",
-        desktop: desktop[0] || "",
-      };
+    // If it's already in the expected format, process it directly
+    const [all, mobile, tablet, desktop] = processClassesForViewports(
+      modalClasses as ClassNamesPayloadValue,
+      undefined
+    );
+    optionsPayload.classNamesModal = {
+      all: all[0] || "",
+      mobile: mobile[0] || "",
+      tablet: tablet[0] || "",
+      desktop: desktop[0] || "",
+    };
     //}
   }
 
   // Process button classes
   if (optionsPayload.buttons) {
     for (const buttonKey in optionsPayload.buttons) {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       const buttonData = (optionsPayload.buttons as any)[buttonKey];
       const buttonClasses = buttonData.classNamesPayload?.button?.classes;
       const buttonHoverClasses = buttonData.classNamesPayload?.hover?.classes;

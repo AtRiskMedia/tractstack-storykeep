@@ -81,6 +81,7 @@ export const StoryFragmentHeader = memo(
     };
 
     const setToolMode = (newToolMode: ToolMode) => {
+      editModeStore.set(null);
       toolModeStore.set({ value: newToolMode });
     };
 

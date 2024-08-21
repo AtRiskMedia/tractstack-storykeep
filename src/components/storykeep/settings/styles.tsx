@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   paneMarkdownFragmentId,
@@ -26,6 +26,7 @@ export const PaneAstStyles = (props: {
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const [parentLayer, setParentLayer] = useState(0);
+  const [confirm, setConfirm] = useState<string | null>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [id],
   });
@@ -93,22 +94,57 @@ export const PaneAstStyles = (props: {
           ? listItemClassNamesPayload
           : outerTagClassNamesPayload;
 
+  const removeStyle = (className: string) => {
+    if (!confirm) setConfirm(className);
+    else {
+      setConfirm(null);
+      console.log(`remove tag ${className}`, targetId);
+    }
+  };
+  const cancelRemoveStyle = () => {
+    setConfirm(null);
+  };
+
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">
-      <button
-        className="text-sm py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-myblue hover:text-white"
-        title="Adjust style"
-        onClick={() => setSelectedStyle(className)}
-      >
-        {tailwindClasses[className].title}
-      </button>
-      <button
-        className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange"
-        title="Remove style"
-        onClick={() => console.log(`remove`, className, targetId)}
-      >
-        <XMarkIcon className="w-3 h-5" />
-      </button>
+      {!confirm || confirm !== className ? (
+        <>
+          <button
+            className="peer text-md py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-myblue hover:text-white"
+            title="Adjust style"
+            onClick={() => setSelectedStyle(className)}
+          >
+            {tailwindClasses[className].title}
+          </button>
+          <button
+            className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange peer-hover:invisible"
+            title="Remove style"
+            onClick={() => removeStyle(className)}
+          >
+            <XMarkIcon className="w-3 h-5" />
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            className="text-md py-1 pl-1.5 pr-3 bg-myorange/20 text-black rounded-md hover:bg-myblue hover:text-white"
+            title="Remove style"
+            onClick={() => removeStyle(className)}
+          >
+            <span className="flex flex-nowrap">
+              Are you sure
+              <CheckIcon className="w-5 h-5" />
+            </span>
+          </button>
+          <button
+            className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange"
+            title="Keep style"
+            onClick={() => cancelRemoveStyle()}
+          >
+            <XMarkIcon className="w-3 h-5" />
+          </button>
+        </>
+      )}
     </div>
   );
 
@@ -131,6 +167,21 @@ export const PaneAstStyles = (props: {
     setParentLayer(0);
   }, [id, targetId]);
 
+  const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {
+    return [...arr].sort((a, b) => {
+      if (a.tag === activeTag && b.tag !== activeTag) return -1;
+      if (b.tag === activeTag && a.tag !== activeTag) return 1;
+      return 0;
+    });
+  };
+
+  useEffect(() => {
+    if (activeTag)
+      setTabs(prevItems =>
+        prevItems && activeTag ? sortByActiveTag(prevItems, activeTag) : null
+      );
+  }, [activeTag]);
+
   if (!tabs) return null;
 
   return (
@@ -150,8 +201,8 @@ export const PaneAstStyles = (props: {
               className={classNames(
                 tab.tag === activeTag
                   ? "text-black font-bold"
-                  : "text-mydarkgrey hover:text-myorange",
-                "text-sm"
+                  : "text-mydarkgrey hover:text-black underline",
+                "text-md"
               )}
             >
               {tab.name}
@@ -161,15 +212,17 @@ export const PaneAstStyles = (props: {
         <hr />
         {activeTag && ![`parent`, `modal`].includes(activeTag) && (
           <>
-            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-              {classNamesPayload?.classes &&
-              Object.keys(classNamesPayload.classes).length ? (
-                Object.keys(classNamesPayload.classes).map(className =>
-                  ClassTag(className)
-                )
-              ) : (
-                <span>No styles</span>
-              )}
+            <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+              <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">
+                {classNamesPayload?.classes &&
+                Object.keys(classNamesPayload.classes).length ? (
+                  Object.keys(classNamesPayload.classes).map(className =>
+                    ClassTag(className)
+                  )
+                ) : (
+                  <span>No styles</span>
+                )}
+              </div>
             </div>
             <div className="my-6">todo: Add new style selectbox</div>
           </>
@@ -177,35 +230,38 @@ export const PaneAstStyles = (props: {
 
         {activeTag === `parent` && (
           <>
-            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-              Layers:
-              {parentClassNamesPayload?.classes &&
-                Object.keys(parentClassNamesPayload?.classes).map(
-                  (_, idx: number) => (
-                    <span
-                      key={idx}
-                      onClick={() => setParentLayer(idx)}
-                      className={classNames(
-                        "text-sm py-1 px-1.5 rounded-md",
-                        idx !== parentLayer
-                          ? "text-mydarkgrey bg-mylightgrey/20 hover:bg-myorange/20"
-                          : "text-black font-bold"
-                      )}
-                    >
-                      {idx}
-                    </span>
-                  )
+            <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+              <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">
+                {parentClassNamesPayload?.classes &&
+                Array.isArray(parentClassNamesPayload?.classes) ? (
+                  Object.keys(
+                    parentClassNamesPayload?.classes[parentLayer]
+                  ).map(className => ClassTag(className))
+                ) : (
+                  <span>No styles</span>
                 )}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-              {parentClassNamesPayload?.classes &&
-              Array.isArray(parentClassNamesPayload?.classes) ? (
-                Object.keys(parentClassNamesPayload?.classes[parentLayer]).map(
-                  className => ClassTag(className)
-                )
-              ) : (
-                <span>No styles</span>
-              )}
+              </div>
+              <hr />
+              <div className="bg-myblue/5 text-md mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+                <span className="py-1">Layers:</span>
+                {parentClassNamesPayload?.classes &&
+                  Object.keys(parentClassNamesPayload?.classes).map(
+                    (_, idx: number) => (
+                      <span
+                        key={idx}
+                        onClick={() => setParentLayer(idx)}
+                        className={classNames(
+                          "text-md py-1 px-1.5 rounded-md",
+                          idx !== parentLayer
+                            ? "text-mydarkgrey bg-mylightgrey/20 hover:bg-myorange/20"
+                            : "text-black font-bold"
+                        )}
+                      >
+                        {idx}
+                      </span>
+                    )
+                  )}
+              </div>
             </div>
             <div className="my-6">
               todo: Add new style selectbox; add/remove layer --${parentLayers}
@@ -215,14 +271,16 @@ export const PaneAstStyles = (props: {
 
         {activeTag === `modal` && (
           <>
-            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-              {modalClassNamesPayload?.classes ? (
-                Object.keys(modalClassNamesPayload?.classes).map(className =>
-                  ClassTag(className)
-                )
-              ) : (
-                <span>No styles</span>
-              )}
+            <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+              <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+                {modalClassNamesPayload?.classes ? (
+                  Object.keys(modalClassNamesPayload?.classes).map(className =>
+                    ClassTag(className)
+                  )
+                ) : (
+                  <span>No styles</span>
+                )}
+              </div>
             </div>
             <div className="my-6">todo: Add new style selectbox</div>
           </>
@@ -235,11 +293,7 @@ export const PaneAstStyles = (props: {
           <h4 className="text-lg">
             Styles on: <strong>{tailwindClasses[selectedStyle].title}</strong>
           </h4>
-        ) : (
-          <h4 className="text-md font-bold text-mydarkgrey">
-            ... select which style to adjust; or add new ones!
-          </h4>
-        )}
+        ) : null}
       </div>
     </div>
   );

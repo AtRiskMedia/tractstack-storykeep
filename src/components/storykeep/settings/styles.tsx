@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
+import { Switch } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
-import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  XMarkIcon,
+  CheckIcon,
+  DevicePhoneMobileIcon,
+  DeviceTabletIcon,
+  ComputerDesktopIcon,
+} from "@heroicons/react/24/outline";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   paneMarkdownFragmentId,
@@ -24,6 +31,8 @@ export const PaneAstStyles = (props: {
 }) => {
   const { id, targetId, type } = props;
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
+  // replace with direct from datum
+  const [enabled, setEnabled] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const [parentLayer, setParentLayer] = useState(0);
@@ -196,7 +205,7 @@ export const PaneAstStyles = (props: {
       )}
     >
       <div className={classNames(type === `mobile` ? `max-w-5/12` : `w-full`)}>
-        <nav aria-label="Tabs" className="flex space-x-4 mb-1">
+        <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
           {tabs.map((tab: StyleTab, idx: number) => (
             <button
               key={idx}
@@ -235,6 +244,27 @@ export const PaneAstStyles = (props: {
         {activeTag === `parent` && (
           <>
             <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+              <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+                <span className="py-1">Layer:</span>
+                {parentClassNamesPayload?.classes &&
+                  Object.keys(parentClassNamesPayload?.classes).map(
+                    (_, idx: number) => (
+                      <button
+                        key={idx}
+                        onClick={() => setParentLayer(idx)}
+                        className={classNames(
+                          "text-md py-1 px-1.5 rounded-md",
+                          idx !== parentLayer
+                            ? "text-mydarkgrey bg-mylightgrey/20 hover:bg-myorange/20"
+                            : "text-black font-bold pointer-events-none"
+                        )}
+                      >
+                        {idx}
+                      </button>
+                    )
+                  )}
+              </div>
+              <hr />
               <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">
                 {parentClassNamesPayload?.classes &&
                 Array.isArray(parentClassNamesPayload?.classes) ? (
@@ -244,27 +274,6 @@ export const PaneAstStyles = (props: {
                 ) : (
                   <span>No styles</span>
                 )}
-              </div>
-              <hr />
-              <div className="bg-myblue/5 text-md mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-                <span className="py-1">Layers:</span>
-                {parentClassNamesPayload?.classes &&
-                  Object.keys(parentClassNamesPayload?.classes).map(
-                    (_, idx: number) => (
-                      <span
-                        key={idx}
-                        onClick={() => setParentLayer(idx)}
-                        className={classNames(
-                          "text-md py-1 px-1.5 rounded-md",
-                          idx !== parentLayer
-                            ? "text-mydarkgrey bg-mylightgrey/20 hover:bg-myorange/20"
-                            : "text-black font-bold"
-                        )}
-                      >
-                        {idx}
-                      </span>
-                    )
-                  )}
               </div>
             </div>
             <div className="my-6">
@@ -294,9 +303,51 @@ export const PaneAstStyles = (props: {
         className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mt-8`)}
       >
         {selectedStyle ? (
-          <h4 className="text-lg">
-            Styles on: <strong>{tailwindClasses[selectedStyle].title}</strong>
-          </h4>
+          <div className="my-1 bg-white shadow-inner rounded">
+            <div className="px-6 py-4">
+              <h4 className="text-lg">
+                <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
+                {tabs.length && tagTitles[tabs.at(0)!.tag]}
+              </h4>
+              <div className="flex flex-col gap-y-5 my-4 text-mydarkgrey">
+                <div className="flex flex-nowrap">
+                  <DevicePhoneMobileIcon
+                    className="h-5 w-5"
+                    aria-hidden="true"
+                  />
+                  select box
+                </div>
+                <div className="flex flex-nowrap">
+                  <DeviceTabletIcon className="h-5 w-5" aria-hidden="true" />
+                  select box
+                </div>
+                <div className="flex flex-nowrap">
+                  <ComputerDesktopIcon className="h-5 w-5" aria-hidden="true" />
+                  select box
+                </div>
+              </div>
+              <div className="flex items-center my-6">
+                <Switch
+                  checked={enabled}
+                  onChange={setEnabled}
+                  className={`${
+                    enabled ? "bg-myorange" : "bg-mydarkgrey"
+                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+                >
+                  <span
+                    className={`${
+                      enabled ? "translate-x-6" : "translate-x-1"
+                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                  />
+                </Switch>
+                <span className="ml-3">
+                  <span className="text-md text-black">
+                    Override styles on just this element
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
         ) : null}
       </div>
     </div>

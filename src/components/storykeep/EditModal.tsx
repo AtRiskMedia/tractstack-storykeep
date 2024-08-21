@@ -92,7 +92,7 @@ export const EditModal = ({ type, contentMap }: EditModalProps) => {
           <XMarkIcon className="w-4 h-4 text-black/50 hover:text-black" />
         </button>
       </div>
-      <div className="p-6">
+      <div className="py-2 px-4">
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
           <StoryFragmentSettings id={$editMode.id} />

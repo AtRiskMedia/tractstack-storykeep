@@ -253,10 +253,10 @@ export const PaneAstStyles = (props: {
                         key={idx}
                         onClick={() => setParentLayer(idx)}
                         className={classNames(
-                          "text-md py-1 px-1.5 rounded-md",
+                          "py-1 px-1.5 rounded-md",
                           idx !== parentLayer
-                            ? "text-mydarkgrey bg-mylightgrey/20 hover:bg-myorange/20"
-                            : "text-black font-bold pointer-events-none"
+                            ? "text-md underline underline-offset-2 text-mydarkgrey bg-myorange/20 hover:bg-myorange/20"
+                            : "text-lg text-black font-bold pointer-events-none"
                         )}
                       >
                         {idx}
@@ -272,7 +272,12 @@ export const PaneAstStyles = (props: {
                     parentClassNamesPayload?.classes[parentLayer]
                   ).map(className => ClassTag(className))
                 ) : (
-                  <span>No styles</span>
+                  <div>
+                    No styles.{" "}
+                    <button className="font-bold underline">
+                      Delete layer.
+                    </button>
+                  </div>
                 )}
               </div>
             </div>

@@ -82,11 +82,11 @@ export const PaneAstStyles = (props: {
     markdownDatum.payload.optionsPayload.classNamesPayload.parent;
   const modalClassNamesPayload =
     markdownDatum.payload.optionsPayload.classNamesPayload.modal;
-  const parentLayers =
-    (!hasTextShapeOutside &&
-      parentClassNamesPayload &&
-      Object.keys(parentClassNamesPayload).length) ||
-    false;
+  //const parentLayers =
+  //  (!hasTextShapeOutside &&
+  //    parentClassNamesPayload &&
+  //    Object.keys(parentClassNamesPayload).length) ||
+  //  false;
   const imageClassNamesPayload =
     markdownDatum.payload.optionsPayload.classNamesPayload.img;
   const codeItemClassNamesPayload =
@@ -120,18 +120,20 @@ export const PaneAstStyles = (props: {
       {!confirm || confirm !== className ? (
         <>
           <button
-            className="peer text-md py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-myblue hover:text-white"
+            className="peer text-md py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-myblue hover:text-white shadow"
             title="Adjust style"
             onClick={() => setSelectedStyle(className)}
           >
-            {tailwindClasses[className].title}
+            {typeof tailwindClasses[className] !== `undefined`
+              ? tailwindClasses[className].title
+              : className}
           </button>
           <button
-            className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange peer-hover:invisible"
+            className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange/50 peer-hover:invisible shadow"
             title="Remove style"
             onClick={() => removeStyle(className)}
           >
-            <XMarkIcon className="w-3 h-5" />
+            <XMarkIcon className="w-3 h-6" />
           </button>
         </>
       ) : (
@@ -147,7 +149,7 @@ export const PaneAstStyles = (props: {
             </span>
           </button>
           <button
-            className="ml-[-0.5rem] p-1 bg-red-50 text-black font-bold rounded-full hover:bg-myorange"
+            className="ml-[-0.5rem] p-1 bg-black text-white font-bold rounded-full hover:bg-myorange hover:text-white"
             title="Keep style"
             onClick={() => cancelRemoveStyle()}
           >
@@ -226,7 +228,7 @@ export const PaneAstStyles = (props: {
         {activeTag && ![`parent`, `modal`].includes(activeTag) && (
           <>
             <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-              <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              <div className="my-4 flex flex-wrap gap-x-2 gap-y-1.5">
                 {classNamesPayload?.classes &&
                 Object.keys(classNamesPayload.classes).length ? (
                   Object.keys(classNamesPayload.classes).map(className =>
@@ -237,14 +239,14 @@ export const PaneAstStyles = (props: {
                 )}
               </div>
             </div>
-            <div className="my-6">todo: Add new style selectbox</div>
+            <div className="my-2">ADD STYLE</div>
           </>
         )}
 
         {activeTag === `parent` && (
           <>
             <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-              <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-2 gap-y-1.5">
                 <span className="py-1">Layer:</span>
                 {parentClassNamesPayload?.classes &&
                   Object.keys(parentClassNamesPayload?.classes).map(
@@ -255,8 +257,8 @@ export const PaneAstStyles = (props: {
                         className={classNames(
                           "py-1 px-1.5 rounded-md",
                           idx !== parentLayer
-                            ? "text-md underline underline-offset-2 text-mydarkgrey bg-myorange/20 hover:bg-myorange/20"
-                            : "text-lg text-black font-bold pointer-events-none"
+                            ? "text-md underline underline-offset-2 text-mydarkgrey hover:text-black hover:bg-myorange/20"
+                            : "text-md text-black bg-myorange/50 font-bold pointer-events-none"
                         )}
                       >
                         {idx}
@@ -281,9 +283,7 @@ export const PaneAstStyles = (props: {
                 )}
               </div>
             </div>
-            <div className="my-6">
-              todo: Add new style selectbox; add/remove layer --${parentLayers}
-            </div>
+            <div className="my-2">ADD STYLE</div>
           </>
         )}
 
@@ -300,7 +300,7 @@ export const PaneAstStyles = (props: {
                 )}
               </div>
             </div>
-            <div className="my-6">todo: Add new style selectbox</div>
+            <div className="my-2">ADD STYLE</div>
           </>
         )}
       </div>
@@ -347,7 +347,9 @@ export const PaneAstStyles = (props: {
                 </Switch>
                 <span className="ml-3">
                   <span className="text-md text-black">
-                    Override styles on just this element
+                    {!enabled
+                      ? `Default style (applies to all)`
+                      : `Style applies to this element only`}
                   </span>
                 </span>
               </div>

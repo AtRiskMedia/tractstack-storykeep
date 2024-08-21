@@ -173,7 +173,7 @@ export const paneDesigns: PaneDesign[] = [
             h2: {
               classes: {
                 fontFACE: ["action"],
-                relative: [true],
+                position: ["relative"],
                 textCOLOR: ["myblue"],
                 textSIZE: ["r2xl", "r3xl", "r4xl"],
                 z: [1],
@@ -222,7 +222,7 @@ export const paneDesigns: PaneDesign[] = [
                 textCOLOR: ["myblue"],
                 textSIZE: ["r6xl", "r7xl", "r8xl"],
                 z: [1],
-                relative: [true],
+                position: ["relative"],
               },
             },
             p: {
@@ -232,7 +232,7 @@ export const paneDesigns: PaneDesign[] = [
                 mt: ["r12"],
                 rotate: ["!1"],
                 z: [1],
-                relative: [true],
+                position: ["relative"],
               },
             },
           },

@@ -14,6 +14,7 @@ import type { PaneAstTargetId, Tag } from "../../../types";
 interface StyleTab {
   name: string;
   tag: Tag;
+  priority: number;
 }
 
 export const PaneAstStyles = (props: {
@@ -150,17 +151,19 @@ export const PaneAstStyles = (props: {
 
   useEffect(() => {
     const thisTabs: StyleTab[] = [];
-    if (isImage) thisTabs.push({ name: `Image`, tag: `img` });
-    else if (isCodeItem) thisTabs.push({ name: `Widget`, tag: `code` });
+    if (isImage) thisTabs.push({ name: `Image`, tag: `img`, priority: 1 });
+    else if (isCodeItem)
+      thisTabs.push({ name: `Widget`, tag: `code`, priority: 1 });
     else if (thisTagTitle && !isListItem)
-      thisTabs.push({ name: thisTagTitle, tag: thisTag });
+      thisTabs.push({ name: thisTagTitle, tag: thisTag, priority: 0 });
     if (isListItem) {
-      thisTabs.push({ name: `List Item`, tag: `li` });
-      thisTabs.push({ name: `List Container`, tag: thisTag });
+      thisTabs.push({ name: `List Item`, tag: `li`, priority: 2 });
+      thisTabs.push({ name: `List Container`, tag: thisTag, priority: 3 });
     }
-    if (hasModal) thisTabs.push({ name: `Modal Styles`, tag: `modal` });
+    if (hasModal)
+      thisTabs.push({ name: `Modal Styles`, tag: `modal`, priority: 3 });
     if (!hasTextShapeOutside)
-      thisTabs.push({ name: `Pane Styles`, tag: `parent` });
+      thisTabs.push({ name: `Pane Styles`, tag: `parent`, priority: 4 });
     setTabs(thisTabs);
     setActiveTag(thisTabs[0].tag);
     setSelectedStyle(null);
@@ -171,7 +174,8 @@ export const PaneAstStyles = (props: {
     return [...arr].sort((a, b) => {
       if (a.tag === activeTag && b.tag !== activeTag) return -1;
       if (b.tag === activeTag && a.tag !== activeTag) return 1;
-      return 0;
+      if (a.tag === activeTag && b.tag === activeTag) return 0;
+      return a.priority - b.priority;
     });
   };
 

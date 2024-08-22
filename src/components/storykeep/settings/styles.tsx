@@ -217,6 +217,40 @@ export const PaneAstStyles = (props: {
     });
   };
 
+  const setViewportValues = (
+    mobileVal: string | number | null | unknown,
+    tabletVal: string | number | null | unknown,
+    desktopVal: string | number | null | unknown
+  ) => {
+    if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+    else if (typeof mobileVal === `number`)
+      setMobileValue(mobileVal.toString());
+    else
+      console.log(
+        `unable to setViewportValues on`,
+        mobileVal,
+        typeof mobileVal
+      );
+    if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+    else if (typeof tabletVal === `number`)
+      setTabletValue(tabletVal.toString());
+    else
+      console.log(
+        `unable to setViewportValues on`,
+        tabletVal,
+        typeof tabletVal
+      );
+    if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+    else if (typeof desktopVal === `number`)
+      setDesktopValue(desktopVal.toString());
+    else
+      console.log(
+        `unable to setViewportValues on`,
+        desktopVal,
+        typeof desktopVal
+      );
+  };
+
   useEffect(() => {
     if (activeTag)
       setTabs(prevItems =>
@@ -255,9 +289,7 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+        setViewportValues(mobileVal, tabletVal, desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -313,9 +345,7 @@ export const PaneAstStyles = (props: {
             : classes && classes.length > 2
               ? classes[2]
               : tabletVal;
-        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+        setViewportValues(mobileVal, tabletVal, desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -359,9 +389,7 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+        setViewportValues(mobileVal, tabletVal, desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -417,9 +445,7 @@ export const PaneAstStyles = (props: {
             : classes && classes.length > 2
               ? classes[2]
               : tabletVal;
-        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+        setViewportValues(mobileVal, tabletVal, desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -446,9 +472,7 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+        setViewportValues(mobileVal, tabletVal, desktopVal);
         return {
           tag: `modal`,
           class: selectedStyle,
@@ -479,9 +503,7 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
+        setViewportValues(mobileVal, tabletVal, desktopVal);
         return {
           tag: `parent`,
           class: selectedStyle,

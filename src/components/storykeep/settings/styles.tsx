@@ -119,8 +119,8 @@ export const PaneAstStyles = (props: {
   };
 
   const removeOverride = () => {
-    console.log(`will do!`)
-  }
+    console.log(`will do!`);
+  };
 
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">
@@ -150,7 +150,7 @@ export const PaneAstStyles = (props: {
       ) : (
         <>
           <button
-            className="text-md py-1 pl-1.5 pr-3 bg-myorange/20 text-black rounded-md hover:bg-yellow-300"
+            className="text-md py-1 pl-1.5 pr-3 bg-myorange/20 text-black rounded-md hover:bg-myorange/50"
             title="Remove style"
             onClick={() => removeStyle(className)}
           >
@@ -225,19 +225,28 @@ export const PaneAstStyles = (props: {
             classNamesPayload.override[selectedStyle] &&
             classNamesPayload.override[selectedStyle][globalNth]) ||
           null;
+        const classes =
+          classNamesPayload?.classes &&
+          typeof selectedStyle === "string" &&
+          selectedStyle in classNamesPayload.classes
+            ? (classNamesPayload.classes as Record<string, unknown[]>)[
+                selectedStyle
+              ]
+            : undefined;
+        const mobileVal =
+          Array.isArray(classes) && classes.length ? classes[0] : null;
+        const tabletVal =
+          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
+        const desktopVal =
+          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
         return {
           class: selectedStyle,
           tag: activeTag,
           globalNth,
-          overrideClasses,
-          classes:
-            classNamesPayload?.classes &&
-            typeof selectedStyle === "string" &&
-            selectedStyle in classNamesPayload.classes
-              ? (classNamesPayload.classes as Record<string, unknown>)[
-                  selectedStyle
-                ]
-              : undefined,
+          hasOverride: !!overrideClasses,
+          mobileVal,
+          tabletVal,
+          desktopVal,
         };
       }
       case "img": {
@@ -258,19 +267,40 @@ export const PaneAstStyles = (props: {
             classNamesPayload.override[selectedStyle] &&
             classNamesPayload.override[selectedStyle][globalNth]) ||
           null;
+        const classes =
+          classNamesPayload?.classes &&
+          typeof selectedStyle === "string" &&
+          selectedStyle in classNamesPayload.classes
+            ? (classNamesPayload.classes as Record<string, unknown[]>)[
+                selectedStyle
+              ]
+            : undefined;
+        const mobileVal =
+          overrideClasses && overrideClasses.length
+            ? overrideClasses[0]
+            : classes && classes.length
+              ? classes[0]
+              : null;
+        const tabletVal =
+          overrideClasses && overrideClasses.length > 1
+            ? overrideClasses[1]
+            : classes && classes.length > 1
+              ? classes[1]
+              : mobileVal;
+        const desktopVal =
+          overrideClasses && overrideClasses.length > 2
+            ? overrideClasses[2]
+            : classes && classes.length > 2
+              ? classes[2]
+              : tabletVal;
         return {
           class: selectedStyle,
           tag: activeTag,
           globalNth,
-          overrideClasses,
-          classes:
-            classNamesPayload?.classes &&
-            typeof selectedStyle === "string" &&
-            selectedStyle in classNamesPayload.classes
-              ? (classNamesPayload.classes as Record<string, unknown>)[
-                  selectedStyle
-                ]
-              : undefined,
+          hasOverride: !!overrideClasses,
+          mobileVal,
+          tabletVal,
+          desktopVal,
         };
       }
       case "li": {
@@ -291,19 +321,28 @@ export const PaneAstStyles = (props: {
             classNamesPayload.override[selectedStyle] &&
             classNamesPayload.override[selectedStyle][globalNth]) ||
           null;
+        const classes =
+          classNamesPayload?.classes &&
+          typeof selectedStyle === "string" &&
+          selectedStyle in classNamesPayload.classes
+            ? (classNamesPayload.classes as Record<string, unknown[]>)[
+                selectedStyle
+              ]
+            : undefined;
+        const mobileVal =
+          Array.isArray(classes) && classes.length ? classes[0] : null;
+        const tabletVal =
+          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
+        const desktopVal =
+          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
         return {
           class: selectedStyle,
           tag: activeTag,
           globalNth,
-          overrideClasses,
-          classes:
-            classNamesPayload?.classes &&
-            typeof selectedStyle === "string" &&
-            selectedStyle in classNamesPayload.classes
-              ? (classNamesPayload.classes as Record<string, unknown>)[
-                  selectedStyle
-                ]
-              : undefined,
+          hasOverride: !!overrideClasses,
+          mobileVal,
+          tabletVal,
+          desktopVal,
         };
       }
       case "code": {
@@ -324,47 +363,93 @@ export const PaneAstStyles = (props: {
             classNamesPayload.override[selectedStyle] &&
             classNamesPayload.override[selectedStyle][globalNth]) ||
           null;
+        const classes =
+          classNamesPayload?.classes &&
+          typeof selectedStyle === "string" &&
+          selectedStyle in classNamesPayload.classes
+            ? (classNamesPayload.classes as Record<string, unknown[]>)[
+                selectedStyle
+              ]
+            : undefined;
+        const mobileVal =
+          overrideClasses && overrideClasses.length
+            ? overrideClasses[0]
+            : classes && classes.length
+              ? classes[0]
+              : null;
+        const tabletVal =
+          overrideClasses && overrideClasses.length > 1
+            ? overrideClasses[1]
+            : classes && classes.length > 1
+              ? classes[1]
+              : mobileVal;
+        const desktopVal =
+          overrideClasses && overrideClasses.length > 2
+            ? overrideClasses[2]
+            : classes && classes.length > 2
+              ? classes[2]
+              : tabletVal;
         return {
           class: selectedStyle,
           tag: activeTag,
           globalNth,
-          overrideClasses,
-          classes:
-            classNamesPayload?.classes &&
-            typeof selectedStyle === "string" &&
-            selectedStyle in classNamesPayload.classes
-              ? (classNamesPayload.classes as Record<string, unknown>)[
-                  selectedStyle
-                ]
-              : undefined,
+          hasOverride: !!overrideClasses,
+          mobileVal,
+          tabletVal,
+          desktopVal,
         };
       }
       case "modal": {
+        const classes =
+          modalClassNamesPayload?.classes &&
+          typeof selectedStyle === "string" &&
+          selectedStyle in modalClassNamesPayload.classes
+            ? (modalClassNamesPayload.classes as Record<string, unknown>)[
+                selectedStyle
+              ]
+            : undefined;
+        const mobileVal =
+          Array.isArray(classes) && classes.length ? classes[0] : null;
+        const tabletVal =
+          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
+        const desktopVal =
+          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
         return {
           tag: `modal`,
           class: selectedStyle,
-          classes:
-            modalClassNamesPayload?.classes &&
-            typeof selectedStyle === "string" &&
-            selectedStyle in modalClassNamesPayload.classes
-              ? (modalClassNamesPayload.classes as Record<string, unknown>)[
-                  selectedStyle
-                ]
-              : undefined,
+          hasOverride: false,
+          mobileVal,
+          tabletVal,
+          desktopVal,
         };
       }
       case "parent": {
+        const classes =
+          parentClassNamesPayload?.classes &&
+          typeof selectedStyle === "string" &&
+          Array.isArray(parentClassNamesPayload.classes) &&
+          parentClassNamesPayload.classes[parentLayer] &&
+          selectedStyle in parentClassNamesPayload.classes[parentLayer]
+            ? (
+                parentClassNamesPayload.classes[parentLayer] as Record<
+                  string,
+                  unknown[]
+                >
+              )[selectedStyle]
+            : undefined;
+        const mobileVal =
+          Array.isArray(classes) && classes.length ? classes[0] : null;
+        const tabletVal =
+          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
+        const desktopVal =
+          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
         return {
           tag: `parent`,
           class: selectedStyle,
-          classes:
-            parentClassNamesPayload?.classes &&
-            typeof selectedStyle === "string" &&
-            selectedStyle in parentClassNamesPayload.classes
-              ? (parentClassNamesPayload.classes as Record<string, unknown>)[
-                  selectedStyle
-                ]
-              : undefined,
+          hasOverride: false,
+          mobileVal,
+          tabletVal,
+          desktopVal,
         };
       }
       default:
@@ -380,8 +465,7 @@ export const PaneAstStyles = (props: {
     parentClassNamesPayload,
     parentLayer,
   ]);
-  if (activeTagData) console.log(activeTagData);
-  const enabled = !!activeTagData?.overrideClasses
+  const overrideStyle = activeTagData?.hasOverride || false;
 
   if (!tabs) return null;
 
@@ -442,7 +526,10 @@ export const PaneAstStyles = (props: {
                     (_, idx: number) => (
                       <button
                         key={idx}
-                        onClick={() => setParentLayer(idx)}
+                        onClick={() => {
+                          setParentLayer(idx);
+                          setSelectedStyle(null);
+                        }}
                         className={classNames(
                           "py-1 px-1.5 rounded-md",
                           idx !== parentLayer
@@ -501,23 +588,31 @@ export const PaneAstStyles = (props: {
             <div className="px-6 py-4">
               <h4 className="text-lg">
                 <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
+                {overrideStyle ? <span className="underline">this</span> : <span className="underline">all</span>}{" "}
                 {tabs.length && tagTitles[tabs.at(0)!.tag]}
+                {!overrideStyle ? `s` : null}
               </h4>
-              <div className="flex flex-col gap-y-5 my-4 text-mydarkgrey">
-                <div className="flex flex-nowrap">
+              <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
+                <div className="flex flex-nowrap" title="Value on Small Screens">
                   <DevicePhoneMobileIcon
-                    className="h-5 w-5"
+                    className="h-8 w-8"
                     aria-hidden="true"
                   />
-                  select box
+                  <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
+                    {activeTagData?.mobileVal}
+                  </span>
                 </div>
-                <div className="flex flex-nowrap">
-                  <DeviceTabletIcon className="h-5 w-5" aria-hidden="true" />
-                  select box
+                <div className="flex flex-nowrap" title="Value on Medium Screens">
+                  <DeviceTabletIcon className="h-8 w-8" aria-hidden="true" />
+                  <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
+                    {activeTagData?.tabletVal}
+                  </span>
                 </div>
-                <div className="flex flex-nowrap">
-                  <ComputerDesktopIcon className="h-5 w-5" aria-hidden="true" />
-                  select box
+                <div className="flex flex-nowrap" title="Value on Large Screens">
+                  <ComputerDesktopIcon className="h-8 w-8" aria-hidden="true" />
+                  <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
+                    {activeTagData?.desktopVal}
+                  </span>
                 </div>
               </div>
 
@@ -525,27 +620,32 @@ export const PaneAstStyles = (props: {
               ![`Pane Styles`, `Modal Styles`].includes(
                 tagTitles[tabs.at(0)!.tag]
               ) ? (
-                <div className="flex items-center my-6">
+                <div className="flex items-center mt-4">
                   <Switch
-                    checked={enabled}
+                    checked={overrideStyle}
                     onChange={removeOverride}
                     className={`${
-                      enabled ? "bg-myorange" : "bg-mydarkgrey"
+                      overrideStyle ? "bg-myorange" : "bg-mydarkgrey"
                     } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
                   >
                     <span
                       className={`${
-                        enabled ? "translate-x-6" : "translate-x-1"
+                        overrideStyle ? "translate-x-6" : "translate-x-1"
                       } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                     />
                   </Switch>
-                  <span className="ml-3">
-                    <span className="text-md text-black">
-                      {!enabled
-                        ? `Styles applied to all ${tagTitles[tabs.at(0)!.tag]}s (in this pane)`
-                        : `Style override (on this ${tagTitles[tabs.at(0)!.tag]})`}
-                    </span>
-                  </span>
+                  <div className="ml-3">
+                    <div className="text-md text-black font-bold">
+                      {!overrideStyle
+                        ? `Quick style mode`
+                        : `Custom styles`}
+                    </div>
+                    <div className="text-md text-mydarkgrey">
+                      {!overrideStyle
+                        ? `all ${tagTitles[tabs.at(0)!.tag]}s (in this pane)`
+                        : `on this ${tagTitles[tabs.at(0)!.tag]} only`}
+                    </div>
+                  </div>
                 </div>
               ) : null}
             </div>
@@ -554,14 +654,4 @@ export const PaneAstStyles = (props: {
       </div>
     </div>
   );
-  //return (
-  //  <>
-  //    <p>Pane Ast Styles: {id}</p>
-  //    <ul>
-  //      <li>{$paneTitle[id].current}</li>
-  //      <li>{$paneSlug[id].current}</li>
-  //      <li>{$paneFragmentIds[id].current.join(`, `)}</li>
-  //    </ul>
-  //  </>
-  //);
 };

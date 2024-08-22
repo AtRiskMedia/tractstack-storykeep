@@ -292,11 +292,6 @@ export const tailwindColors: TailwindColorPalette = {
 };
 
 export const colorValues = [
-  "inherit",
-  "current",
-  "transparent",
-  "black",
-  "white",
   "slate-50",
   "slate-100",
   "slate-200",

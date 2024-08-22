@@ -1,14 +1,9 @@
 import { useMemo, useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
-import {
-  XMarkIcon,
-  CheckIcon,
-  DevicePhoneMobileIcon,
-  DeviceTabletIcon,
-  ComputerDesktopIcon,
-} from "@heroicons/react/24/outline";
+import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
+import ViewportComboBox from "../fields/ViewportComboBox";
 import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
@@ -35,6 +30,9 @@ export const PaneAstStyles = (props: {
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const [parentLayer, setParentLayer] = useState(0);
+  const [mobileValue, setMobileValue] = useState<string | null>(null);
+  const [tabletValue, setTabletValue] = useState<string | null>(null);
+  const [desktopValue, setDesktopValue] = useState<string | null>(null);
   const [confirm, setConfirm] = useState<string | null>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [id],
@@ -122,6 +120,21 @@ export const PaneAstStyles = (props: {
     console.log(`will do!`);
   };
 
+  const handleFinalChange = (
+    value: string,
+    viewport: "mobile" | "tablet" | "desktop"
+  ) => {
+    if (activeTagData?.values.includes(value)) {
+      console.log(
+        `set:`,
+        value,
+        viewport,
+        `hasOverride?`,
+        activeTagData?.hasOverride
+      );
+    }
+  };
+
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">
       {!confirm || confirm !== className ? (
@@ -190,6 +203,9 @@ export const PaneAstStyles = (props: {
     setParentLayer(0);
     setTabs(thisTabs);
     setActiveTag(thisTabs[0].tag);
+    setMobileValue(null);
+    setTabletValue(null);
+    setDesktopValue(null);
   }, [id, targetId]);
 
   const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {
@@ -239,7 +255,9 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        console.log(`values`, tailwindClasses[selectedStyle].values);
+        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -248,6 +266,7 @@ export const PaneAstStyles = (props: {
           mobileVal,
           tabletVal,
           desktopVal,
+          values: tailwindClasses[selectedStyle].values,
         };
       }
       case "img": {
@@ -294,6 +313,9 @@ export const PaneAstStyles = (props: {
             : classes && classes.length > 2
               ? classes[2]
               : tabletVal;
+        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -302,6 +324,7 @@ export const PaneAstStyles = (props: {
           mobileVal,
           tabletVal,
           desktopVal,
+          values: tailwindClasses[selectedStyle].values,
         };
       }
       case "li": {
@@ -336,6 +359,9 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
+        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -344,6 +370,7 @@ export const PaneAstStyles = (props: {
           mobileVal,
           tabletVal,
           desktopVal,
+          values: tailwindClasses[selectedStyle].values,
         };
       }
       case "code": {
@@ -390,6 +417,9 @@ export const PaneAstStyles = (props: {
             : classes && classes.length > 2
               ? classes[2]
               : tabletVal;
+        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -398,6 +428,7 @@ export const PaneAstStyles = (props: {
           mobileVal,
           tabletVal,
           desktopVal,
+          values: tailwindClasses[selectedStyle].values,
         };
       }
       case "modal": {
@@ -415,6 +446,9 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
+        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
         return {
           tag: `modal`,
           class: selectedStyle,
@@ -422,6 +456,7 @@ export const PaneAstStyles = (props: {
           mobileVal,
           tabletVal,
           desktopVal,
+          values: tailwindClasses[selectedStyle].values,
         };
       }
       case "parent": {
@@ -444,6 +479,9 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
+        if (typeof mobileVal === `string`) setMobileValue(mobileVal);
+        if (typeof tabletVal === `string`) setTabletValue(tabletVal);
+        if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
         return {
           tag: `parent`,
           class: selectedStyle,
@@ -451,6 +489,7 @@ export const PaneAstStyles = (props: {
           mobileVal,
           tabletVal,
           desktopVal,
+          values: tailwindClasses[selectedStyle].values,
         };
       }
       default:
@@ -466,7 +505,6 @@ export const PaneAstStyles = (props: {
     parentClassNamesPayload,
     parentLayer,
   ]);
-  const overrideStyle = activeTagData?.hasOverride || false;
 
   if (!tabs) return null;
 
@@ -589,45 +627,37 @@ export const PaneAstStyles = (props: {
             <div className="px-6 py-4">
               <h4 className="text-lg">
                 <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
-                {overrideStyle ? (
+                {activeTagData?.hasOverride ? (
                   <span className="underline">this</span>
                 ) : (
                   <span className="underline">all</span>
                 )}{" "}
                 {tabs.length && tagTitles[tabs.at(0)!.tag]}
-                {!overrideStyle ? `s` : null}
+                {!activeTagData?.hasOverride ? `s` : null}
               </h4>
+
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
-                <div
-                  className="flex flex-nowrap"
-                  title="Value on Small Screens"
-                >
-                  <DevicePhoneMobileIcon
-                    className="h-8 w-8"
-                    aria-hidden="true"
-                  />
-                  <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
-                    {activeTagData?.mobileVal}
-                  </span>
-                </div>
-                <div
-                  className="flex flex-nowrap"
-                  title="Value on Medium Screens"
-                >
-                  <DeviceTabletIcon className="h-8 w-8" aria-hidden="true" />
-                  <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
-                    {activeTagData?.tabletVal}
-                  </span>
-                </div>
-                <div
-                  className="flex flex-nowrap"
-                  title="Value on Large Screens"
-                >
-                  <ComputerDesktopIcon className="h-8 w-8" aria-hidden="true" />
-                  <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
-                    {activeTagData?.desktopVal}
-                  </span>
-                </div>
+                <ViewportComboBox
+                  value={mobileValue || ``}
+                  onChange={setMobileValue}
+                  onFinalChange={handleFinalChange}
+                  values={activeTagData?.values || []}
+                  viewport="mobile"
+                />
+                <ViewportComboBox
+                  value={tabletValue || ``}
+                  onChange={setTabletValue}
+                  onFinalChange={handleFinalChange}
+                  values={activeTagData?.values || []}
+                  viewport="tablet"
+                />
+                <ViewportComboBox
+                  value={desktopValue || ``}
+                  onChange={setDesktopValue}
+                  onFinalChange={handleFinalChange}
+                  values={activeTagData?.values || []}
+                  viewport="desktop"
+                />
               </div>
 
               {tabs.length &&
@@ -636,24 +666,30 @@ export const PaneAstStyles = (props: {
               ) ? (
                 <div className="flex items-center mt-4">
                   <Switch
-                    checked={overrideStyle}
+                    checked={activeTagData?.hasOverride}
                     onChange={removeOverride}
                     className={`${
-                      overrideStyle ? "bg-myorange" : "bg-mydarkgrey"
+                      activeTagData?.hasOverride
+                        ? "bg-myorange"
+                        : "bg-mydarkgrey"
                     } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
                   >
                     <span
                       className={`${
-                        overrideStyle ? "translate-x-6" : "translate-x-1"
+                        activeTagData?.hasOverride
+                          ? "translate-x-6"
+                          : "translate-x-1"
                       } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
                     />
                   </Switch>
                   <div className="ml-3">
                     <div className="text-md text-black font-bold">
-                      {!overrideStyle ? `Quick style mode` : `Custom styles`}
+                      {!activeTagData?.hasOverride
+                        ? `Quick style mode`
+                        : `Custom styles`}
                     </div>
                     <div className="text-md text-mydarkgrey">
-                      {!overrideStyle
+                      {!activeTagData?.hasOverride
                         ? `all ${tagTitles[tabs.at(0)!.tag]}s (in this pane)`
                         : `on this ${tagTitles[tabs.at(0)!.tag]} only`}
                     </div>

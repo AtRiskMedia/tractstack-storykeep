@@ -85,7 +85,7 @@ export const tailwindClasses: TailwindClasses = {
     prefix: "inset-",
     priority: 0,
   },
-  zIndex: {
+  z: {
     values: "number",
     group: "Layout",
     title: "Z-Index",
@@ -654,6 +654,14 @@ export const tailwindClasses: TailwindClasses = {
     className: "placeholder-opacity",
     prefix: "placeholder-opacity-",
     priority: 2,
+  },
+  rotate: {
+    values: ["0", "1", "2", "3", "6", "12", "45", "90", "180"],
+    group: "Effects",
+    title: "Rotate",
+    className: "rotate",
+    prefix: "rotate-",
+    priority: 3,
   },
   opacity: {
     values: "number",

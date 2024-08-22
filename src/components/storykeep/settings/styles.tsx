@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import {
@@ -46,11 +46,13 @@ export const PaneAstStyles = (props: {
   });
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
   const hasModal = markdownDatum.payload.isModal;
-  const markdownLookup =
-    markdownDatum?.markdown?.htmlAst &&
-    generateMarkdownLookup(markdownDatum.markdown.htmlAst);
-  const thisTag = markdownLookup.nthTag[targetId.outerIdx];
-  const thisTagTitle = tagTitles[thisTag];
+  const markdownLookup = useMemo(() => {
+    return markdownDatum?.markdown?.htmlAst
+      ? generateMarkdownLookup(markdownDatum.markdown.htmlAst)
+      : null;
+  }, [markdownDatum?.markdown?.htmlAst]);
+  const thisTag = markdownLookup?.nthTag[targetId.outerIdx];
+  const thisTagTitle = thisTag && tagTitles[thisTag];
   const hasTextShapeOutside =
     (markdownDatum.payload.textShapeOutsideDesktop &&
       markdownDatum.payload.textShapeOutsideDesktop !== `none`) ||
@@ -60,28 +62,30 @@ export const PaneAstStyles = (props: {
       markdownDatum.payload.textShapeOutsideMobile !== `none`);
   const isListItem =
     typeof targetId.idx === `number`
-      ? typeof markdownLookup.listItemsLookup[targetId.outerIdx] === `object` &&
+      ? typeof markdownLookup?.listItemsLookup[targetId.outerIdx] ===
+          `object` &&
         typeof markdownLookup.listItemsLookup[targetId.outerIdx][
           targetId.idx
         ] === `number`
       : null;
   const isCodeItem =
     typeof targetId.idx === `number`
-      ? typeof markdownLookup.codeItemsLookup[targetId.outerIdx] === `object` &&
+      ? typeof markdownLookup?.codeItemsLookup[targetId.outerIdx] ===
+          `object` &&
         typeof markdownLookup.codeItemsLookup[targetId.outerIdx][
           targetId.idx
         ] === `number`
       : null;
   const isImage =
     typeof targetId.idx === `number`
-      ? typeof markdownLookup.imagesLookup[targetId.outerIdx] === `object` &&
+      ? typeof markdownLookup?.imagesLookup[targetId.outerIdx] === `object` &&
         typeof markdownLookup.imagesLookup[targetId.outerIdx][targetId.idx] ===
           `number`
       : null;
   const parentClassNamesPayload =
-    markdownDatum.payload.optionsPayload.classNamesPayload.parent;
+    markdownDatum?.payload.optionsPayload.classNamesPayload.parent;
   const modalClassNamesPayload =
-    markdownDatum.payload.optionsPayload.classNamesPayload.modal;
+    markdownDatum?.payload.optionsPayload.classNamesPayload.modal;
   //const parentLayers =
   //  (!hasTextShapeOutside &&
   //    parentClassNamesPayload &&
@@ -94,7 +98,7 @@ export const PaneAstStyles = (props: {
   const listItemClassNamesPayload =
     markdownDatum.payload.optionsPayload.classNamesPayload.li;
   const outerTagClassNamesPayload =
-    markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
+    thisTag && markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
   const classNamesPayload =
     activeTag === `img`
       ? imageClassNamesPayload
@@ -120,8 +124,12 @@ export const PaneAstStyles = (props: {
       {!confirm || confirm !== className ? (
         <>
           <button
-            className="peer text-md py-1 pl-1.5 pr-3 bg-white text-black rounded-md hover:bg-yellow-300 shadow"
-            title="Adjust style"
+            className="peer text-md py-1 px-3 bg-mywhite text-black rounded-md hover:bg-yellow-300 shadow hover:underline"
+            title={`Adjust ${
+              typeof tailwindClasses[className] !== `undefined`
+                ? tailwindClasses[className].title
+                : className
+            }`}
             onClick={() => setSelectedStyle(className)}
           >
             {typeof tailwindClasses[className] !== `undefined`
@@ -129,7 +137,7 @@ export const PaneAstStyles = (props: {
               : className}
           </button>
           <button
-            className="ml-[-0.5rem] p-1 bg-myorange/20 text-black font-bold rounded-full hover:bg-myorange/50 peer-hover:invisible shadow"
+            className="ml-[-0.5rem] py-1 px-0.5 bg-myorange/10 text-myorange font-bold rounded-full hover:bg-myorange/50 hover:text-black peer-hover:invisible shadow"
             title="Remove style"
             onClick={() => removeStyle(className)}
           >
@@ -167,7 +175,7 @@ export const PaneAstStyles = (props: {
       thisTabs.push({ name: `Widget`, tag: `code`, priority: 1 });
     else if (thisTagTitle && !isListItem)
       thisTabs.push({ name: thisTagTitle, tag: thisTag, priority: 0 });
-    if (isListItem) {
+    if (isListItem && thisTag) {
       thisTabs.push({ name: `List Item`, tag: `li`, priority: 2 });
       thisTabs.push({ name: `List Container`, tag: thisTag, priority: 3 });
     }
@@ -175,10 +183,10 @@ export const PaneAstStyles = (props: {
       thisTabs.push({ name: `Modal Styles`, tag: `modal`, priority: 3 });
     if (!hasTextShapeOutside)
       thisTabs.push({ name: `Pane Styles`, tag: `parent`, priority: 4 });
-    setTabs(thisTabs);
-    setActiveTag(thisTabs[0].tag);
     setSelectedStyle(null);
     setParentLayer(0);
+    setTabs(thisTabs);
+    setActiveTag(thisTabs[0].tag);
   }, [id, targetId]);
 
   const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {
@@ -197,6 +205,180 @@ export const PaneAstStyles = (props: {
       );
   }, [activeTag]);
 
+  const activeTagData = useMemo(() => {
+    if (!activeTag || !selectedStyle || !markdownLookup) return null;
+    switch (activeTag) {
+      case "p":
+      case "h2":
+      case "h3":
+      case "h4":
+      case "ol":
+      case "ul": {
+        const tagLookup = markdownLookup.nthTagLookup[activeTag];
+        if (!tagLookup || !tagLookup[targetId.outerIdx]) return null;
+        const globalNth = tagLookup[targetId.outerIdx].nth;
+        const overrideClasses =
+          (classNamesPayload?.override &&
+            classNamesPayload.override[selectedStyle] &&
+            classNamesPayload.override[selectedStyle][globalNth]) ||
+          null;
+        return {
+          class: selectedStyle,
+          tag: activeTag,
+          globalNth,
+          overrideClasses,
+          classes:
+            classNamesPayload?.classes &&
+            typeof selectedStyle === "string" &&
+            selectedStyle in classNamesPayload.classes
+              ? (classNamesPayload.classes as Record<string, unknown>)[
+                  selectedStyle
+                ]
+              : undefined,
+        };
+      }
+      case "img": {
+        if (
+          typeof targetId.idx === `number` &&
+          markdownLookup.imagesLookup[targetId.outerIdx] &&
+          typeof markdownLookup.imagesLookup[targetId.outerIdx][
+            targetId.idx
+          ] !== `number`
+        )
+          return null;
+        const globalNth =
+          typeof targetId.idx === `number` &&
+          markdownLookup?.imagesLookup[targetId.outerIdx][targetId.idx];
+        const overrideClasses =
+          (classNamesPayload?.override &&
+            typeof globalNth === `number` &&
+            classNamesPayload.override[selectedStyle] &&
+            classNamesPayload.override[selectedStyle][globalNth]) ||
+          null;
+        return {
+          class: selectedStyle,
+          tag: activeTag,
+          globalNth,
+          overrideClasses,
+          classes:
+            classNamesPayload?.classes &&
+            typeof selectedStyle === "string" &&
+            selectedStyle in classNamesPayload.classes
+              ? (classNamesPayload.classes as Record<string, unknown>)[
+                  selectedStyle
+                ]
+              : undefined,
+        };
+      }
+      case "li": {
+        if (
+          typeof targetId.idx === `number` &&
+          markdownLookup.listItemsLookup[targetId.outerIdx] &&
+          typeof markdownLookup.listItemsLookup[targetId.outerIdx][
+            targetId.idx
+          ] !== `number`
+        )
+          return null;
+        const globalNth =
+          typeof targetId.idx === `number` &&
+          markdownLookup?.listItemsLookup[targetId.outerIdx][targetId.idx];
+        const overrideClasses =
+          (classNamesPayload?.override &&
+            typeof globalNth === `number` &&
+            classNamesPayload.override[selectedStyle] &&
+            classNamesPayload.override[selectedStyle][globalNth]) ||
+          null;
+        return {
+          class: selectedStyle,
+          tag: activeTag,
+          globalNth,
+          overrideClasses,
+          classes:
+            classNamesPayload?.classes &&
+            typeof selectedStyle === "string" &&
+            selectedStyle in classNamesPayload.classes
+              ? (classNamesPayload.classes as Record<string, unknown>)[
+                  selectedStyle
+                ]
+              : undefined,
+        };
+      }
+      case "code": {
+        if (
+          typeof targetId.idx === `number` &&
+          markdownLookup.codeItemsLookup[targetId.outerIdx] &&
+          typeof markdownLookup.codeItemsLookup[targetId.outerIdx][
+            targetId.idx
+          ] !== `number`
+        )
+          return null;
+        const globalNth =
+          typeof targetId.idx === `number` &&
+          markdownLookup.codeItemsLookup[targetId.outerIdx][targetId.idx];
+        const overrideClasses =
+          (classNamesPayload?.override &&
+            typeof globalNth === `number` &&
+            classNamesPayload.override[selectedStyle] &&
+            classNamesPayload.override[selectedStyle][globalNth]) ||
+          null;
+        return {
+          class: selectedStyle,
+          tag: activeTag,
+          globalNth,
+          overrideClasses,
+          classes:
+            classNamesPayload?.classes &&
+            typeof selectedStyle === "string" &&
+            selectedStyle in classNamesPayload.classes
+              ? (classNamesPayload.classes as Record<string, unknown>)[
+                  selectedStyle
+                ]
+              : undefined,
+        };
+      }
+      case "modal": {
+        return {
+          tag: `modal`,
+          class: selectedStyle,
+          classes:
+            modalClassNamesPayload?.classes &&
+            typeof selectedStyle === "string" &&
+            selectedStyle in modalClassNamesPayload.classes
+              ? (modalClassNamesPayload.classes as Record<string, unknown>)[
+                  selectedStyle
+                ]
+              : undefined,
+        };
+      }
+      case "parent": {
+        return {
+          tag: `parent`,
+          class: selectedStyle,
+          classes:
+            parentClassNamesPayload?.classes &&
+            typeof selectedStyle === "string" &&
+            selectedStyle in parentClassNamesPayload.classes
+              ? (parentClassNamesPayload.classes as Record<string, unknown>)[
+                  selectedStyle
+                ]
+              : undefined,
+        };
+      }
+      default:
+        return null;
+    }
+  }, [
+    activeTag,
+    selectedStyle,
+    markdownLookup,
+    targetId,
+    classNamesPayload,
+    modalClassNamesPayload,
+    parentClassNamesPayload,
+    parentLayer,
+  ]);
+  if (activeTagData) console.log(activeTagData);
+
   if (!tabs) return null;
 
   return (
@@ -212,7 +394,10 @@ export const PaneAstStyles = (props: {
             <button
               key={idx}
               aria-current={tab.tag === activeTag ? "page" : undefined}
-              onClick={() => setActiveTag(tab.tag)}
+              onClick={() => {
+                setActiveTag(tab.tag);
+                setSelectedStyle(null);
+              }}
               className={classNames(
                 tab.tag === activeTag
                   ? "text-black font-bold"

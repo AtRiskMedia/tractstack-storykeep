@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef, useState } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import {
@@ -12,10 +12,12 @@ interface ViewportComboBoxProps {
   onChange: (value: string) => void;
   onFinalChange: (
     value: string,
-    viewport: "mobile" | "tablet" | "desktop"
+    viewport: "mobile" | "tablet" | "desktop",
+    isNegative?: boolean
   ) => void;
   values: string[];
   viewport: "mobile" | "tablet" | "desktop";
+  forceNegative?: boolean;
 }
 
 const ViewportComboBox = ({
@@ -24,8 +26,10 @@ const ViewportComboBox = ({
   onFinalChange,
   values,
   viewport,
+  forceNegative = false,
 }: ViewportComboBoxProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isNegative, setIsNegative] = useState(false);
 
   const Icon =
     viewport === "mobile"
@@ -40,16 +44,21 @@ const ViewportComboBox = ({
 
   const handleSelect = (selectedValue: string) => {
     onChange(selectedValue);
-    onFinalChange(selectedValue, viewport);
+    onFinalChange(selectedValue, viewport, isNegative);
     inputRef.current?.blur();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      onFinalChange(value, viewport);
+      onFinalChange(value, viewport, isNegative);
       inputRef.current?.blur();
     }
+  };
+
+  const handleNegativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setIsNegative(event.target.checked);
+    onFinalChange(value, viewport, event.target.checked);
   };
 
   return (
@@ -58,9 +67,9 @@ const ViewportComboBox = ({
       title={`Value on ${viewport} Screens`}
     >
       <Icon className="h-8 w-8 mr-2" aria-hidden="true" />
-      <div className="relative w-full">
+      <div className="relative w-full flex items-center">
         <Combobox value={value} onChange={handleSelect}>
-          <div className="relative">
+          <div className="relative flex-grow">
             <Combobox.Input
               ref={inputRef}
               className="w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-1 focus:ring-myorange focus:border-myorange"
@@ -114,6 +123,23 @@ const ViewportComboBox = ({
               ))}
           </Combobox.Options>
         </Combobox>
+        {forceNegative && (
+          <div className="ml-2 flex items-center">
+            <input
+              type="checkbox"
+              id={`negative-${viewport}`}
+              checked={isNegative}
+              onChange={handleNegativeChange}
+              className="h-4 w-4 text-myorange focus:ring-myorange border-gray-300 rounded"
+            />
+            <label
+              htmlFor={`negative-${viewport}`}
+              className="ml-2 block text-sm text-gray-900"
+            >
+              Negative
+            </label>
+          </div>
+        )}
       </div>
     </div>
   );

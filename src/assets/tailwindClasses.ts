@@ -8,6 +8,7 @@ interface TailwindClassDefinition {
   prefix: string;
   priority: number;
   useKeyAsClass?: boolean;
+  allowNegative?: boolean;
 }
 
 type TailwindClasses = {
@@ -1301,6 +1302,7 @@ export const tailwindClasses: TailwindClasses = {
     className: "rotate",
     prefix: "rotate-",
     priority: 3,
+    allowNegative: true,
   },
   opacity: {
     values: [...opacity],

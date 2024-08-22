@@ -122,7 +122,8 @@ export const PaneAstStyles = (props: {
 
   const handleFinalChange = (
     value: string,
-    viewport: "mobile" | "tablet" | "desktop"
+    viewport: "mobile" | "tablet" | "desktop",
+    isNegative?: boolean
   ) => {
     if (activeTagData?.values.includes(value)) {
       console.log(
@@ -130,7 +131,9 @@ export const PaneAstStyles = (props: {
         value,
         viewport,
         `hasOverride?`,
-        activeTagData?.hasOverride
+        activeTagData?.hasOverride,
+        `isNegative?`,
+        isNegative
       );
     }
   };
@@ -299,6 +302,7 @@ export const PaneAstStyles = (props: {
           tabletVal,
           desktopVal,
           values: tailwindClasses[selectedStyle].values,
+          allowNegative: false,
         };
       }
       case "img": {
@@ -355,6 +359,7 @@ export const PaneAstStyles = (props: {
           tabletVal,
           desktopVal,
           values: tailwindClasses[selectedStyle].values,
+          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
         };
       }
       case "li": {
@@ -399,6 +404,7 @@ export const PaneAstStyles = (props: {
           tabletVal,
           desktopVal,
           values: tailwindClasses[selectedStyle].values,
+          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
         };
       }
       case "code": {
@@ -455,6 +461,7 @@ export const PaneAstStyles = (props: {
           tabletVal,
           desktopVal,
           values: tailwindClasses[selectedStyle].values,
+          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
         };
       }
       case "modal": {
@@ -481,6 +488,7 @@ export const PaneAstStyles = (props: {
           tabletVal,
           desktopVal,
           values: tailwindClasses[selectedStyle].values,
+          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
         };
       }
       case "parent": {
@@ -512,6 +520,7 @@ export const PaneAstStyles = (props: {
           tabletVal,
           desktopVal,
           values: tailwindClasses[selectedStyle].values,
+          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
         };
       }
       default:
@@ -665,6 +674,7 @@ export const PaneAstStyles = (props: {
                   onFinalChange={handleFinalChange}
                   values={activeTagData?.values || []}
                   viewport="mobile"
+                  forceNegative={activeTagData?.allowNegative}
                 />
                 <ViewportComboBox
                   value={tabletValue || ``}
@@ -672,6 +682,7 @@ export const PaneAstStyles = (props: {
                   onFinalChange={handleFinalChange}
                   values={activeTagData?.values || []}
                   viewport="tablet"
+                  forceNegative={activeTagData?.allowNegative}
                 />
                 <ViewportComboBox
                   value={desktopValue || ``}
@@ -679,6 +690,7 @@ export const PaneAstStyles = (props: {
                   onFinalChange={handleFinalChange}
                   values={activeTagData?.values || []}
                   viewport="desktop"
+                  forceNegative={activeTagData?.allowNegative}
                 />
               </div>
 

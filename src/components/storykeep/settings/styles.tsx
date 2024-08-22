@@ -32,7 +32,6 @@ export const PaneAstStyles = (props: {
   const { id, targetId, type } = props;
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   // replace with direct from datum
-  const [enabled, setEnabled] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const [parentLayer, setParentLayer] = useState(0);
@@ -118,6 +117,10 @@ export const PaneAstStyles = (props: {
   const cancelRemoveStyle = () => {
     setConfirm(null);
   };
+
+  const removeOverride = () => {
+    console.log(`will do!`)
+  }
 
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">
@@ -378,6 +381,7 @@ export const PaneAstStyles = (props: {
     parentLayer,
   ]);
   if (activeTagData) console.log(activeTagData);
+  const enabled = !!activeTagData?.overrideClasses
 
   if (!tabs) return null;
 
@@ -524,7 +528,7 @@ export const PaneAstStyles = (props: {
                 <div className="flex items-center my-6">
                   <Switch
                     checked={enabled}
-                    onChange={setEnabled}
+                    onChange={removeOverride}
                     className={`${
                       enabled ? "bg-myorange" : "bg-mydarkgrey"
                     } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}

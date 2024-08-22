@@ -239,6 +239,7 @@ export const PaneAstStyles = (props: {
           Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
         const desktopVal =
           Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
+        console.log(`values`, tailwindClasses[selectedStyle].values);
         return {
           class: selectedStyle,
           tag: activeTag,
@@ -588,12 +589,19 @@ export const PaneAstStyles = (props: {
             <div className="px-6 py-4">
               <h4 className="text-lg">
                 <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
-                {overrideStyle ? <span className="underline">this</span> : <span className="underline">all</span>}{" "}
+                {overrideStyle ? (
+                  <span className="underline">this</span>
+                ) : (
+                  <span className="underline">all</span>
+                )}{" "}
                 {tabs.length && tagTitles[tabs.at(0)!.tag]}
                 {!overrideStyle ? `s` : null}
               </h4>
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
-                <div className="flex flex-nowrap" title="Value on Small Screens">
+                <div
+                  className="flex flex-nowrap"
+                  title="Value on Small Screens"
+                >
                   <DevicePhoneMobileIcon
                     className="h-8 w-8"
                     aria-hidden="true"
@@ -602,13 +610,19 @@ export const PaneAstStyles = (props: {
                     {activeTagData?.mobileVal}
                   </span>
                 </div>
-                <div className="flex flex-nowrap" title="Value on Medium Screens">
+                <div
+                  className="flex flex-nowrap"
+                  title="Value on Medium Screens"
+                >
                   <DeviceTabletIcon className="h-8 w-8" aria-hidden="true" />
                   <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
                     {activeTagData?.tabletVal}
                   </span>
                 </div>
-                <div className="flex flex-nowrap" title="Value on Large Screens">
+                <div
+                  className="flex flex-nowrap"
+                  title="Value on Large Screens"
+                >
                   <ComputerDesktopIcon className="h-8 w-8" aria-hidden="true" />
                   <span className="px-3 py-1 rounded-md bg-mywhite shadow-inner">
                     {activeTagData?.desktopVal}
@@ -636,9 +650,7 @@ export const PaneAstStyles = (props: {
                   </Switch>
                   <div className="ml-3">
                     <div className="text-md text-black font-bold">
-                      {!overrideStyle
-                        ? `Quick style mode`
-                        : `Custom styles`}
+                      {!overrideStyle ? `Quick style mode` : `Custom styles`}
                     </div>
                     <div className="text-md text-mydarkgrey">
                       {!overrideStyle

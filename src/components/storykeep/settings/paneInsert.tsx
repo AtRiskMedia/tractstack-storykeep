@@ -257,7 +257,7 @@ export const PaneInsert = (props: {
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div>
+    <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner mr-6">
       <p className="text-lg my-1 text-black">
         <strong>Please provide a descriptive title and slug.</strong>
       </p>

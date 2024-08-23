@@ -48,13 +48,13 @@ export const PaneSettings = (props: { id: string }) => {
   //const $paneWithheldBeliefs = useStore(paneWithheldBeliefs);
 
   return (
-    <>
+    <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner mr-6">
       <p>Pane: {id}</p>
       <ul>
         <li>{$paneTitle[id].current}</li>
         <li>{$paneSlug[id].current}</li>
         <li>{$paneFragmentIds[id].current.join(`, `)}</li>
       </ul>
-    </>
+    </div>
   );
 };

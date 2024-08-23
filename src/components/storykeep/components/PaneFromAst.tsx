@@ -14,6 +14,7 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
+import StylesWrapper from "./StylesWrapper";
 import { handleToggleOn } from "../../../utils/storykeep";
 import type { MouseEvent, ReactNode } from "react";
 import type {
@@ -105,15 +106,15 @@ const EditableInnerElementWrapper = ({
   children: ReactNode;
 }) => {
   return (
-    <span id={id} className="relative" title={tooltip}>
+    <div id={id} className="relative" title={tooltip}>
       {children}
-      <span
+      <div
         onClick={onClick}
         className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white
                    outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
                    mix-blend-exclusion"
       />
-    </span>
+    </div>
   );
 };
 
@@ -238,6 +239,17 @@ const PaneFromAst = ({
       ? thisHookValuesRaw[2]
       : "";
 
+  const wrapWithStylesIndicator = (content: ReactNode) => {
+    if (toolMode === "styles" && !readonly) {
+      return (
+        <StylesWrapper paneId={paneId} outerIdx={outerIdx} idx={idx}>
+          {content}
+        </StylesWrapper>
+      );
+    }
+    return content;
+  };
+
   // if editable as text
   if (
     !readonly &&
@@ -355,7 +367,7 @@ const PaneFromAst = ({
 
       const tip = toolMode === `styles` ? `Click to update style/design` : ``;
       if (tip)
-        return (
+        return wrapWithStylesIndicator(
           <EditableOuterWrapper
             id={thisId}
             tooltip={tip}
@@ -451,7 +463,9 @@ const PaneFromAst = ({
   }
 
   if (Tag === "img" && imageSrc) {
-    return <img className={injectClassNames} src={imageSrc} alt={altText} />;
+    return wrapWithStylesIndicator(
+      <img className={injectClassNames} src={imageSrc} alt={altText} />
+    );
   }
 
   if (Tag === "code") {

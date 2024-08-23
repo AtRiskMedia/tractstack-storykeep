@@ -85,15 +85,16 @@ export const EditModal = ({ type, contentMap }: EditModalProps) => {
 
   return (
     <div className="relative">
-      <div className="absolute right-4 top-4">
+      <div className="absolute top-0 right-0">
         <button
+          className="bg-white rounded-md hover:bg-myorange"
           title={$editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`}
           onClick={() => toggleOffEditModal()}
         >
-          <XMarkIcon className="w-4 h-4 text-black/50 hover:text-black" />
+          <XMarkIcon className="w-4 h-4 text-black hover:text-white" />
         </button>
       </div>
-      <div className="py-2 px-4">
+      <div>
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
           <StoryFragmentSettings id={$editMode.id} />

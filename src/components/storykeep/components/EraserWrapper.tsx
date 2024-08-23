@@ -68,16 +68,16 @@ const EraserWrapper = ({
 
   if (!allowTag) return children;
   return (
-    <span className="relative">
+    <div className="relative">
       {children}
-      <span
+      <div
         onClick={handleErase}
         title="Delete this!"
         className="absolute inset-0 w-full h-full z-101 hover:bg-myorange hover:bg-opacity-20 hover:outline-white/20
                    outline-2 outline-dashed outline-myorange/50 outline-offset-[-2px]
                    mix-blend-exclusion cursor-pointer"
       />
-    </span>
+    </div>
   );
 };
 

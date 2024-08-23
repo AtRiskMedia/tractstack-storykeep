@@ -250,7 +250,7 @@ export const StoryFragment = (props: { id: string }) => {
   return (
     <>
       {($editMode?.mode === `settings` || $editMode?.mode === `insert`) && (
-        <div className="fixed inset-0 bg-black/85 z-[8999]"></div>
+        <div className="fixed inset-0 bg-black/95 z-[8999]"></div>
       )}
       <div
         id="storykeep-preview"

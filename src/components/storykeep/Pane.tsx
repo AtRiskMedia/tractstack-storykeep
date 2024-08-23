@@ -233,10 +233,12 @@ const Pane = (props: {
         {memoizedPaneData.fragments.map(renderFragment)}
       </div>
       {toolMode === "settings" && (
-        <div className="absolute inset-0 hover:bg-mylightgrey hover:bg-opacity-85 flex items-center justify-center group z-104">
+        <div className="absolute inset-0 hover:backdrop-blur-sm hover:bg-white/50 hover:dark:bg-black/50 flex items-center justify-center group z-104">
           <div className="relative">
-            <div className="bg-white p-4 rounded invisible group-hover:visible">
-              <h2 className="text-xl font-bold mb-2">Click for Settings</h2>
+            <div className="bg-yellow-300 p-4 rounded-md invisible group-hover:visible">
+              <h2 className="text-xl text-black font-bold mb-2">
+                Click for Settings
+              </h2>
             </div>
           </div>
         </div>

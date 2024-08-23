@@ -269,52 +269,49 @@ export const PaneAstStyles = (props: {
     <div
       className={classNames(
         `flex`,
-        type === `mobile` ? `flex-nowrap gap-x-12 gap-y-2` : `flex-wrap`
+        type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
       )}
     >
-      <div className={classNames(type === `mobile` ? `max-w-5/12` : `w-full`)}>
-        <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
-          {tabs.map((tab: StyleTab, idx: number) => (
-            <button
-              key={idx}
-              aria-current={tab.tag === activeTag ? "page" : undefined}
-              onClick={() => {
-                setActiveTag(tab.tag);
-                setSelectedStyle(null);
-              }}
-              className={classNames(
-                tab.tag === activeTag
-                  ? "text-black font-bold"
-                  : "text-mydarkgrey hover:text-black underline",
-                "text-md"
-              )}
-            >
-              {tab.name}
-            </button>
-          ))}
-        </nav>
-        <hr />
-        {activeTag && ![`parent`, `modal`].includes(activeTag) && (
-          <>
-            <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-              <div className="my-4 flex flex-wrap gap-x-2 gap-y-1.5">
-                {classNamesPayload?.classes &&
-                Object.keys(classNamesPayload.classes).length ? (
-                  Object.keys(classNamesPayload.classes).map(className =>
-                    ClassTag(className)
-                  )
-                ) : (
-                  <span>No styles</span>
+      <div
+        className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mr-8`)}
+      >
+        <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+          <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
+            {tabs.map((tab: StyleTab, idx: number) => (
+              <button
+                key={idx}
+                aria-current={tab.tag === activeTag ? "page" : undefined}
+                onClick={() => {
+                  setActiveTag(tab.tag);
+                  setSelectedStyle(null);
+                }}
+                className={classNames(
+                  tab.tag === activeTag
+                    ? "text-black font-bold"
+                    : "text-mydarkgrey hover:text-black underline",
+                  "text-md"
                 )}
-              </div>
+              >
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+          <hr />
+          {activeTag && ![`parent`, `modal`].includes(activeTag) && (
+            <div className="my-4 flex flex-wrap gap-x-2 gap-y-1.5">
+              {classNamesPayload?.classes &&
+              Object.keys(classNamesPayload.classes).length ? (
+                Object.keys(classNamesPayload.classes).map(className =>
+                  ClassTag(className)
+                )
+              ) : (
+                <span>No styles</span>
+              )}
             </div>
-            <div className="my-2">ADD STYLE</div>
-          </>
-        )}
+          )}
 
-        {activeTag === `parent` && (
-          <>
-            <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+          {activeTag === `parent` && (
+            <>
               <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-2 gap-y-1.5">
                 <span className="py-1">Layer:</span>
                 {parentClassNamesPayload?.classes &&
@@ -354,33 +351,28 @@ export const PaneAstStyles = (props: {
                   </div>
                 )}
               </div>
-            </div>
-            <div className="my-2">ADD STYLE</div>
-          </>
-        )}
+            </>
+          )}
 
-        {activeTag === `modal` && (
-          <>
-            <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-              <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-                {modalClassNamesPayload?.classes ? (
-                  Object.keys(modalClassNamesPayload?.classes).map(className =>
-                    ClassTag(className)
-                  )
-                ) : (
-                  <span>No styles</span>
-                )}
-              </div>
+          {activeTag === `modal` && (
+            <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              {modalClassNamesPayload?.classes ? (
+                Object.keys(modalClassNamesPayload?.classes).map(className =>
+                  ClassTag(className)
+                )
+              ) : (
+                <span>No styles</span>
+              )}
             </div>
-            <div className="my-2">ADD STYLE</div>
-          </>
-        )}
+          )}
+          <div className="my-2">ADD STYLE</div>
+        </div>
       </div>
       <div
         className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mt-8`)}
       >
         {selectedStyle ? (
-          <div className="my-1 bg-white shadow-inner rounded">
+          <div className="bg-white shadow-inner rounded">
             <div className="px-6 py-4">
               <h4 className="text-lg">
                 <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
@@ -463,6 +455,7 @@ export const PaneAstStyles = (props: {
           </div>
         ) : null}
       </div>
+      <div className="w-2 h-auto"></div>
     </div>
   );
 };

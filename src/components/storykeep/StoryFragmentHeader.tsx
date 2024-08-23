@@ -129,7 +129,7 @@ export const StoryFragmentHeader = memo(
           mode: `settings`,
           type: `storyfragment`,
         });
-        handleToggleOn(true);
+        handleToggleOn(true, undefined, true);
       }
     };
 

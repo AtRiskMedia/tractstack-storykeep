@@ -27,22 +27,20 @@ const InsertAboveBelowWrapper = ({
   return (
     <div className="relative group">
       {children}
-      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top mix-blend-exclusion">
+      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top mix-blend-exclusion hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
         <div
           onClick={() => onInsertClick("above")}
           title="Insert new Pane above this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-white/10
                      before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-4
                      before:border-t-4 before:border-dashed before:border-white/25 hover:before:border-white"
         />
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom mix-blend-exclusion">
+      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom mix-blend-exclusion hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
         <div
           onClick={() => onInsertClick("below")}
           title="Insert new Pane below this one"
           className="absolute inset-0 w-full h-full
-                     hover:bg-white/10
                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-4
                      after:border-b-4 after:border-dashed after:border-white/25 hover:after:border-white"
         />
@@ -103,10 +101,10 @@ const PaneWrapper = (props: {
     };
   }, [$editMode, id, paneElement]);
 
-  const toggleOffEditModal = () => {
+  const toggleOffEditModal = useCallback(() => {
     editModeStore.set(null);
     handleToggleOff();
-  };
+  }, []);
 
   const handleEditModeToggle = () => {
     if (
@@ -121,7 +119,7 @@ const PaneWrapper = (props: {
         mode: "settings",
         type: "pane",
       });
-      handleToggleOn(false, `pane-inner-${id}`);
+      handleToggleOn(false, `pane-inner-${id}`, true);
     }
   };
 
@@ -150,7 +148,8 @@ const PaneWrapper = (props: {
           const currentEditMode = editModeStore.get();
           if (
             currentEditMode?.type === "pane" &&
-            currentEditMode.mode === "settings" &&
+            (currentEditMode.mode === "settings" ||
+              currentEditMode.mode === "styles") &&
             currentEditMode.id === id
           ) {
             toggleOffEditModal();
@@ -183,34 +182,36 @@ const PaneWrapper = (props: {
   if (!isClient) return null;
 
   return (
-    <div ref={paneRef} onClick={handleClick} className="relative">
-      {toolMode === `pane` && !isDesigningNew ? (
-        <InsertAboveBelowWrapper onInsertClick={handleInsertClick}>
-          {Content}
-        </InsertAboveBelowWrapper>
-      ) : (
-        Content
-      )}
-      {toolMode === `settings` && (
-        <div
-          className="absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out 
-                   bg-transparent group-hover:bg-[rgba(167,177,183,0.85)]"
-        >
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+    <div ref={paneRef} className="relative">
+      <div
+        onClick={handleClick}
+        className="w-full pointer-events-auto cursor-pointer"
+      >
+        {toolMode === `pane` && !isDesigningNew ? (
+          <InsertAboveBelowWrapper onInsertClick={handleInsertClick}>
+            {Content}
+          </InsertAboveBelowWrapper>
+        ) : (
+          Content
+        )}
+        {toolMode === `settings` && (
+          <div className="absolute inset-0">
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
                         text-black bg-mywhite p-2.5 rounded-sm shadow-md
                         text-xl md:text-3xl font-action mx-6
                         opacity-0 group-hover:opacity-100 transition-opacity duration-300
                         invisible hover:visible"
-          >
-            {$editMode?.id === id ? (
-              <span>click to close panel</span>
-            ) : (
-              <span>click for design &amp; set-up options</span>
-            )}
+            >
+              {$editMode?.id === id ? (
+                <span>click to close panel</span>
+              ) : (
+                <span>click for design &amp; set-up options</span>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

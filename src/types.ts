@@ -308,14 +308,15 @@ export interface ClassNamesPrePayload {
   [key: string]: TupleValue | TupleValue[];
 }
 
-export interface ClassNamesPayloadDatum {
-  [key: string]: {
-    classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumWrapper;
-    count?: number;
-    override?: {
-      [key: string]: Tuple[];
-    };
+export interface ClassNamesPayloadInnerDatum {
+  classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumWrapper;
+  count?: number;
+  override?: {
+    [key: string]: Tuple[];
   };
+}
+export interface ClassNamesPayloadDatum {
+  [key: string]: ClassNamesPayloadInnerDatum;
 }
 
 export interface ClassNamesPayloadResult {

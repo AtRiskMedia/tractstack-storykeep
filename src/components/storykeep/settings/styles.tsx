@@ -3,6 +3,7 @@ import { Switch } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
+import { getActiveTagData } from "../../../utils/compositor/markdownUtils";
 import ViewportComboBox from "../fields/ViewportComboBox";
 import {
   paneMarkdownFragmentId,
@@ -30,9 +31,9 @@ export const PaneAstStyles = (props: {
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const [parentLayer, setParentLayer] = useState(0);
-  const [mobileValue, setMobileValue] = useState<string | null>(null);
-  const [tabletValue, setTabletValue] = useState<string | null>(null);
-  const [desktopValue, setDesktopValue] = useState<string | null>(null);
+  const [mobileValue, setMobileValue] = useState<string>(``);
+  const [tabletValue, setTabletValue] = useState<string>(``);
+  const [desktopValue, setDesktopValue] = useState<string>(``);
   const [confirm, setConfirm] = useState<string | null>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [id],
@@ -206,9 +207,9 @@ export const PaneAstStyles = (props: {
     setParentLayer(0);
     setTabs(thisTabs);
     setActiveTag(thisTabs[0].tag);
-    setMobileValue(null);
-    setTabletValue(null);
-    setDesktopValue(null);
+    setMobileValue(``);
+    setTabletValue(``);
+    setDesktopValue(``);
   }, [id, targetId]);
 
   const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {
@@ -220,40 +221,6 @@ export const PaneAstStyles = (props: {
     });
   };
 
-  const setViewportValues = (
-    mobileVal: string | number | null | unknown,
-    tabletVal: string | number | null | unknown,
-    desktopVal: string | number | null | unknown
-  ) => {
-    if (typeof mobileVal === `string`) setMobileValue(mobileVal);
-    else if (typeof mobileVal === `number`)
-      setMobileValue(mobileVal.toString());
-    else
-      console.log(
-        `unable to setViewportValues on`,
-        mobileVal,
-        typeof mobileVal
-      );
-    if (typeof tabletVal === `string`) setTabletValue(tabletVal);
-    else if (typeof tabletVal === `number`)
-      setTabletValue(tabletVal.toString());
-    else
-      console.log(
-        `unable to setViewportValues on`,
-        tabletVal,
-        typeof tabletVal
-      );
-    if (typeof desktopVal === `string`) setDesktopValue(desktopVal);
-    else if (typeof desktopVal === `number`)
-      setDesktopValue(desktopVal.toString());
-    else
-      console.log(
-        `unable to setViewportValues on`,
-        desktopVal,
-        typeof desktopVal
-      );
-  };
-
   useEffect(() => {
     if (activeTag)
       setTabs(prevItems =>
@@ -262,270 +229,16 @@ export const PaneAstStyles = (props: {
   }, [activeTag]);
 
   const activeTagData = useMemo(() => {
-    if (!activeTag || !selectedStyle || !markdownLookup) return null;
-    switch (activeTag) {
-      case "p":
-      case "h2":
-      case "h3":
-      case "h4":
-      case "ol":
-      case "ul": {
-        const tagLookup = markdownLookup.nthTagLookup[activeTag];
-        if (!tagLookup || !tagLookup[targetId.outerIdx]) return null;
-        const globalNth = tagLookup[targetId.outerIdx].nth;
-        const overrideClasses =
-          (classNamesPayload?.override &&
-            classNamesPayload.override[selectedStyle] &&
-            classNamesPayload.override[selectedStyle][globalNth]) ||
-          null;
-        const classes =
-          classNamesPayload?.classes &&
-          typeof selectedStyle === "string" &&
-          selectedStyle in classNamesPayload.classes
-            ? (classNamesPayload.classes as Record<string, unknown[]>)[
-                selectedStyle
-              ]
-            : undefined;
-        const mobileVal =
-          Array.isArray(classes) && classes.length ? classes[0] : null;
-        const tabletVal =
-          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
-        const desktopVal =
-          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        setViewportValues(mobileVal, tabletVal, desktopVal);
-        return {
-          class: selectedStyle,
-          tag: activeTag,
-          globalNth,
-          hasOverride: !!overrideClasses,
-          mobileVal,
-          tabletVal,
-          desktopVal,
-          values: tailwindClasses[selectedStyle].values,
-          allowNegative: false,
-        };
-      }
-      case "img": {
-        if (
-          typeof targetId.idx === `number` &&
-          markdownLookup.imagesLookup[targetId.outerIdx] &&
-          typeof markdownLookup.imagesLookup[targetId.outerIdx][
-            targetId.idx
-          ] !== `number`
-        )
-          return null;
-        const globalNth =
-          typeof targetId.idx === `number` &&
-          markdownLookup?.imagesLookup[targetId.outerIdx][targetId.idx];
-        const overrideClasses =
-          (classNamesPayload?.override &&
-            typeof globalNth === `number` &&
-            classNamesPayload.override[selectedStyle] &&
-            classNamesPayload.override[selectedStyle][globalNth]) ||
-          null;
-        const classes =
-          classNamesPayload?.classes &&
-          typeof selectedStyle === "string" &&
-          selectedStyle in classNamesPayload.classes
-            ? (classNamesPayload.classes as Record<string, unknown[]>)[
-                selectedStyle
-              ]
-            : undefined;
-        const mobileVal =
-          overrideClasses && overrideClasses.length
-            ? overrideClasses[0]
-            : classes && classes.length
-              ? classes[0]
-              : null;
-        const tabletVal =
-          overrideClasses && overrideClasses.length > 1
-            ? overrideClasses[1]
-            : classes && classes.length > 1
-              ? classes[1]
-              : mobileVal;
-        const desktopVal =
-          overrideClasses && overrideClasses.length > 2
-            ? overrideClasses[2]
-            : classes && classes.length > 2
-              ? classes[2]
-              : tabletVal;
-        setViewportValues(mobileVal, tabletVal, desktopVal);
-        return {
-          class: selectedStyle,
-          tag: activeTag,
-          globalNth,
-          hasOverride: !!overrideClasses,
-          mobileVal,
-          tabletVal,
-          desktopVal,
-          values: tailwindClasses[selectedStyle].values,
-          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
-        };
-      }
-      case "li": {
-        if (
-          typeof targetId.idx === `number` &&
-          markdownLookup.listItemsLookup[targetId.outerIdx] &&
-          typeof markdownLookup.listItemsLookup[targetId.outerIdx][
-            targetId.idx
-          ] !== `number`
-        )
-          return null;
-        const globalNth =
-          typeof targetId.idx === `number` &&
-          markdownLookup?.listItemsLookup[targetId.outerIdx][targetId.idx];
-        const overrideClasses =
-          (classNamesPayload?.override &&
-            typeof globalNth === `number` &&
-            classNamesPayload.override[selectedStyle] &&
-            classNamesPayload.override[selectedStyle][globalNth]) ||
-          null;
-        const classes =
-          classNamesPayload?.classes &&
-          typeof selectedStyle === "string" &&
-          selectedStyle in classNamesPayload.classes
-            ? (classNamesPayload.classes as Record<string, unknown[]>)[
-                selectedStyle
-              ]
-            : undefined;
-        const mobileVal =
-          Array.isArray(classes) && classes.length ? classes[0] : null;
-        const tabletVal =
-          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
-        const desktopVal =
-          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        setViewportValues(mobileVal, tabletVal, desktopVal);
-        return {
-          class: selectedStyle,
-          tag: activeTag,
-          globalNth,
-          hasOverride: !!overrideClasses,
-          mobileVal,
-          tabletVal,
-          desktopVal,
-          values: tailwindClasses[selectedStyle].values,
-          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
-        };
-      }
-      case "code": {
-        if (
-          typeof targetId.idx === `number` &&
-          markdownLookup.codeItemsLookup[targetId.outerIdx] &&
-          typeof markdownLookup.codeItemsLookup[targetId.outerIdx][
-            targetId.idx
-          ] !== `number`
-        )
-          return null;
-        const globalNth =
-          typeof targetId.idx === `number` &&
-          markdownLookup.codeItemsLookup[targetId.outerIdx][targetId.idx];
-        const overrideClasses =
-          (classNamesPayload?.override &&
-            typeof globalNth === `number` &&
-            classNamesPayload.override[selectedStyle] &&
-            classNamesPayload.override[selectedStyle][globalNth]) ||
-          null;
-        const classes =
-          classNamesPayload?.classes &&
-          typeof selectedStyle === "string" &&
-          selectedStyle in classNamesPayload.classes
-            ? (classNamesPayload.classes as Record<string, unknown[]>)[
-                selectedStyle
-              ]
-            : undefined;
-        const mobileVal =
-          overrideClasses && overrideClasses.length
-            ? overrideClasses[0]
-            : classes && classes.length
-              ? classes[0]
-              : null;
-        const tabletVal =
-          overrideClasses && overrideClasses.length > 1
-            ? overrideClasses[1]
-            : classes && classes.length > 1
-              ? classes[1]
-              : mobileVal;
-        const desktopVal =
-          overrideClasses && overrideClasses.length > 2
-            ? overrideClasses[2]
-            : classes && classes.length > 2
-              ? classes[2]
-              : tabletVal;
-        setViewportValues(mobileVal, tabletVal, desktopVal);
-        return {
-          class: selectedStyle,
-          tag: activeTag,
-          globalNth,
-          hasOverride: !!overrideClasses,
-          mobileVal,
-          tabletVal,
-          desktopVal,
-          values: tailwindClasses[selectedStyle].values,
-          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
-        };
-      }
-      case "modal": {
-        const classes =
-          modalClassNamesPayload?.classes &&
-          typeof selectedStyle === "string" &&
-          selectedStyle in modalClassNamesPayload.classes
-            ? (modalClassNamesPayload.classes as Record<string, unknown>)[
-                selectedStyle
-              ]
-            : undefined;
-        const mobileVal =
-          Array.isArray(classes) && classes.length ? classes[0] : null;
-        const tabletVal =
-          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
-        const desktopVal =
-          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        setViewportValues(mobileVal, tabletVal, desktopVal);
-        return {
-          tag: `modal`,
-          class: selectedStyle,
-          hasOverride: false,
-          mobileVal,
-          tabletVal,
-          desktopVal,
-          values: tailwindClasses[selectedStyle].values,
-          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
-        };
-      }
-      case "parent": {
-        const classes =
-          parentClassNamesPayload?.classes &&
-          typeof selectedStyle === "string" &&
-          Array.isArray(parentClassNamesPayload.classes) &&
-          parentClassNamesPayload.classes[parentLayer] &&
-          selectedStyle in parentClassNamesPayload.classes[parentLayer]
-            ? (
-                parentClassNamesPayload.classes[parentLayer] as Record<
-                  string,
-                  unknown[]
-                >
-              )[selectedStyle]
-            : undefined;
-        const mobileVal =
-          Array.isArray(classes) && classes.length ? classes[0] : null;
-        const tabletVal =
-          Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
-        const desktopVal =
-          Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
-        setViewportValues(mobileVal, tabletVal, desktopVal);
-        return {
-          tag: `parent`,
-          class: selectedStyle,
-          hasOverride: false,
-          mobileVal,
-          tabletVal,
-          desktopVal,
-          values: tailwindClasses[selectedStyle].values,
-          allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
-        };
-      }
-      default:
-        return null;
-    }
+    return getActiveTagData(
+      activeTag,
+      selectedStyle,
+      markdownLookup,
+      targetId,
+      classNamesPayload || null,
+      modalClassNamesPayload,
+      parentClassNamesPayload,
+      parentLayer
+    );
   }, [
     activeTag,
     selectedStyle,
@@ -536,6 +249,28 @@ export const PaneAstStyles = (props: {
     parentClassNamesPayload,
     parentLayer,
   ]);
+
+  useEffect(() => {
+    if (activeTagData) {
+      // everything is converted to strings;
+      // prototype tract stack will have numbers here
+      if (typeof activeTagData?.mobileVal === `string`)
+        setMobileValue(activeTagData.mobileVal);
+      else if (typeof activeTagData?.mobileVal === `number`)
+        setMobileValue(activeTagData.mobileVal.toString());
+      else setMobileValue(``);
+      if (typeof activeTagData?.tabletVal === `string`)
+        setTabletValue(activeTagData.tabletVal);
+      else if (typeof activeTagData?.tabletVal === `number`)
+        setTabletValue(activeTagData.tabletVal.toString());
+      else setTabletValue(``);
+      if (typeof activeTagData?.desktopVal === `string`)
+        setDesktopValue(activeTagData.desktopVal);
+      else if (typeof activeTagData?.desktopVal === `number`)
+        setDesktopValue(activeTagData.desktopVal.toString());
+      else setDesktopValue(``);
+    }
+  }, [activeTagData]);
 
   if (!tabs) return null;
 

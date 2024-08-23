@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import {
@@ -28,6 +28,7 @@ const ViewportComboBox = ({
   viewport,
   forceNegative = false,
 }: ViewportComboBoxProps) => {
+  const [internalValue, setInternalValue] = useState(value || "");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isNegative, setIsNegative] = useState(false);
 
@@ -39,10 +40,12 @@ const ViewportComboBox = ({
         : ComputerDesktopIcon;
 
   const handleChange = (newValue: string) => {
+    setInternalValue(newValue || "");
     onChange(newValue || "");
   };
 
   const handleSelect = (selectedValue: string) => {
+    setInternalValue(selectedValue);
     onChange(selectedValue);
     onFinalChange(selectedValue, viewport, isNegative);
     inputRef.current?.blur();
@@ -61,30 +64,54 @@ const ViewportComboBox = ({
     onFinalChange(value, viewport, event.target.checked);
   };
 
+  useEffect(() => {
+    setInternalValue(value || "");
+  }, [value]);
+
   return (
     <div
       className="flex flex-nowrap items-center"
       title={`Value on ${viewport} Screens`}
     >
       <Icon className="h-8 w-8 mr-2" aria-hidden="true" />
-      <div className="relative w-full flex items-center">
+      <div className="relative w-full">
         <Combobox value={value} onChange={handleSelect}>
-          <div className="relative flex-grow">
-            <Combobox.Input
-              ref={inputRef}
-              className="w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-1 focus:ring-myorange focus:border-myorange"
-              onChange={event => handleChange(event.target.value)}
-              onKeyDown={handleKeyDown}
-              displayValue={v => (typeof v === `string` ? v : "")}
-            />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <ChevronUpDownIcon
-                className="h-5 w-5 text-gray-400"
-                aria-hidden="true"
+          <div className="flex items-center">
+            <div className="relative flex-grow">
+              <Combobox.Input
+                ref={inputRef}
+                className="w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-1 focus:ring-myorange focus:border-myorange"
+                onChange={event => handleChange(event.target.value)}
+                onKeyDown={handleKeyDown}
+                value={internalValue}
+                displayValue={v => (typeof v === `string` ? v : "")}
               />
-            </Combobox.Button>
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                <ChevronUpDownIcon
+                  className="h-5 w-5 text-gray-400"
+                  aria-hidden="true"
+                />
+              </Combobox.Button>
+            </div>
+            {forceNegative && (
+              <div className="ml-2 flex items-center">
+                <input
+                  type="checkbox"
+                  id={`negative-${viewport}`}
+                  checked={isNegative}
+                  onChange={handleNegativeChange}
+                  className="h-4 w-4 text-myorange focus:ring-myorange border-gray-300 rounded"
+                />
+                <label
+                  htmlFor={`negative-${viewport}`}
+                  className="ml-2 block text-sm text-gray-900"
+                >
+                  Negative
+                </label>
+              </div>
+            )}
           </div>
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <Combobox.Options className="absolute z-10 left-0 right-0 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
             {values
               .filter(item =>
                 item.toLowerCase().includes((value || "").toLowerCase())
@@ -123,23 +150,6 @@ const ViewportComboBox = ({
               ))}
           </Combobox.Options>
         </Combobox>
-        {forceNegative && (
-          <div className="ml-2 flex items-center">
-            <input
-              type="checkbox"
-              id={`negative-${viewport}`}
-              checked={isNegative}
-              onChange={handleNegativeChange}
-              className="h-4 w-4 text-myorange focus:ring-myorange border-gray-300 rounded"
-            />
-            <label
-              htmlFor={`negative-${viewport}`}
-              className="ml-2 block text-sm text-gray-900"
-            >
-              Negative
-            </label>
-          </div>
-        )}
       </div>
     </div>
   );

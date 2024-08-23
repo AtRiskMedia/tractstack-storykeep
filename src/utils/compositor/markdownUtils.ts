@@ -659,6 +659,31 @@ export function cleanHtmlAst(
   return node;
 }
 
+function processClassValues(
+  classes: unknown[] | null,
+  overrideClasses: Tuple | null
+): [unknown | null, unknown | null, unknown | null] {
+  const mobileVal =
+    overrideClasses && overrideClasses.length
+      ? overrideClasses[0]
+      : Array.isArray(classes) && classes.length
+        ? classes[0]
+        : null;
+  const tabletVal =
+    overrideClasses && overrideClasses.length > 1
+      ? overrideClasses[1]
+      : Array.isArray(classes) && classes.length > 1
+        ? classes[1]
+        : mobileVal;
+  const desktopVal =
+    overrideClasses && overrideClasses.length > 2
+      ? overrideClasses[2]
+      : Array.isArray(classes) && classes.length > 2
+        ? classes[2]
+        : tabletVal;
+  return [mobileVal, tabletVal, desktopVal];
+}
+
 export function getActiveTagData(
   activeTag: Tag | null,
   selectedStyle: string | null,
@@ -694,12 +719,10 @@ export function getActiveTagData(
               selectedStyle
             ]
           : null;
-      const mobileVal =
-        Array.isArray(classes) && classes.length ? classes[0] : null;
-      const tabletVal =
-        Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
-      const desktopVal =
-        Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
+      const [mobileVal, tabletVal, desktopVal] = processClassValues(
+        classes,
+        overrideClasses
+      );
       return {
         class: selectedStyle,
         tag: activeTag,
@@ -737,24 +760,10 @@ export function getActiveTagData(
               selectedStyle
             ]
           : null;
-      const mobileVal =
-        overrideClasses && overrideClasses.length
-          ? overrideClasses[0]
-          : classes && classes.length
-            ? classes[0]
-            : null;
-      const tabletVal =
-        overrideClasses && overrideClasses.length > 1
-          ? overrideClasses[1]
-          : classes && classes.length > 1
-            ? classes[1]
-            : mobileVal;
-      const desktopVal =
-        overrideClasses && overrideClasses.length > 2
-          ? overrideClasses[2]
-          : classes && classes.length > 2
-            ? classes[2]
-            : tabletVal;
+      const [mobileVal, tabletVal, desktopVal] = processClassValues(
+        classes,
+        overrideClasses
+      );
       return {
         class: selectedStyle,
         tag: activeTag,
@@ -793,12 +802,10 @@ export function getActiveTagData(
               selectedStyle
             ]
           : null;
-      const mobileVal =
-        Array.isArray(classes) && classes.length ? classes[0] : null;
-      const tabletVal =
-        Array.isArray(classes) && classes.length > 1 ? classes[1] : mobileVal;
-      const desktopVal =
-        Array.isArray(classes) && classes.length > 2 ? classes[2] : tabletVal;
+      const [mobileVal, tabletVal, desktopVal] = processClassValues(
+        classes,
+        overrideClasses
+      );
       return {
         class: selectedStyle,
         tag: activeTag,
@@ -837,24 +844,10 @@ export function getActiveTagData(
               selectedStyle
             ]
           : null;
-      const mobileVal =
-        overrideClasses && overrideClasses.length
-          ? overrideClasses[0]
-          : classes && classes.length
-            ? classes[0]
-            : null;
-      const tabletVal =
-        overrideClasses && overrideClasses.length > 1
-          ? overrideClasses[1]
-          : classes && classes.length > 1
-            ? classes[1]
-            : mobileVal;
-      const desktopVal =
-        overrideClasses && overrideClasses.length > 2
-          ? overrideClasses[2]
-          : classes && classes.length > 2
-            ? classes[2]
-            : tabletVal;
+      const [mobileVal, tabletVal, desktopVal] = processClassValues(
+        classes,
+        overrideClasses
+      );
       return {
         class: selectedStyle,
         tag: activeTag,

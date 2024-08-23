@@ -28,7 +28,7 @@ const ViewportComboBox = ({
   viewport,
   forceNegative = false,
 }: ViewportComboBoxProps) => {
-  const [internalValue, setInternalValue] = useState(value || "");
+  const [internalValue, setInternalValue] = useState(value ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
   const [isNegative, setIsNegative] = useState(false);
 
@@ -40,8 +40,8 @@ const ViewportComboBox = ({
         : ComputerDesktopIcon;
 
   const handleChange = (newValue: string) => {
-    setInternalValue(newValue || "");
-    onChange(newValue || "");
+    setInternalValue(newValue ?? "");
+    onChange(newValue ?? "");
   };
 
   const handleSelect = (selectedValue: string) => {

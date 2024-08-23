@@ -24,6 +24,7 @@ interface EditModalProps {
 export const EditModal = ({ type, contentMap }: EditModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
+  const contentId = `${$editMode?.targetId?.tag}-${$editMode?.targetId?.outerIdx}${typeof $editMode?.targetId?.idx === "number" ? `-${$editMode.targetId.idx}` : ""}-${$editMode?.id}`;
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $paneInit = useStore(paneInit);
   const $activeEditModal = useStore(activeEditModalStore);
@@ -115,6 +116,7 @@ export const EditModal = ({ type, contentMap }: EditModalProps) => {
           $editMode?.mode === `styles` &&
           typeof $editMode.targetId !== `undefined` ? (
           <PaneAstStyles
+            key={contentId}
             id={$editMode.id}
             targetId={$editMode.targetId}
             type={type}

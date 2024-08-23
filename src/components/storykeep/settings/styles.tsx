@@ -252,23 +252,14 @@ export const PaneAstStyles = (props: {
 
   useEffect(() => {
     if (activeTagData) {
-      // everything is converted to strings;
-      // prototype tract stack will have numbers here
-      if (typeof activeTagData?.mobileVal === `string`)
-        setMobileValue(activeTagData.mobileVal);
-      else if (typeof activeTagData?.mobileVal === `number`)
-        setMobileValue(activeTagData.mobileVal.toString());
-      else setMobileValue(``);
-      if (typeof activeTagData?.tabletVal === `string`)
-        setTabletValue(activeTagData.tabletVal);
-      else if (typeof activeTagData?.tabletVal === `number`)
-        setTabletValue(activeTagData.tabletVal.toString());
-      else setTabletValue(``);
-      if (typeof activeTagData?.desktopVal === `string`)
-        setDesktopValue(activeTagData.desktopVal);
-      else if (typeof activeTagData?.desktopVal === `number`)
-        setDesktopValue(activeTagData.desktopVal.toString());
-      else setDesktopValue(``);
+      setMobileValue(String(activeTagData.mobileVal ?? ""));
+      setTabletValue(String(activeTagData.tabletVal ?? ""));
+      setDesktopValue(String(activeTagData.desktopVal ?? ""));
+    } else {
+      // Reset values when activeTagData is null or undefined
+      setMobileValue("");
+      setTabletValue("");
+      setDesktopValue("");
     }
   }, [activeTagData]);
 
@@ -404,28 +395,28 @@ export const PaneAstStyles = (props: {
 
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
                 <ViewportComboBox
-                  value={mobileValue || ``}
+                  value={mobileValue}
                   onChange={setMobileValue}
                   onFinalChange={handleFinalChange}
-                  values={activeTagData?.values || []}
+                  values={activeTagData?.values ?? []}
                   viewport="mobile"
-                  forceNegative={activeTagData?.allowNegative}
+                  forceNegative={activeTagData?.allowNegative ?? false}
                 />
                 <ViewportComboBox
-                  value={tabletValue || ``}
+                  value={tabletValue}
                   onChange={setTabletValue}
                   onFinalChange={handleFinalChange}
-                  values={activeTagData?.values || []}
+                  values={activeTagData?.values ?? []}
                   viewport="tablet"
                   forceNegative={activeTagData?.allowNegative}
                 />
                 <ViewportComboBox
-                  value={desktopValue || ``}
+                  value={desktopValue}
                   onChange={setDesktopValue}
                   onFinalChange={handleFinalChange}
-                  values={activeTagData?.values || []}
+                  values={activeTagData?.values ?? []}
                   viewport="desktop"
-                  forceNegative={activeTagData?.allowNegative}
+                  forceNegative={activeTagData?.allowNegative ?? false}
                 />
               </div>
 

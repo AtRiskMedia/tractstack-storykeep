@@ -21,7 +21,9 @@ import type {
   OptionsPayloadDatum,
   ClassNamesPayloadInnerDatum,
   Tuple,
+  TupleValue,
   ToolAddMode,
+  ViewportAuto,
 } from "../../types";
 
 export function allowTagErase(
@@ -257,19 +259,25 @@ export function getGlobalNth(
   outerIdx: number,
   markdownLookup: MarkdownLookup
 ): number | null {
-  if (idx === null) return null;
-
   switch (Tag) {
     case "li":
-      return markdownLookup?.listItemsLookup?.[outerIdx]?.[idx] ?? null;
+      return idx !== null
+        ? markdownLookup?.listItemsLookup?.[outerIdx]?.[idx] ?? null
+        : null;
     case "img":
-      return markdownLookup?.imagesLookup?.[outerIdx]?.[idx] ?? null;
+      return idx !== null
+        ? markdownLookup?.imagesLookup?.[outerIdx]?.[idx] ?? null
+        : null;
     case "code":
-      return markdownLookup?.codeItemsLookup?.[outerIdx]?.[idx] ?? null;
+      return idx !== null
+        ? markdownLookup?.codeItemsLookup?.[outerIdx]?.[idx] ?? null
+        : null;
     case "a":
-      return markdownLookup?.linksLookup?.[outerIdx]?.[idx] ?? null;
+      return idx !== null
+        ? markdownLookup?.linksLookup?.[outerIdx]?.[idx] ?? null
+        : null;
     default:
-      return null;
+      return markdownLookup?.nthTagLookup?.[Tag]?.[outerIdx]?.nth ?? null;
   }
 }
 
@@ -972,4 +980,48 @@ export function getActiveTagData(
     default:
       return null;
   }
+}
+
+export function updateViewportTuple(
+  tuple: Tuple,
+  viewport: ViewportAuto,
+  newValue: TupleValue
+): Tuple {
+  const result: TupleValue[] = [...tuple];
+  console.log(tuple, viewport, newValue);
+  console.log(result);
+
+  switch (viewport) {
+    case "mobile":
+      result[0] = newValue;
+      break;
+    case "tablet":
+      if (tuple.length === 1) {
+        result[1] = newValue !== tuple[0] ? newValue : tuple[0];
+      } else {
+        result[1] = newValue;
+      }
+      break;
+    case "desktop":
+      if (tuple.length === 1) {
+        result[2] = newValue !== tuple[0] ? newValue : tuple[0];
+      } else if (tuple.length === 2) {
+        result[2] = newValue !== tuple[1] ? newValue : tuple[1];
+      } else {
+        result[2] = newValue;
+      }
+      break;
+  }
+
+  // always ensure a value
+  if (typeof result[0] === `undefined`) result[0] = ``;
+  if (typeof result[1] === `undefined` && typeof result[2] !== `undefined`)
+    result[1] = result[0];
+
+  // Remove undefined values from the end of the array
+  //while (result.length > 0 && result[result.length - 1] === undefined) {
+  //  result.pop();
+  //}
+
+  return result as Tuple;
 }

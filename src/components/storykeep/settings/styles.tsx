@@ -2,17 +2,29 @@ import { useMemo, useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  createFieldWithHistory,
+  useStoryKeepUtils,
+} from "../../../utils/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
-import { getActiveTagData } from "../../../utils/compositor/markdownUtils";
+import {
+  getActiveTagData,
+  updateViewportTuple,
+} from "../../../utils/compositor/markdownUtils";
 import ViewportComboBox from "../fields/ViewportComboBox";
 import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
 } from "../../../store/storykeep";
-import { classNames } from "../../../utils/helpers";
+import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
 import { tagTitles } from "../../../constants";
-import type { PaneAstTargetId, Tag } from "../../../types";
+import type {
+  ClassNamesPayloadInnerDatum,
+  PaneAstTargetId,
+  Tag,
+  Tuple,
+} from "../../../types";
 
 interface StyleTab {
   name: string;
@@ -26,6 +38,8 @@ export const PaneAstStyles = (props: {
   type: "desktop" | "mobile";
 }) => {
   const { id, targetId, type } = props;
+  const { updateStoreField, handleEditingChange, handleUndo } =
+    useStoryKeepUtils(id, []);
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   // replace with direct from datum
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -126,16 +140,61 @@ export const PaneAstStyles = (props: {
     viewport: "mobile" | "tablet" | "desktop",
     isNegative?: boolean
   ) => {
+    // require valid value
     if (activeTagData?.values.includes(value)) {
+      const thisTag = activeTagData.tag;
+      const thisGlobalNth = activeTagData.globalNth;
+      const thisClass = activeTagData.class;
       console.log(
-        `set:`,
-        value,
-        viewport,
-        `hasOverride?`,
-        activeTagData?.hasOverride,
-        `isNegative?`,
-        isNegative
+        `new value received:${value} for tag:${thisTag} globalNth:${thisGlobalNth}, ${thisClass} on ${viewport}`
       );
+      if (isNegative) console.log(`MUST HANDLE NEGATIVE CASE`);
+
+      const payloadForTag = markdownDatum.payload.optionsPayload
+        .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
+
+      const thisTuple = !activeTagData.hasOverride
+        ? (payloadForTag.classes as Record<string, Tuple>)[thisClass]
+        : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
+
+      if (thisTuple) {
+        const newTuple = updateViewportTuple(thisTuple, viewport, value);
+        const newOptionsPayload = cloneDeep(payloadForTag);
+
+        if (activeTagData?.hasOverride) {
+          if (!newOptionsPayload.override) {
+            newOptionsPayload.override = {};
+          }
+          if (!newOptionsPayload.override[thisClass]) {
+            newOptionsPayload.override[thisClass] = [];
+          }
+          newOptionsPayload.override[thisClass][thisGlobalNth as number] =
+            newTuple;
+        } else {
+          (newOptionsPayload.classes as Record<string, Tuple>)[thisClass] =
+            newTuple;
+        }
+
+        console.log(`=`, newOptionsPayload);
+        const newPayload = cloneDeep(markdownDatum.payload);
+        newPayload.optionsPayload.classNamesPayload = {
+          ...newPayload.optionsPayload.classNamesPayload,
+          [thisTag]: newOptionsPayload,
+        };
+
+        paneFragmentMarkdown.set({
+          ...paneFragmentMarkdown.get(),
+          [markdownFragmentId]: createFieldWithHistory({
+            markdown: markdownDatum.markdown,
+            payload: newPayload,
+            type: `markdown`,
+          }),
+        });
+        paneMarkdownFragmentId.set({
+          ...paneMarkdownFragmentId.get(),
+          [id]: createFieldWithHistory(markdownFragmentId),
+        });
+      }
     }
   };
 
@@ -273,7 +332,9 @@ export const PaneAstStyles = (props: {
       )}
     >
       <div
-        className={classNames(type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`)}
+        className={classNames(
+          type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
+        )}
       >
         <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
           <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
@@ -369,7 +430,9 @@ export const PaneAstStyles = (props: {
         </div>
       </div>
       <div
-        className={classNames(type === `mobile` ? `max-w-5/12` : `w-fit-contents mt-8`)}
+        className={classNames(
+          type === `mobile` ? `max-w-5/12` : `w-fit-contents mt-8`
+        )}
       >
         {selectedStyle ? (
           <div className="bg-white shadow-inner rounded">

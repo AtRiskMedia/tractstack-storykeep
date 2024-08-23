@@ -369,8 +369,7 @@ export function initStoryKeep() {
         // If the element is taller than available space, align the centers
         const elementCenter = elementRect.top + elementRect.height / 2;
         const availableSpaceCenter = headerHeight + availableSpace / 2;
-        targetScroll =
-          window.scrollY + elementCenter - availableSpaceCenter;
+        targetScroll = window.scrollY + elementCenter - availableSpaceCenter;
       }
     }
     // Ensure we don't scroll past the top of the document

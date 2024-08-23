@@ -155,6 +155,18 @@ const PaneFromAst = ({
   const noOverlay = readonly || (!showOverlay && !showInsertOverlay);
   const globalNth = getGlobalNth(Tag, idx, outerIdx, markdownLookup);
   const thisId = `${paneId}-${Tag}-${outerIdx}${typeof idx === `number` ? `-${idx}` : ``}`;
+  // is this an image?
+  const isImage =
+    typeof idx === `number` &&
+    typeof markdownLookup.imagesLookup[outerIdx] !== `undefined`
+      ? typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
+      : false;
+  // is this an inline code?
+  const isWidget =
+    typeof idx === `number` &&
+    typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`
+      ? typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
+      : false;
 
   // Callback fns for toolMode
   const updateLastInteracted = (paneId: string) => {
@@ -162,15 +174,29 @@ const PaneFromAst = ({
     lastInteractedTypeStore.set(`markdown`);
   };
   const handleToolModeClick = useCallback(() => {
+    const thisTag = isImage ? `img` : isWidget ? `code` : Tag;
+    const thisGlobalNth = getGlobalNth(thisTag, idx, outerIdx, markdownLookup);
     updateLastInteracted(paneId);
     editModeStore.set({
       id: paneId,
       mode: `styles`,
       type: `pane`,
-      targetId: { outerIdx, idx, tag: Tag },
+      targetId: { outerIdx, idx, globalNth: thisGlobalNth, tag: thisTag },
     });
     handleToggleOn(`styles`);
   }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);
+
+  const handleToolModeLinkClick = useCallback(() => {
+    updateLastInteracted(paneId);
+    console.log(`NOT YET IMPLEMENTED`);
+    //editModeStore.set({
+    //  id: paneId,
+    //  mode: `styles`,
+    //  type: `pane`,
+    //  targetId: { outerIdx, idx, globalNth: thisGlobalNth, tag: thisTag },
+    //});
+    //handleToggleOn(`styles`);
+  }, [paneId]);
 
   // Extract class names
   const injectClassNames =
@@ -310,18 +336,6 @@ const PaneFromAst = ({
     );
     if (noOverlay || [`ol`, `ul`, `strong`, `em`].includes(Tag)) return child;
     if (showOverlay && [`li`].includes(Tag)) {
-      // is this an image?
-      const isImage =
-        typeof idx === `number` &&
-        typeof markdownLookup.imagesLookup[outerIdx] !== `undefined`
-          ? typeof markdownLookup.imagesLookup[outerIdx][idx] === `number`
-          : false;
-      // is this an inline code?
-      const isWidget =
-        typeof idx === `number` &&
-        typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`
-          ? typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
-          : false;
       // is this a blockquote (not currently implemented)
       if (toolMode === `eraser`)
         return (
@@ -421,8 +435,8 @@ const PaneFromAst = ({
       return (
         <EditableInnerWrapper
           id={thisId}
-          tooltip={`Configure this Link`}
-          onClick={handleToolModeClick}
+          tooltip={`Manage this Link`}
+          onClick={handleToolModeLinkClick}
         >
           {child}
         </EditableInnerWrapper>
@@ -458,8 +472,8 @@ const PaneFromAst = ({
       return (
         <EditableInnerWrapper
           id={thisId}
-          tooltip={`Style this Link`}
-          onClick={handleToolModeClick}
+          tooltip={`Manage this Link`}
+          onClick={handleToolModeLinkClick}
         >
           {child}
         </EditableInnerWrapper>

@@ -118,7 +118,7 @@ export const PaneAstStyles = (props: {
   };
 
   const removeOverride = () => {
-    console.log(`will do!`);
+    console.log(`todo! removeOverride`);
   };
 
   const handleFinalChange = (
@@ -400,7 +400,8 @@ export const PaneAstStyles = (props: {
                   onFinalChange={handleFinalChange}
                   values={activeTagData?.values ?? []}
                   viewport="mobile"
-                  forceNegative={activeTagData?.allowNegative ?? false}
+                  allowNegative={activeTagData?.allowNegative ?? false}
+                  isNegative={activeTagData?.mobileIsNegative ?? false}
                 />
                 <ViewportComboBox
                   value={tabletValue}
@@ -408,7 +409,8 @@ export const PaneAstStyles = (props: {
                   onFinalChange={handleFinalChange}
                   values={activeTagData?.values ?? []}
                   viewport="tablet"
-                  forceNegative={activeTagData?.allowNegative}
+                  allowNegative={activeTagData?.allowNegative}
+                  isNegative={activeTagData?.tabletIsNegative ?? false}
                 />
                 <ViewportComboBox
                   value={desktopValue}
@@ -416,7 +418,8 @@ export const PaneAstStyles = (props: {
                   onFinalChange={handleFinalChange}
                   values={activeTagData?.values ?? []}
                   viewport="desktop"
-                  forceNegative={activeTagData?.allowNegative ?? false}
+                  allowNegative={activeTagData?.allowNegative ?? false}
+                  isNegative={activeTagData?.desktopIsNegative ?? false}
                 />
               </div>
 

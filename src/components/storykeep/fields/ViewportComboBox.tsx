@@ -17,7 +17,8 @@ interface ViewportComboBoxProps {
   ) => void;
   values: string[];
   viewport: "mobile" | "tablet" | "desktop";
-  forceNegative?: boolean;
+  allowNegative?: boolean;
+  isNegative?: boolean;
 }
 
 const ViewportComboBox = ({
@@ -26,11 +27,12 @@ const ViewportComboBox = ({
   onFinalChange,
   values,
   viewport,
-  forceNegative = false,
+  allowNegative = false,
+  isNegative = false,
 }: ViewportComboBoxProps) => {
   const [internalValue, setInternalValue] = useState(value ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isNegative, setIsNegative] = useState(false);
+  //const [isNegative, setIsNegative] = useState(false);
 
   const Icon =
     viewport === "mobile"
@@ -60,7 +62,7 @@ const ViewportComboBox = ({
   };
 
   const handleNegativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setIsNegative(event.target.checked);
+    //setIsNegative(event.target.checked);
     onFinalChange(value, viewport, event.target.checked);
   };
 
@@ -93,7 +95,7 @@ const ViewportComboBox = ({
                 />
               </Combobox.Button>
             </div>
-            {forceNegative && (
+            {allowNegative && (
               <div className="ml-2 flex items-center">
                 <input
                   type="checkbox"

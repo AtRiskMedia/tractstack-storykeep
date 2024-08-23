@@ -355,7 +355,7 @@ export function initStoryKeep() {
       // For desktop, center the element in the available space
       const availableSpace = viewportHeight - headerHeight;
       const idealTop = headerHeight + (availableSpace - elementRect.height) / 2;
-      targetScroll = window.pageYOffset + elementRect.top - idealTop;
+      targetScroll = window.scrollY + elementRect.top - idealTop;
     } else {
       // Keep the existing mobile logic
       const editModalHeight = window.innerHeight / 3;
@@ -364,13 +364,13 @@ export function initStoryKeep() {
         // If the element fits in the available space, center it
         const idealTop =
           headerHeight + (availableSpace - elementRect.height) / 2;
-        targetScroll = window.pageYOffset + elementRect.top - idealTop;
+        targetScroll = window.scrollY + elementRect.top - idealTop;
       } else {
         // If the element is taller than available space, align the centers
         const elementCenter = elementRect.top + elementRect.height / 2;
         const availableSpaceCenter = headerHeight + availableSpace / 2;
         targetScroll =
-          window.pageYOffset + elementCenter - availableSpaceCenter;
+          window.scrollY + elementCenter - availableSpaceCenter;
       }
     }
     // Ensure we don't scroll past the top of the document

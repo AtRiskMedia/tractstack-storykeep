@@ -9,11 +9,13 @@ import {
 } from "../../store/storykeep";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
+import { SHORT_SCREEN_THRESHOLD } from "../../constants";
 import {
   isFullScreenEditModal,
   handleToggleOn,
   handleToggleOff,
 } from "../../utils/storykeep";
+import { classNames } from "../../utils/helpers";
 import type { ReactNode } from "react";
 import type { ViewportAuto, ToolMode, ToolAddMode } from "../../types";
 
@@ -119,7 +121,7 @@ const PaneWrapper = (props: {
         mode: "settings",
         type: "pane",
       });
-      handleToggleOn(false, `pane-inner-${id}`, true);
+      handleToggleOn(`settings`);
     }
   };
 
@@ -146,13 +148,14 @@ const PaneWrapper = (props: {
         visiblePanesStore.setKey(id, entry.isIntersecting);
         if (!entry.isIntersecting) {
           const currentEditMode = editModeStore.get();
+          const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
           if (
             currentEditMode?.type === "pane" &&
             (currentEditMode.mode === "settings" ||
               currentEditMode.mode === "styles") &&
             currentEditMode.id === id
           ) {
-            toggleOffEditModal();
+            if (!isShortScreen) toggleOffEditModal();
           }
         }
       },
@@ -185,7 +188,10 @@ const PaneWrapper = (props: {
     <div ref={paneRef} className="relative">
       <div
         onClick={handleClick}
-        className="w-full pointer-events-auto cursor-pointer"
+        className={classNames(
+          "w-full",
+          toolMode === `settings` ? "pointer-events-auto cursor-pointer" : ""
+        )}
       >
         {toolMode === `pane` && !isDesigningNew ? (
           <InsertAboveBelowWrapper onInsertClick={handleInsertClick}>

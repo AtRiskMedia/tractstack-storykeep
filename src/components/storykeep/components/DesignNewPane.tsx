@@ -67,7 +67,7 @@ const DesignNewPane = ({
         doInsert,
       },
     });
-    handleToggleOn(false, `pane-insert`, true);
+    handleToggleOn(`insert`, `pane-insert`);
   };
 
   return (

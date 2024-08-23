@@ -20,7 +20,7 @@ import {
   toolModeStore,
   toolAddModeStore,
 } from "../../store/storykeep";
-import { STICKY_HEADER_THRESHOLD } from "../../constants";
+import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
 import {
   useStoryKeepUtils,
   handleToggleOn,
@@ -63,7 +63,7 @@ export const StoryFragmentHeader = memo(
     const viewportKey = $viewportKey.value;
     const { value: toolMode } = useStore(toolModeStore);
     const { value: toolAddMode } = useStore(toolAddModeStore);
-
+    let lastScrollTop = 0;
     const setViewport = (
       newViewport: "auto" | "mobile" | "tablet" | "desktop"
     ) => {
@@ -82,7 +82,7 @@ export const StoryFragmentHeader = memo(
 
     const setToolMode = (newToolMode: ToolMode) => {
       editModeStore.set(null);
-      handleToggleOff(true);
+      handleToggleOff();
       toolModeStore.set({ value: newToolMode });
     };
 
@@ -122,14 +122,14 @@ export const StoryFragmentHeader = memo(
     const handleEditModeToggle = () => {
       if ($editMode?.mode === `settings`) {
         editModeStore.set(null);
-        handleToggleOff(true);
+        handleToggleOff();
       } else {
         editModeStore.set({
           id,
           mode: `settings`,
           type: `storyfragment`,
         });
-        handleToggleOn(true, undefined, true);
+        handleToggleOn(`settings`);
       }
     };
 
@@ -188,16 +188,23 @@ export const StoryFragmentHeader = memo(
 
     const handleScroll = useCallback(() => {
       if (headerRef.current) {
-        const viewportHeight = window.innerHeight;
         const scrollPosition =
           window.scrollY || document.documentElement.scrollTop;
-        setHideElements(
-          scrollPosition === 0
-            ? false
-            : viewportHeight > STICKY_HEADER_THRESHOLD &&
-                document.documentElement.scrollHeight >
-                  4 * STICKY_HEADER_THRESHOLD
-        );
+        const scrollingDown = scrollPosition > lastScrollTop;
+
+        setHideElements(prevHideElements => {
+          if (scrollingDown) {
+            // When scrolling down, hide elements if we've scrolled past the threshold
+            return scrollPosition > MIN_SCROLL_THRESHOLD;
+          } else {
+            // When scrolling up, show elements if we've scrolled up past (threshold - hysteresis)
+            return (
+              prevHideElements &&
+              scrollPosition > MIN_SCROLL_THRESHOLD - HYSTERESIS
+            );
+          }
+        });
+        lastScrollTop = scrollPosition;
       }
     }, []);
 

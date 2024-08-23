@@ -60,7 +60,11 @@ const EditableOuterWrapper = ({
   children: ReactNode;
 }) => {
   return (
-    <div id={id} className="relative" title={tooltip}>
+    <div
+      id={id}
+      className="relative cursor-pointer pointer-events-auto"
+      title={tooltip}
+    >
       {children}
       <div
         onClick={onClick}
@@ -165,7 +169,7 @@ const PaneFromAst = ({
       type: `pane`,
       targetId: { outerIdx, idx, tag: Tag },
     });
-    handleToggleOn(false, thisId);
+    handleToggleOn(`styles`);
   }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);
 
   // Extract class names

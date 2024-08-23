@@ -235,9 +235,9 @@ const Pane = (props: {
       {toolMode === "settings" && (
         <div className="absolute inset-0 hover:backdrop-blur-sm hover:bg-white/50 hover:dark:bg-black/50 flex items-center justify-center group z-104 cursor-pointer pointer-events-auto">
           <div className="relative">
-            <div className="bg-yellow-300 p-12 rounded-md invisible group-hover:visible">
+            <div className="bg-yellow-300 p-4 rounded-md invisible group-hover:visible">
               <h2 className="text-xl text-black font-bold mb-2">
-                Click for Settings
+                Configure this Pane
               </h2>
             </div>
           </div>

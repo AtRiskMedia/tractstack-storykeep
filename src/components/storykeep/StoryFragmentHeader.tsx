@@ -225,7 +225,7 @@ export const StoryFragmentHeader = memo(
     if (!isClient) return <div>Loading...</div>;
 
     return (
-      <div className="w-full" ref={headerRef}>
+      <div className="w-full shadow-md" ref={headerRef}>
         <div className="w-full my-2">
           <div
             className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}

@@ -273,7 +273,7 @@ export const PaneAstStyles = (props: {
       )}
     >
       <div
-        className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mr-8`)}
+        className={classNames(type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`)}
       >
         <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
           <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
@@ -369,7 +369,7 @@ export const PaneAstStyles = (props: {
         </div>
       </div>
       <div
-        className={classNames(type === `mobile` ? `max-w-5/12` : `w-full mt-8`)}
+        className={classNames(type === `mobile` ? `max-w-5/12` : `w-fit-contents mt-8`)}
       >
         {selectedStyle ? (
           <div className="bg-white shadow-inner rounded">

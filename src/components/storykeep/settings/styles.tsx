@@ -14,6 +14,8 @@ import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
   unsavedChangesStore,
+  lastInteractedTypeStore,
+  lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
@@ -187,6 +189,8 @@ export const PaneAstStyles = (props: {
           ...$unsavedChanges[id],
           paneFragmentMarkdown: true,
         });
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(targetId.paneId);
       }
     }
   };

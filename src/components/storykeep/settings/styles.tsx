@@ -56,6 +56,7 @@ export const PaneAstStyles = (props: {
   });
   const { handleUndo } = useStoryKeepUtils(id, []);
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
+  const hasHistory = !!$paneFragmentMarkdown[markdownFragmentId].history.length;
   const hasModal = markdownDatum.payload.isModal;
   const markdownLookup = useMemo(() => {
     return markdownDatum?.markdown?.htmlAst
@@ -329,26 +330,43 @@ export const PaneAstStyles = (props: {
         )}
       >
         <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-          <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
-            {tabs.map((tab: StyleTab, idx: number) => (
+          <div className="flex justify-between items-center">
+            <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
+              {tabs.map((tab: StyleTab, idx: number) => (
+                <button
+                  key={idx}
+                  aria-current={tab.tag === activeTag ? "page" : undefined}
+                  onClick={() => {
+                    setActiveTag(tab.tag);
+                    setSelectedStyle(null);
+                  }}
+                  className={classNames(
+                    tab.tag === activeTag
+                      ? "text-black font-bold"
+                      : "text-mydarkgrey hover:text-black underline",
+                    "text-md"
+                  )}
+                >
+                  {tab.name}
+                </button>
+              ))}
+            </nav>
+            {hasHistory ? (
               <button
-                key={idx}
-                aria-current={tab.tag === activeTag ? "page" : undefined}
-                onClick={() => {
-                  setActiveTag(tab.tag);
-                  setSelectedStyle(null);
-                }}
-                className={classNames(
-                  tab.tag === activeTag
-                    ? "text-black font-bold"
-                    : "text-mydarkgrey hover:text-black underline",
-                  "text-md"
-                )}
+                onClick={() =>
+                  handleUndo("paneFragmentMarkdown", markdownFragmentId)
+                }
+                className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
+                disabled={
+                  $paneFragmentMarkdown[markdownFragmentId]?.history.length ===
+                  0
+                }
               >
-                {tab.name}
+                Undo
               </button>
-            ))}
-          </nav>
+            ) : null}
+          </div>
+
           <hr />
           {activeTag && ![`parent`, `modal`].includes(activeTag) && (
             <div className="my-4 flex flex-wrap gap-x-2 gap-y-1.5">
@@ -429,30 +447,16 @@ export const PaneAstStyles = (props: {
         {selectedStyle ? (
           <div className="bg-white shadow-inner rounded">
             <div className="px-6 py-4">
-              <div className="flex justify-between items-center">
-                <h4 className="text-lg">
-                  <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
-                  {activeTagData?.hasOverride ? (
-                    <span className="underline">this</span>
-                  ) : (
-                    <span className="underline">all</span>
-                  )}{" "}
-                  {tabs.length && tagTitles[tabs.at(0)!.tag]}
-                  {!activeTagData?.hasOverride ? `s` : null}
-                </h4>
-                <button
-                  onClick={() =>
-                    handleUndo("paneFragmentMarkdown", markdownFragmentId)
-                  }
-                  className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
-                  disabled={
-                    $paneFragmentMarkdown[markdownFragmentId]?.history
-                      .length === 0
-                  }
-                >
-                  Undo
-                </button>
-              </div>
+              <h4 className="text-lg">
+                <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
+                {activeTagData?.hasOverride ? (
+                  <span className="underline">this</span>
+                ) : (
+                  <span className="underline">all</span>
+                )}{" "}
+                {tabs.length && tagTitles[tabs.at(0)!.tag]}
+                {!activeTagData?.hasOverride ? `s` : null}
+              </h4>
 
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
                 <ViewportComboBox

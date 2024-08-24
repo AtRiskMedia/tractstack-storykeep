@@ -351,11 +351,11 @@ const PaneFromAst = ({
           </EraserWrapper>
         );
       const tip = isImage
-        ? `Edit this image`
+        ? `Style this image`
         : isWidget
-          ? `Configure this widget`
+          ? `Style this widget`
           : isTextContainerItem
-            ? `Edit this text`
+            ? `Style this text`
             : `UNKNOWN`;
       if (tip)
         return (

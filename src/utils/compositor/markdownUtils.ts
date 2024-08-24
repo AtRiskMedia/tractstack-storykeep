@@ -988,9 +988,6 @@ export function updateViewportTuple(
   newValue: TupleValue
 ): Tuple {
   const result: TupleValue[] = [...tuple];
-  console.log(tuple, viewport, newValue);
-  console.log(result);
-
   switch (viewport) {
     case "mobile":
       result[0] = newValue;

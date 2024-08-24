@@ -145,11 +145,7 @@ export const PaneAstStyles = (props: {
       const thisTag = activeTagData.tag;
       const thisGlobalNth = activeTagData.globalNth;
       const thisClass = activeTagData.class;
-      console.log(
-        `new value received:${value} for tag:${thisTag} globalNth:${thisGlobalNth}, ${thisClass} on ${viewport}`
-      );
-      if (isNegative) console.log(`MUST HANDLE NEGATIVE CASE`);
-
+      const thisValue = !isNegative ? value : `!${value}`;
       const payloadForTag = markdownDatum.payload.optionsPayload
         .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
 
@@ -158,7 +154,7 @@ export const PaneAstStyles = (props: {
         : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
 
       if (thisTuple) {
-        const newTuple = updateViewportTuple(thisTuple, viewport, value);
+        const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
         const newOptionsPayload = cloneDeep(payloadForTag);
 
         if (activeTagData?.hasOverride) {
@@ -174,8 +170,6 @@ export const PaneAstStyles = (props: {
           (newOptionsPayload.classes as Record<string, Tuple>)[thisClass] =
             newTuple;
         }
-
-        console.log(`=`, newOptionsPayload);
         const newPayload = cloneDeep(markdownDatum.payload);
         newPayload.optionsPayload.classNamesPayload = {
           ...newPayload.optionsPayload.classNamesPayload,

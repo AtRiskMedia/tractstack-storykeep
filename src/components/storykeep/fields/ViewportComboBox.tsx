@@ -31,8 +31,8 @@ const ViewportComboBox = ({
   isNegative = false,
 }: ViewportComboBoxProps) => {
   const [internalValue, setInternalValue] = useState(value ?? "");
+  const [isNowNegative, setIsNowNegative] = useState(isNegative);
   const inputRef = useRef<HTMLInputElement>(null);
-  //const [isNegative, setIsNegative] = useState(false);
 
   const Icon =
     viewport === "mobile"
@@ -40,6 +40,11 @@ const ViewportComboBox = ({
       : viewport === "tablet"
         ? DeviceTabletIcon
         : ComputerDesktopIcon;
+
+  const handleNegativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onFinalChange(value, viewport, event.target.checked);
+    setIsNowNegative(event.target.checked);
+  };
 
   const handleChange = (newValue: string) => {
     setInternalValue(newValue ?? "");
@@ -49,21 +54,16 @@ const ViewportComboBox = ({
   const handleSelect = (selectedValue: string) => {
     setInternalValue(selectedValue);
     onChange(selectedValue);
-    onFinalChange(selectedValue, viewport, isNegative);
+    onFinalChange(selectedValue, viewport, isNowNegative);
     inputRef.current?.blur();
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
-      onFinalChange(value, viewport, isNegative);
+      onFinalChange(value, viewport, isNowNegative);
       inputRef.current?.blur();
     }
-  };
-
-  const handleNegativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    //setIsNegative(event.target.checked);
-    onFinalChange(value, viewport, event.target.checked);
   };
 
   useEffect(() => {
@@ -100,7 +100,7 @@ const ViewportComboBox = ({
                 <input
                   type="checkbox"
                   id={`negative-${viewport}`}
-                  checked={isNegative}
+                  checked={isNowNegative}
                   onChange={handleNegativeChange}
                   className="h-4 w-4 text-myorange focus:ring-myorange border-mydarkgrey rounded"
                 />

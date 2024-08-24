@@ -2,19 +2,18 @@ import { useMemo, useState, useEffect } from "react";
 import { Switch } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
-import {
-  createFieldWithHistory,
-  useStoryKeepUtils,
-} from "../../../utils/storykeep";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   getActiveTagData,
   updateViewportTuple,
+  updateHistory,
 } from "../../../utils/compositor/markdownUtils";
 import ViewportComboBox from "../fields/ViewportComboBox";
 import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
+  unsavedChangesStore,
 } from "../../../store/storykeep";
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
@@ -38,8 +37,6 @@ export const PaneAstStyles = (props: {
   type: "desktop" | "mobile";
 }) => {
   const { id, targetId, type } = props;
-  const { updateStoreField, handleEditingChange, handleUndo } =
-    useStoryKeepUtils(id, []);
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   // replace with direct from datum
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -49,13 +46,15 @@ export const PaneAstStyles = (props: {
   const [tabletValue, setTabletValue] = useState<string>(``);
   const [desktopValue, setDesktopValue] = useState<string>(``);
   const [confirm, setConfirm] = useState<string | null>(null);
+  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
-    keys: [id],
+    keys: [targetId.paneId],
   });
-  const markdownFragmentId = $paneMarkdownFragmentId[id].current;
+  const markdownFragmentId = $paneMarkdownFragmentId[targetId.paneId].current;
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [markdownFragmentId],
   });
+  const { handleUndo } = useStoryKeepUtils(id, []);
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
   const hasModal = markdownDatum.payload.isModal;
   const markdownLookup = useMemo(() => {
@@ -140,53 +139,52 @@ export const PaneAstStyles = (props: {
     viewport: "mobile" | "tablet" | "desktop",
     isNegative?: boolean
   ) => {
-    // require valid value
     if (activeTagData?.values.includes(value)) {
       const thisTag = activeTagData.tag;
       const thisGlobalNth = activeTagData.globalNth;
       const thisClass = activeTagData.class;
       const thisValue = !isNegative ? value : `!${value}`;
-      const payloadForTag = markdownDatum.payload.optionsPayload
+      const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+      const payloadForTag = currentField.current.payload.optionsPayload
         .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
-
       const thisTuple = !activeTagData.hasOverride
         ? (payloadForTag.classes as Record<string, Tuple>)[thisClass]
         : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
-
       if (thisTuple) {
         const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
-        const newOptionsPayload = cloneDeep(payloadForTag);
-
         if (activeTagData?.hasOverride) {
-          if (!newOptionsPayload.override) {
-            newOptionsPayload.override = {};
-          }
-          if (!newOptionsPayload.override[thisClass]) {
-            newOptionsPayload.override[thisClass] = [];
-          }
-          newOptionsPayload.override[thisClass][thisGlobalNth as number] =
-            newTuple;
+          if (!payloadForTag.override) payloadForTag.override = {};
+          if (!payloadForTag.override[thisClass])
+            payloadForTag.override[thisClass] = [];
+          payloadForTag.override[thisClass][thisGlobalNth as number] = newTuple;
         } else {
-          (newOptionsPayload.classes as Record<string, Tuple>)[thisClass] =
+          (payloadForTag.classes as Record<string, Tuple>)[thisClass] =
             newTuple;
         }
-        const newPayload = cloneDeep(markdownDatum.payload);
-        newPayload.optionsPayload.classNamesPayload = {
-          ...newPayload.optionsPayload.classNamesPayload,
-          [thisTag]: newOptionsPayload,
-        };
-
-        paneFragmentMarkdown.set({
-          ...paneFragmentMarkdown.get(),
-          [markdownFragmentId]: createFieldWithHistory({
-            markdown: markdownDatum.markdown,
-            payload: newPayload,
-            type: `markdown`,
-          }),
+        paneFragmentMarkdown.setKey(markdownFragmentId, {
+          ...currentField,
+          current: {
+            ...currentField.current,
+            payload: {
+              ...currentField.current.payload,
+              optionsPayload: {
+                ...currentField.current.payload.optionsPayload,
+                classNamesPayload: {
+                  ...currentField.current.payload.optionsPayload
+                    .classNamesPayload,
+                  [thisTag]: payloadForTag,
+                },
+              },
+            },
+          },
+          history: newHistory,
         });
-        paneMarkdownFragmentId.set({
-          ...paneMarkdownFragmentId.get(),
-          [id]: createFieldWithHistory(markdownFragmentId),
+        // Update unsavedChanges store
+        unsavedChangesStore.setKey(id, {
+          ...$unsavedChanges[id],
+          paneFragmentMarkdown: true,
         });
       }
     }
@@ -431,16 +429,30 @@ export const PaneAstStyles = (props: {
         {selectedStyle ? (
           <div className="bg-white shadow-inner rounded">
             <div className="px-6 py-4">
-              <h4 className="text-lg">
-                <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
-                {activeTagData?.hasOverride ? (
-                  <span className="underline">this</span>
-                ) : (
-                  <span className="underline">all</span>
-                )}{" "}
-                {tabs.length && tagTitles[tabs.at(0)!.tag]}
-                {!activeTagData?.hasOverride ? `s` : null}
-              </h4>
+              <div className="flex justify-between items-center">
+                <h4 className="text-lg">
+                  <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
+                  {activeTagData?.hasOverride ? (
+                    <span className="underline">this</span>
+                  ) : (
+                    <span className="underline">all</span>
+                  )}{" "}
+                  {tabs.length && tagTitles[tabs.at(0)!.tag]}
+                  {!activeTagData?.hasOverride ? `s` : null}
+                </h4>
+                <button
+                  onClick={() =>
+                    handleUndo("paneFragmentMarkdown", markdownFragmentId)
+                  }
+                  className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
+                  disabled={
+                    $paneFragmentMarkdown[markdownFragmentId]?.history
+                      .length === 0
+                  }
+                >
+                  Undo
+                </button>
+              </div>
 
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
                 <ViewportComboBox

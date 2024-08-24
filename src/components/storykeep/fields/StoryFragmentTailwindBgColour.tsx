@@ -9,7 +9,7 @@ import type { StoreKey } from "../../../types";
 interface StoryFragmentTailwindBgColourProps {
   id: string;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const StoryFragmentTailwindBgColour = ({
@@ -47,7 +47,7 @@ const StoryFragmentTailwindBgColour = ({
   );
 
   const handleUndoCallback = useCallback(() => {
-    handleUndo("storyFragmentTailwindBgColour");
+    handleUndo("storyFragmentTailwindBgColour", id);
     setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
   }, [handleUndo, $storyFragmentTailwindBgColour, id]);
 

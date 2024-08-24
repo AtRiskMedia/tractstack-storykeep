@@ -67,7 +67,12 @@ const contentMap: ContentMap[] = await getContentMap();
   border-opacity-50 border-b-2 border-l-2 border-t-2 border-black/20 border-solid
        rounded-bl-xl transition-all duration-300"
     >
-      <EditModal client:only="react" type="desktop" contentMap={contentMap} />
+      <EditModal
+        client:only="react"
+        type="desktop"
+        contentMap={contentMap}
+        id={storyfragment.id}
+      />
     </div>
 
     <div
@@ -76,7 +81,12 @@ const contentMap: ContentMap[] = await getContentMap();
  border-opacity-50 border-l-2 border-t-2 border-black/20 border-solid
            rounded-tl-xl transition-all duration-300"
     >
-      <EditModal client:only="react" type="mobile" contentMap={contentMap} />
+      <EditModal
+        client:only="react"
+        type="mobile"
+        contentMap={contentMap}
+        id={storyfragment.id}
+      />
     </div>
   </div>
 

@@ -16,7 +16,7 @@ interface StoryFragmentTitleProps {
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const StoryFragmentTitle = ({
@@ -64,7 +64,7 @@ const StoryFragmentTitle = ({
           )}
         </div>
         <button
-          onClick={() => handleUndo("storyFragmentTitle")}
+          onClick={() => handleUndo("storyFragmentTitle", id)}
           className="disabled:hidden ml-2"
           disabled={$storyFragmentTitle[id]?.history.length === 0}
         >

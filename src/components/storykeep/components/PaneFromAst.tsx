@@ -181,7 +181,13 @@ const PaneFromAst = ({
       id: paneId,
       mode: `styles`,
       type: `pane`,
-      targetId: { outerIdx, idx, globalNth: thisGlobalNth, tag: thisTag },
+      targetId: {
+        paneId,
+        outerIdx,
+        idx,
+        globalNth: thisGlobalNth,
+        tag: thisTag,
+      },
     });
     handleToggleOn(`styles`);
   }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);

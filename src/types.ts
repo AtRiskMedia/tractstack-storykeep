@@ -158,6 +158,7 @@ export type PaneAstTargetId = {
   idx: number | null;
   globalNth: number | null;
   tag: "p" | "h2" | "h3" | "h4" | "li";
+  paneId: string;
 };
 
 export type EditModeValue = {
@@ -177,7 +178,19 @@ export type EditModeValue = {
 };
 
 export type StoreMapType = {
-  [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
+  [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<any>>>;
+};
+
+export type StoreValueType = {
+  storyFragmentTitle: string;
+  storyFragmentSlug: string;
+  storyFragmentTailwindBgColour: string;
+  storyFragmentSocialImagePath: string;
+  storyFragmentMenuId: string;
+  paneFragmentMarkdown: MarkdownEditDatum;
+  paneTitle: string;
+  paneSlug: string;
+  // Add other store types here
 };
 
 export interface EventStreamController {

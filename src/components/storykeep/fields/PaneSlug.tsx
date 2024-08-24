@@ -15,7 +15,7 @@ interface PaneSlugProps {
   id: string;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const PaneSlug = ({
@@ -56,7 +56,7 @@ const PaneSlug = ({
         )}
       </div>
       <button
-        onClick={() => handleUndo("paneSlug")}
+        onClick={() => handleUndo("paneSlug", id)}
         className="disabled:hidden ml-2"
         disabled={$paneSlug[id]?.history.length === 0}
       >

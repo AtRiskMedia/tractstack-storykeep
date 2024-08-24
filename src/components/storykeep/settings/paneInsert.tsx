@@ -66,7 +66,7 @@ export const PaneInsert = (props: {
     .filter(item => item.type === "Pane")
     .map(item => item.slug);
   const { updateStoreField, handleEditingChange, handleUndo } =
-    useStoryKeepUtils(paneId, usedSlugs);
+    useStoryKeepUtils(storyFragmentId, usedSlugs);
   const newPaneIds = [
     ...($storyFragmentPaneIds[storyFragmentId]?.current || []),
   ];

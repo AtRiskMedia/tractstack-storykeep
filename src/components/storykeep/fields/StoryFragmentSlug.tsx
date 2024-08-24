@@ -16,7 +16,7 @@ interface StoryFragmentSlugProps {
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const StoryFragmentSlug = ({
@@ -64,7 +64,7 @@ const StoryFragmentSlug = ({
           )}
         </div>
         <button
-          onClick={() => handleUndo("storyFragmentSlug")}
+          onClick={() => handleUndo("storyFragmentSlug", id)}
           className="disabled:hidden ml-2"
           disabled={$storyFragmentSlug[id]?.history.length === 0}
         >

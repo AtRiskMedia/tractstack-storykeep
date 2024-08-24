@@ -15,7 +15,7 @@ interface PaneTitleProps {
   id: string;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const PaneTitle = ({
@@ -55,7 +55,7 @@ const PaneTitle = ({
         )}
       </div>
       <button
-        onClick={() => handleUndo("paneTitle")}
+        onClick={() => handleUndo("paneTitle", id)}
         className="disabled:hidden ml-2"
         disabled={$paneTitle[id]?.history.length === 0}
       >

@@ -10,6 +10,7 @@ import {
   storyFragmentSocialImagePath,
   paneTitle,
   paneSlug,
+  paneFragmentMarkdown,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -36,6 +37,7 @@ const storeMap: StoreMapType = {
   storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
   storyFragmentSocialImagePath: storyFragmentSocialImagePath,
   storyFragmentMenuId: storyFragmentMenuId,
+  paneFragmentMarkdown: paneFragmentMarkdown,
   paneTitle: paneTitle,
   paneSlug: paneSlug,
   // Add other stores here
@@ -215,7 +217,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   });
 
   const handleUndo = useCallback(
-    (storeKey: StoreKey) => {
+    (storeKey: StoreKey, id: string) => {
       const store = storeMap[storeKey];
       if (!store) return;
 

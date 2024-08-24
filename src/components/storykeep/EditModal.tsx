@@ -17,11 +17,12 @@ import { handleToggleOff } from "../../utils/storykeep";
 import type { ContentMap } from "../../types";
 
 interface EditModalProps {
+  id: string;
   type: "desktop" | "mobile";
   contentMap: ContentMap[];
 }
 
-export const EditModal = ({ type, contentMap }: EditModalProps) => {
+export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
   const contentId = `${$editMode?.targetId?.tag}-${$editMode?.targetId?.outerIdx}${typeof $editMode?.targetId?.idx === "number" ? `-${$editMode.targetId.idx}` : ""}-${$editMode?.id}`;
@@ -118,7 +119,7 @@ export const EditModal = ({ type, contentMap }: EditModalProps) => {
           typeof $editMode.targetId !== `undefined` ? (
           <PaneAstStyles
             key={contentId}
-            id={$editMode.id}
+            id={id}
             targetId={$editMode.targetId}
             type={type}
           />

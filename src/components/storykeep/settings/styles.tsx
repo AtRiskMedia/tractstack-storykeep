@@ -1,7 +1,11 @@
 import { useMemo, useState, useEffect } from "react";
-import { Switch } from "@headlessui/react";
+import { Switch, Combobox } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
-import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  XMarkIcon,
+  CheckIcon,
+  ChevronUpDownIcon,
+} from "@heroicons/react/24/outline";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
@@ -40,7 +44,10 @@ export const PaneAstStyles = (props: {
 }) => {
   const { id, targetId, type } = props;
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
-  // replace with direct from datum
+  const [styleFilter, setStyleFilter] = useState("popular");
+  const [selectedClass, setSelectedClass] = useState("");
+  const [query, setQuery] = useState("");
+  const [addClass, setAddClass] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [tabs, setTabs] = useState<StyleTab[] | null>(null);
   const [parentLayer, setParentLayer] = useState(0);
@@ -123,10 +130,10 @@ export const PaneAstStyles = (props: {
           : outerTagClassNamesPayload;
 
   const removeStyle = (className: string) => {
+    setSelectedStyle(null);
     if (!confirm) setConfirm(className);
     else {
       setConfirm(null);
-      console.log(`remove tag ${className}`, targetId);
       const activeTagData = getActiveTagData(
         activeTag,
         className,
@@ -146,7 +153,6 @@ export const PaneAstStyles = (props: {
         (currentField.current.payload.optionsPayload.classNamesPayload[
           thisTag
         ] as ClassNamesPayloadInnerDatum);
-      console.log(payloadForTag);
       if (payloadForTag && className) {
         if (payloadForTag.classes && className in payloadForTag.classes) {
           delete (payloadForTag.classes as Record<string, string[]>)[className];
@@ -247,6 +253,91 @@ export const PaneAstStyles = (props: {
         lastInteractedTypeStore.set(`markdown`);
         lastInteractedPaneStore.set(targetId.paneId);
       }
+    }
+  };
+
+  const filteredClasses = useMemo(() => {
+    return Object.entries(tailwindClasses)
+      .filter(([, classInfo]) => {
+        switch (styleFilter) {
+          case "popular":
+            return classInfo.priority <= 1;
+          case "advanced":
+            return classInfo.priority <= 2;
+          case "effects":
+            return true;
+          default:
+            return false;
+        }
+      })
+      .filter(([, classInfo]) =>
+        classInfo.title.toLowerCase().includes(query.toLowerCase())
+      );
+  }, [styleFilter, query]);
+
+  const handleAddStyle = () => {
+    if (selectedClass) {
+      const activeTagData = getActiveTagData(
+        activeTag,
+        selectedClass,
+        markdownLookup,
+        targetId,
+        classNamesPayload || null,
+        modalClassNamesPayload,
+        parentClassNamesPayload,
+        parentLayer
+      );
+      const thisTag = activeTagData?.tag;
+      const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+      const payloadForTag =
+        thisTag &&
+        (currentField.current.payload.optionsPayload.classNamesPayload[
+          thisTag
+        ] as ClassNamesPayloadInnerDatum);
+
+      if (payloadForTag && !(selectedClass in payloadForTag.classes)) {
+        if (
+          typeof payloadForTag.classes === "object" &&
+          !Array.isArray(payloadForTag.classes)
+        ) {
+          (payloadForTag.classes as Record<string, Tuple>)[selectedClass] = [
+            "",
+          ];
+        }
+      }
+      if (thisTag && payloadForTag)
+        paneFragmentMarkdown.setKey(markdownFragmentId, {
+          ...currentField,
+          current: {
+            ...currentField.current,
+            payload: {
+              ...currentField.current.payload,
+              optionsPayload: {
+                ...currentField.current.payload.optionsPayload,
+                classNamesPayload: {
+                  ...currentField.current.payload.optionsPayload
+                    .classNamesPayload,
+                  [thisTag]: payloadForTag,
+                },
+              },
+            },
+          },
+          history: newHistory,
+        });
+      // Update unsavedChanges store
+      unsavedChangesStore.setKey(id, {
+        ...$unsavedChanges[id],
+        paneFragmentMarkdown: true,
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
+
+      setAddClass(false);
+      setSelectedStyle(selectedClass);
+      setSelectedClass("");
+      setQuery("");
     }
   };
 
@@ -495,7 +586,16 @@ export const PaneAstStyles = (props: {
               )}
             </div>
           )}
-          <div className="my-2">ADD STYLE</div>
+          <button
+            className="my-2 underline"
+            title="Add a Style to this"
+            onClick={() => {
+              setSelectedStyle(null);
+              setAddClass(true);
+            }}
+          >
+            ADD STYLE
+          </button>
         </div>
       </div>
       <div
@@ -583,6 +683,88 @@ export const PaneAstStyles = (props: {
                   </div>
                 </div>
               ) : null}
+            </div>
+          </div>
+        ) : addClass ? (
+          <div className="bg-white shadow-inner rounded">
+            <div className="px-6 py-4">
+              <h4 className="text-lg">Add Styles</h4>
+              <div className="my-4">
+                <select
+                  value={styleFilter}
+                  onChange={e => setStyleFilter(e.target.value)}
+                  className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
+                >
+                  <option value="popular">Popular Styles</option>
+                  <option value="advanced">+ Advanced</option>
+                  <option value="effects">+ Effects</option>
+                </select>
+              </div>
+
+              <div className="relative">
+                <Combobox value={selectedClass} onChange={setSelectedClass}>
+                  <div className="relative mt-1">
+                    <Combobox.Input
+                      className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
+                      displayValue={(className: string) =>
+                        tailwindClasses[className]?.title || ""
+                      }
+                      onChange={event => setQuery(event.target.value)}
+                      placeholder="Select a style to add"
+                    />
+                    <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-mydarkgrey"
+                        aria-hidden="true"
+                      />
+                    </Combobox.Button>
+                  </div>
+                  <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                    {filteredClasses.map(([className, classInfo]) => (
+                      <Combobox.Option
+                        key={className}
+                        value={className}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                            active ? "bg-myorange text-white" : "text-black"
+                          }`
+                        }
+                      >
+                        {({ selected, active }) => (
+                          <>
+                            <span
+                              className={`block truncate ${
+                                selected ? "font-medium" : "font-normal"
+                              }`}
+                            >
+                              {classInfo.title}
+                            </span>
+                            {selected ? (
+                              <span
+                                className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                  active ? "text-white" : "text-myorange"
+                                }`}
+                              >
+                                <CheckIcon
+                                  className="h-5 w-5"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                      </Combobox.Option>
+                    ))}
+                  </Combobox.Options>
+                </Combobox>
+              </div>
+
+              <button
+                onClick={handleAddStyle}
+                className="mt-4 w-full py-2 bg-myorange text-white rounded-md hover:bg-myorange/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-myorange"
+              >
+                Add Style
+              </button>
             </div>
           </div>
         ) : null}

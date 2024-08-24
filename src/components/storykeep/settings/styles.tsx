@@ -127,6 +127,60 @@ export const PaneAstStyles = (props: {
     else {
       setConfirm(null);
       console.log(`remove tag ${className}`, targetId);
+      const activeTagData = getActiveTagData(
+        activeTag,
+        className,
+        markdownLookup,
+        targetId,
+        classNamesPayload || null,
+        modalClassNamesPayload,
+        parentClassNamesPayload,
+        parentLayer
+      );
+      const thisTag = activeTagData?.tag;
+      const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+      const now = Date.now();
+      const newHistory = updateHistory(currentField, now);
+      const payloadForTag =
+        thisTag &&
+        (currentField.current.payload.optionsPayload.classNamesPayload[
+          thisTag
+        ] as ClassNamesPayloadInnerDatum);
+      console.log(payloadForTag);
+      if (payloadForTag && className) {
+        if (payloadForTag.classes && className in payloadForTag.classes) {
+          delete (payloadForTag.classes as Record<string, string[]>)[className];
+        }
+        if (payloadForTag.override && className in payloadForTag.override) {
+          delete payloadForTag.override[className];
+        }
+      }
+      if (thisTag && payloadForTag)
+        paneFragmentMarkdown.setKey(markdownFragmentId, {
+          ...currentField,
+          current: {
+            ...currentField.current,
+            payload: {
+              ...currentField.current.payload,
+              optionsPayload: {
+                ...currentField.current.payload.optionsPayload,
+                classNamesPayload: {
+                  ...currentField.current.payload.optionsPayload
+                    .classNamesPayload,
+                  [thisTag]: payloadForTag,
+                },
+              },
+            },
+          },
+          history: newHistory,
+        });
+      // Update unsavedChanges store
+      unsavedChangesStore.setKey(id, {
+        ...$unsavedChanges[id],
+        paneFragmentMarkdown: true,
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
     }
   };
   const cancelRemoveStyle = () => {
@@ -134,7 +188,8 @@ export const PaneAstStyles = (props: {
   };
 
   const removeOverride = () => {
-    console.log(`todo! removeOverride`);
+    if (activeTagData?.hasOverride) console.log(`todo! removeOverride`);
+    else console.log(`todo! enableOverride`);
   };
 
   const handleFinalChange = (

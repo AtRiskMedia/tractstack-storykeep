@@ -200,20 +200,89 @@ export const PaneAstStyles = (props: {
   };
 
   const removeOverride = () => {
-    if (activeTagData?.hasOverride) console.log(`todo! removeOverride`);
-    else console.log(`todo! enableOverride`);
+    const thisTag = activeTagData?.tag;
+    const thisClass = activeTagData?.class ?? "";
+    const thisGlobalNth = activeTagData?.globalNth ?? 0;
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const now = Date.now();
+    const newHistory = updateHistory(currentField, now);
+    const payloadForTag =
+      thisTag &&
+      (currentField.current.payload.optionsPayload.classNamesPayload[
+        thisTag
+      ] as ClassNamesPayloadInnerDatum | undefined);
+    if (payloadForTag && payloadForTag.override) {
+      if (activeTagData?.hasOverride && typeof thisGlobalNth === `number`) {
+        if (payloadForTag.override[thisClass]) {
+          delete payloadForTag.override[thisClass][thisGlobalNth];
+          if (Object.keys(payloadForTag.override[thisClass]).length === 0) {
+            delete payloadForTag.override[thisClass];
+          }
+        }
+        if (Object.keys(payloadForTag.override).length === 0) {
+          delete payloadForTag.override;
+          delete payloadForTag.count;
+        }
+      } else {
+        const count = markdownLookup?.nthTagLookup[
+          thisTag as keyof typeof markdownLookup.nthTagLookup
+        ]
+          ? Object.keys(
+              markdownLookup.nthTagLookup[
+                thisTag as keyof typeof markdownLookup.nthTagLookup
+              ]
+            ).length
+          : 0;
+        payloadForTag.count = count;
+        if (payloadForTag && typeof thisGlobalNth === "number") {
+          if (!payloadForTag.override) {
+            payloadForTag.override = {};
+          }
+          if (!payloadForTag.override[thisClass]) {
+            payloadForTag.override[thisClass] = [];
+          }
+          payloadForTag.override[thisClass][thisGlobalNth] = [""];
+        }
+      }
+      paneFragmentMarkdown.setKey(markdownFragmentId, {
+        ...currentField,
+        current: {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                [thisTag]: payloadForTag as ClassNamesPayloadInnerDatum,
+              },
+            },
+          },
+        },
+        history: newHistory,
+      });
+      // Update unsavedChanges store
+      unsavedChangesStore.setKey(id, {
+        ...$unsavedChanges[id],
+        paneFragmentMarkdown: true,
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
+    }
   };
 
   const handleFinalChange = (
     value: string,
     viewport: "mobile" | "tablet" | "desktop",
-    isNegative?: boolean
+    isNegative: boolean = false
   ) => {
     if (activeTagData?.values.includes(value)) {
       const thisTag = activeTagData.tag;
       const thisGlobalNth = activeTagData.globalNth;
       const thisClass = activeTagData.class;
-      const thisValue = !isNegative ? value : `!${value}`;
+      const thisValue =
+        typeof isNegative !== `undefined` && isNegative ? `!${value}` : value;
       const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
       const now = Date.now();
       const newHistory = updateHistory(currentField, now);

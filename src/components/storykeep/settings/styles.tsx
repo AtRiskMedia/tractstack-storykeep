@@ -160,11 +160,25 @@ export const PaneAstStyles = (props: {
           thisTag
         ] as ClassNamesPayloadInnerDatum);
       if (payloadForTag && className) {
-        if (payloadForTag.classes && className in payloadForTag.classes) {
-          delete (payloadForTag.classes as Record<string, string[]>)[className];
-        }
-        if (payloadForTag.override && className in payloadForTag.override) {
-          delete payloadForTag.override[className];
+        if (thisTag === `parent`) {
+          if (
+            Array.isArray(payloadForTag.classes) &&
+            payloadForTag.classes?.[parentLayer] &&
+            className in payloadForTag.classes[parentLayer]
+          ) {
+            delete (
+              payloadForTag.classes[parentLayer] as Record<string, string[]>
+            )[className];
+          }
+        } else {
+          if (payloadForTag.classes && className in payloadForTag.classes) {
+            delete (payloadForTag.classes as Record<string, string[]>)[
+              className
+            ];
+          }
+          if (payloadForTag.override && className in payloadForTag.override) {
+            delete payloadForTag.override[className];
+          }
         }
       }
       if (thisTag && payloadForTag)
@@ -362,6 +376,42 @@ export const PaneAstStyles = (props: {
       );
   }, [styleFilter, query]);
 
+  const handleDeleteLayer = () => {
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const now = Date.now();
+    const newHistory = updateHistory(currentField, now);
+    const payloadForTag =
+      currentField.current.payload.optionsPayload.classNamesPayload.parent;
+    if( Array.isArray(payloadForTag.classes))
+    payloadForTag.classes.splice(parentLayer, 1);
+    if (payloadForTag)
+      paneFragmentMarkdown.setKey(markdownFragmentId, {
+        ...currentField,
+        current: {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                [`parent`]: payloadForTag,
+              },
+            },
+          },
+        },
+        history: newHistory,
+      });
+    // Update unsavedChanges store
+    unsavedChangesStore.setKey(id, {
+      ...$unsavedChanges[id],
+      paneFragmentMarkdown: true,
+    });
+    lastInteractedTypeStore.set(`markdown`);
+    lastInteractedPaneStore.set(targetId.paneId);
+  };
+
   const handleAddStyle = () => {
     if (selectedClass) {
       const activeTagData = getActiveTagData(
@@ -384,7 +434,20 @@ export const PaneAstStyles = (props: {
           thisTag
         ] as ClassNamesPayloadInnerDatum);
 
-      if (payloadForTag && !(selectedClass in payloadForTag.classes)) {
+      if (
+        payloadForTag &&
+        Array.isArray(payloadForTag.classes) &&
+        !(selectedClass in payloadForTag.classes[parentLayer])
+      ) {
+        if (
+          typeof payloadForTag.classes === "object" &&
+          typeof payloadForTag.classes[parentLayer] === "object"
+        ) {
+          (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
+            selectedClass
+          ] = [""];
+        }
+      } else if (payloadForTag && !(selectedClass in payloadForTag.classes)) {
         if (
           typeof payloadForTag.classes === "object" &&
           !Array.isArray(payloadForTag.classes)
@@ -646,14 +709,19 @@ export const PaneAstStyles = (props: {
               <hr />
               <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">
                 {parentClassNamesPayload?.classes &&
-                Array.isArray(parentClassNamesPayload?.classes) ? (
+                Array.isArray(parentClassNamesPayload?.classes) &&
+                Object.keys(parentClassNamesPayload?.classes[parentLayer])
+                  .length ? (
                   Object.keys(
                     parentClassNamesPayload?.classes[parentLayer]
                   ).map(className => ClassTag(className))
                 ) : (
                   <div>
                     No styles.{" "}
-                    <button className="font-bold underline">
+                    <button
+                      className="font-bold underline"
+                      onClick={handleDeleteLayer}
+                    >
                       Delete layer.
                     </button>
                   </div>

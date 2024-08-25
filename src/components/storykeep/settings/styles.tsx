@@ -213,6 +213,46 @@ export const PaneAstStyles = (props: {
     setConfirm(null);
   };
 
+  const handleAddLayer = (start: boolean) => {
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const now = Date.now();
+    const newHistory = updateHistory(currentField, now);
+    const payloadForTag = currentField.current.payload.optionsPayload
+      .classNamesPayload.parent as ClassNamesPayloadInnerDatum;
+    if (Array.isArray(payloadForTag.classes)) {
+      if (start) {
+        payloadForTag.classes.unshift({});
+      } else {
+        payloadForTag.classes.push({});
+      }
+      paneFragmentMarkdown.setKey(markdownFragmentId, {
+        ...currentField,
+        current: {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                [`parent`]: payloadForTag,
+              },
+            },
+          },
+        },
+        history: newHistory,
+      });
+      // Update unsavedChanges store
+      unsavedChangesStore.setKey(id, {
+        ...$unsavedChanges[id],
+        paneFragmentMarkdown: true,
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
+    }
+  };
+
   const removeOverride = () => {
     const thisTag = activeTagData?.tag;
     const thisClass = activeTagData?.class ?? "";
@@ -382,8 +422,8 @@ export const PaneAstStyles = (props: {
     const newHistory = updateHistory(currentField, now);
     const payloadForTag =
       currentField.current.payload.optionsPayload.classNamesPayload.parent;
-    if( Array.isArray(payloadForTag.classes))
-    payloadForTag.classes.splice(parentLayer, 1);
+    if (Array.isArray(payloadForTag.classes))
+      payloadForTag.classes.splice(parentLayer, 1);
     if (payloadForTag)
       paneFragmentMarkdown.setKey(markdownFragmentId, {
         ...currentField,
@@ -685,6 +725,13 @@ export const PaneAstStyles = (props: {
             <>
               <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-2 gap-y-1.5">
                 <span className="py-1">Layer:</span>
+                <button
+                  onClick={() => handleAddLayer(true)}
+                  title="Insert layer before"
+                  className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
+                >
+                  +
+                </button>
                 {parentClassNamesPayload?.classes &&
                   Object.keys(parentClassNamesPayload?.classes).map(
                     (_, idx: number) => (
@@ -705,6 +752,13 @@ export const PaneAstStyles = (props: {
                       </button>
                     )
                   )}
+                <button
+                  onClick={() => handleAddLayer(false)}
+                  title="Insert layer after"
+                  className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
+                >
+                  +
+                </button>
               </div>
               <hr />
               <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">

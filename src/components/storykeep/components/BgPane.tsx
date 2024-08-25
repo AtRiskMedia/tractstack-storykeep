@@ -9,8 +9,8 @@ import type {
   MaskOptionsDatum,
   ShapeOptionsDatum,
   OptionsPayloadDatum,
+  ClassNamesPayloadResult,
   ViewportAuto,
-  //ToolMode,
 } from "../../../types";
 
 const BgPane = ({
@@ -82,7 +82,7 @@ const BgPane = ({
     const thisId = `${_viewportKey}-${thisShapeSelector}-pane`;
 
     // check for tailwind classes
-    const classNamesParent =
+    const classNamesParentRaw =
       optionsPayloadDatum?.classNamesParent &&
       viewportKey &&
       typeof optionsPayloadDatum?.classNamesParent[viewportKey] !== `undefined`
@@ -91,10 +91,17 @@ const BgPane = ({
             typeof optionsPayload?.classNamesParent?.all !== `undefined`
           ? optionsPayload.classNamesParent.all
           : typeof optionsPayload?.classNamesParent !== `undefined` &&
-              typeof optionsPayload?.classNamesParent[_viewportKey] !==
-                `undefined`
-            ? optionsPayload.classNamesParent[_viewportKey]
+              typeof optionsPayload?.classNamesParent[
+                _viewportKey as keyof ClassNamesPayloadResult
+              ] !== `undefined`
+            ? optionsPayload.classNamesParent[
+                _viewportKey as keyof ClassNamesPayloadResult
+              ]
             : ``;
+    const classNamesParent =
+      typeof classNamesParentRaw === `string`
+        ? classNamesParentRaw
+        : classNamesParentRaw.at(0);
 
     // based on artpack mode
     switch (artpackMode) {

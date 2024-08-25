@@ -44,7 +44,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
         ? payload.textShapeOutsideTablet
         : viewportKey === `mobile`
           ? payload.textShapeOutsideMobile
-          : null;
+          : `none`;
   const astPayload = {
     ast: markdown.htmlAst.children,
     buttonData: optionsPayload?.buttons || {},

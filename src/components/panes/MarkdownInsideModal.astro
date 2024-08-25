@@ -2,7 +2,7 @@
 import PaneFromAst from "./PaneFromAst.astro";
 import { SvgInsideLeftModal } from "@components/panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "@components/panes/SvgInsideRightModal";
-import { classNames, getClassNames } from "../../utils/helpers";
+import { classNames } from "../../utils/helpers";
 import type {
   MarkdownLookup,
   FileNode,
@@ -68,18 +68,11 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     typeof optionsPayload?.classNames?.all === `object`
       ? optionsPayload.classNames.all
       : {};
-  const classNamesParentRaw = optionsPayload?.classNamesParent?.all
-    ? getClassNames(optionsPayload.classNamesParent.all)
-    : ``;
-  const classNamesParent =
-    typeof classNamesParentRaw === `string`
-      ? [classNamesParentRaw]
-      : classNamesParentRaw;
   return {
     shapeName,
     astPayload,
     injectClassNames,
-    classNamesParent,
+    classNamesParent: [``],
     viewportKey,
   };
 });

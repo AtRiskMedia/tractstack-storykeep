@@ -27,7 +27,6 @@ const PaneTitle = ({
   const $paneTitle = useStore(paneTitle, { keys: [id] });
   const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
   const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
-
   return (
     <div className="flex items-center space-x-4 py-1.5">
       <span

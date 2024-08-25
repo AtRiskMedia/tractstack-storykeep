@@ -3,10 +3,11 @@ import SvgModal from "./SvgModal";
 import { classNames } from "../../../utils/helpers";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
 import type {
-  ClassNamesPayloadValue,
+  //  ClassNamesPayloadValue,
   OptionsPayloadDatum,
   MarkdownPaneDatum,
   ViewportKey,
+  ClassNamesPayloadResult,
 } from "../../../types";
 
 interface ModalOptionsDatum {
@@ -27,17 +28,18 @@ interface Props {
   viewportKey: ViewportKey;
 }
 
-const getClassString = (
-  classNameInput: string | { classes: ClassNamesPayloadValue }
-): string => {
-  if (typeof classNameInput === "string") {
-    return classNameInput;
-  }
-  if (typeof classNameInput === "object" && "classes" in classNameInput) {
-    return Object.values(classNameInput.classes).join(" ");
-  }
-  return "";
-};
+//const getClassString = (
+//  classNameInput: string | { classes: ClassNamesPayloadValue }
+//): string => {
+//  console.log(classNameInput)
+//  if (typeof classNameInput === "string") {
+//    return classNameInput;
+//  }
+//  if (typeof classNameInput === "object" && "classes" in classNameInput) {
+//    return Object.values(classNameInput.classes).join(" ");
+//  }
+//  return "";
+//};
 
 const Modal = ({ payload, modalPayload, viewportKey }: Props) => {
   const optionsPayload = payload.optionsPayload;
@@ -79,19 +81,23 @@ const Modal = ({ payload, modalPayload, viewportKey }: Props) => {
               : null;
       const thisId = `${_viewportKey}-${shapeName}-modal`;
 
-      const injectClassNames =
+      const injectClassNamesRaw =
         (viewportKey &&
           optionsPayloadDatum?.classNamesModal &&
-          optionsPayloadDatum?.classNamesModal[viewportKey]) ||
+          optionsPayloadDatum?.classNamesModal[
+            viewportKey as keyof ClassNamesPayloadResult
+          ]) ||
         optionsPayloadDatum?.classNamesModal?.all ||
         optionsPayload?.classNamesModal?.all ||
         ``;
+      const injectClassNames =
+        typeof injectClassNamesRaw === `string`
+          ? injectClassNamesRaw
+          : injectClassNamesRaw.at(0);
+
       return {
         id: thisId,
-        classes: classNames(
-          baseClasses[_viewportKey],
-          getClassString(injectClassNames)
-        ),
+        classes: classNames(baseClasses[_viewportKey], injectClassNames || ``),
         shapeName: shapeName ?? "",
       };
     }

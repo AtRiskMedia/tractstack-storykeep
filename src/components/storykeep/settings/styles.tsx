@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { Switch, Combobox } from "@headlessui/react";
+import { Switch, Combobox, Listbox } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import {
   XMarkIcon,
@@ -129,6 +129,12 @@ export const PaneAstStyles = (props: {
           ? listItemClassNamesPayload
           : outerTagClassNamesPayload;
 
+  const styleFilterOptions = [
+    { value: "popular", label: "Popular Styles" },
+    { value: "advanced", label: "+ Advanced" },
+    { value: "effects", label: "+ Effects" },
+  ];
+
   const removeStyle = (className: string) => {
     setSelectedStyle(null);
     if (!confirm) setConfirm(className);
@@ -213,12 +219,24 @@ export const PaneAstStyles = (props: {
       const newHistory = updateHistory(currentField, now);
       const payloadForTag = currentField.current.payload.optionsPayload
         .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
-      const thisTuple = !activeTagData.hasOverride
-        ? (payloadForTag.classes as Record<string, Tuple>)[thisClass]
-        : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
+      const thisTuple =
+        activeTagData.tag === `parent` && Array.isArray(payloadForTag.classes)
+          ? (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
+              thisClass
+            ]
+          : !activeTagData.hasOverride
+            ? (payloadForTag.classes as Record<string, Tuple>)[thisClass]
+            : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
       if (thisTuple) {
         const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
-        if (activeTagData?.hasOverride) {
+        if (
+          activeTagData.tag === `parent` &&
+          Array.isArray(payloadForTag.classes)
+        ) {
+          (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
+            thisClass
+          ] = newTuple;
+        } else if (activeTagData?.hasOverride) {
           if (!payloadForTag.override) payloadForTag.override = {};
           if (!payloadForTag.override[thisClass])
             payloadForTag.override[thisClass] = [];
@@ -481,7 +499,7 @@ export const PaneAstStyles = (props: {
       >
         <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
           <div className="flex justify-between items-center">
-            <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1">
+            <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
               {tabs.map((tab: StyleTab, idx: number) => (
                 <button
                   key={idx}
@@ -551,7 +569,7 @@ export const PaneAstStyles = (props: {
                             : "text-md text-black bg-myorange/50 font-bold pointer-events-none"
                         )}
                       >
-                        {idx}
+                        {idx + 1}
                       </button>
                     )
                   )}
@@ -690,15 +708,62 @@ export const PaneAstStyles = (props: {
             <div className="px-6 py-4">
               <h4 className="text-lg">Add Styles</h4>
               <div className="my-4">
-                <select
-                  value={styleFilter}
-                  onChange={e => setStyleFilter(e.target.value)}
-                  className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
-                >
-                  <option value="popular">Popular Styles</option>
-                  <option value="advanced">+ Advanced</option>
-                  <option value="effects">+ Effects</option>
-                </select>
+                <Listbox value={styleFilter} onChange={setStyleFilter}>
+                  <div className="relative mt-1">
+                    <Listbox.Button className="relative w-full cursor-default rounded-md border border-mydarkgrey bg-white py-2 pl-3 pr-10 text-left text-black shadow-sm focus:outline-none focus:ring-1 focus:ring-myorange focus:border-myorange sm:text-sm">
+                      <span className="block truncate">
+                        {
+                          styleFilterOptions.find(
+                            option => option.value === styleFilter
+                          )?.label
+                        }
+                      </span>
+                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <ChevronUpDownIcon
+                          className="h-5 w-5 text-mydarkgrey"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </Listbox.Button>
+                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {styleFilterOptions.map(option => (
+                        <Listbox.Option
+                          key={option.value}
+                          value={option.value}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active ? "bg-myorange text-white" : "text-black"
+                            }`
+                          }
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selected ? "font-medium" : "font-normal"
+                                }`}
+                              >
+                                {option.label}
+                              </span>
+                              {selected ? (
+                                <span
+                                  className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                    active ? "text-white" : "text-myorange"
+                                  }`}
+                                >
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </div>
+                </Listbox>
               </div>
 
               <div className="relative">

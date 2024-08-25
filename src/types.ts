@@ -307,23 +307,24 @@ export interface ClassNamesPayloadValue {
 export interface ClassNamesPayloadDatumValue {
   [key: string]: Tuple;
 }
-export interface ClassNamesPayloadDatumWrapper {
-  [key: number]: ClassNamesPayloadDatumValue;
-}
+// this should no longer be required!!!
+//export interface ClassNamesPayloadDatumWrapper {
+//  [key: number]: ClassNamesPayloadDatumValue;
+//}
+//
 
 export interface ClassNamesPayload {
-  [key: string]:
-    | {
-        classes: ClassNamesPayloadValue;
-      }
-    | string;
+  [key: string]: {
+    classes: ClassNamesPayloadDatumValue;
+  };
+  //    | string;
 }
 export interface ClassNamesPrePayload {
   [key: string]: TupleValue | TupleValue[];
 }
 
 export interface ClassNamesPayloadInnerDatum {
-  classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumWrapper;
+  classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumValue[];
   count?: number;
   override?: {
     [key: string]: Tuple[];
@@ -334,16 +335,16 @@ export interface ClassNamesPayloadDatum {
 }
 
 export interface ClassNamesPayloadResult {
-  all: string;
-  mobile: string;
-  tablet: string;
-  desktop: string;
+  all: string | string[];
+  mobile: string | string[];
+  tablet: string | string[];
+  desktop: string | string[];
 }
 
 export interface OptionsPayloadDatum {
   classNamesPayload: ClassNamesPayloadDatum;
-  classNamesParent?: ClassNamesPayload;
-  classNamesModal?: ClassNamesPayload;
+  classNamesParent?: ClassNamesPayloadResult;
+  classNamesModal?: ClassNamesPayloadResult;
   classNames?: {
     all: ClassNamesPayloadValue;
     desktop?: ClassNamesPayloadValue;

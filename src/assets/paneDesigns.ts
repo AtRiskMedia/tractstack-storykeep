@@ -20,6 +20,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
       bgColour: false,
+      codeHook: null,
     },
     fragments: [
       {
@@ -84,6 +85,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
       bgColour: false,
+      codeHook: null,
     },
     fragments: [
       {
@@ -148,6 +150,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioTablet: `26.00`,
       heightRatioMobile: `32.67`,
       bgColour: false,
+      codeHook: null,
     },
     fragments: [
       {
@@ -200,6 +203,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioTablet: `92.22`,
       heightRatioMobile: `120.83`,
       bgColour: false,
+      codeHook: null,
     },
     fragments: [
       {
@@ -290,6 +294,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
       bgColour: false,
+      codeHook: null,
     },
     fragments: [
       {
@@ -363,6 +368,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
       bgColour: `#10120d`,
+      codeHook: null,
     },
     fragments: [
       {

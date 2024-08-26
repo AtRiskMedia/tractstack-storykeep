@@ -2,7 +2,7 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
-export type TursoOperation = "test" | "getResourcesBySlug";
+export type TursoOperation = "test" | "paneDesigns";
 
 export interface TursoClientError extends Error {
   name: string;
@@ -149,8 +149,9 @@ export interface PaneDesign {
     heightRatioTablet: string;
     heightRatioMobile: string;
     bgColour: string | boolean;
+    codeHook: string | null;
   };
-  fragments: (PaneDesignBgPane | PaneDesignMarkdown)[];
+  fragments: (PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum)[];
 }
 
 export type PaneAstTargetId = {
@@ -400,6 +401,9 @@ export interface PaneOptionsPayload {
   maxHScreen?: boolean;
   heldBeliefs?: BeliefDatum[];
   withheldBeliefs?: BeliefDatum[];
+}
+export interface PaneDesignOptionsPayload extends PaneOptionsPayload {
+  bgColour: string | null;
 }
 
 export interface PaneDatum {

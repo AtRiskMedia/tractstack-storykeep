@@ -4,12 +4,14 @@ import { cleanTursoPayload } from "../utils/compositor/tursoPayload";
 import { cleanTursoContentMap } from "../utils/compositor/tursoContentMap";
 import { cleanTursoStoryFragment } from "../utils/compositor/tursoStoryFragment";
 import { cleanTursoContextPane } from "../utils/compositor/tursoContextPane";
+import { cleanPaneDesigns } from "../utils/compositor/paneDesigns";
 import type {
   ResourceDatum,
   StoryFragmentDatum,
   ContextPaneDatum,
   ContentMap,
   DatumPayload,
+  PaneDesign,
 } from "../types.ts";
 
 export const turso = createClient({
@@ -282,6 +284,37 @@ export async function getContentMap(): Promise<ContentMap[]> {
     return cleanTursoContentMap(storyfragments, panes);
   } catch (error) {
     console.error("Error fetching ContentMap:", error);
+    throw error;
+  }
+}
+
+export async function getPaneDesigns(): Promise<PaneDesign[]> {
+  try {
+    const { rows } = await turso.execute(`
+      SELECT 
+        p.id,
+        p.title,
+        p.slug,
+        p.created,
+        p.changed,
+        p.markdown_id,
+        p.options_payload,
+        p.is_context_pane,
+        p.height_offset_desktop,
+        p.height_offset_tablet,
+        p.height_offset_mobile,
+        p.height_ratio_desktop,
+        p.height_ratio_tablet,
+        p.height_ratio_mobile,
+        m.body AS markdown_body
+      FROM pane p
+      LEFT JOIN markdown m ON p.markdown_id = m.id
+      ORDER BY p.created DESC
+    `);
+    const cleanedDesigns = cleanPaneDesigns(rows);
+    return cleanedDesigns;
+  } catch (error) {
+    console.error("Error fetching pane designs:", error);
     throw error;
   }
 }

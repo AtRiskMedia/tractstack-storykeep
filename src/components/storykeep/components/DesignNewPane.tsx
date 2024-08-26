@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Combobox } from "@headlessui/react";
 import {
   CheckIcon,
@@ -11,6 +11,7 @@ import PreviewPane from "./PreviewPane";
 import { paneDesigns } from "../../../assets/paneDesigns";
 import { editModeStore } from "../../../store/storykeep";
 import { handleToggleOn } from "../../../utils/storykeep";
+import { tursoClient } from "../../../api/tursoClient";
 import type { PaneDesign, ViewportAuto } from "../../../types";
 
 const DesignNewPane = ({
@@ -28,17 +29,24 @@ const DesignNewPane = ({
   tailwindBgColour: string;
   viewportKey: ViewportAuto;
 }) => {
+  const [mode, setMode] = useState<`design` | `reuse`>(`design`);
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);
+  const [activePaneDesigns, setActivePaneDesigns] = useState(paneDesigns);
+  const [reusePaneDesigns, setReuseActivePaneDesigns] = useState<PaneDesign[]>(
+    []
+  );
   const [selectedDesign, setSelectedDesign] = useState<PaneDesign>(
-    paneDesigns[0]
+    activePaneDesigns[0]
   );
   const [, setCurrentIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredDesigns =
     query === ""
-      ? paneDesigns
-      : paneDesigns.filter(design =>
+      ? activePaneDesigns
+      : activePaneDesigns.filter(design =>
           design.name.toLowerCase().includes(query.toLowerCase())
         );
 
@@ -46,9 +54,10 @@ const DesignNewPane = ({
     setCurrentIndex(prevIndex => {
       const newIndex =
         direction === "next"
-          ? (prevIndex + 1) % paneDesigns.length
-          : (prevIndex - 1 + paneDesigns.length) % paneDesigns.length;
-      setSelectedDesign(paneDesigns[newIndex]);
+          ? (prevIndex + 1) % activePaneDesigns.length
+          : (prevIndex - 1 + activePaneDesigns.length) %
+            activePaneDesigns.length;
+      setSelectedDesign(activePaneDesigns[newIndex]);
       return newIndex;
     });
   };
@@ -70,6 +79,47 @@ const DesignNewPane = ({
     handleToggleOn(`insert`, `pane-insert`);
   };
 
+  const changeMode = (newMode: `design` | `reuse`) => {
+    setMode(newMode);
+    if (newMode === `design`) {
+      setActivePaneDesigns(paneDesigns);
+      setSelectedDesign(paneDesigns[0]);
+    } else {
+      setActivePaneDesigns(reusePaneDesigns);
+      setSelectedDesign(reusePaneDesigns[0]);
+    }
+    setCurrentIndex(0);
+    setQuery(``);
+    console.log(`push fetchResult into activePaneDesigns`);
+  };
+
+  useEffect(() => {
+    async function runFetch() {
+      try {
+        setIsLoading(true);
+        const result = (await tursoClient.paneDesigns()) as PaneDesign[];
+        setReuseActivePaneDesigns(result);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching datum payload:", err);
+        setError(
+          err instanceof Error ? err.message : "An unknown error occurred"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    runFetch();
+  }, []);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
     <div id="pane-insert" className="py-6 bg-mywhite shadow-inner">
       <div className="px-6 flex justify-center space-x-4 mb-4">
@@ -80,16 +130,48 @@ const DesignNewPane = ({
             onChange={design => {
               setSelectedDesign(design);
               setCurrentIndex(
-                design ? paneDesigns.findIndex(d => d.id === design.id) : 0
+                design
+                  ? activePaneDesigns.findIndex(d => d.id === design.id)
+                  : 0
               );
             }}
           >
-            <Combobox.Label className="block text-sm font-medium text-mydarkgrey mb-1">
-              Select design to use
-            </Combobox.Label>
+            {mode === `design` ? (
+              <div className="flex flex-nowrap gap-x-3 text-md mb-1">
+                <Combobox.Label className="block text-mydarkgrey">
+                  Choose design starter
+                </Combobox.Label>
+                <span className="text-mydarkgrey/85">
+                  ( or,{` `}
+                  <button
+                    onClick={() => changeMode(`reuse`)}
+                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
+                  >
+                    Re-use existing pane
+                  </button>
+                  )
+                </span>
+              </div>
+            ) : (
+              <div className="flex flex-nowrap gap-x-3 text-md mb-1">
+                <Combobox.Label className="block text-mydarkgrey">
+                  Re-use existing pane
+                </Combobox.Label>
+                <span className="text-mydarkgrey/85">
+                  ( or,{` `}
+                  <button
+                    onClick={() => changeMode(`design`)}
+                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
+                  >
+                    Choose design starter
+                  </button>
+                  )
+                </span>
+              </div>
+            )}
             <div className="relative">
               <Combobox.Input
-                className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange sm:text-sm sm:leading-6"
+                className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg sm:text-md sm:leading-6"
                 onChange={event => setQuery(event.target.value)}
                 displayValue={(design: PaneDesign | null) => design?.name ?? ""}
               />
@@ -106,7 +188,7 @@ const DesignNewPane = ({
                       key={design.id}
                       value={design}
                       className={({ active }) =>
-                        `z-999 relative cursor-default select-none py-2 pl-8 pr-4 ${
+                        `z-[99999] relative cursor-default select-none py-2 pl-8 pr-4 ${
                           active ? "bg-myorange text-white" : "text-mydarkgrey"
                         }`
                       }

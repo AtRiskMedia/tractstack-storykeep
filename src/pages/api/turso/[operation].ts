@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-//import { turso } from "../../../api/turso";
+import { getPaneDesigns } from "../../../api/turso";
 
 export const POST: APIRoute = async ({ /* request, */ params, locals }) => {
   if (!locals.user?.isAuthenticated) {
@@ -18,6 +18,12 @@ export const POST: APIRoute = async ({ /* request, */ params, locals }) => {
       case "test":
         result = JSON.stringify({ success: true });
         break;
+
+      case "paneDesigns":
+        result = await getPaneDesigns();
+        //result = JSON.stringify({ success: true });
+        break;
+
       //case "getResourcesBySlug":
       //  if (!Array.isArray(body.slugs)) {
       //    throw new Error("Invalid or missing slugs array");
@@ -51,7 +57,7 @@ export const POST: APIRoute = async ({ /* request, */ params, locals }) => {
 
 //// React component example
 //
-//import React, { useState, useEffect } from 'react';
+//import { useState, useEffect } from 'react';
 //import { tursoClient } from '../api/tursoClient';
 //import type { DatumPayload } from '../types';
 //

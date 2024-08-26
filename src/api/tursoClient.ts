@@ -9,7 +9,6 @@ const BASE_URL = `/api/turso`;
 
 function logError(error: TursoClientError): void {
   console.error("Logged error:", error);
-  // Implement more comprehensive error logging here
 }
 
 async function fetchTurso(
@@ -70,10 +69,9 @@ export const tursoClient = {
       throw error;
     }
   },
-  // Add other methods here...
-  getResourcesBySlug: async (slugs: string[]): Promise<unknown> => {
+  paneDesigns: async (): Promise<unknown> => {
     try {
-      return await fetchTurso("getResourcesBySlug", { slugs });
+      return await fetchTurso("paneDesigns");
     } catch (error) {
       if (isTursoClientError(error)) {
         logError(error);
@@ -81,5 +79,16 @@ export const tursoClient = {
       throw error;
     }
   },
+  // Add other methods here...
+  //getResourcesBySlug: async (slugs: string[]): Promise<unknown> => {
+  //  try {
+  //    return await fetchTurso("getResourcesBySlug", { slugs });
+  //  } catch (error) {
+  //    if (isTursoClientError(error)) {
+  //      logError(error);
+  //    }
+  //    throw error;
+  //  }
+  //},
   // ... other methods
 };

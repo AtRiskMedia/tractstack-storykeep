@@ -49,12 +49,20 @@ export const PaneInsert = (props: {
   paneId: string;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   payload: any;
+  reuse: boolean;
   contentMap: ContentMap[];
   toggleOff: () => void;
   doInsert: (newPaneIds: string[]) => void | null;
 }) => {
-  const { doInsert, contentMap, storyFragmentId, paneId, payload, toggleOff } =
-    props;
+  const {
+    reuse,
+    doInsert,
+    contentMap,
+    storyFragmentId,
+    paneId,
+    payload,
+    toggleOff,
+  } = props;
   const [isClient, setIsClient] = useState(false);
   const $uncleanData = useStore(uncleanDataStore, { keys: [paneId] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
@@ -73,19 +81,27 @@ export const PaneInsert = (props: {
   newPaneIds.splice(payload.index, 0, paneId);
 
   useEffect(() => {
-    // Initialize the new pane's title and slug
+    // Initialize (or re-use) the new pane's title and slug
     if (!$paneTitle[paneId]) {
-      $paneTitle[paneId] = { current: "", original: "", history: [] };
+      $paneTitle[paneId] = {
+        current: reuse ? payload.selectedDesign.name : ``,
+        original: "",
+        history: [],
+      };
       uncleanDataStore.setKey(paneId, {
         ...(uncleanDataStore.get()[paneId] || {}),
-        [`paneTitle`]: true,
+        [`paneTitle`]: !reuse,
       });
     }
     if (!$paneSlug[paneId]) {
-      $paneSlug[paneId] = { current: "", original: "", history: [] };
+      $paneSlug[paneId] = {
+        current: reuse ? payload.selectedDesign.slug : ``,
+        original: "",
+        history: [],
+      };
       uncleanDataStore.setKey(paneId, {
         ...(uncleanDataStore.get()[paneId] || {}),
-        [`paneSlug`]: true,
+        [`paneSlug`]: !reuse,
       });
     }
     setIsClient(true);
@@ -111,11 +127,8 @@ export const PaneInsert = (props: {
     }
     return handleEditingChange(storeKey, editing);
   };
+
   const handleSave = () => {
-    console.log(`handleSave`, payload);
-    console.log(
-      `for selectedDesign, push to store; for re-use, must intercept by id and insert accordingly`
-    );
     const paneData = preparePreviewPane(payload.selectedDesign);
     const newPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
     newPaneIds.splice(payload.index, 0, paneId);
@@ -171,13 +184,15 @@ export const PaneInsert = (props: {
       },
     ];
     paneStores.forEach(({ store, value }) => {
-      store.set({
-        ...store.get(),
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        [paneId]: createFieldWithHistory(value as any),
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-      } as any);
+      if (typeof store.get()[paneId] === `undefined`)
+        store.set({
+          ...store.get(),
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          [paneId]: createFieldWithHistory(value as any),
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+        } as any);
     });
+
     // Process PaneFragments
     const thisPaneFragmentIds = paneData?.optionsPayload?.paneFragmentsPayload
       ?.map((paneFragment: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) => {

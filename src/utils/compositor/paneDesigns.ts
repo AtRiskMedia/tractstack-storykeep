@@ -129,6 +129,7 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
 
       const design: PaneDesign = {
         id: row.id,
+        slug: row.slug,
         name: row.title,
         panePayload: {
           heightOffsetDesktop: row.height_offset_desktop || 0,

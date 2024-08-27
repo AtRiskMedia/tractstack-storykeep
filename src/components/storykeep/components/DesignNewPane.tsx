@@ -21,6 +21,7 @@ const DesignNewPane = ({
   doInsert,
   tailwindBgColour,
   viewportKey,
+  paneIds,
 }: {
   id: string;
   index: number;
@@ -28,6 +29,7 @@ const DesignNewPane = ({
   doInsert: (newPaneIds: string[]) => void;
   tailwindBgColour: string;
   viewportKey: ViewportAuto;
+  paneIds: string[];
 }) => {
   const [mode, setMode] = useState<`design` | `reuse`>(`design`);
   const [query, setQuery] = useState("");
@@ -64,18 +66,6 @@ const DesignNewPane = ({
 
   const handleInsert = () => {
     setSaving(true);
-    console.log(`handleInsert`, {
-      id,
-      mode: "insert",
-      type: "pane",
-      payload: {
-        storyFragment: id,
-        index,
-        selectedDesign,
-        cancelInsert,
-        doInsert,
-      },
-    });
     editModeStore.set({
       id,
       mode: "insert",
@@ -102,7 +92,6 @@ const DesignNewPane = ({
     }
     setCurrentIndex(0);
     setQuery(``);
-    console.log(`push fetchResult into activePaneDesigns`);
   };
 
   useEffect(() => {
@@ -110,7 +99,10 @@ const DesignNewPane = ({
       try {
         setIsLoading(true);
         const result = (await tursoClient.paneDesigns()) as PaneDesign[];
-        setReuseActivePaneDesigns(result);
+        // prevent use of duplicate panes on one storyFragment
+        setReuseActivePaneDesigns(
+          result.filter((p: PaneDesign) => !paneIds.includes(p.id))
+        );
         setError(null);
       } catch (err) {
         console.error("Error fetching datum payload:", err);
@@ -194,13 +186,13 @@ const DesignNewPane = ({
                 />
               </Combobox.Button>
               {filteredDesigns.length > 0 && (
-                <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                   {filteredDesigns.map(design => (
                     <Combobox.Option
                       key={design.id}
                       value={design}
                       className={({ active }) =>
-                        `z-[99999] relative cursor-default select-none py-2 pl-8 pr-4 ${
+                        `relative cursor-default select-none py-2 pl-8 pr-4 ${
                           active ? "bg-myorange text-white" : "text-mydarkgrey"
                         }`
                       }

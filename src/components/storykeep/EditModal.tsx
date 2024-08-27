@@ -106,11 +106,20 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
           typeof $editMode?.payload !== `undefined` ? (
           <PaneInsert
             storyFragmentId={$editMode.id}
-            paneId={ulid()}
+            paneId={
+              $editMode.payload.selectedDesign.id ===
+              $editMode.payload.selectedDesign.slug
+                ? ulid()
+                : $editMode.payload.selectedDesign.id
+            }
             payload={$editMode.payload}
             toggleOff={toggleOffEditModal}
             doInsert={$editMode?.payload?.doInsert}
             contentMap={contentMap}
+            reuse={
+              $editMode.payload.selectedDesign.id !==
+              $editMode.payload.selectedDesign.slug
+            }
           />
         ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
           <PaneSettings id={$editMode.id} />

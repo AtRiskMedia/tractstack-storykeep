@@ -140,6 +140,7 @@ export interface PaneDesignBgPane {
 }
 export interface PaneDesign {
   id: string;
+  slug: string;
   name: string;
   panePayload: {
     heightOffsetDesktop: number;

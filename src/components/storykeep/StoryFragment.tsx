@@ -267,7 +267,7 @@ export const StoryFragment = (props: { id: string }) => {
         )}
       >
         {thisPaneIds.map((paneId: string, idx: number) => (
-          <div key={paneId}>
+          <div key={`${idx}-${paneId}`}>
             {paneId === `insert` ? (
               <div id={`design-new-pane-${idx}`}>
                 <DesignNewPane
@@ -279,6 +279,7 @@ export const StoryFragment = (props: { id: string }) => {
                     tailwindBgColour ? tailwindBgColour : `bg-white`
                   }
                   viewportKey={viewportKey}
+                  paneIds={paneIds}
                 />
               </div>
             ) : thisPaneIds.length !== paneIds.length && paneId !== `insert` ? (

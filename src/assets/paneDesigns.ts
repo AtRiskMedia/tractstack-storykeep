@@ -5,6 +5,7 @@ import type { PaneDesign, OptionsPayloadDatum } from "../types";
 export const paneDesigns: PaneDesign[] = [
   {
     id: "titleText",
+    slug: "titleText",
     name: "Title with paragraph",
     panePayload: {
       heightOffsetDesktop: 0,
@@ -71,6 +72,7 @@ export const paneDesigns: PaneDesign[] = [
   },
   {
     id: "text",
+    slug: "text",
     name: "Just text starter",
     panePayload: {
       heightOffsetDesktop: 0,
@@ -137,6 +139,7 @@ export const paneDesigns: PaneDesign[] = [
   },
   {
     id: "modal",
+    slug: "modal",
     name: "Modal with title",
     panePayload: {
       heightOffsetDesktop: 0,
@@ -191,6 +194,7 @@ export const paneDesigns: PaneDesign[] = [
   },
   {
     id: "fancy",
+    slug: "fancy",
     name: "Fancy title section",
     panePayload: {
       heightOffsetDesktop: 0,
@@ -283,6 +287,7 @@ export const paneDesigns: PaneDesign[] = [
   },
   {
     id: "borderedText",
+    slug: "borderedText",
     name: "Bordered paragraphs",
     panePayload: {
       heightOffsetDesktop: 0,
@@ -358,6 +363,7 @@ export const paneDesigns: PaneDesign[] = [
   },
   {
     id: "breaks",
+    slug: "breaks",
     name: "Transition Shape",
     panePayload: {
       heightOffsetDesktop: 0,

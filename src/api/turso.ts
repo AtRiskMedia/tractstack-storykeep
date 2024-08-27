@@ -291,6 +291,23 @@ export async function getContentMap(): Promise<ContentMap[]> {
 export async function getPaneDesigns(): Promise<PaneDesign[]> {
   try {
     const { rows } = await turso.execute(`
+      WITH file_data AS (
+        SELECT pane_id, json_group_array(json_object(
+          'id', f.id,
+          'filename', f.filename,
+          'url', f.url
+        )) AS files
+        FROM (
+          SELECT fp.pane_id, fp.file_id
+          FROM file_pane fp
+          UNION
+          SELECT p.id as pane_id, fm.file_id
+          FROM pane p
+          JOIN file_markdown fm ON p.markdown_id = fm.markdown_id
+        ) AS combined_files
+        JOIN file f ON combined_files.file_id = f.id
+        GROUP BY pane_id
+      )
       SELECT 
         p.id,
         p.title,
@@ -306,13 +323,14 @@ export async function getPaneDesigns(): Promise<PaneDesign[]> {
         p.height_ratio_desktop,
         p.height_ratio_tablet,
         p.height_ratio_mobile,
-        m.body AS markdown_body
+        m.body AS markdown_body,
+        COALESCE(fd.files, '[]') AS files
       FROM pane p
       LEFT JOIN markdown m ON p.markdown_id = m.id
+      LEFT JOIN file_data fd ON p.id = fd.pane_id
       ORDER BY p.created DESC
     `);
-    const cleanedDesigns = cleanPaneDesigns(rows);
-    return cleanedDesigns;
+    return cleanPaneDesigns(rows);
   } catch (error) {
     console.error("Error fetching pane designs:", error);
     throw error;

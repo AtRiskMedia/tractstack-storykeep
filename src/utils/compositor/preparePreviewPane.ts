@@ -74,7 +74,7 @@ const preparePreviewPane = (design: PaneDesign) => {
     heightRatioDesktop: design.panePayload.heightRatioDesktop,
     heightRatioMobile: design.panePayload.heightRatioMobile,
     heightRatioTablet: design.panePayload.heightRatioTablet,
-    files: [],
+    files: design?.files || [],
   };
   return paneData;
 };

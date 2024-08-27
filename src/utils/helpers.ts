@@ -1,4 +1,5 @@
 //import { storySteps } from "../store/events";
+import { getImage } from "astro:assets";
 import { tailwindColors } from "../assets/tailwindColors";
 import type {
   GraphNodes,
@@ -503,4 +504,17 @@ export function cleanString(s: string): string {
   words = words.filter(word => !stopWords.has(word));
   s = words.join("-");
   return s;
+}
+
+export async function getOptimizedImage(src: string) {
+  try {
+    const img = await getImage({
+      src,
+      inferSize: true,
+    });
+    return img.src;
+  } catch {
+    console.log(`error generating images -- are you offline?`);
+    return null;
+  }
 }

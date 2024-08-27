@@ -112,6 +112,10 @@ export const PaneInsert = (props: {
     return handleEditingChange(storeKey, editing);
   };
   const handleSave = () => {
+    console.log(`handleSave`, payload);
+    console.log(
+      `for selectedDesign, push to store; for re-use, must intercept by id and insert accordingly`
+    );
     const paneData = preparePreviewPane(payload.selectedDesign);
     const newPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
     newPaneIds.splice(payload.index, 0, paneId);
@@ -213,22 +217,6 @@ export const PaneInsert = (props: {
             );
             return null;
         }
-        // this needs to be done differently...
-        //const paneFragmentKeys: StoreKey[] = [
-        //  "paneFragmentBgColour",
-        //  "paneFragmentBgPane",
-        //  "paneFragmentMarkdown",
-        //];
-        //const emptyPaneFragment = paneFragmentKeys.reduce(
-        //  (acc, key) => ({ ...acc, [key]: false }),
-        //  {} as Record<StoreKey, boolean>
-        //);
-        //unsavedChangesStore.setKey(paneFragmentId, emptyPaneFragment);
-        //uncleanDataStore.setKey(paneFragmentId, emptyPaneFragment);
-        //temporaryErrorsStore.setKey(
-        //  paneFragmentId,
-        //  emptyPaneFragment
-        //);
       })
       .filter((item): item is string => item !== null);
     // link pane fragments to pane

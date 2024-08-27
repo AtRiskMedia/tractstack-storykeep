@@ -340,6 +340,7 @@ const PaneFromAst = ({
         ))}
       </TagComponent>
     );
+
     if (noOverlay || [`ol`, `ul`, `strong`, `em`].includes(Tag)) return child;
     if (showOverlay && [`li`].includes(Tag)) {
       // is this a blockquote (not currently implemented)

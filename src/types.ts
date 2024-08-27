@@ -151,6 +151,7 @@ export interface PaneDesign {
     bgColour: string | boolean;
     codeHook: string | null;
   };
+  files: FileDatum[];
   fragments: (PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum)[];
 }
 

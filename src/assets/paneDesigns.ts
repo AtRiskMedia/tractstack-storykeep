@@ -1,12 +1,6 @@
 //import { ulid } from "ulid";
 //import type { Root } from "hast";
-import type {
-  PaneDesign,
-  //  MarkdownEditDatum,
-  //  BgPaneDatum,
-  //  BgColourDatum,
-  OptionsPayloadDatum,
-} from "../types";
+import type { PaneDesign, OptionsPayloadDatum } from "../types";
 
 export const paneDesigns: PaneDesign[] = [
   {
@@ -22,6 +16,7 @@ export const paneDesigns: PaneDesign[] = [
       bgColour: false,
       codeHook: null,
     },
+    files: [],
     fragments: [
       {
         type: "markdown",
@@ -87,6 +82,7 @@ export const paneDesigns: PaneDesign[] = [
       bgColour: false,
       codeHook: null,
     },
+    files: [],
     fragments: [
       {
         type: "markdown",
@@ -152,6 +148,7 @@ export const paneDesigns: PaneDesign[] = [
       bgColour: false,
       codeHook: null,
     },
+    files: [],
     fragments: [
       {
         type: "markdown",
@@ -205,6 +202,7 @@ export const paneDesigns: PaneDesign[] = [
       bgColour: false,
       codeHook: null,
     },
+    files: [],
     fragments: [
       {
         type: "markdown",
@@ -296,6 +294,7 @@ export const paneDesigns: PaneDesign[] = [
       bgColour: false,
       codeHook: null,
     },
+    files: [],
     fragments: [
       {
         type: "markdown",
@@ -370,6 +369,7 @@ export const paneDesigns: PaneDesign[] = [
       bgColour: `#10120d`,
       codeHook: null,
     },
+    files: [],
     fragments: [
       {
         type: "bgPane",

@@ -64,6 +64,18 @@ const DesignNewPane = ({
 
   const handleInsert = () => {
     setSaving(true);
+    console.log(`handleInsert`, {
+      id,
+      mode: "insert",
+      type: "pane",
+      payload: {
+        storyFragment: id,
+        index,
+        selectedDesign,
+        cancelInsert,
+        doInsert,
+      },
+    });
     editModeStore.set({
       id,
       mode: "insert",

@@ -11,6 +11,7 @@ import {
   paneTitle,
   paneSlug,
   paneFragmentMarkdown,
+  paneIsHiddenPane,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -40,6 +41,7 @@ const storeMap: StoreMapType = {
   paneFragmentMarkdown: paneFragmentMarkdown,
   paneTitle: paneTitle,
   paneSlug: paneSlug,
+  paneIsHiddenPane: paneIsHiddenPane,
   // Add other stores here
 };
 
@@ -125,7 +127,8 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
     [id]
   );
 
-  const updateStoreField = (storeKey: StoreKey, newValue: string): boolean => {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const updateStoreField = (storeKey: StoreKey, newValue: any): boolean => {
     const store = storeMap[storeKey];
     if (!store) return false;
 
@@ -170,6 +173,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
       });
 
       const isUnsaved = !isDeepEqual(newValue, newField.original);
+      console.log(`isUnsaved on ${id} and ${storeKey}`, isUnsaved);
       unsavedChangesStore.setKey(id, {
         ...(unsavedChangesStore.get()[id] || {}),
         [storeKey]: isUnsaved,

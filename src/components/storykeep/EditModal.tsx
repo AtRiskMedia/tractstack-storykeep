@@ -122,7 +122,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
             }
           />
         ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
-          <PaneSettings id={$editMode.id} />
+          <PaneSettings id={$editMode.id} contentMap={contentMap} />
         ) : $editMode?.type === `pane` &&
           $editMode?.mode === `styles` &&
           typeof $editMode.targetId !== `undefined` ? (

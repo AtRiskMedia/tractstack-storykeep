@@ -101,12 +101,15 @@ export const StoryFragmentHeader = memo(
       const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
         Object.values($unsavedChanges[paneId] || {}).some(Boolean)
       );
+      console.log(`storyFragmentChanges`, storyFragmentChanges);
+      console.log(`paneChanges?`, paneChanges);
       const paneFragmentChanges = $storyFragmentPaneIds[id]?.current.some(
         paneId =>
           $paneFragmentIds[paneId]?.current.some(fragmentId =>
             Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
           )
       );
+      console.log(`paneFragmentChanges?`, paneFragmentChanges);
       return storyFragmentChanges || paneChanges || paneFragmentChanges;
     }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
     const $uncleanData = useStore(uncleanDataStore, { keys: [id] });

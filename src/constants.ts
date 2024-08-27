@@ -112,13 +112,13 @@ export const toolModeButtons = [
     title: "Erase element",
   },
   {
-    key: "settings" as const,
-    Icon: Cog8ToothIcon,
-    title: "Edit settings",
-  },
-  {
     key: "pane" as const,
     Icon: Square3Stack3DIcon,
     title: "Insert Pane",
+  },
+  {
+    key: "settings" as const,
+    Icon: Cog8ToothIcon,
+    title: "Edit settings",
   },
 ] as const;

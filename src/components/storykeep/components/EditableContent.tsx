@@ -2,18 +2,16 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
-  unsavedChangesStore,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import {
   updateMarkdownElement,
   markdownToHtmlAst,
-  updateHistory,
 } from "../../../utils/compositor/markdownUtils";
 import ContentEditableField from "./ContentEditableField";
 import { MAX_LENGTH_CONTENT } from "../../../constants";
-import { isDeepEqual } from "../../../utils/helpers";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import type { KeyboardEvent } from "react";
 
 interface EditableContentProps {
@@ -40,11 +38,10 @@ const EditableContent = ({
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [markdownFragmentId],
   });
-  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
-
   const [localContent, setLocalContent] = useState(content);
   const originalContentRef = useRef(content);
   const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${markdownFragmentId}`;
+  const { updateStoreField } = useStoryKeepUtils(markdownFragmentId, []);
 
   useEffect(() => {
     setLocalContent(content);
@@ -56,41 +53,29 @@ const EditableContent = ({
       if (!markdownFragmentId) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
-      const fragmentData = $paneFragmentMarkdown[markdownFragmentId];
-      if (
-        !fragmentData ||
-        !fragmentData.current ||
-        !fragmentData.current.markdown
-      )
-        return;
-      const updatedMarkdown = updateMarkdownElement(
-        fragmentData.current.markdown.body,
-        newContent,
-        tag,
-        outerIdx,
-        idx
-      );
-      const updatedHtmlAst = markdownToHtmlAst(updatedMarkdown);
-      const now = Date.now();
-      const newHistory = updateHistory(fragmentData, now);
-      const newValue = {
-        ...fragmentData.current,
+
+      updateStoreField("paneFragmentMarkdown", {
+        ...($paneFragmentMarkdown[markdownFragmentId]?.current || {}),
         markdown: {
-          ...fragmentData.current.markdown,
-          body: updatedMarkdown,
-          htmlAst: updatedHtmlAst,
+          ...($paneFragmentMarkdown[markdownFragmentId]?.current?.markdown ||
+            {}),
+          body: updateMarkdownElement(
+            $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
+            newContent,
+            tag,
+            outerIdx,
+            idx
+          ),
+          htmlAst: markdownToHtmlAst(
+            updateMarkdownElement(
+              $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
+              newContent,
+              tag,
+              outerIdx,
+              idx
+            )
+          ),
         },
-      };
-      //console.log(`after edit`, [updatedMarkdown], newValue);
-      paneFragmentMarkdown.setKey(markdownFragmentId, {
-        ...fragmentData,
-        current: newValue,
-        history: newHistory,
-      });
-      const isUnsaved = !isDeepEqual(newValue, fragmentData.original);
-      unsavedChangesStore.setKey(paneId, {
-        ...$unsavedChanges[paneId],
-        paneFragmentMarkdown: isUnsaved,
       });
     },
     [
@@ -99,8 +84,7 @@ const EditableContent = ({
       outerIdx,
       idx,
       $paneFragmentMarkdown,
-      queueUpdate,
-      updateHistory,
+      updateStoreField,
     ]
   );
 

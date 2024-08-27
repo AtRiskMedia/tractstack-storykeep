@@ -173,7 +173,6 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
       });
 
       const isUnsaved = !isDeepEqual(newValue, newField.original);
-      console.log(`isUnsaved on ${id} and ${storeKey}`, isUnsaved);
       unsavedChangesStore.setKey(id, {
         ...(unsavedChangesStore.get()[id] || {}),
         [storeKey]: isUnsaved,

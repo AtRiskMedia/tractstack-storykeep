@@ -6,18 +6,16 @@ import {
   CheckIcon,
   ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
-import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   getActiveTagData,
   updateViewportTuple,
-  updateHistory,
 } from "../../../utils/compositor/markdownUtils";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import ViewportComboBox from "../fields/ViewportComboBox";
 import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
-  unsavedChangesStore,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
 } from "../../../store/storykeep";
@@ -55,11 +53,11 @@ export const PaneAstStyles = (props: {
   const [tabletValue, setTabletValue] = useState<string>(``);
   const [desktopValue, setDesktopValue] = useState<string>(``);
   const [confirm, setConfirm] = useState<string | null>(null);
-  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [targetId.paneId],
   });
   const markdownFragmentId = $paneMarkdownFragmentId[targetId.paneId].current;
+  const { updateStoreField } = useStoryKeepUtils(markdownFragmentId, []);
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [markdownFragmentId],
   });
@@ -129,12 +127,6 @@ export const PaneAstStyles = (props: {
           ? listItemClassNamesPayload
           : outerTagClassNamesPayload;
 
-  const styleFilterOptions = [
-    { value: "popular", label: "Popular Styles" },
-    { value: "advanced", label: "+ Advanced" },
-    { value: "effects", label: "+ Effects" },
-  ];
-
   const removeStyle = (className: string) => {
     setSelectedStyle(null);
     if (!confirm) setConfirm(className);
@@ -152,8 +144,6 @@ export const PaneAstStyles = (props: {
       );
       const thisTag = activeTagData?.tag;
       const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-      const now = Date.now();
-      const newHistory = updateHistory(currentField, now);
       const payloadForTag =
         thisTag &&
         (currentField.current.payload.optionsPayload.classNamesPayload[
@@ -181,53 +171,8 @@ export const PaneAstStyles = (props: {
           }
         }
       }
-      if (thisTag && payloadForTag)
-        paneFragmentMarkdown.setKey(markdownFragmentId, {
-          ...currentField,
-          current: {
-            ...currentField.current,
-            payload: {
-              ...currentField.current.payload,
-              optionsPayload: {
-                ...currentField.current.payload.optionsPayload,
-                classNamesPayload: {
-                  ...currentField.current.payload.optionsPayload
-                    .classNamesPayload,
-                  [thisTag]: payloadForTag,
-                },
-              },
-            },
-          },
-          history: newHistory,
-        });
-      // Update unsavedChanges store
-      unsavedChangesStore.setKey(id, {
-        ...$unsavedChanges[id],
-        paneFragmentMarkdown: true,
-      });
-      lastInteractedTypeStore.set(`markdown`);
-      lastInteractedPaneStore.set(targetId.paneId);
-    }
-  };
-  const cancelRemoveStyle = () => {
-    setConfirm(null);
-  };
-
-  const handleAddLayer = (start: boolean) => {
-    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-    const now = Date.now();
-    const newHistory = updateHistory(currentField, now);
-    const payloadForTag = currentField.current.payload.optionsPayload
-      .classNamesPayload.parent as ClassNamesPayloadInnerDatum;
-    if (Array.isArray(payloadForTag.classes)) {
-      if (start) {
-        payloadForTag.classes.unshift({});
-      } else {
-        payloadForTag.classes.push({});
-      }
-      paneFragmentMarkdown.setKey(markdownFragmentId, {
-        ...currentField,
-        current: {
+      if (thisTag && payloadForTag) {
+        updateStoreField("paneFragmentMarkdown", {
           ...currentField.current,
           payload: {
             ...currentField.current.payload,
@@ -236,17 +181,39 @@ export const PaneAstStyles = (props: {
               classNamesPayload: {
                 ...currentField.current.payload.optionsPayload
                   .classNamesPayload,
-                [`parent`]: payloadForTag,
+                [thisTag]: payloadForTag,
               },
             },
           },
+        });
+      }
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
+    }
+  };
+
+  const handleAddLayer = (start: boolean) => {
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const payloadForTag = currentField.current.payload.optionsPayload
+      .classNamesPayload.parent as ClassNamesPayloadInnerDatum;
+    if (Array.isArray(payloadForTag.classes)) {
+      if (start) {
+        payloadForTag.classes.unshift({});
+      } else {
+        payloadForTag.classes.push({});
+      }
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        payload: {
+          ...currentField.current.payload,
+          optionsPayload: {
+            ...currentField.current.payload.optionsPayload,
+            classNamesPayload: {
+              ...currentField.current.payload.optionsPayload.classNamesPayload,
+              [`parent`]: payloadForTag,
+            },
+          },
         },
-        history: newHistory,
-      });
-      // Update unsavedChanges store
-      unsavedChangesStore.setKey(id, {
-        ...$unsavedChanges[id],
-        paneFragmentMarkdown: true,
       });
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(targetId.paneId);
@@ -258,8 +225,6 @@ export const PaneAstStyles = (props: {
     const thisClass = activeTagData?.class ?? "";
     const thisGlobalNth = activeTagData?.globalNth ?? 0;
     const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-    const now = Date.now();
-    const newHistory = updateHistory(currentField, now);
     const payloadForTag =
       thisTag &&
       (currentField.current.payload.optionsPayload.classNamesPayload[
@@ -298,28 +263,18 @@ export const PaneAstStyles = (props: {
           payloadForTag.override[thisClass][thisGlobalNth] = [""];
         }
       }
-      paneFragmentMarkdown.setKey(markdownFragmentId, {
-        ...currentField,
-        current: {
-          ...currentField.current,
-          payload: {
-            ...currentField.current.payload,
-            optionsPayload: {
-              ...currentField.current.payload.optionsPayload,
-              classNamesPayload: {
-                ...currentField.current.payload.optionsPayload
-                  .classNamesPayload,
-                [thisTag]: payloadForTag as ClassNamesPayloadInnerDatum,
-              },
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        payload: {
+          ...currentField.current.payload,
+          optionsPayload: {
+            ...currentField.current.payload.optionsPayload,
+            classNamesPayload: {
+              ...currentField.current.payload.optionsPayload.classNamesPayload,
+              [thisTag]: payloadForTag as ClassNamesPayloadInnerDatum,
             },
           },
         },
-        history: newHistory,
-      });
-      // Update unsavedChanges store
-      unsavedChangesStore.setKey(id, {
-        ...$unsavedChanges[id],
-        paneFragmentMarkdown: true,
       });
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(targetId.paneId);
@@ -338,8 +293,6 @@ export const PaneAstStyles = (props: {
       const thisValue =
         typeof isNegative !== `undefined` && isNegative ? `!${value}` : value;
       const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-      const now = Date.now();
-      const newHistory = updateHistory(currentField, now);
       const payloadForTag = currentField.current.payload.optionsPayload
         .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
       const thisTuple =
@@ -368,66 +321,7 @@ export const PaneAstStyles = (props: {
           (payloadForTag.classes as Record<string, Tuple>)[thisClass] =
             newTuple;
         }
-        paneFragmentMarkdown.setKey(markdownFragmentId, {
-          ...currentField,
-          current: {
-            ...currentField.current,
-            payload: {
-              ...currentField.current.payload,
-              optionsPayload: {
-                ...currentField.current.payload.optionsPayload,
-                classNamesPayload: {
-                  ...currentField.current.payload.optionsPayload
-                    .classNamesPayload,
-                  [thisTag]: payloadForTag,
-                },
-              },
-            },
-          },
-          history: newHistory,
-        });
-        // Update unsavedChanges store
-        unsavedChangesStore.setKey(id, {
-          ...$unsavedChanges[id],
-          paneFragmentMarkdown: true,
-        });
-        lastInteractedTypeStore.set(`markdown`);
-        lastInteractedPaneStore.set(targetId.paneId);
-      }
-    }
-  };
-
-  const filteredClasses = useMemo(() => {
-    return Object.entries(tailwindClasses)
-      .filter(([, classInfo]) => {
-        switch (styleFilter) {
-          case "popular":
-            return classInfo.priority <= 1;
-          case "advanced":
-            return classInfo.priority <= 2;
-          case "effects":
-            return true;
-          default:
-            return false;
-        }
-      })
-      .filter(([, classInfo]) =>
-        classInfo.title.toLowerCase().includes(query.toLowerCase())
-      );
-  }, [styleFilter, query]);
-
-  const handleDeleteLayer = () => {
-    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-    const now = Date.now();
-    const newHistory = updateHistory(currentField, now);
-    const payloadForTag =
-      currentField.current.payload.optionsPayload.classNamesPayload.parent;
-    if (Array.isArray(payloadForTag.classes))
-      payloadForTag.classes.splice(parentLayer, 1);
-    if (payloadForTag)
-      paneFragmentMarkdown.setKey(markdownFragmentId, {
-        ...currentField,
-        current: {
+        updateStoreField("paneFragmentMarkdown", {
           ...currentField.current,
           payload: {
             ...currentField.current.payload,
@@ -436,18 +330,37 @@ export const PaneAstStyles = (props: {
               classNamesPayload: {
                 ...currentField.current.payload.optionsPayload
                   .classNamesPayload,
-                [`parent`]: payloadForTag,
+                [thisTag]: payloadForTag,
               },
             },
           },
+        });
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(targetId.paneId);
+      }
+    }
+  };
+
+  const handleDeleteLayer = () => {
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const payloadForTag =
+      currentField.current.payload.optionsPayload.classNamesPayload.parent;
+    if (Array.isArray(payloadForTag.classes))
+      payloadForTag.classes.splice(parentLayer, 1);
+    if (payloadForTag)
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        payload: {
+          ...currentField.current.payload,
+          optionsPayload: {
+            ...currentField.current.payload.optionsPayload,
+            classNamesPayload: {
+              ...currentField.current.payload.optionsPayload.classNamesPayload,
+              [`parent`]: payloadForTag,
+            },
+          },
         },
-        history: newHistory,
       });
-    // Update unsavedChanges store
-    unsavedChangesStore.setKey(id, {
-      ...$unsavedChanges[id],
-      paneFragmentMarkdown: true,
-    });
     lastInteractedTypeStore.set(`markdown`);
     lastInteractedPaneStore.set(targetId.paneId);
   };
@@ -466,8 +379,6 @@ export const PaneAstStyles = (props: {
       );
       const thisTag = activeTagData?.tag;
       const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-      const now = Date.now();
-      const newHistory = updateHistory(currentField, now);
       const payloadForTag =
         thisTag &&
         (currentField.current.payload.optionsPayload.classNamesPayload[
@@ -498,29 +409,20 @@ export const PaneAstStyles = (props: {
         }
       }
       if (thisTag && payloadForTag)
-        paneFragmentMarkdown.setKey(markdownFragmentId, {
-          ...currentField,
-          current: {
-            ...currentField.current,
-            payload: {
-              ...currentField.current.payload,
-              optionsPayload: {
-                ...currentField.current.payload.optionsPayload,
-                classNamesPayload: {
-                  ...currentField.current.payload.optionsPayload
-                    .classNamesPayload,
-                  [thisTag]: payloadForTag,
-                },
+        updateStoreField("paneFragmentMarkdown", {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                [thisTag]: payloadForTag,
               },
             },
           },
-          history: newHistory,
         });
-      // Update unsavedChanges store
-      unsavedChangesStore.setKey(id, {
-        ...$unsavedChanges[id],
-        paneFragmentMarkdown: true,
-      });
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(targetId.paneId);
 
@@ -530,6 +432,35 @@ export const PaneAstStyles = (props: {
       setQuery("");
     }
   };
+
+  const cancelRemoveStyle = () => {
+    setConfirm(null);
+  };
+
+  const styleFilterOptions = [
+    { value: "popular", label: "Popular Styles" },
+    { value: "advanced", label: "+ Advanced" },
+    { value: "effects", label: "+ Effects" },
+  ];
+
+  const filteredClasses = useMemo(() => {
+    return Object.entries(tailwindClasses)
+      .filter(([, classInfo]) => {
+        switch (styleFilter) {
+          case "popular":
+            return classInfo.priority <= 1;
+          case "advanced":
+            return classInfo.priority <= 2;
+          case "effects":
+            return true;
+          default:
+            return false;
+        }
+      })
+      .filter(([, classInfo]) =>
+        classInfo.title.toLowerCase().includes(query.toLowerCase())
+      );
+  }, [styleFilter, query]);
 
   const ClassTag = (className: string) => (
     <div key={className} className="flex items-center">

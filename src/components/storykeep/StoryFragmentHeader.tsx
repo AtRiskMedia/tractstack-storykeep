@@ -28,12 +28,6 @@ import {
 } from "../../utils/storykeep";
 import { cleanString, debounce } from "../../utils/helpers";
 import type { StoreKey, ContentMap, ToolMode, ToolAddMode } from "../../types";
-//import { tursoClient } from "../../api/tursoClient";
-//import {
-//  UnauthorizedError,
-//  TursoOperationError,
-//  NetworkError,
-//} from "../../types";
 
 export const StoryFragmentHeader = memo(
   ({
@@ -48,12 +42,8 @@ export const StoryFragmentHeader = memo(
     const usedSlugs = contentMap
       .filter(item => item.type === "StoryFragment" && item.slug !== slug)
       .map(item => item.slug);
-    // helpers
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(id, usedSlugs);
-
-    // required stores
-
     const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
     const $editMode = useStore(editModeStore);
     const $viewportSet = useStore(viewportSetStore);
@@ -89,38 +79,40 @@ export const StoryFragmentHeader = memo(
     const setToolAddMode = (newToolAddMode: ToolAddMode) => {
       toolAddModeStore.set({ value: newToolAddMode });
     };
-    const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
+    const $unsavedChanges = useStore(unsavedChangesStore);
     const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
       keys: [id],
     });
     const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
-    const hasUnsavedChanges = useMemo(() => {
+
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    useEffect(() => {
       const storyFragmentChanges = Object.values(
         $unsavedChanges[id] || {}
       ).some(Boolean);
       const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
         Object.values($unsavedChanges[paneId] || {}).some(Boolean)
       );
-      console.log(`storyFragmentChanges`, storyFragmentChanges);
-      console.log(`paneChanges?`, paneChanges);
       const paneFragmentChanges = $storyFragmentPaneIds[id]?.current.some(
-        paneId =>
-          $paneFragmentIds[paneId]?.current.some(fragmentId =>
+        paneId => {
+          const fragmentIds = $paneFragmentIds[paneId]?.current || [];
+          return fragmentIds.some(fragmentId =>
             Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
-          )
+          );
+        }
       );
-      console.log(`paneFragmentChanges?`, paneFragmentChanges);
-      return storyFragmentChanges || paneChanges || paneFragmentChanges;
+      setHasUnsavedChanges(
+        storyFragmentChanges || paneChanges || paneFragmentChanges
+      );
     }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
+
     const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
     const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
     const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
     const [isClient, setIsClient] = useState(false);
     const [hideElements, setHideElements] = useState(false);
     const headerRef = useRef<HTMLDivElement>(null);
-
-    //const [testResult, setTestResult] = useState<string | null>(null);
-    //const [error, setError] = useState<string | null>(null);
 
     const handleEditModeToggle = () => {
       if ($editMode?.mode === `settings`) {
@@ -158,30 +150,6 @@ export const StoryFragmentHeader = memo(
       }
       return handleEditingChange(storeKey, editing);
     };
-
-    //useEffect(() => {
-    //  async function runTest() {
-    //    try {
-    //      const result = await tursoClient.test();
-    //      setTestResult(JSON.stringify(result));
-    //      setError(null);
-    //    } catch (error) {
-    //      if (error instanceof UnauthorizedError) {
-    //        setError("You need to log in");
-    //      } else if (error instanceof TursoOperationError) {
-    //        setError(`Operation failed: ${error.operation}`);
-    //      } else if (error instanceof NetworkError) {
-    //        setError("Network issue detected");
-    //      } else if (error instanceof Error) {
-    //        setError(`An unknown error occurred: ${error.message}`);
-    //      } else {
-    //        setError("An unknown error occurred");
-    //      }
-    //    }
-    //  }
-
-    //  runTest();
-    //}, []);
 
     useEffect(() => {
       if ($storyFragmentInit[id]?.init) {

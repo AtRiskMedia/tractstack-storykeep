@@ -21,7 +21,7 @@ import {
   //paneWithheldBeliefs,
 } from "../../../store/storykeep";
 import { cleanString } from "../../../utils/helpers";
-import type { ContentMap,StoreKey } from "../../../types";
+import type { ContentMap, StoreKey } from "../../../types";
 
 export const PaneSettings = (props: {
   id: string;
@@ -57,8 +57,8 @@ export const PaneSettings = (props: {
     if (storeKey === `paneTitle` && $paneSlug[id].current === ``) {
       const clean = cleanString($paneTitle[id].current).substring(0, 50);
       const newVal = !usedSlugs.includes(clean) ? clean : ``;
-updateStoreField(storeKey, newVal);
-      }
+      updateStoreField(storeKey, newVal);
+    }
     return handleEditingChange(storeKey, editing);
   };
 
@@ -110,12 +110,14 @@ updateStoreField(storeKey, newVal);
             </Switch>
             <div className="ml-3">
               <div className="text-md text-black font-bold">
-                {$paneIsHiddenPane[id].current ? `Hidden pane` : `Normal mode`}
+                {$paneIsHiddenPane[id].current
+                  ? `Hidden or decorative pane`
+                  : `Monitor engagement`}
               </div>
               <div className="text-md text-mydarkgrey">
                 {$paneIsHiddenPane[id].current
-                  ? `No pane analytics tracked`
-                  : `Pane analytics are tracked`}
+                  ? `No pane analytics will be collected`
+                  : `Pane analytics will be collected`}
               </div>
             </div>
           </div>

@@ -166,12 +166,10 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
       const now = Date.now();
       const newHistory = updateHistory(storeKey, currentField, now);
       const newField = createNewField(currentField, newValue, newHistory);
-
       store.set({
         ...currentStoreValue,
         [id]: newField,
       });
-
       const isUnsaved = !isDeepEqual(newValue, newField.original);
       unsavedChangesStore.setKey(id, {
         ...(unsavedChangesStore.get()[id] || {}),
@@ -226,21 +224,26 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
 
       const currentStoreValue = store.get();
       const currentField = currentStoreValue[id];
-      if (currentField && currentField.history.length > 0) {
-        const [lastEntry, ...newHistory] = currentField.history;
-        store.set({
-          ...currentStoreValue,
-          [id]: {
-            current: lastEntry.value,
-            original: currentField.original,
-            history: newHistory,
-          },
+      if (currentField && currentField.history.length > 1) {
+        store.setKey(id, {
+          current: currentField.history[0].value,
+          original: currentField.original,
+          history: currentField.history.slice(1),
         });
-        lastUpdateTimeRef.current[storeKey] = Date.now();
-        updateStoreField(storeKey, lastEntry.value);
       }
+      if (currentField && currentField.history.length === 1) {
+        store.setKey(id, {
+          current: currentField.original,
+          original: currentField.original,
+          history: [], // Clear the history
+        });
+      }
+      unsavedChangesStore.setKey(id, {
+        ...(unsavedChangesStore.get()[id] || {}),
+        [storeKey]: false,
+      });
     },
-    [id, storeMap, validationFunctions, setTemporaryError, updateStoreField]
+    [storeMap]
   );
 
   const handleEditingChange = useCallback(

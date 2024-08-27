@@ -260,7 +260,7 @@ export const PaneAstStyles = (props: {
           if (!payloadForTag.override[thisClass]) {
             payloadForTag.override[thisClass] = [];
           }
-          payloadForTag.override[thisClass][thisGlobalNth] = [""];
+          payloadForTag.override[thisClass][thisGlobalNth] = ["", "", ""];
         }
       }
       updateStoreField("paneFragmentMarkdown", {
@@ -396,7 +396,7 @@ export const PaneAstStyles = (props: {
         ) {
           (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
             selectedClass
-          ] = [""];
+          ] = ["", "", ""];
         }
       } else if (payloadForTag && !(selectedClass in payloadForTag.classes)) {
         if (
@@ -404,6 +404,8 @@ export const PaneAstStyles = (props: {
           !Array.isArray(payloadForTag.classes)
         ) {
           (payloadForTag.classes as Record<string, Tuple>)[selectedClass] = [
+            "",
+            "",
             "",
           ];
         }

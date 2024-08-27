@@ -993,9 +993,10 @@ export function updateViewportTuple(
       result[0] = newValue;
       break;
     case "tablet":
-      if (tuple.length === 1) {
+      if (tuple.length > 0) {
         result[1] = newValue !== tuple[0] ? newValue : tuple[0];
       } else {
+        result[0] = newValue;
         result[1] = newValue;
       }
       break;
@@ -1005,20 +1006,11 @@ export function updateViewportTuple(
       } else if (tuple.length === 2) {
         result[2] = newValue !== tuple[1] ? newValue : tuple[1];
       } else {
+        result[0] = newValue;
+        result[1] = newValue;
         result[2] = newValue;
       }
       break;
   }
-
-  // always ensure a value
-  if (typeof result[0] === `undefined`) result[0] = ``;
-  if (typeof result[1] === `undefined` && typeof result[2] !== `undefined`)
-    result[1] = result[0];
-
-  // Remove undefined values from the end of the array
-  //while (result.length > 0 && result[result.length - 1] === undefined) {
-  //  result.pop();
-  //}
-
   return result as Tuple;
 }

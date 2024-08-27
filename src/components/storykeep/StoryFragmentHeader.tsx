@@ -193,6 +193,26 @@ export const StoryFragmentHeader = memo(
       };
     }, [debouncedHandleScroll, handleScroll]);
 
+    useEffect(() => {
+      const storyFragmentChanges = Object.values(
+        $unsavedChanges[id] || {}
+      ).some(Boolean);
+      const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
+        Object.values($unsavedChanges[paneId] || {}).some(Boolean)
+      );
+      const paneFragmentChanges = $storyFragmentPaneIds[id]?.current.some(
+        paneId => {
+          const fragmentIds = $paneFragmentIds[paneId]?.current || [];
+          return fragmentIds.some(fragmentId =>
+            Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
+          );
+        }
+      );
+      const newHasUnsavedChanges =
+        storyFragmentChanges || paneChanges || paneFragmentChanges;
+      setHasUnsavedChanges(newHasUnsavedChanges);
+    }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
+
     if (!isClient) return <div>Loading...</div>;
 
     return (

@@ -5,11 +5,9 @@ import {
   storyFragmentPaneIds,
   storyFragmentTailwindBgColour,
   paneMarkdownFragmentId,
-  paneFragmentMarkdown,
   lastInteractedPaneStore,
   lastInteractedTypeStore,
   visiblePanesStore,
-  unsavedChangesStore,
   viewportStore,
   viewportKeyStore,
   viewportSetStore,
@@ -17,19 +15,18 @@ import {
   toolAddModeStore,
   editModeStore,
 } from "../../store/storykeep";
+import { useStoryKeepUtils } from "../../utils/storykeep";
+
 import PaneWrapper from "./PaneWrapper";
 import DesignNewPane from "./components/DesignNewPane";
-import {
-  classNames,
-  handleEditorResize,
-  isDeepEqual,
-  debounce,
-} from "../../utils/helpers";
+import { classNames, handleEditorResize, debounce } from "../../utils/helpers";
 import type { ViewportKey } from "../../types";
 
 export const StoryFragment = (props: { id: string }) => {
   const { id } = props;
   const [isClient, setIsClient] = useState(false);
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  const { handleUndo } = useStoryKeepUtils(currentId || id, []);
   const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
   const $storyFragmentTailwindBgColour = useStore(
@@ -42,8 +39,8 @@ export const StoryFragment = (props: { id: string }) => {
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
   const $lastInteractedType = useStore(lastInteractedTypeStore);
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
   const $visiblePanes = useStore(visiblePanesStore);
-  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [id] });
   const $toolMode = useStore(toolModeStore);
   const toolMode = $toolMode.value || ``;
   const $toolAddMode = useStore(toolAddModeStore);
@@ -130,6 +127,15 @@ export const StoryFragment = (props: { id: string }) => {
   }, []);
 
   useEffect(() => {
+    if ($lastInteractedPane && $lastInteractedType === "markdown") {
+      const thisId = $paneMarkdownFragmentId[$lastInteractedPane]?.current;
+      setCurrentId(thisId || null);
+    } else {
+      setCurrentId(null);
+    }
+  }, [$lastInteractedPane, $lastInteractedType, $paneMarkdownFragmentId]);
+
+  useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       if ((event as any).handledByComponent) {
@@ -151,24 +157,7 @@ export const StoryFragment = (props: { id: string }) => {
               const fragmentId =
                 paneMarkdownFragmentId.get()[targetPaneId]?.current;
               if (fragmentId) {
-                const currentField = paneFragmentMarkdown.get()[fragmentId];
-                if (currentField && currentField.history.length > 0) {
-                  // Perform undo operation
-                  const [lastEntry, ...newHistory] = currentField.history;
-                  paneFragmentMarkdown.setKey(fragmentId, {
-                    ...currentField,
-                    current: lastEntry.value,
-                    history: newHistory,
-                  });
-                  const isUnsaved = !isDeepEqual(
-                    lastEntry.value,
-                    currentField.original
-                  );
-                  unsavedChangesStore.setKey(targetPaneId, {
-                    ...$unsavedChanges[targetPaneId],
-                    paneFragmentMarkdown: isUnsaved,
-                  });
-                }
+                handleUndo("paneFragmentMarkdown", fragmentId);
               }
             }
           } else if (interactedType === "bgpane") {

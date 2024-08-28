@@ -125,7 +125,7 @@ export const PaneSettings = (props: {
             Note: title + slug used for analytics and may (if enabled) be used
             as part of the "fast travel" map shown to users.{" "}
           </p>
-          <div className="flex flex-wrap gap-x-16">
+          <div className="flex flex-wrap gap-x-16 gap-y-6">
             <div className="flex-grow w-96">
               <PaneTitle
                 id={id}

@@ -5,6 +5,10 @@ import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
 import PaneHeightOffset from "../fields/PaneHeightOffset";
 import PaneHeightRatio from "../fields/PaneHeightRatio";
+import PaneFiles from "../fields/PaneFiles";
+import PaneShapes from "../fields/PaneShapes";
+import PaneImpression from "../fields/PaneImpression";
+import PaneBeliefs from "../fields/PaneBeliefs";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
@@ -15,9 +19,7 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneCodeHook,
-  paneImpression,
-  paneHeldBeliefs,
-  paneWithheldBeliefs,
+  paneFiles,
 } from "../../../store/storykeep";
 import { cleanString, classNames } from "../../../utils/helpers";
 import type { ContentMap, StoreKey } from "../../../types";
@@ -40,6 +42,12 @@ export const PaneSettings = (props: {
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [markdownFragmentId],
   });
+  const $paneFiles = useStore(paneFiles, { keys: [id] });
+  const $paneHasMaxHScreen = useStore(paneHasMaxHScreen, { keys: [id] });
+  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
+  const hasFiles =
+    typeof $paneFiles[id].current.length === `number` &&
+    $paneFiles[id].current.length > 0;
   const buttons =
     $paneFragmentMarkdown[markdownFragmentId]?.current?.payload?.optionsPayload
       ?.buttons;
@@ -48,25 +56,13 @@ export const PaneSettings = (props: {
   const $paneHasOverflowHidden = useStore(paneHasOverflowHidden, {
     keys: [id],
   });
-  const $paneHasMaxHScreen = useStore(paneHasMaxHScreen, { keys: [id] });
-  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const hasCodeHook = $paneCodeHook[id].current;
   const hasShapes = true;
   const tabs = [`settings`, `advanced`, `beliefs`, `impression`];
   if (hasCodeHook) tabs.push(`codeHook`);
   if (hasButtons) tabs.push(`buttons`);
   if (hasShapes) tabs.push(`shapes`);
-  const $paneImpression = useStore(paneImpression);
-  const $paneHeldBeliefs = useStore(paneHeldBeliefs);
-  const $paneWithheldBeliefs = useStore(paneWithheldBeliefs);
-  console.log(`impression`, $paneImpression[id]?.current);
-  console.log(
-    `beliefs`,
-    $paneHeldBeliefs[id]?.current,
-    $paneWithheldBeliefs[id]?.current
-  );
-  console.log(`codeHook`, $paneCodeHook[id]?.current);
-  console.log(`buttons`,buttons)
+  if (hasFiles) tabs.push(`images`);
 
   const handleUpdateStoreField = (storeKey: StoreKey, newValue: string) => {
     return updateStoreField(storeKey, newValue);
@@ -111,9 +107,11 @@ export const PaneSettings = (props: {
                         ? `Manage Code Hook`
                         : tab === `buttons`
                           ? `Buttons`
-                          : tab === `shapes`
-                            ? `Background Shapes`
-                            : ``}
+                          : tab === `images`
+                            ? `Images`
+                            : tab === `shapes`
+                              ? `Background Shapes`
+                              : ``}
             </button>
           ))}
         </nav>
@@ -249,15 +247,25 @@ export const PaneSettings = (props: {
           </div>
         </div>
       ) : activeTab === `beliefs` ? (
-        <></>
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <PaneBeliefs id={id} />
+        </div>
       ) : activeTab === `impression` ? (
-        <></>
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <PaneImpression id={id} />
+        </div>
       ) : activeTab === `codeHook` ? (
         <></>
       ) : activeTab === `buttons` ? (
         <></>
+      ) : activeTab === `images` ? (
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <PaneFiles id={id} />
+        </div>
       ) : activeTab === `shapes` ? (
-        <></>
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <PaneShapes id={id} />
+        </div>
       ) : null}
     </div>
   );

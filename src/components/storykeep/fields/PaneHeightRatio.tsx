@@ -115,7 +115,7 @@ const PaneHeightRatio = ({ id }: PaneHeightRatioProps) => {
       </span>
       <InformationCircleIcon
         className="h-5 w-5"
-        title="0 means no height; or fixed proportion based on viewport; 100 is square, 178.778 is 16/9"
+        title="0 means height:auto, otherwise fixed proportion based on viewport; 100 is square, 178.778 is 16/9"
       />
       {renderInput(
         desktopInput,

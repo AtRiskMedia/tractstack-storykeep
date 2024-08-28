@@ -2,14 +2,12 @@ import { useStore } from "@nanostores/react";
 import { Switch } from "@headlessui/react";
 import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
+import PaneHeightOffset from "../fields/PaneHeightOffset";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
   paneSlug,
   paneIsHiddenPane,
-  //paneHeightOffsetDesktop,
-  //paneHeightOffsetMobile,
-  //paneHeightOffsetTablet,
   //paneHeightRatioDesktop,
   //paneHeightRatioMobile,
   //paneHeightRatioTablet,
@@ -36,9 +34,6 @@ export const PaneSettings = (props: {
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
   const $paneIsHiddenPane = useStore(paneIsHiddenPane);
-  //const $paneHeightOffsetDesktop = useStore(paneHeightOffsetDesktop);
-  //const $paneHeightOffsetTablet = useStore(paneHeightOffsetTablet);
-  //const $paneHeightOffsetMobile = useStore(paneHeightOffsetMobile);
   //const $paneHeightRatioDesktop = useStore(paneHeightRatioDesktop);
   //const $paneHeightRatioTablet = useStore(paneHeightRatioTablet);
   //const $paneHeightRatioMobile = useStore(paneHeightRatioMobile);
@@ -87,6 +82,11 @@ export const PaneSettings = (props: {
             handleEditingChange={handleEditingChange}
             updateStoreField={handleUpdateStoreField}
             handleUndo={handleUndo}
+          />
+        </div>
+        <div className="flex-grow w-full">
+          <PaneHeightOffset
+            id={id}
           />
         </div>
         <div className="flex-grow w-full">

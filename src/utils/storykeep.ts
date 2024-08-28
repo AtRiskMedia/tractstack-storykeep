@@ -12,6 +12,9 @@ import {
   paneSlug,
   paneFragmentMarkdown,
   paneIsHiddenPane,
+  paneHeightOffsetDesktop,
+  paneHeightOffsetMobile,
+  paneHeightOffsetTablet,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -33,15 +36,19 @@ const BREAKPOINTS = {
 };
 
 const storeMap: StoreMapType = {
-  storyFragmentTitle: storyFragmentTitle,
-  storyFragmentSlug: storyFragmentSlug,
-  storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
-  storyFragmentSocialImagePath: storyFragmentSocialImagePath,
-  storyFragmentMenuId: storyFragmentMenuId,
-  paneFragmentMarkdown: paneFragmentMarkdown,
-  paneTitle: paneTitle,
-  paneSlug: paneSlug,
-  paneIsHiddenPane: paneIsHiddenPane,
+  storyFragmentTitle,
+  storyFragmentSlug,
+  storyFragmentTailwindBgColour,
+  storyFragmentSocialImagePath,
+  storyFragmentMenuId,
+  paneFragmentMarkdown,
+  paneTitle,
+  paneSlug,
+  paneIsHiddenPane,
+  paneHeightOffsetDesktop,
+  paneHeightOffsetMobile,
+  paneHeightOffsetTablet,
+
   // Add other stores here
 };
 

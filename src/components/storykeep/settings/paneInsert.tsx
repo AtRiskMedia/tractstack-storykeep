@@ -27,6 +27,8 @@ import {
   paneFiles,
   paneHeldBeliefs,
   paneWithheldBeliefs,
+  paneImpression,
+  paneCodeHook,
 } from "../../../store/storykeep";
 import { cleanString } from "../../../utils/helpers";
 import {
@@ -173,6 +175,14 @@ export const PaneInsert = (props: {
       {
         store: paneHasMaxHScreen,
         value: false,
+      },
+      {
+        store: paneCodeHook,
+        value: false,
+      },
+      {
+        store: paneImpression,
+        value: null,
       },
       {
         store: paneHeldBeliefs,

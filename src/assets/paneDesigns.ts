@@ -319,7 +319,6 @@ export const paneDesigns: PaneDesign[] = [
                 { my: [12, 16], px: [12] },
                 {
                   bgCOLOR: ["slate-50"],
-                  border: [true],
                   borderCOLOR: ["mylightgrey"],
                   borderSTROKE: [2],
                   borderSTYLE: ["dashed"],

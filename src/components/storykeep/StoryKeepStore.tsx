@@ -187,14 +187,14 @@ export const StoryKeepStore = (props: {
             paneHeldBeliefs.set({
               ...paneHeldBeliefs.get(),
               [payload.id]: createFieldWithHistory(
-                payload.optionsPayload.heldBeliefs || ([] as BeliefDatum[])
+                payload.optionsPayload.heldBeliefs || ({} as BeliefDatum)
               ),
             });
 
             paneWithheldBeliefs.set({
               ...paneWithheldBeliefs.get(),
               [payload.id]: createFieldWithHistory(
-                payload.optionsPayload.withheldBeliefs || ([] as BeliefDatum[])
+                payload.optionsPayload.withheldBeliefs || ({} as BeliefDatum)
               ),
             });
 

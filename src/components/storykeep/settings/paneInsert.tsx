@@ -186,11 +186,11 @@ export const PaneInsert = (props: {
       },
       {
         store: paneHeldBeliefs,
-        value: [] as BeliefDatum[],
+        value: {} as BeliefDatum,
       },
       {
         store: paneWithheldBeliefs,
-        value: [] as BeliefDatum[],
+        value: {} as BeliefDatum,
       },
     ];
     paneStores.forEach(({ store, value }) => {

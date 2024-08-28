@@ -1,23 +1,212 @@
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import {
- paneHeldBeliefs,
-  paneWithheldBeliefs
-} from "../../../store/storykeep";
+  PlusIcon,
+  XMarkIcon,
+  ChevronDoubleLeftIcon,
+} from "@heroicons/react/24/outline";
+import { paneHeldBeliefs, paneWithheldBeliefs } from "../../../store/storykeep";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
+import ContentEditableField from "../components/ContentEditableField";
+import type { BeliefDatum } from "../../../types";
 
 interface PaneBeliefsProps {
   id: string;
 }
 
-/*
- There is no validation for Beliefs ...
- eventually will add UI and turso tables with look-up scale
- */
 const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
   const $paneHeldBeliefs = useStore(paneHeldBeliefs, { keys: [id] });
   const $paneWithheldBeliefs = useStore(paneWithheldBeliefs, { keys: [id] });
-  console.log($paneHeldBeliefs[id]?.current)
-  console.log($paneWithheldBeliefs[id]?.current)
-  return <div>Beliefs on Pane {id}</div>;
+  const { updateStoreField, handleUndo } = useStoryKeepUtils(id);
+
+  const [heldBeliefs, setHeldBeliefs] = useState<BeliefDatum>({});
+  const [withheldBeliefs, setWithheldBeliefs] = useState<BeliefDatum>({});
+
+  useEffect(() => {
+    setHeldBeliefs($paneHeldBeliefs[id]?.current || {});
+    setWithheldBeliefs($paneWithheldBeliefs[id]?.current || {});
+  }, [$paneHeldBeliefs[id]?.current, $paneWithheldBeliefs[id]?.current]);
+
+  const updateBeliefs = (isHeld: boolean, newBeliefs: BeliefDatum) => {
+    const storeKey = isHeld ? "paneHeldBeliefs" : "paneWithheldBeliefs";
+    updateStoreField(storeKey, newBeliefs);
+    if (isHeld) {
+      setHeldBeliefs(newBeliefs);
+    } else {
+      setWithheldBeliefs(newBeliefs);
+    }
+  };
+
+  const addBelief = (isHeld: boolean) => {
+    const newKey = `newBelief${Object.keys(isHeld ? heldBeliefs : withheldBeliefs).length + 1}`;
+    const updatedBeliefs = {
+      ...(isHeld ? heldBeliefs : withheldBeliefs),
+      [newKey]: [""],
+    };
+    updateBeliefs(isHeld, updatedBeliefs);
+  };
+
+  const updateBeliefKey = (
+    isHeld: boolean,
+    oldKey: string,
+    newKey: string
+  ): boolean => {
+    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
+    const values = beliefs[oldKey];
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const { [oldKey]: _, ...rest } = beliefs;
+    const updatedBeliefs = { ...rest, [newKey]: values };
+    updateBeliefs(isHeld, updatedBeliefs);
+    return true;
+  };
+
+  const updateBeliefValue = (
+    isHeld: boolean,
+    key: string,
+    valueIndex: number,
+    newValue: string
+  ): boolean => {
+    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
+    const values = beliefs[key];
+    if (Array.isArray(values)) {
+      const updatedValues = [...values];
+      updatedValues[valueIndex] = newValue;
+      const updatedBeliefs = { ...beliefs, [key]: updatedValues };
+      updateBeliefs(isHeld, updatedBeliefs);
+    }
+    return true;
+  };
+
+  const addBeliefValue = (isHeld: boolean, key: string) => {
+    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
+    const values = beliefs[key];
+    if (Array.isArray(values)) {
+      const updatedValues = [...values, ""];
+      const updatedBeliefs = { ...beliefs, [key]: updatedValues };
+      updateBeliefs(isHeld, updatedBeliefs);
+    }
+  };
+
+  const removeBeliefValue = (
+    isHeld: boolean,
+    key: string,
+    valueIndex: number
+  ) => {
+    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
+    const values = beliefs[key];
+    if (Array.isArray(values)) {
+      const updatedValues = values.filter((_, index) => index !== valueIndex);
+      let updatedBeliefs: BeliefDatum;
+      if (updatedValues.length === 0) {
+        updatedBeliefs = Object.fromEntries(
+          Object.entries(beliefs).filter(([k]) => k !== key)
+        );
+      } else {
+        updatedBeliefs = { ...beliefs, [key]: updatedValues };
+      }
+      updateBeliefs(isHeld, updatedBeliefs);
+    }
+  };
+
+  const renderBeliefForm = (isHeld: boolean) => {
+    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
+    const storeKey = isHeld ? "paneHeldBeliefs" : "paneWithheldBeliefs";
+    return (
+      <div className="mb-4 w-96">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-semibold">
+            {isHeld ? "Held Beliefs" : "Withheld Beliefs"}
+          </h3>
+          <div className="flex items-center">
+            <button
+              onClick={() => addBelief(isHeld)}
+              className="p-1 bg-myblue text-white rounded-md hover:bg-myblue/80 mr-2"
+              title={`Add ${isHeld ? "Held" : "Withheld"} Belief`}
+            >
+              <PlusIcon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => handleUndo(storeKey, id)}
+              className="disabled:hidden"
+              disabled={$paneHeldBeliefs[id]?.history.length === 0}
+            >
+              <ChevronDoubleLeftIcon
+                className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
+                title="Undo"
+              />
+            </button>
+          </div>
+        </div>
+        {Object.entries(beliefs).map(([key, values]) => (
+          <div
+            key={key}
+            className="mb-2 p-2 border border-mylightgrey rounded-md"
+          >
+            <div className="flex gap-2 mb-1">
+              <div className="flex-1">
+                <label className="text-sm text-mydarkgrey">Slug</label>
+                <ContentEditableField
+                  id={`belief-key-${isHeld ? "held" : "withheld"}-${key}`}
+                  value={key}
+                  onChange={newValue => updateBeliefKey(isHeld, key, newValue)}
+                  onEditingChange={() => {}}
+                  placeholder="Enter belief slug"
+                  className="p-1 border border-mylightgrey rounded-md w-full text-sm"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-sm text-mydarkgrey">Value(s)</label>
+                <div className="flex flex-wrap gap-1">
+                  {Array.isArray(values) &&
+                    values.map((value, valueIndex) => (
+                      <div key={valueIndex} className="flex items-center">
+                        <ContentEditableField
+                          id={`belief-value-${isHeld ? "held" : "withheld"}-${key}-${valueIndex}`}
+                          value={value}
+                          onChange={newValue =>
+                            updateBeliefValue(isHeld, key, valueIndex, newValue)
+                          }
+                          onEditingChange={() => {}}
+                          placeholder="Value"
+                          className="p-1 border border-mylightgrey rounded-md text-sm w-24"
+                        />
+                        <div className="flex">
+                          <button
+                            onClick={() =>
+                              removeBeliefValue(isHeld, key, valueIndex)
+                            }
+                            className="ml-1 text-myorange hover:text-myorange/80"
+                            title="Remove value"
+                          >
+                            <XMarkIcon className="h-4 w-4" />
+                          </button>
+                          {valueIndex === values.length - 1 && (
+                            <button
+                              onClick={() => addBeliefValue(isHeld, key)}
+                              className="text-mygreen hover:text-mygreen/80"
+                              title="Add value"
+                            >
+                              <PlusIcon className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="w-full flex flex-wrap gap-16">
+      {renderBeliefForm(true)}
+      {renderBeliefForm(false)}
+    </div>
+  );
 };
 
 export default PaneBeliefs;

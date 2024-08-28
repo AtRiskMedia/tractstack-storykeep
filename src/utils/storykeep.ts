@@ -20,6 +20,11 @@ import {
   paneHeightRatioDesktop,
   paneHeightRatioMobile,
   paneHeightRatioTablet,
+  paneHeldBeliefs,
+  paneWithheldBeliefs,
+  paneCodeHook,
+  paneImpression,
+  paneFiles,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -58,6 +63,11 @@ const storeMap: StoreMapType = {
   paneHeightRatioDesktop,
   paneHeightRatioMobile,
   paneHeightRatioTablet,
+  paneHeldBeliefs,
+  paneWithheldBeliefs,
+  paneCodeHook,
+  paneImpression,
+  paneFiles,
   // Add other stores here
 };
 
@@ -146,6 +156,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const updateStoreField = (storeKey: StoreKey, newValue: any): boolean => {
     const store = storeMap[storeKey];
+    console.log(storeKey, store);
     if (!store) return false;
 
     const isValid =
@@ -154,6 +165,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
         ? usedSlugs && !usedSlugs.includes(newValue)
         : true);
     const isPreValid = isPreValidValue(storeKey, newValue);
+    console.log(newValue, isPreValid);
     if (!isPreValid) {
       // don't save to undo if preValid fails
       // contentEditable also rejects when return false
@@ -235,6 +247,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
 
   const handleUndo = useCallback(
     (storeKey: StoreKey, id: string) => {
+      console.log(storeKey);
       const store = storeMap[storeKey];
       if (!store) return;
 

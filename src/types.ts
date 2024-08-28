@@ -401,8 +401,8 @@ export interface PaneOptionsPayload {
   hiddenPane?: boolean;
   overflowHidden?: boolean;
   maxHScreen?: boolean;
-  heldBeliefs?: BeliefDatum[];
-  withheldBeliefs?: BeliefDatum[];
+  heldBeliefs?: BeliefDatum;
+  withheldBeliefs?: BeliefDatum;
 }
 export interface PaneDesignOptionsPayload extends PaneOptionsPayload {
   bgColour: string | null;

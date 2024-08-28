@@ -115,9 +115,9 @@ export const paneCodeHook =
 export const paneImpression =
   map<Record<string, FieldWithHistory<ImpressionDatum | null>>>();
 export const paneHeldBeliefs =
-  map<Record<string, FieldWithHistory<BeliefDatum[]>>>();
+  map<Record<string, FieldWithHistory<BeliefDatum>>>();
 export const paneWithheldBeliefs =
-  map<Record<string, FieldWithHistory<BeliefDatum[]>>>();
+  map<Record<string, FieldWithHistory<BeliefDatum>>>();
 
 // pane fragments have no ids ...
 // PaneDatum has an array of BgPaneDatum, BgColourDatum, MarkdownPaneDatum

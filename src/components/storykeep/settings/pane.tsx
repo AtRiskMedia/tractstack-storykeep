@@ -63,7 +63,7 @@ export const PaneSettings = (props: {
         title/slug.
       </p>
       <div className="flex flex-wrap gap-x-12">
-        <div className="flex-grow max-w-lg w-full">
+        <div className="flex-grow w-96">
           <PaneTitle
             id={id}
             handleEditingChange={handleInterceptEdit}
@@ -71,7 +71,7 @@ export const PaneSettings = (props: {
             handleUndo={handleUndo}
           />
         </div>
-        <div className="flex-grow max-w-xs w-full">
+        <div className="flex-grow w-64">
           <PaneSlug
             id={id}
             handleEditingChange={handleEditingChange}
@@ -80,8 +80,8 @@ export const PaneSettings = (props: {
           />
         </div>
 
-        <div className="flex-grow w-full">
-          <div className="flex items-center mt-4">
+        <div className="flex-grow">
+          <div className="flex items-center">
             <Switch
               checked={$paneIsHiddenPane[id].current}
               onChange={newValue =>
@@ -113,14 +113,16 @@ export const PaneSettings = (props: {
             </div>
           </div>
         </div>
-        <h4 className="mt-8 font-action text-md font-bold text-myblue">
-          Advanced settings:
+        <h4 className="w-full font-action text-myblue text-md font-bold mt-6">
+          Advanced options:
         </h4>
-        <div className="flex-grow w-full">
-          <PaneHeightOffset id={id} />
-        </div>
-        <div className="flex-grow w-full">
-          <PaneHeightRatio id={id} />
+        <div className="flex flex-wrap gap-x-12 gap-y-3">
+          <div className="flex-grow">
+            <PaneHeightOffset id={id} />
+          </div>
+          <div className="flex-grow">
+            <PaneHeightRatio id={id} />
+          </div>
         </div>
       </div>
     </div>

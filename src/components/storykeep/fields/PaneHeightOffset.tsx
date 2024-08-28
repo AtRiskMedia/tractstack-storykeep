@@ -108,7 +108,7 @@ const PaneHeightOffset = ({ id }: PaneHeightOffsetProps) => {
   );
 
   return (
-    <div className="flex items-center space-x-4 py-1">
+    <div className="flex items-center space-x-4">
       <span className="text-md text-mydarkgrey flex-shrink-0">
         Height Offset:
       </span>

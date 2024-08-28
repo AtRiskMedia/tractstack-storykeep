@@ -156,7 +156,6 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const updateStoreField = (storeKey: StoreKey, newValue: any): boolean => {
     const store = storeMap[storeKey];
-    console.log(storeKey, store);
     if (!store) return false;
 
     const isValid =
@@ -165,7 +164,6 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
         ? usedSlugs && !usedSlugs.includes(newValue)
         : true);
     const isPreValid = isPreValidValue(storeKey, newValue);
-    console.log(newValue, isPreValid);
     if (!isPreValid) {
       // don't save to undo if preValid fails
       // contentEditable also rejects when return false

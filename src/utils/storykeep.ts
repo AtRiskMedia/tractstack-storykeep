@@ -15,6 +15,9 @@ import {
   paneHeightOffsetDesktop,
   paneHeightOffsetMobile,
   paneHeightOffsetTablet,
+  paneHeightRatioDesktop,
+  paneHeightRatioMobile,
+  paneHeightRatioTablet,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -48,7 +51,9 @@ const storeMap: StoreMapType = {
   paneHeightOffsetDesktop,
   paneHeightOffsetMobile,
   paneHeightOffsetTablet,
-
+  paneHeightRatioDesktop,
+  paneHeightRatioMobile,
+  paneHeightRatioTablet,
   // Add other stores here
 };
 

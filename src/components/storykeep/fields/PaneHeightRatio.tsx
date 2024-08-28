@@ -5,64 +5,65 @@ import {
 } from "@heroicons/react/24/outline";
 import { useStore } from "@nanostores/react";
 import {
-  paneHeightOffsetDesktop,
-  paneHeightOffsetTablet,
-  paneHeightOffsetMobile,
+  paneHeightRatioDesktop,
+  paneHeightRatioTablet,
+  paneHeightRatioMobile,
 } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import type { StoreKey } from "../../../types";
 
-interface PaneHeightOffsetProps {
+interface PaneHeightRatioProps {
   id: string;
 }
 
-const PaneHeightOffset = ({ id }: PaneHeightOffsetProps) => {
-  const $paneHeightOffsetDesktop = useStore(paneHeightOffsetDesktop, {
+const PaneHeightRatio = ({ id }: PaneHeightRatioProps) => {
+  const $paneHeightRatioDesktop = useStore(paneHeightRatioDesktop, {
     keys: [id],
   });
-  const $paneHeightOffsetTablet = useStore(paneHeightOffsetTablet, {
+  const $paneHeightRatioTablet = useStore(paneHeightRatioTablet, {
     keys: [id],
   });
-  const $paneHeightOffsetMobile = useStore(paneHeightOffsetMobile, {
+  const $paneHeightRatioMobile = useStore(paneHeightRatioMobile, {
     keys: [id],
   });
 
   const { updateStoreField, handleUndo } = useStoryKeepUtils(id);
 
   const [desktopInput, setDesktopInput] = useState(
-    $paneHeightOffsetDesktop[id]?.current?.toString() || "0"
+    $paneHeightRatioDesktop[id]?.current?.toString() || "0"
   );
   const [tabletInput, setTabletInput] = useState(
-    $paneHeightOffsetTablet[id]?.current?.toString() || "0"
+    $paneHeightRatioTablet[id]?.current?.toString() || "0"
   );
   const [mobileInput, setMobileInput] = useState(
-    $paneHeightOffsetMobile[id]?.current?.toString() || "0"
+    $paneHeightRatioMobile[id]?.current?.toString() || "0"
   );
 
   useEffect(() => {
-    setDesktopInput($paneHeightOffsetDesktop[id]?.current?.toString() || "0");
-    setTabletInput($paneHeightOffsetTablet[id]?.current?.toString() || "0");
-    setMobileInput($paneHeightOffsetMobile[id]?.current?.toString() || "0");
+    setDesktopInput($paneHeightRatioDesktop[id]?.current?.toString() || "0");
+    setTabletInput($paneHeightRatioTablet[id]?.current?.toString() || "0");
+    setMobileInput($paneHeightRatioMobile[id]?.current?.toString() || "0");
   }, [
-    $paneHeightOffsetDesktop[id]?.current,
-    $paneHeightOffsetTablet[id]?.current,
-    $paneHeightOffsetMobile[id]?.current,
+    $paneHeightRatioDesktop[id]?.current,
+    $paneHeightRatioTablet[id]?.current,
+    $paneHeightRatioMobile[id]?.current,
   ]);
 
   const isPreValid = (value: string): boolean => {
-    return /^-?\d{0,4}$/.test(value);
+    return /^(\d{1,7}|\d{0,7}\.\d{1,7}|\.\d{1,7}|(\.)|)$/.test(value);
   };
 
   const isValid = (value: string): boolean => {
     const numValue = parseInt(value);
-    return !isNaN(numValue) && numValue >= -300 && numValue <= 300;
+    return !isNaN(numValue) && numValue >= 10 && numValue <= 200;
   };
 
   const normalizeValue = (value: string): string => {
-    const numValue = parseInt(value);
+    const numValue = parseFloat(value);
     if (isNaN(numValue)) return "0";
-    if (numValue < -300) return "-300";
-    if (numValue > 300) return "300";
+    if (numValue === 0) return "0";
+    if (numValue < 10) return "10";
+    if (numValue > 200) return "200";
     return numValue.toString();
   };
 
@@ -110,41 +111,41 @@ const PaneHeightOffset = ({ id }: PaneHeightOffsetProps) => {
   return (
     <div className="flex items-center space-x-4 py-1">
       <span className="text-md text-mydarkgrey flex-shrink-0">
-        Height Offset:
+        Height Ratio:
       </span>
       <InformationCircleIcon
         className="h-5 w-5"
-        title="In rare instance to add negative (or positive) margin between panes"
+        title="0 means no height; or fixed proportion based on viewport; 100 is square, 178.778 is 16/9"
       />
       {renderInput(
         desktopInput,
         setDesktopInput,
-        "paneHeightOffsetDesktop",
+        "paneHeightRatioDesktop",
         "Desktop"
       )}
       {renderInput(
         tabletInput,
         setTabletInput,
-        "paneHeightOffsetTablet",
+        "paneHeightRatioTablet",
         "Tablet"
       )}
       {renderInput(
         mobileInput,
         setMobileInput,
-        "paneHeightOffsetMobile",
+        "paneHeightRatioMobile",
         "Mobile"
       )}
       <button
         onClick={() => {
-          handleUndo("paneHeightOffsetDesktop", id);
-          handleUndo("paneHeightOffsetTablet", id);
-          handleUndo("paneHeightOffsetMobile", id);
+          handleUndo("paneHeightRatioDesktop", id);
+          handleUndo("paneHeightRatioTablet", id);
+          handleUndo("paneHeightRatioMobile", id);
         }}
         className="disabled:hidden ml-2"
         disabled={
-          $paneHeightOffsetDesktop[id]?.history.length === 0 &&
-          $paneHeightOffsetTablet[id]?.history.length === 0 &&
-          $paneHeightOffsetMobile[id]?.history.length === 0
+          $paneHeightRatioDesktop[id]?.history.length === 0 &&
+          $paneHeightRatioTablet[id]?.history.length === 0 &&
+          $paneHeightRatioMobile[id]?.history.length === 0
         }
       >
         <ChevronDoubleLeftIcon
@@ -156,4 +157,4 @@ const PaneHeightOffset = ({ id }: PaneHeightOffsetProps) => {
   );
 };
 
-export default PaneHeightOffset;
+export default PaneHeightRatio;

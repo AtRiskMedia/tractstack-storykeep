@@ -3,14 +3,12 @@ import { Switch } from "@headlessui/react";
 import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
 import PaneHeightOffset from "../fields/PaneHeightOffset";
+import PaneHeightRatio from "../fields/PaneHeightRatio";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
   paneSlug,
   paneIsHiddenPane,
-  //paneHeightRatioDesktop,
-  //paneHeightRatioMobile,
-  //paneHeightRatioTablet,
   //paneHasOverflowHidden,
   //paneHasMaxHScreen,
   //paneCodeHook,
@@ -34,9 +32,6 @@ export const PaneSettings = (props: {
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
   const $paneIsHiddenPane = useStore(paneIsHiddenPane);
-  //const $paneHeightRatioDesktop = useStore(paneHeightRatioDesktop);
-  //const $paneHeightRatioTablet = useStore(paneHeightRatioTablet);
-  //const $paneHeightRatioMobile = useStore(paneHeightRatioMobile);
   //const $paneHasOverflowHidden = useStore(paneHasOverflowHidden);
   //const $paneHasMaxHScreen = useStore(paneHasMaxHScreen);
   //const $paneCodeHook = useStore(paneCodeHook);
@@ -84,11 +79,7 @@ export const PaneSettings = (props: {
             handleUndo={handleUndo}
           />
         </div>
-        <div className="flex-grow w-full">
-          <PaneHeightOffset
-            id={id}
-          />
-        </div>
+
         <div className="flex-grow w-full">
           <div className="flex items-center mt-4">
             <Switch
@@ -121,6 +112,15 @@ export const PaneSettings = (props: {
               </div>
             </div>
           </div>
+        </div>
+        <h4 className="mt-8 font-action text-md font-bold text-myblue">
+          Advanced settings:
+        </h4>
+        <div className="flex-grow w-full">
+          <PaneHeightOffset id={id} />
+        </div>
+        <div className="flex-grow w-full">
+          <PaneHeightRatio id={id} />
         </div>
       </div>
     </div>

@@ -44,7 +44,6 @@ import type {
   BgPaneDatum,
   BgColourDatum,
   MarkdownPaneDatum,
-  ImpressionDatum,
   BeliefDatum,
 } from "../../types";
 
@@ -171,25 +170,19 @@ export const StoryKeepStore = (props: {
             });
 
             // Initialize optional Pane stores
-            if (payload?.optionsPayload?.codeHook) {
-              paneCodeHook.set({
-                ...paneCodeHook.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.codeHook
-                ),
-              });
-            }
+            paneCodeHook.set({
+              ...paneCodeHook.get(),
+              [payload.id]: createFieldWithHistory(
+                payload?.optionsPayload?.codeHook || null
+              ),
+            });
 
-            if (
-              typeof payload?.optionsPayload?.impressions?.at(0) !== `undefined`
-            ) {
-              paneImpression.set({
-                ...paneImpression.get(),
-                [payload.id]: createFieldWithHistory(
-                  payload.optionsPayload.impressions.at(0) as ImpressionDatum
-                ),
-              });
-            }
+            paneImpression.set({
+              ...paneImpression.get(),
+              [payload.id]: createFieldWithHistory(
+                payload?.optionsPayload?.impressions?.at(0) || null
+              ),
+            });
 
             paneHeldBeliefs.set({
               ...paneHeldBeliefs.get(),
@@ -205,12 +198,10 @@ export const StoryKeepStore = (props: {
               ),
             });
 
-            if (payload?.files) {
-              paneFiles.set({
-                ...paneFiles.get(),
-                [payload.id]: createFieldWithHistory(payload.files),
-              });
-            }
+            paneFiles.set({
+              ...paneFiles.get(),
+              [payload.id]: createFieldWithHistory(payload.files || []),
+            });
 
             // Process PaneFragments
             const thisPaneFragmentIds =

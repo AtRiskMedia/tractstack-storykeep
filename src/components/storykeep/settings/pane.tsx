@@ -9,13 +9,15 @@ import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
   paneSlug,
+  paneMarkdownFragmentId,
+  paneFragmentMarkdown,
   paneIsHiddenPane,
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneCodeHook,
-  //paneImpression,
-  //paneHeldBeliefs,
-  //paneWithheldBeliefs,
+  paneImpression,
+  paneHeldBeliefs,
+  paneWithheldBeliefs,
 } from "../../../store/storykeep";
 import { cleanString, classNames } from "../../../utils/helpers";
 import type { ContentMap, StoreKey } from "../../../types";
@@ -25,25 +27,46 @@ export const PaneSettings = (props: {
   contentMap: ContentMap[];
 }) => {
   const { id, contentMap } = props;
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(`settings`);
   const usedSlugs = contentMap
     .filter(item => item.type === "Pane")
     .map(item => item.slug);
   const { updateStoreField, handleEditingChange, handleUndo } =
     useStoryKeepUtils(id, usedSlugs);
-  const $paneTitle = useStore(paneTitle);
-  const $paneSlug = useStore(paneSlug);
-  const $paneIsHiddenPane = useStore(paneIsHiddenPane);
-  const $paneHasOverflowHidden = useStore(paneHasOverflowHidden);
-  const $paneHasMaxHScreen = useStore(paneHasMaxHScreen);
-  const $paneCodeHook = useStore(paneCodeHook);
-  const hasCodeHook = typeof $paneCodeHook[id] !== `undefined`;
-  const tabs = !hasCodeHook
-    ? [`settings`, `advanced`, `beliefs`]
-    : [`settings`, `advanced`, `beliefs`, `codeHook`];
-  //const $paneImpression = useStore(paneImpression);
-  //const $paneHeldBeliefs = useStore(paneHeldBeliefs);
-  //const $paneWithheldBeliefs = useStore(paneWithheldBeliefs);
+  const $paneTitle = useStore(paneTitle, { keys: [id] });
+  const $paneSlug = useStore(paneSlug, { keys: [id] });
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
+  const markdownFragmentId = $paneMarkdownFragmentId[id]?.current;
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
+    keys: [markdownFragmentId],
+  });
+  const buttons =
+    $paneFragmentMarkdown[markdownFragmentId]?.current?.payload?.optionsPayload
+      ?.buttons;
+  const hasButtons = buttons ? Object.keys(buttons).length : false;
+  const $paneIsHiddenPane = useStore(paneIsHiddenPane, { keys: [id] });
+  const $paneHasOverflowHidden = useStore(paneHasOverflowHidden, {
+    keys: [id],
+  });
+  const $paneHasMaxHScreen = useStore(paneHasMaxHScreen, { keys: [id] });
+  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
+  const hasCodeHook = $paneCodeHook[id].current;
+  const hasShapes = true;
+  const tabs = [`settings`, `advanced`, `beliefs`, `impression`];
+  if (hasCodeHook) tabs.push(`codeHook`);
+  if (hasButtons) tabs.push(`buttons`);
+  if (hasShapes) tabs.push(`shapes`);
+  const $paneImpression = useStore(paneImpression);
+  const $paneHeldBeliefs = useStore(paneHeldBeliefs);
+  const $paneWithheldBeliefs = useStore(paneWithheldBeliefs);
+  console.log(`impression`, $paneImpression[id]?.current);
+  console.log(
+    `beliefs`,
+    $paneHeldBeliefs[id]?.current,
+    $paneWithheldBeliefs[id]?.current
+  );
+  console.log(`codeHook`, $paneCodeHook[id]?.current);
+  console.log(`buttons`,buttons)
 
   const handleUpdateStoreField = (storeKey: StoreKey, newValue: string) => {
     return updateStoreField(storeKey, newValue);
@@ -53,7 +76,7 @@ export const PaneSettings = (props: {
     if (storeKey === `paneTitle` && $paneSlug[id].current === ``) {
       const clean = cleanString($paneTitle[id].current).substring(0, 50);
       const newVal = !usedSlugs.includes(clean) ? clean : ``;
-      updateStoreField(storeKey, newVal);
+      updateStoreField(`paneSlug`, newVal);
     }
     return handleEditingChange(storeKey, editing);
   };
@@ -65,12 +88,12 @@ export const PaneSettings = (props: {
           {tabs.map((tab: string, idx: number) => (
             <button
               key={idx}
-              aria-current={idx === activeTab ? "page" : undefined}
+              aria-current={tab === activeTab ? "page" : undefined}
               onClick={() => {
-                setActiveTab(idx);
+                setActiveTab(tab);
               }}
               className={classNames(
-                idx === activeTab
+                tab === activeTab
                   ? "text-black font-bold"
                   : "text-mydarkgrey hover:text-black underline",
                 "text-md"
@@ -80,17 +103,23 @@ export const PaneSettings = (props: {
                 ? `Pane Settings`
                 : tab === `advanced`
                   ? `Advanced Settings`
-                  : tab === `beliefs`
-                    ? `Add Story Paths`
-                    : tab === `codeHook`
-                      ? `Manage Code Hook`
-                      : ``}
+                  : tab === `impression`
+                    ? `Add Impression`
+                    : tab === `beliefs`
+                      ? `Add Story Paths`
+                      : tab === `codeHook`
+                        ? `Manage Code Hook`
+                        : tab === `buttons`
+                          ? `Buttons`
+                          : tab === `shapes`
+                            ? `Background Shapes`
+                            : ``}
             </button>
           ))}
         </nav>
       </div>
       <hr className="w-full" />
-      {activeTab === 0 ? (
+      {activeTab === `settings` ? (
         <div className="my-4">
           <p className="text-md mb-2 text-mydarkgrey italic">
             Note: title + slug used for analytics and may (if enabled) be used
@@ -151,7 +180,7 @@ export const PaneSettings = (props: {
             </div>
           </div>
         </div>
-      ) : activeTab === 1 ? (
+      ) : activeTab === `advanced` ? (
         <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
           <div className="flex-grow">
             <PaneHeightOffset id={id} />
@@ -219,9 +248,15 @@ export const PaneSettings = (props: {
             </div>
           </div>
         </div>
-      ) : activeTab === 2 ? (
+      ) : activeTab === `beliefs` ? (
         <></>
-      ) : activeTab === 3 ? (
+      ) : activeTab === `impression` ? (
+        <></>
+      ) : activeTab === `codeHook` ? (
+        <></>
+      ) : activeTab === `buttons` ? (
+        <></>
+      ) : activeTab === `shapes` ? (
         <></>
       ) : null}
     </div>

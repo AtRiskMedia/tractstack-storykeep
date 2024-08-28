@@ -111,9 +111,9 @@ export const paneHeightRatioMobile =
   map<Record<string, FieldWithHistory<string>>>();
 export const paneFiles = map<Record<string, FieldWithHistory<FileDatum[]>>>();
 export const paneCodeHook =
-  map<Record<string, FieldWithHistory<CodeHookDatum>>>();
+  map<Record<string, FieldWithHistory<CodeHookDatum | null>>>();
 export const paneImpression =
-  map<Record<string, FieldWithHistory<ImpressionDatum>>>();
+  map<Record<string, FieldWithHistory<ImpressionDatum | null>>>();
 export const paneHeldBeliefs =
   map<Record<string, FieldWithHistory<BeliefDatum[]>>>();
 export const paneWithheldBeliefs =

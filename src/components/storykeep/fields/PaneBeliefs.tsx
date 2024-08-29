@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
-  PlusIcon,
   XMarkIcon,
+  PlusIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
 import { paneHeldBeliefs, paneWithheldBeliefs } from "../../../store/storykeep";
@@ -27,15 +27,13 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
     setWithheldBeliefs($paneWithheldBeliefs[id]?.current || {});
   }, [$paneHeldBeliefs[id]?.current, $paneWithheldBeliefs[id]?.current]);
 
-  const updateBeliefs = (isHeld: boolean, newBeliefs: BeliefDatum) => {
-    const storeKey = isHeld ? "paneHeldBeliefs" : "paneWithheldBeliefs";
-    updateStoreField(storeKey, newBeliefs);
-    if (isHeld) {
-      setHeldBeliefs(newBeliefs);
-    } else {
-      setWithheldBeliefs(newBeliefs);
-    }
-  };
+  const updateBeliefs = useCallback(
+    (isHeld: boolean, newBeliefs: BeliefDatum) => {
+      const storeKey = isHeld ? "paneHeldBeliefs" : "paneWithheldBeliefs";
+      updateStoreField(storeKey, newBeliefs);
+    },
+    [updateStoreField]
+  );
 
   const addBelief = (isHeld: boolean) => {
     const newKey = `newBelief${Object.keys(isHeld ? heldBeliefs : withheldBeliefs).length + 1}`;
@@ -43,6 +41,11 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
       ...(isHeld ? heldBeliefs : withheldBeliefs),
       [newKey]: [""],
     };
+    if (isHeld) {
+      setHeldBeliefs(updatedBeliefs);
+    } else {
+      setWithheldBeliefs(updatedBeliefs);
+    }
     updateBeliefs(isHeld, updatedBeliefs);
   };
 
@@ -52,29 +55,51 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
     newKey: string
   ): boolean => {
     const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
-    const values = beliefs[oldKey];
-    /* eslint-disable @typescript-eslint/no-unused-vars */
+    if (oldKey === newKey) return true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { [oldKey]: _, ...rest } = beliefs;
-    const updatedBeliefs = { ...rest, [newKey]: values };
-    updateBeliefs(isHeld, updatedBeliefs);
     return true;
   };
 
-  const updateBeliefValue = (
+  const updateBeliefValue = (): boolean => {
+    return true;
+  };
+
+  const handleEditingChange = (
     isHeld: boolean,
     key: string,
-    valueIndex: number,
-    newValue: string
-  ): boolean => {
-    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
-    const values = beliefs[key];
-    if (Array.isArray(values)) {
-      const updatedValues = [...values];
-      updatedValues[valueIndex] = newValue;
-      const updatedBeliefs = { ...beliefs, [key]: updatedValues };
+    valueIndex: number | null,
+    editing: boolean
+  ) => {
+    if (!editing) {
+      const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
+      const updatedBeliefs = { ...beliefs };
+
+      if (valueIndex !== null) {
+        if (Array.isArray(updatedBeliefs[key])) {
+          updatedBeliefs[key] = [...(updatedBeliefs[key] as string[])];
+          (updatedBeliefs[key] as string[])[valueIndex] = (
+            (updatedBeliefs[key] as string[])[valueIndex] || ""
+          ).trim();
+        }
+      } else {
+        const oldKey = Object.keys(beliefs).find(
+          k => k.toLowerCase() === key.toLowerCase()
+        );
+        if (oldKey && oldKey !== key) {
+          const values = updatedBeliefs[oldKey];
+          delete updatedBeliefs[oldKey];
+          updatedBeliefs[key] = values;
+        }
+      }
+
+      if (isHeld) {
+        setHeldBeliefs(updatedBeliefs);
+      } else {
+        setWithheldBeliefs(updatedBeliefs);
+      }
       updateBeliefs(isHeld, updatedBeliefs);
     }
-    return true;
   };
 
   const addBeliefValue = (isHeld: boolean, key: string) => {
@@ -83,6 +108,11 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
     if (Array.isArray(values)) {
       const updatedValues = [...values, ""];
       const updatedBeliefs = { ...beliefs, [key]: updatedValues };
+      if (isHeld) {
+        setHeldBeliefs(updatedBeliefs);
+      } else {
+        setWithheldBeliefs(updatedBeliefs);
+      }
       updateBeliefs(isHeld, updatedBeliefs);
     }
   };
@@ -103,6 +133,11 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
         );
       } else {
         updatedBeliefs = { ...beliefs, [key]: updatedValues };
+      }
+      if (isHeld) {
+        setHeldBeliefs(updatedBeliefs);
+      } else {
+        setWithheldBeliefs(updatedBeliefs);
       }
       updateBeliefs(isHeld, updatedBeliefs);
     }
@@ -149,7 +184,9 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                   id={`belief-key-${isHeld ? "held" : "withheld"}-${key}`}
                   value={key}
                   onChange={newValue => updateBeliefKey(isHeld, key, newValue)}
-                  onEditingChange={() => {}}
+                  onEditingChange={editing =>
+                    handleEditingChange(isHeld, key, null, editing)
+                  }
                   placeholder="Enter belief slug"
                   className="p-1 border border-mylightgrey rounded-md w-full text-sm"
                 />
@@ -163,10 +200,15 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                         <ContentEditableField
                           id={`belief-value-${isHeld ? "held" : "withheld"}-${key}-${valueIndex}`}
                           value={value}
-                          onChange={newValue =>
-                            updateBeliefValue(isHeld, key, valueIndex, newValue)
+                          onChange={() => updateBeliefValue()}
+                          onEditingChange={editing =>
+                            handleEditingChange(
+                              isHeld,
+                              key,
+                              valueIndex,
+                              editing
+                            )
                           }
-                          onEditingChange={() => {}}
                           placeholder="Value"
                           className="p-1 border border-mylightgrey rounded-md text-sm w-24"
                         />

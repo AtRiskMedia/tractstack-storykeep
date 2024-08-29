@@ -31,10 +31,12 @@ const DesignNewPane = ({
   viewportKey: ViewportAuto;
   paneIds: string[];
 }) => {
-  const [mode, setMode] = useState<`design` | `reuse`>(`design`);
+  const [mode, setMode] = useState<`design` | `reuse` | `break`>(`design`);
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);
-  const [activePaneDesigns, setActivePaneDesigns] = useState(paneDesigns);
+  const [activePaneDesigns, setActivePaneDesigns] = useState(
+    paneDesigns.filter((p: PaneDesign) => p.type === `starter`)
+  );
   const [reusePaneDesigns, setReuseActivePaneDesigns] = useState<PaneDesign[]>(
     []
   );
@@ -81,11 +83,22 @@ const DesignNewPane = ({
     handleToggleOn(`insert`, `pane-insert`);
   };
 
-  const changeMode = (newMode: `design` | `reuse`) => {
+  const changeMode = (newMode: `design` | `reuse` | `break`) => {
     setMode(newMode);
     if (newMode === `design`) {
-      setActivePaneDesigns(paneDesigns);
-      setSelectedDesign(paneDesigns[0]);
+      setActivePaneDesigns(
+        paneDesigns.filter((p: PaneDesign) => p.type === `starter`)
+      );
+      setSelectedDesign(
+        paneDesigns.filter((p: PaneDesign) => p.type === `starter`)[0]
+      );
+    } else if (newMode === `break`) {
+      setActivePaneDesigns(
+        paneDesigns.filter((p: PaneDesign) => p.type === `break`)
+      );
+      setSelectedDesign(
+        paneDesigns.filter((p: PaneDesign) => p.type === `break`)[0]
+      );
     } else {
       setActivePaneDesigns(reusePaneDesigns);
       setSelectedDesign(reusePaneDesigns[0]);
@@ -143,17 +156,45 @@ const DesignNewPane = ({
             {mode === `design` ? (
               <div className="flex flex-nowrap gap-x-3 text-md mb-1">
                 <Combobox.Label className="block text-mydarkgrey">
-                  Choose design starter
+                  Starter designs
                 </Combobox.Label>
                 <span className="text-mydarkgrey/85">
-                  ( or,{` `}
+                  {` | `}
+                  <button
+                    onClick={() => changeMode(`break`)}
+                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
+                  >
+                    Transition shapes
+                  </button>
+                  {` | `}
                   <button
                     onClick={() => changeMode(`reuse`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
                     Re-use existing pane
                   </button>
-                  )
+                </span>
+              </div>
+            ) : mode === `break` ? (
+              <div className="flex flex-nowrap gap-x-3 text-md mb-1">
+                <Combobox.Label className="block text-mydarkgrey">
+                  Transition shapes
+                </Combobox.Label>
+                <span className="text-mydarkgrey/85">
+                  {` | `}
+                  <button
+                    onClick={() => changeMode(`design`)}
+                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
+                  >
+                    Starter designs
+                  </button>
+                  {` | `}
+                  <button
+                    onClick={() => changeMode(`reuse`)}
+                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
+                  >
+                    Re-use existing pane
+                  </button>
                 </span>
               </div>
             ) : (
@@ -162,14 +203,20 @@ const DesignNewPane = ({
                   Re-use existing pane
                 </Combobox.Label>
                 <span className="text-mydarkgrey/85">
-                  ( or,{` `}
+                  {` | `}
+                  <button
+                    onClick={() => changeMode(`break`)}
+                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
+                  >
+                    Transition shapes
+                  </button>
+                  {` | `}
                   <button
                     onClick={() => changeMode(`design`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
-                    Choose design starter
+                    Starter designs
                   </button>
-                  )
                 </span>
               </div>
             )}

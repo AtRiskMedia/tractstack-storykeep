@@ -6,7 +6,6 @@ import PaneSlug from "../fields/PaneSlug";
 import PaneHeightOffset from "../fields/PaneHeightOffset";
 import PaneHeightRatio from "../fields/PaneHeightRatio";
 import PaneFiles from "../fields/PaneFiles";
-import PaneShapes from "../fields/PaneShapes";
 import PaneImpression from "../fields/PaneImpression";
 import PaneBeliefs from "../fields/PaneBeliefs";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
@@ -57,11 +56,9 @@ export const PaneSettings = (props: {
     keys: [id],
   });
   const hasCodeHook = $paneCodeHook[id].current;
-  const hasShapes = true;
   const tabs = [`settings`, `advanced`, `beliefs`, `impression`];
   if (hasCodeHook) tabs.push(`codeHook`);
   if (hasButtons) tabs.push(`buttons`);
-  if (hasShapes) tabs.push(`shapes`);
   if (hasFiles) tabs.push(`images`);
 
   const handleUpdateStoreField = (storeKey: StoreKey, newValue: string) => {
@@ -109,9 +106,7 @@ export const PaneSettings = (props: {
                           ? `Buttons`
                           : tab === `images`
                             ? `Images`
-                            : tab === `shapes`
-                              ? `Background Shapes`
-                              : ``}
+                            : ``}
             </button>
           ))}
         </nav>
@@ -261,10 +256,6 @@ export const PaneSettings = (props: {
       ) : activeTab === `images` ? (
         <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
           <PaneFiles id={id} />
-        </div>
-      ) : activeTab === `shapes` ? (
-        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
-          <PaneShapes id={id} />
         </div>
       ) : null}
     </div>

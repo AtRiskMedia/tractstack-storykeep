@@ -131,6 +131,7 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
         id: row.id,
         slug: row.slug,
         name: row.title,
+        type: `reuse`,
         panePayload: {
           heightOffsetDesktop: row.height_offset_desktop || 0,
           heightOffsetMobile: row.height_offset_mobile || 0,

@@ -142,6 +142,7 @@ export interface PaneDesign {
   id: string;
   slug: string;
   name: string;
+  type: `starter` | `break` | `reuse`;
   panePayload: {
     heightOffsetDesktop: number;
     heightOffsetTablet: number;

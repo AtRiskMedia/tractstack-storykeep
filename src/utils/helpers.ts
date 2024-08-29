@@ -518,3 +518,18 @@ export async function getOptimizedImage(src: string) {
     return null;
   }
 }
+
+export function sortULIDs(ulids: string[]) {
+  return ulids.sort((a, b) => {
+    const toBinary = (ulid: string) => {
+      return Array.from(ulid, char =>
+        char.charCodeAt(0).toString(2).padStart(8, "0")
+      ).join("");
+    };
+
+    const binaryA = toBinary(a);
+    const binaryB = toBinary(b);
+
+    return binaryA.localeCompare(binaryB);
+  });
+}

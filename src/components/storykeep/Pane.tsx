@@ -192,6 +192,7 @@ const Pane = (props: {
             </div>
           );
         case "bgPane":
+          console.log(`intercept bgPane`, toolMode);
           return (
             <div
               key={`bgpane-${index}`}

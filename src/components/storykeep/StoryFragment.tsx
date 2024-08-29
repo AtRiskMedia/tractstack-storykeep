@@ -238,7 +238,10 @@ export const StoryFragment = (props: { id: string }) => {
 
   return (
     <>
-      {($editMode?.mode === `settings` || $editMode?.mode === `insert`) && (
+      {$editMode?.mode === `settings` && (
+        <div className="fixed inset-0 z-[8999]"></div>
+      )}
+      {$editMode?.mode === `insert` && (
         <div className="fixed inset-0 bg-black/95 z-[8999]"></div>
       )}
       <div

@@ -1,6 +1,7 @@
 import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { classNames } from "../../utils/helpers";
+import { handleToggleOn } from "../../utils/storykeep";
 import {
   paneInit,
   paneSlug,
@@ -18,6 +19,7 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneFiles,
+  editModeStore,
 } from "../../store/storykeep";
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
@@ -192,18 +194,29 @@ const Pane = (props: {
             </div>
           );
         case "bgPane":
-          console.log(`intercept bgPane`, toolMode);
+          if (toolMode === `styles`)
+            return (
+              <div
+                key={`bgPane-${index}`}
+                className="relative"
+                title="Style this shape"
+              >
+                <BgPane payload={fragment} viewportKey={viewportKey} />
+                <div
+                  onClick={onClick}
+                  className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-50 hover:outline-white
+                   outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
+                   mix-blend-exclusion"
+                />
+              </div>
+            );
           return (
             <div
               key={`bgpane-${index}`}
               className="relative w-full h-auto justify-self-start"
               style={{ gridArea: "1/1/1/1" }}
             >
-              <BgPane
-                payload={fragment}
-                viewportKey={viewportKey}
-                //                toolMode={toolMode}
-              />
+              <BgPane payload={fragment} viewportKey={viewportKey} />
             </div>
           );
         default:
@@ -213,11 +226,20 @@ const Pane = (props: {
     [id, memoizedPaneData, queueUpdate, viewportKey, toolMode, toolAddMode]
   );
 
-  if (!isClient) return null;
-
   const bgColourStyle = memoizedPaneData.bgColour
     ? { backgroundColor: memoizedPaneData.bgColour }
     : {};
+
+  const onClick = () => {
+    editModeStore.set({
+      id: id,
+      mode: `styles`,
+      type: `break`,
+    });
+    handleToggleOn(`styles`);
+  };
+
+  if (!isClient) return null;
 
   return (
     <div className="relative">

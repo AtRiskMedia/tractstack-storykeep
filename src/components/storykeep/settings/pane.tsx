@@ -5,20 +5,16 @@ import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
 import PaneHeightOffset from "../fields/PaneHeightOffset";
 import PaneHeightRatio from "../fields/PaneHeightRatio";
-import PaneFiles from "../fields/PaneFiles";
 import PaneImpression from "../fields/PaneImpression";
 import PaneBeliefs from "../fields/PaneBeliefs";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
   paneSlug,
-  paneMarkdownFragmentId,
-  paneFragmentMarkdown,
   paneIsHiddenPane,
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneCodeHook,
-  paneFiles,
 } from "../../../store/storykeep";
 import { cleanString, classNames } from "../../../utils/helpers";
 import type { ContentMap, StoreKey } from "../../../types";
@@ -28,7 +24,6 @@ export const PaneSettings = (props: {
   contentMap: ContentMap[];
 }) => {
   const { id, contentMap } = props;
-  const [activeTab, setActiveTab] = useState(`settings`);
   const usedSlugs = contentMap
     .filter(item => item.type === "Pane")
     .map(item => item.slug);
@@ -36,30 +31,16 @@ export const PaneSettings = (props: {
     useStoryKeepUtils(id, usedSlugs);
   const $paneTitle = useStore(paneTitle, { keys: [id] });
   const $paneSlug = useStore(paneSlug, { keys: [id] });
-  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
-  const markdownFragmentId = $paneMarkdownFragmentId[id]?.current;
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
-    keys: [markdownFragmentId],
-  });
-  const $paneFiles = useStore(paneFiles, { keys: [id] });
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
-  const hasFiles =
-    typeof $paneFiles[id].current.length === `number` &&
-    $paneFiles[id].current.length > 0;
-  const buttons =
-    $paneFragmentMarkdown[markdownFragmentId]?.current?.payload?.optionsPayload
-      ?.buttons;
-  const hasButtons = buttons ? Object.keys(buttons).length : false;
   const $paneIsHiddenPane = useStore(paneIsHiddenPane, { keys: [id] });
   const $paneHasOverflowHidden = useStore(paneHasOverflowHidden, {
     keys: [id],
   });
   const hasCodeHook = $paneCodeHook[id].current;
   const tabs = [`settings`, `advanced`, `beliefs`, `impression`];
-  if (hasCodeHook) tabs.push(`codeHook`);
-  if (hasButtons) tabs.push(`buttons`);
-  if (hasFiles) tabs.push(`images`);
+  if (hasCodeHook) tabs.unshift(`codeHook`);
+  const [activeTab, setActiveTab] = useState(tabs[0]);
 
   const handleUpdateStoreField = (storeKey: StoreKey, newValue: string) => {
     return updateStoreField(storeKey, newValue);
@@ -103,10 +84,8 @@ export const PaneSettings = (props: {
                       : tab === `codeHook`
                         ? `Manage Code Hook`
                         : tab === `buttons`
-                          ? `Buttons`
-                          : tab === `images`
-                            ? `Images`
-                            : ``}
+                          ? `Images`
+                          : ``}
             </button>
           ))}
         </nav>
@@ -251,12 +230,6 @@ export const PaneSettings = (props: {
         </div>
       ) : activeTab === `codeHook` ? (
         <></>
-      ) : activeTab === `buttons` ? (
-        <></>
-      ) : activeTab === `images` ? (
-        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
-          <PaneFiles id={id} />
-        </div>
       ) : null}
     </div>
   );

@@ -728,16 +728,40 @@ export const PaneAstStyles = (props: {
               )}
             </div>
           )}
-          <button
-            className="my-2 underline"
-            title="Add a Style to this"
-            onClick={() => {
-              setSelectedStyle(null);
-              setAddClass(true);
-            }}
-          >
-            ADD STYLE
-          </button>
+          <span className="flex gap-x-6">
+            <button
+              className="my-2 underline"
+              title="Add a Style to this"
+              onClick={() => {
+                setSelectedStyle(null);
+                setAddClass(true);
+              }}
+            >
+              ADD STYLE
+            </button>
+            {activeTag === `img` && (
+              <button
+                className="my-2 underline"
+                title="Edit Image Metadata"
+                onClick={() => {
+                  console.log(`todo: NOT YET IMPLEMENTED`);
+                }}
+              >
+                IMAGE DESCRIPTION
+              </button>
+            )}
+            {activeTag === `code` && (
+              <button
+                className="my-2 underline"
+                title="Configure Widget"
+                onClick={() => {
+                  console.log(`todo: NOT YET IMPLEMENTED`);
+                }}
+              >
+                CONFIGURE WIDGET
+              </button>
+            )}
+          </span>
         </div>
       </div>
       <div

@@ -35,6 +35,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
       ($editMode?.type === `pane` && $editMode?.mode === `insert`) ||
       ($editMode?.type === `storyfragment` &&
         $storyFragmentInit[$editMode.id].init) ||
+      ($editMode?.type === `break` && $paneInit[$editMode.id].init) ||
       ($editMode?.type === `pane` && $paneInit[$editMode.id].init)
     )
       setIsClient(true);
@@ -132,6 +133,11 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
             targetId={$editMode.targetId}
             type={type}
           />
+        ) : $editMode?.type === `break` && $editMode?.mode === `styles` ? (
+          <div>
+            this is long text to fill space while there isn't proper content yet
+            for this section
+          </div>
         ) : null}
       </div>
     </div>

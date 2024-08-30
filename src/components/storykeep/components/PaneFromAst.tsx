@@ -194,7 +194,7 @@ const PaneFromAst = ({
 
   const handleToolModeLinkClick = useCallback(() => {
     updateLastInteracted(paneId);
-    console.log(`NOT YET IMPLEMENTED`);
+    console.log(`todo: NOT YET IMPLEMENTED`);
     //editModeStore.set({
     //  id: paneId,
     //  mode: `styles`,

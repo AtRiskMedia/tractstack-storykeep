@@ -251,10 +251,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
       if (!store) return;
       const currentStoreValue = store.get();
       const currentField = currentStoreValue[id];
-      console.log(storeKey, id, currentField);
-      console.log(currentStoreValue);
       if (currentField && currentField.history.length > 1) {
-        console.log(currentField.history[0].value);
         store.setKey(id, {
           current: currentField.history[0].value,
           original: currentField.original,
@@ -262,7 +259,6 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
         });
       }
       if (currentField && currentField.history.length === 1) {
-        console.log(`origin`);
         store.setKey(id, {
           current: currentField.original,
           original: currentField.original,

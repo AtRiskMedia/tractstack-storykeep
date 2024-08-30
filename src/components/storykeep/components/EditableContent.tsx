@@ -53,28 +53,20 @@ const EditableContent = ({
       if (!markdownFragmentId) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
-
+      const newBody = updateMarkdownElement(
+        $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
+        newContent,
+        tag,
+        outerIdx,
+        idx
+      );
       updateStoreField("paneFragmentMarkdown", {
         ...($paneFragmentMarkdown[markdownFragmentId]?.current || {}),
         markdown: {
           ...($paneFragmentMarkdown[markdownFragmentId]?.current?.markdown ||
             {}),
-          body: updateMarkdownElement(
-            $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
-            newContent,
-            tag,
-            outerIdx,
-            idx
-          ),
-          htmlAst: markdownToHtmlAst(
-            updateMarkdownElement(
-              $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
-              newContent,
-              tag,
-              outerIdx,
-              idx
-            )
-          ),
+          body: newBody,
+          htmlAst: markdownToHtmlAst(newBody),
         },
       });
     },

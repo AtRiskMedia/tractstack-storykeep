@@ -22,6 +22,7 @@ import {
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
 import { tagTitles } from "../../../constants";
+import ImageMeta from "../fields/ImageMeta";
 import type {
   ClassNamesPayloadInnerDatum,
   PaneAstTargetId,
@@ -44,6 +45,7 @@ export const PaneAstStyles = (props: {
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
+  const [imageMeta, setImageMeta] = useState(false);
   const [query, setQuery] = useState("");
   const [addClass, setAddClass] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -611,6 +613,7 @@ export const PaneAstStyles = (props: {
                   aria-current={tab.tag === activeTag ? "page" : undefined}
                   onClick={() => {
                     setActiveTag(tab.tag);
+                    setImageMeta(false);
                     setSelectedStyle(null);
                   }}
                   className={classNames(
@@ -641,18 +644,42 @@ export const PaneAstStyles = (props: {
           </div>
 
           <hr />
-          {activeTag && ![`parent`, `modal`].includes(activeTag) && (
-            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              {classNamesPayload?.classes &&
-              Object.keys(classNamesPayload.classes).length ? (
-                Object.keys(classNamesPayload.classes).map(className =>
-                  ClassTag(className)
-                )
-              ) : (
-                <span>No styles</span>
-              )}
-            </div>
-          )}
+          {!imageMeta &&
+            activeTag &&
+            ![`parent`, `modal`].includes(activeTag) && (
+              <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+                {classNamesPayload?.classes &&
+                Object.keys(classNamesPayload.classes).length ? (
+                  Object.keys(classNamesPayload.classes).map(className =>
+                    ClassTag(className)
+                  )
+                ) : (
+                  <span>No styles</span>
+                )}
+              </div>
+            )}
+          {imageMeta &&
+            activeTag &&
+            activeTag === `img` &&
+            typeof targetId?.globalNth === `number` &&
+            typeof targetId?.idx === `number` && (
+              <>
+                <ImageMeta
+                  paneId={targetId.paneId}
+                  outerIdx={targetId.outerIdx}
+                  idx={targetId.idx}
+                />
+                <button
+                  className="my-2 underline"
+                  title="Edit Image Metadata"
+                  onClick={() => {
+                    setImageMeta(false);
+                  }}
+                >
+                  STYLE IMAGE
+                </button>
+              </>
+            )}
 
           {activeTag === `parent` && (
             <>
@@ -728,40 +755,42 @@ export const PaneAstStyles = (props: {
               )}
             </div>
           )}
-          <span className="flex gap-x-6">
-            <button
-              className="my-2 underline"
-              title="Add a Style to this"
-              onClick={() => {
-                setSelectedStyle(null);
-                setAddClass(true);
-              }}
-            >
-              ADD STYLE
-            </button>
-            {activeTag === `img` && (
+          {!imageMeta && (
+            <span className="flex gap-x-6">
               <button
                 className="my-2 underline"
-                title="Edit Image Metadata"
+                title="Add a Style to this"
                 onClick={() => {
-                  console.log(`todo: NOT YET IMPLEMENTED`);
+                  setSelectedStyle(null);
+                  setAddClass(true);
                 }}
               >
-                IMAGE DESCRIPTION
+                ADD STYLE
               </button>
-            )}
-            {activeTag === `code` && (
-              <button
-                className="my-2 underline"
-                title="Configure Widget"
-                onClick={() => {
-                  console.log(`todo: NOT YET IMPLEMENTED`);
-                }}
-              >
-                CONFIGURE WIDGET
-              </button>
-            )}
-          </span>
+              {activeTag === `img` && (
+                <button
+                  className="my-2 underline"
+                  title="Edit Image Metadata"
+                  onClick={() => {
+                    setImageMeta(true);
+                  }}
+                >
+                  IMAGE DESCRIPTION
+                </button>
+              )}
+              {activeTag === `code` && (
+                <button
+                  className="my-2 underline"
+                  title="Configure Widget"
+                  onClick={() => {
+                    console.log(`todo: NOT YET IMPLEMENTED`);
+                  }}
+                >
+                  CONFIGURE WIDGET
+                </button>
+              )}
+            </span>
+          )}
         </div>
       </div>
       <div

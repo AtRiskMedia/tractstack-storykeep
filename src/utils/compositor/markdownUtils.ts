@@ -182,7 +182,11 @@ function processMarkdownElement(
         }
         currentOuterIdx++;
       }
-    } else if (/^\d+\.\s/.test(line) || /^-\s/.test(line)) {
+    } else if (
+      /^\d+\.\s/.test(line) ||
+      /^\*\s/.test(line) ||
+      /^-\s/.test(line)
+    ) {
       // List item handling
       if (!inList) {
         inList = true;
@@ -195,7 +199,7 @@ function processMarkdownElement(
           } else if (action === "update" && newContent) {
             const prefix = /^\d+\.\s/.test(line)
               ? line.match(/^\d+\./)?.at(0) ?? "1."
-              : "-";
+              : line[0];
             lines[i] = `${prefix} ${newContent}`;
             return lines.join("\n");
           }

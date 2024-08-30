@@ -57,7 +57,7 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
     const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
     if (oldKey === newKey) return true;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { [oldKey]: _, ...rest } = beliefs;
+    //const { [oldKey]: _, ...rest } = beliefs;
     return true;
   };
 
@@ -183,7 +183,9 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                 <ContentEditableField
                   id={`belief-key-${isHeld ? "held" : "withheld"}-${key}`}
                   value={key}
-                  onChange={newValue => updateBeliefKey(isHeld, key, newValue)}
+                  onChange={() => {
+                    return true;
+                  }}
                   onEditingChange={editing =>
                     handleEditingChange(isHeld, key, null, editing)
                   }
@@ -200,7 +202,9 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                         <ContentEditableField
                           id={`belief-value-${isHeld ? "held" : "withheld"}-${key}-${valueIndex}`}
                           value={value}
-                          onChange={() => updateBeliefValue()}
+                          onChange={() => {
+                            return true;
+                          }}
                           onEditingChange={editing =>
                             handleEditingChange(
                               isHeld,
@@ -217,7 +221,7 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                             onClick={() =>
                               removeBeliefValue(isHeld, key, valueIndex)
                             }
-                            className="ml-1 text-myorange hover:text-myorange/80"
+                            className="ml-1 text-myorange hover:text-black"
                             title="Remove value"
                           >
                             <XMarkIcon className="h-4 w-4" />
@@ -225,7 +229,7 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                           {valueIndex === values.length - 1 && (
                             <button
                               onClick={() => addBeliefValue(isHeld, key)}
-                              className="text-mygreen hover:text-mygreen/80"
+                              className="text-mydarkgrey hover:text-black"
                               title="Add value"
                             >
                               <PlusIcon className="h-4 w-4" />

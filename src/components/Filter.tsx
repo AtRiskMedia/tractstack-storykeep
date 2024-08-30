@@ -5,8 +5,8 @@ import type { BeliefStore, BeliefDatum } from "../types";
 
 const Filter = (props: {
   id: string;
-  heldBeliefsFilter: BeliefDatum[];
-  withheldBeliefsFilter: BeliefDatum[];
+  heldBeliefsFilter: BeliefDatum;
+  withheldBeliefsFilter: BeliefDatum;
 }) => {
   const { id, heldBeliefsFilter, withheldBeliefsFilter } = props;
   const $heldBeliefsAll = useStore(heldBeliefs);

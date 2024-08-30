@@ -355,7 +355,9 @@ export interface OptionsPayloadDatum {
     tablet?: ClassNamesPayloadValue;
     mobile?: ClassNamesPayloadValue;
   };
-  buttons?: ButtonData;
+  buttons?: {
+    [key: string]: ButtonData;
+  };
   modal?: {
     [key: string]: {
       zoomFactor: number;

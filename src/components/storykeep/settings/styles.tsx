@@ -23,6 +23,7 @@ import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
 import { tagTitles } from "../../../constants";
 import ImageMeta from "../fields/ImageMeta";
+import LinksMeta from "../fields/LinksMeta";
 import type {
   ClassNamesPayloadInnerDatum,
   PaneAstTargetId,
@@ -46,6 +47,7 @@ export const PaneAstStyles = (props: {
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
   const [imageMeta, setImageMeta] = useState(false);
+  const [linkMeta, setLinkMeta] = useState(false);
   const [query, setQuery] = useState("");
   const [addClass, setAddClass] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -645,6 +647,7 @@ export const PaneAstStyles = (props: {
 
           <hr />
           {!imageMeta &&
+            !linkMeta &&
             activeTag &&
             ![`parent`, `modal`].includes(activeTag) && (
               <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
@@ -658,27 +661,45 @@ export const PaneAstStyles = (props: {
                 )}
               </div>
             )}
+          {linkMeta && (
+            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+              <LinksMeta paneId={targetId.paneId} />
+              <span className="flex gap-x-6 w-full">
+                <button
+                  className="my-2 underline"
+                  title="Close Links panel"
+                  onClick={() => {
+                    setLinkMeta(false);
+                  }}
+                >
+                  CLOSE LINKS
+                </button>
+              </span>
+            </div>
+          )}
           {imageMeta &&
             activeTag &&
             activeTag === `img` &&
             typeof targetId?.globalNth === `number` &&
             typeof targetId?.idx === `number` && (
-              <>
+              <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
                 <ImageMeta
                   paneId={targetId.paneId}
                   outerIdx={targetId.outerIdx}
                   idx={targetId.idx}
                 />
-                <button
-                  className="my-2 underline"
-                  title="Edit Image Metadata"
-                  onClick={() => {
-                    setImageMeta(false);
-                  }}
-                >
-                  STYLE IMAGE
-                </button>
-              </>
+                <span className="flex gap-x-6 w-full">
+                  <button
+                    className="my-2 underline"
+                    title="Edit Image Metadata"
+                    onClick={() => {
+                      setImageMeta(false);
+                    }}
+                  >
+                    STYLE IMAGE
+                  </button>
+                </span>
+              </div>
             )}
 
           {activeTag === `parent` && (
@@ -755,7 +776,7 @@ export const PaneAstStyles = (props: {
               )}
             </div>
           )}
-          {!imageMeta && (
+          {!imageMeta && !linkMeta && (
             <span className="flex gap-x-6">
               <button
                 className="my-2 underline"
@@ -789,6 +810,19 @@ export const PaneAstStyles = (props: {
                   CONFIGURE WIDGET
                 </button>
               )}
+              {markdownLookup?.linksLookup[targetId.outerIdx] &&
+                Object.keys(markdownLookup.linksLookup[targetId.outerIdx])
+                  .length && (
+                  <button
+                    className="my-2 underline"
+                    title="Manage Links"
+                    onClick={() => {
+                      setLinkMeta(true);
+                    }}
+                  >
+                    MANAGE LINKS
+                  </button>
+                )}
             </span>
           )}
         </div>

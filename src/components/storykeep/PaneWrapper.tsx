@@ -104,8 +104,8 @@ const PaneWrapper = (props: {
   }, [$editMode, id, paneElement]);
 
   const toggleOffEditModal = useCallback(() => {
-    editModeStore.set(null);
     handleToggleOff();
+    editModeStore.set(null);
   }, []);
 
   const handleEditModeToggle = () => {
@@ -200,20 +200,14 @@ const PaneWrapper = (props: {
         ) : (
           Content
         )}
-        {toolMode === `settings` && (
-          <div className="absolute inset-0">
-            <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-                        text-black bg-mywhite p-2.5 rounded-sm shadow-md
-                        text-xl md:text-3xl font-action mx-6
-                        opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                        invisible hover:visible"
-            >
-              {$editMode?.id === id ? (
-                <span>click to close panel</span>
-              ) : (
-                <span>click for design &amp; set-up options</span>
-              )}
+        {toolMode === "settings" && (
+          <div className="absolute inset-0 hover:backdrop-blur-sm hover:bg-white/50 hover:dark:bg-black/50 flex items-center justify-center group z-104 cursor-pointer pointer-events-auto">
+            <div className="relative">
+              <div className="bg-yellow-300 p-4 rounded-md invisible group-hover:visible">
+                <h2 className="text-xl text-black font-bold mb-2">
+                  Configure this Pane
+                </h2>
+              </div>
             </div>
           </div>
         )}

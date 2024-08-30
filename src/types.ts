@@ -175,7 +175,6 @@ export type EditModeValue = {
     | "tractstack"
     | "resource"
     | "menu"
-    | "break"
     | "file";
   targetId?: PaneAstTargetId;
   /* eslint-disable @typescript-eslint/no-explicit-any */

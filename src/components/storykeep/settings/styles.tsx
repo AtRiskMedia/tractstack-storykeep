@@ -642,7 +642,7 @@ export const PaneAstStyles = (props: {
 
           <hr />
           {activeTag && ![`parent`, `modal`].includes(activeTag) && (
-            <div className="my-4 flex flex-wrap gap-x-2 gap-y-1.5">
+            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
               {classNamesPayload?.classes &&
               Object.keys(classNamesPayload.classes).length ? (
                 Object.keys(classNamesPayload.classes).map(className =>
@@ -694,7 +694,7 @@ export const PaneAstStyles = (props: {
                 </button>
               </div>
               <hr />
-              <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-1.5">
+              <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
                 {parentClassNamesPayload?.classes &&
                 Array.isArray(parentClassNamesPayload?.classes) &&
                 Object.keys(parentClassNamesPayload?.classes[parentLayer])

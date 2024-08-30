@@ -7,6 +7,7 @@ import PaneHeightOffset from "../fields/PaneHeightOffset";
 import PaneHeightRatio from "../fields/PaneHeightRatio";
 import PaneImpression from "../fields/PaneImpression";
 import PaneBeliefs from "../fields/PaneBeliefs";
+import CodeHookSettings from "../fields/CodeHook";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
@@ -229,7 +230,9 @@ export const PaneSettings = (props: {
           <PaneImpression id={id} />
         </div>
       ) : activeTab === `codeHook` ? (
-        <></>
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <CodeHookSettings id={id} />
+        </div>
       ) : null}
     </div>
   );

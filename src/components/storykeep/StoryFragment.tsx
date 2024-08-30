@@ -15,7 +15,7 @@ import {
   toolAddModeStore,
   editModeStore,
 } from "../../store/storykeep";
-import { useStoryKeepUtils } from "../../utils/storykeep";
+import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
 
 import PaneWrapper from "./PaneWrapper";
 import DesignNewPane from "./components/DesignNewPane";
@@ -239,7 +239,11 @@ export const StoryFragment = (props: { id: string }) => {
   return (
     <>
       {$editMode?.mode === `settings` && (
-        <div className="fixed inset-0 z-[8999]"></div>
+        <div
+          title="Close panel"
+          onClick={handleToggleOff}
+          className="fixed inset-0 z-[8999] pointer-events-auto cursor-pointer"
+        ></div>
       )}
       {$editMode?.mode === `insert` && (
         <div className="fixed inset-0 bg-black/95 z-[8999]"></div>

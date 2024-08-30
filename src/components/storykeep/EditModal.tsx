@@ -9,7 +9,6 @@ import {
   activeEditModalStore,
 } from "../../store/storykeep";
 import { StoryFragmentSettings } from "./settings/storyfragment";
-import { CodeHookSettings } from "./settings/codehook";
 import { PaneSettings } from "./settings/pane";
 import { PaneInsert } from "./settings/paneInsert";
 import { PaneAstStyles } from "./settings/styles";
@@ -35,7 +34,6 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
       ($editMode?.type === `pane` && $editMode?.mode === `insert`) ||
       ($editMode?.type === `storyfragment` &&
         $storyFragmentInit[$editMode.id].init) ||
-      ($editMode?.type === `break` && $paneInit[$editMode.id].init) ||
       ($editMode?.type === `pane` && $paneInit[$editMode.id].init)
     )
       setIsClient(true);
@@ -100,8 +98,6 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
           <StoryFragmentSettings id={$editMode.id} />
-        ) : $editMode?.type === `pane` && $editMode?.mode === `codehook` ? (
-          <CodeHookSettings id={$editMode.id} />
         ) : $editMode?.type === `pane` &&
           $editMode?.mode === `insert` &&
           typeof $editMode?.payload !== `undefined` ? (
@@ -133,7 +129,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
             targetId={$editMode.targetId}
             type={type}
           />
-        ) : $editMode?.type === `break` && $editMode?.mode === `styles` ? (
+        ) : $editMode?.type === `pane` && $editMode?.mode === `break` ? (
           <div>
             this is long text to fill space while there isn't proper content yet
             for this section

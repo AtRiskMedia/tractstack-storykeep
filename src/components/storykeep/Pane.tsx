@@ -233,8 +233,8 @@ const Pane = (props: {
   const onClick = () => {
     editModeStore.set({
       id: id,
-      mode: `styles`,
-      type: `break`,
+      type: `pane`,
+      mode: `break`,
     });
     handleToggleOn(`styles`);
   };
@@ -255,17 +255,6 @@ const Pane = (props: {
       >
         {memoizedPaneData.fragments.map(renderFragment)}
       </div>
-      {toolMode === "settings" && (
-        <div className="absolute inset-0 hover:backdrop-blur-sm hover:bg-white/50 hover:dark:bg-black/50 flex items-center justify-center group z-104 cursor-pointer pointer-events-auto">
-          <div className="relative">
-            <div className="bg-yellow-300 p-4 rounded-md invisible group-hover:visible">
-              <h2 className="text-xl text-black font-bold mb-2">
-                Configure this Pane
-              </h2>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

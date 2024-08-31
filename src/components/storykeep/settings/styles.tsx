@@ -305,7 +305,7 @@ export const PaneAstStyles = (props: {
               thisClass
             ]
           : !activeTagData.hasOverride
-            ? (payloadForTag.classes as Record<string, Tuple>)[thisClass]
+            ? (payloadForTag?.classes as Record<string, Tuple>)[thisClass]
             : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
       if (thisTuple) {
         const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
@@ -400,7 +400,7 @@ export const PaneAstStyles = (props: {
         ) {
           (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
             selectedClass
-          ] = ["", "", ""];
+          ] = [""];
         }
       } else if (payloadForTag && !(selectedClass in payloadForTag.classes)) {
         if (
@@ -408,8 +408,6 @@ export const PaneAstStyles = (props: {
           !Array.isArray(payloadForTag.classes)
         ) {
           (payloadForTag.classes as Record<string, Tuple>)[selectedClass] = [
-            "",
-            "",
             "",
           ];
         }
@@ -633,9 +631,12 @@ export const PaneAstStyles = (props: {
             </nav>
             {hasHistory ? (
               <button
-                onClick={() =>
-                  handleUndo("paneFragmentMarkdown", markdownFragmentId)
-                }
+                onClick={() => {
+                  handleUndo("paneFragmentMarkdown", markdownFragmentId);
+                  setImageMeta(false);
+                  setLinkMeta(null);
+                  setSelectedStyle(null);
+                }}
                 className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
                 disabled={
                   $paneFragmentMarkdown[markdownFragmentId]?.history.length ===

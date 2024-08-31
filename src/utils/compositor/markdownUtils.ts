@@ -998,7 +998,8 @@ export function updateViewportTuple(
       break;
     case "tablet":
       if (tuple.length > 0) {
-        result[1] = newValue !== tuple[0] ? newValue : tuple[0];
+        if (result[0] === ``) result[0] = newValue;
+        else result[1] = newValue !== tuple[0] ? newValue : tuple[0];
       } else {
         result[0] = newValue;
         result[1] = newValue;
@@ -1006,7 +1007,8 @@ export function updateViewportTuple(
       break;
     case "desktop":
       if (tuple.length === 1) {
-        result[2] = newValue !== tuple[0] ? newValue : tuple[0];
+        if (result[0] === ``) result[0] = newValue;
+        else result[2] = newValue !== tuple[0] ? newValue : tuple[0];
       } else if (tuple.length === 2) {
         result[2] = newValue !== tuple[1] ? newValue : tuple[1];
       } else {

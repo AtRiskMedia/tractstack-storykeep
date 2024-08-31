@@ -108,7 +108,7 @@ const ImageMeta = (props: {
           onChange={handleAltTextChange}
           onEditingChange={handleEditingChange}
           placeholder="Enter image description"
-          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          className="px-2.5 mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
         />
       </div>
       <div>
@@ -119,7 +119,7 @@ const ImageMeta = (props: {
           Image Filename
         </label>
         <div className="mt-1 flex items-center">
-          <span className="h-10 max-w-md overflow-hidden text-sm text-mydarkgrey">
+          <span className="px-2.5 h-10 max-w-md overflow-hidden text-sm text-mydarkgrey">
             {filename}
           </span>
         </div>

@@ -373,7 +373,7 @@ const PaneFromAst = ({
           : isTextContainerItem
             ? `Style this text`
             : `UNKNOWN`;
-      if (tip)
+      if (tip && toolMode === `styles`)
         return (
           <EditableInnerElementWrapper
             id={thisId}
@@ -383,6 +383,7 @@ const PaneFromAst = ({
             {child}
           </EditableInnerElementWrapper>
         );
+      else return child;
     }
     if (showOverlay) {
       if (toolMode === `eraser`)

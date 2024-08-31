@@ -163,6 +163,7 @@ export type PaneAstTargetId = {
   globalNth: number | null;
   tag: "p" | "h2" | "h3" | "h4" | "li";
   paneId: string;
+  buttonTarget?: string;
 };
 
 export type EditModeValue = {

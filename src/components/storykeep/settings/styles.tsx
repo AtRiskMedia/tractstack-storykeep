@@ -47,7 +47,7 @@ export const PaneAstStyles = (props: {
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
   const [imageMeta, setImageMeta] = useState(false);
-  const [linkMeta, setLinkMeta] = useState(false);
+  const [linkMeta, setLinkMeta] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [addClass, setAddClass] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -70,10 +70,6 @@ export const PaneAstStyles = (props: {
   const hasHistory = !!$paneFragmentMarkdown[markdownFragmentId].history.length;
   const hasModal = markdownDatum.payload.isModal;
   const markdownLookup = useMemo(() => {
-    console.log(
-      `generating markdownLookup from`,
-      markdownDatum?.markdown?.htmlAst
-    );
     return markdownDatum?.markdown?.htmlAst
       ? generateMarkdownLookup(markdownDatum.markdown.htmlAst)
       : null;
@@ -543,6 +539,7 @@ export const PaneAstStyles = (props: {
     setMobileValue(``);
     setTabletValue(``);
     setDesktopValue(``);
+    if (targetId.buttonTarget) setLinkMeta(targetId.buttonTarget);
   }, [id, targetId]);
 
   const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {
@@ -597,7 +594,7 @@ export const PaneAstStyles = (props: {
   }, [activeTagData]);
 
   if (!tabs) return null;
-  console.log(markdownLookup?.linksLookup);
+
   return (
     <div
       className={classNames(
@@ -620,7 +617,7 @@ export const PaneAstStyles = (props: {
                   onClick={() => {
                     setActiveTag(tab.tag);
                     setImageMeta(false);
-                    setLinkMeta(false);
+                    setLinkMeta(null);
                     setSelectedStyle(null);
                   }}
                   className={classNames(
@@ -668,16 +665,16 @@ export const PaneAstStyles = (props: {
             )}
           {linkMeta && (
             <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              <LinksMeta paneId={targetId.paneId} />
+              <LinksMeta paneId={targetId.paneId} target={linkMeta} />
               <span className="flex gap-x-6 w-full">
                 <button
                   className="my-2 underline"
                   title="Close Links panel"
                   onClick={() => {
-                    setLinkMeta(false);
+                    setLinkMeta(null);
                   }}
                 >
-                  CLOSE LINKS
+                  BACK
                 </button>
               </span>
             </div>
@@ -823,7 +820,7 @@ export const PaneAstStyles = (props: {
                     className="my-2 underline"
                     title="Manage Links"
                     onClick={() => {
-                      setLinkMeta(true);
+                      setLinkMeta(targetId.buttonTarget || `*`);
                       setAddClass(false);
                     }}
                   >

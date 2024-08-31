@@ -193,15 +193,23 @@ const PaneFromAst = ({
   }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);
 
   const handleToolModeLinkClick = useCallback(() => {
+    const thisTag = isImage ? `img` : isWidget ? `code` : Tag;
+    const thisGlobalNth = getGlobalNth(thisTag, idx, outerIdx, markdownLookup);
     updateLastInteracted(paneId);
-    console.log(`todo: NOT YET IMPLEMENTED`);
-    //editModeStore.set({
-    //  id: paneId,
-    //  mode: `styles`,
-    //  type: `pane`,
-    //  targetId: { outerIdx, idx, globalNth: thisGlobalNth, tag: thisTag },
-    //});
-    //handleToggleOn(`styles`);
+    editModeStore.set({
+      id: paneId,
+      mode: `styles`,
+      type: `pane`,
+      targetId: {
+        paneId,
+        outerIdx,
+        idx,
+        globalNth: thisGlobalNth,
+        tag: thisTag,
+        buttonTarget,
+      },
+    });
+    handleToggleOn(`styles`);
   }, [paneId]);
 
   // Extract class names
@@ -234,6 +242,7 @@ const PaneFromAst = ({
     typeof payload?.buttonData[thisAst.properties.href] !== "undefined"
       ? payload.buttonData[thisAst.properties.href]
       : undefined;
+  const buttonTarget = buttonPayload && thisAst.properties.href;
   const callbackPayload =
     buttonPayload?.callbackPayload && lispLexer(buttonPayload?.callbackPayload);
   const targetUrl = callbackPayload && preParseAction(callbackPayload);

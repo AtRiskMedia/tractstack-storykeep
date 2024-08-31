@@ -26,8 +26,8 @@ interface LinkData extends ButtonData {
   index: number;
 }
 
-const LinksMeta = (props: { paneId: string }) => {
-  const { paneId } = props;
+const LinksMeta = (props: { paneId: string; target: string | null }) => {
+  const { paneId, target } = props;
   const [index, setIndex] = useState(0);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
@@ -79,6 +79,7 @@ const LinksMeta = (props: { paneId: string }) => {
               idx: linkInfo ? linkInfo.childNth : 0,
               index: count,
             };
+            if (target && target === href) setIndex(count);
             count++;
           }
         });

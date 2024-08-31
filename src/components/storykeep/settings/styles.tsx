@@ -47,7 +47,8 @@ export const PaneAstStyles = (props: {
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
   const [imageMeta, setImageMeta] = useState(false);
-  const [linkMeta, setLinkMeta] = useState<string | null>(null);
+  const [linkMeta, setLinkMeta] = useState<string>(``);
+  const [linkStyles, setLinkStyles] = useState<`button` | `hover` | null>(null);
   const [query, setQuery] = useState("");
   const [addClass, setAddClass] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
@@ -83,6 +84,11 @@ export const PaneAstStyles = (props: {
       markdownDatum.payload.textShapeOutsideTablet !== `none`) ||
     (markdownDatum.payload.textShapeOutsideMobile &&
       markdownDatum.payload.textShapeOutsideMobile !== `none`);
+  const isLink =
+    (typeof targetId.idx === `number` &&
+      targetId.tag === `a` &&
+      typeof targetId.buttonTarget === `string`) ||
+    (linkMeta && linkMeta !== `*`);
   const isListItem =
     typeof targetId.idx === `number`
       ? typeof markdownLookup?.listItemsLookup[targetId.outerIdx] ===
@@ -109,11 +115,6 @@ export const PaneAstStyles = (props: {
     markdownDatum?.payload.optionsPayload.classNamesPayload.parent;
   const modalClassNamesPayload =
     markdownDatum?.payload.optionsPayload.classNamesPayload.modal;
-  //const parentLayers =
-  //  (!hasTextShapeOutside &&
-  //    parentClassNamesPayload &&
-  //    Object.keys(parentClassNamesPayload).length) ||
-  //  false;
   const imageClassNamesPayload =
     markdownDatum.payload.optionsPayload.classNamesPayload.img;
   const codeItemClassNamesPayload =
@@ -122,14 +123,44 @@ export const PaneAstStyles = (props: {
     markdownDatum.payload.optionsPayload.classNamesPayload.li;
   const outerTagClassNamesPayload =
     thisTag && markdownDatum.payload.optionsPayload.classNamesPayload[thisTag];
+  const linkTargetLookup =
+    typeof linkMeta === `string` ? linkMeta : targetId.buttonTarget;
+  const buttonClassNamesPayload =
+    isLink &&
+    linkStyles === `button` &&
+    linkTargetLookup &&
+    linkTargetLookup !== `*` &&
+    markdownDatum?.payload?.optionsPayload?.buttons
+      ? markdownDatum.payload.optionsPayload.buttons[linkTargetLookup]
+          .classNamesPayload.button
+      : isLink &&
+          linkStyles === `hover` &&
+          linkTargetLookup &&
+          linkTargetLookup !== `*` &&
+          markdownDatum?.payload?.optionsPayload?.buttons
+        ? markdownDatum.payload.optionsPayload.buttons[linkTargetLookup]
+            .classNamesPayload.hover
+        : null;
+
   const classNamesPayload =
-    activeTag === `img`
-      ? imageClassNamesPayload
-      : activeTag === `code`
-        ? codeItemClassNamesPayload
-        : activeTag === `li`
-          ? listItemClassNamesPayload
-          : outerTagClassNamesPayload;
+    isLink && buttonClassNamesPayload
+      ? buttonClassNamesPayload
+      : activeTag === `img`
+        ? imageClassNamesPayload
+        : activeTag === `code`
+          ? codeItemClassNamesPayload
+          : activeTag === `li`
+            ? listItemClassNamesPayload
+            : outerTagClassNamesPayload;
+
+  const removeLinkStyle = (className: string) => {
+    setSelectedStyle(null);
+    if (!confirm) setConfirm(className);
+    else {
+      setConfirm(null);
+      console.log(`TODO`, className);
+    }
+  };
 
   const removeStyle = (className: string) => {
     setSelectedStyle(null);
@@ -283,6 +314,14 @@ export const PaneAstStyles = (props: {
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(targetId.paneId);
     }
+  };
+
+  const handleFinalChangeLink = (
+    value: string,
+    mode: `button` | `hover`,
+    isNegative: boolean = false
+  ) => {
+    console.log(`TODO`, value, mode, isNegative);
   };
 
   const handleFinalChange = (
@@ -486,7 +525,9 @@ export const PaneAstStyles = (props: {
           <button
             className="ml-[-0.5rem] py-1 px-0.5 bg-myorange/10 text-myorange font-bold rounded-full hover:bg-myorange/50 hover:text-black peer-hover:invisible shadow"
             title="Remove style"
-            onClick={() => removeStyle(className)}
+            onClick={() =>
+              !isLink ? removeStyle(className) : removeLinkStyle(className)
+            }
           >
             <XMarkIcon className="w-3 h-6" />
           </button>
@@ -537,7 +578,7 @@ export const PaneAstStyles = (props: {
     setMobileValue(``);
     setTabletValue(``);
     setDesktopValue(``);
-    if (targetId.buttonTarget) setLinkMeta(targetId.buttonTarget);
+    if (targetId.buttonTarget && !linkMeta) setLinkMeta(targetId.buttonTarget);
   }, [id, targetId]);
 
   const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {
@@ -606,49 +647,58 @@ export const PaneAstStyles = (props: {
         )}
       >
         <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-          <div className="flex justify-between items-center">
-            <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
-              {tabs.map((tab: StyleTab, idx: number) => (
-                <button
-                  key={idx}
-                  aria-current={tab.tag === activeTag ? "page" : undefined}
-                  onClick={() => {
-                    setActiveTag(tab.tag);
-                    setImageMeta(false);
-                    setLinkMeta(null);
-                    setSelectedStyle(null);
-                  }}
-                  className={classNames(
-                    tab.tag === activeTag
-                      ? "text-black font-bold"
-                      : "text-mydarkgrey hover:text-black underline",
-                    "text-md"
-                  )}
+          {!linkMeta && (
+            <>
+              <div className="flex justify-between items-center">
+                <nav
+                  aria-label="Tabs"
+                  className="flex space-x-4 mt-4 mb-1 mr-6"
                 >
-                  {tab.name}
-                </button>
-              ))}
-            </nav>
-            {hasHistory ? (
-              <button
-                onClick={() => {
-                  handleUndo("paneFragmentMarkdown", markdownFragmentId);
-                  setImageMeta(false);
-                  setLinkMeta(null);
-                  setSelectedStyle(null);
-                }}
-                className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
-                disabled={
-                  $paneFragmentMarkdown[markdownFragmentId]?.history.length ===
-                  0
-                }
-              >
-                Undo
-              </button>
-            ) : null}
-          </div>
+                  {tabs.map((tab: StyleTab, idx: number) => (
+                    <button
+                      key={idx}
+                      aria-current={tab.tag === activeTag ? "page" : undefined}
+                      onClick={() => {
+                        setActiveTag(tab.tag);
+                        setImageMeta(false);
+                        setLinkMeta(``);
+                        setLinkStyles(null);
+                        setSelectedStyle(null);
+                      }}
+                      className={classNames(
+                        tab.tag === activeTag
+                          ? "text-black font-bold"
+                          : "text-mydarkgrey hover:text-black underline",
+                        "text-md"
+                      )}
+                    >
+                      {tab.name}
+                    </button>
+                  ))}
+                </nav>
+                {hasHistory ? (
+                  <button
+                    onClick={() => {
+                      handleUndo("paneFragmentMarkdown", markdownFragmentId);
+                      setImageMeta(false);
+                      setLinkMeta(``);
+                      setLinkStyles(null);
+                      setSelectedStyle(null);
+                    }}
+                    className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
+                    disabled={
+                      $paneFragmentMarkdown[markdownFragmentId]?.history
+                        .length === 0
+                    }
+                  >
+                    Undo
+                  </button>
+                ) : null}
+              </div>
 
-          <hr />
+              <hr />
+            </>
+          )}
           {!imageMeta &&
             !linkMeta &&
             activeTag &&
@@ -666,13 +716,71 @@ export const PaneAstStyles = (props: {
             )}
           {linkMeta && (
             <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              <LinksMeta paneId={targetId.paneId} target={linkMeta} />
+              {linkStyles && linkMeta !== `*` ? (
+                <div className="min-w-80">
+                  <span className="flex gap-x-6 w-full">
+                    <button
+                      className={classNames(
+                        linkStyles === `button` ? `font-bold` : `underline`,
+                        "my-2"
+                      )}
+                      title="Button Styles"
+                      onClick={() => {
+                        setLinkStyles(`button`);
+                      }}
+                    >
+                      Button Styles
+                    </button>
+                    <button
+                      className={classNames(
+                        linkStyles === `hover` ? `font-bold` : `underline`,
+                        "my-2"
+                      )}
+                      title="Hover Styles"
+                      onClick={() => {
+                        setLinkStyles(`hover`);
+                      }}
+                    >
+                      Hover Styles
+                    </button>
+                  </span>
+                  <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+                    {classNamesPayload?.classes &&
+                    Object.keys(classNamesPayload.classes).length ? (
+                      Object.keys(classNamesPayload.classes).map(className =>
+                        ClassTag(className)
+                      )
+                    ) : (
+                      <span>No styles</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <LinksMeta
+                  paneId={targetId.paneId}
+                  target={linkMeta}
+                  setLinkTarget={setLinkMeta}
+                />
+              )}
               <span className="flex gap-x-6 w-full">
+                <button
+                  className="my-2 underline"
+                  title={
+                    !linkStyles ? `Style this Link` : `Configure this Link`
+                  }
+                  onClick={() => {
+                    if (linkStyles) setLinkStyles(null);
+                    else setLinkStyles(`button`);
+                  }}
+                >
+                  {!linkStyles ? `STYLE THIS LINK` : `CONFIGURE THIS LINK`}
+                </button>
                 <button
                   className="my-2 underline"
                   title="Close Links panel"
                   onClick={() => {
-                    setLinkMeta(null);
+                    setLinkStyles(null);
+                    setLinkMeta(``);
                   }}
                 >
                   BACK
@@ -821,8 +929,10 @@ export const PaneAstStyles = (props: {
                     className="my-2 underline"
                     title="Manage Links"
                     onClick={() => {
-                      setLinkMeta(targetId.buttonTarget || `*`);
+                      setLinkMeta(linkMeta || targetId.buttonTarget || `*`);
+                      setLinkStyles(null);
                       setAddClass(false);
+                      if (thisTag) setActiveTag(thisTag);
                     }}
                   >
                     MANAGE LINKS
@@ -842,20 +952,22 @@ export const PaneAstStyles = (props: {
             <div className="px-6 py-4">
               <h4 className="text-lg">
                 <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
-                {activeTagData?.hasOverride ? (
+                {isLink || activeTagData?.hasOverride ? (
                   <span className="underline">this</span>
                 ) : (
                   <span className="underline">all</span>
                 )}{" "}
-                {tabs.length && tagTitles[tabs.at(0)!.tag]}
-                {!activeTagData?.hasOverride ? `s` : null}
+                {isLink ? `Button` : tabs.length && tagTitles[tabs.at(0)!.tag]}
+                {isLink ? null : !activeTagData?.hasOverride ? `s` : null}
               </h4>
 
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
                 <ViewportComboBox
                   value={mobileValue}
                   onChange={setMobileValue}
-                  onFinalChange={handleFinalChange}
+                  onFinalChange={() =>
+                    !isLink ? handleFinalChange : handleFinalChangeLink
+                  }
                   values={activeTagData?.values ?? []}
                   viewport="mobile"
                   allowNegative={activeTagData?.allowNegative ?? false}
@@ -864,7 +976,9 @@ export const PaneAstStyles = (props: {
                 <ViewportComboBox
                   value={tabletValue}
                   onChange={setTabletValue}
-                  onFinalChange={handleFinalChange}
+                  onFinalChange={() =>
+                    !isLink ? handleFinalChange : handleFinalChangeLink
+                  }
                   values={activeTagData?.values ?? []}
                   viewport="tablet"
                   allowNegative={activeTagData?.allowNegative}
@@ -873,7 +987,9 @@ export const PaneAstStyles = (props: {
                 <ViewportComboBox
                   value={desktopValue}
                   onChange={setDesktopValue}
-                  onFinalChange={handleFinalChange}
+                  onFinalChange={() =>
+                    !isLink ? handleFinalChange : handleFinalChangeLink
+                  }
                   values={activeTagData?.values ?? []}
                   viewport="desktop"
                   allowNegative={activeTagData?.allowNegative ?? false}

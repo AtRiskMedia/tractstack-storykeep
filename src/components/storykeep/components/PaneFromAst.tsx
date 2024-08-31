@@ -16,6 +16,7 @@ import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
 import StylesWrapper from "./StylesWrapper";
 import { handleToggleOn } from "../../../utils/storykeep";
+import { classNames } from "../../../utils/helpers";
 import type { MouseEvent, ReactNode } from "react";
 import type {
   ButtonData,
@@ -439,7 +440,10 @@ const PaneFromAst = ({
       <a
         target="_blank"
         rel="noreferrer"
-        className={buttonPayload?.className || injectClassNames}
+        className={classNames(
+          `pointer-events-none`,
+          buttonPayload?.className || injectClassNames
+        )}
         href={targetUrl || thisAst.properties.href}
       >
         {thisAst.children[0].value}
@@ -469,7 +473,10 @@ const PaneFromAst = ({
   ) {
     const child = (
       <AstToButton
-        className={buttonPayload.className || ""}
+        className={classNames(
+          `pointer-events-none`,
+          buttonPayload.className || ""
+        )}
         callbackPayload={callbackPayload}
         targetUrl={targetUrl}
         slug={slug}

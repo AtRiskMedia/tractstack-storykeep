@@ -18,6 +18,7 @@ import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdo
 import type { Root, Element } from "hast";
 import type { Root as MdastRoot } from "mdast";
 import type { ButtonData } from "../../../types";
+import type { Dispatch, SetStateAction } from "react";
 
 interface LinkData extends ButtonData {
   text: string;
@@ -26,8 +27,14 @@ interface LinkData extends ButtonData {
   index: number;
 }
 
-const LinksMeta = (props: { paneId: string; target: string | null }) => {
-  const { paneId, target } = props;
+interface LinksMetaProps {
+  paneId: string;
+  target: string | null;
+  setLinkTarget: Dispatch<SetStateAction<string>>;
+}
+
+const LinksMeta = (props: LinksMetaProps) => {
+  const { paneId, target, setLinkTarget } = props;
   const [index, setIndex] = useState(0);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
@@ -86,6 +93,8 @@ const LinksMeta = (props: { paneId: string; target: string | null }) => {
       }
       setLinks(initialLinks);
       setIsLoading(false);
+      if (target === `*` && Object.keys(initialLinks).length)
+        setLinkTarget(Object.keys(initialLinks)[0]);
     }
   }, [markdownFragment]);
 
@@ -231,11 +240,12 @@ const LinksMeta = (props: { paneId: string; target: string | null }) => {
     <div className="min-w-80">
       <div className="bg-myblue/5 text-md px-2 flex flex-wrap gap-x-2 gap-y-1.5">
         <span className="py-1">Link:</span>
-        {Object.keys(links).map((_, idx: number) => (
+        {Object.keys(links).map((linkKey, idx: number) => (
           <button
             key={idx}
             onClick={() => {
               setIndex(idx);
+              setLinkTarget(linkKey);
             }}
             className={classNames(
               "py-1 px-1.5 rounded-md",

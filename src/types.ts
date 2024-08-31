@@ -161,7 +161,7 @@ export type PaneAstTargetId = {
   outerIdx: number;
   idx: number | null;
   globalNth: number | null;
-  tag: "p" | "h2" | "h3" | "h4" | "li";
+  tag: "p" | "h2" | "h3" | "h4" | "li" | "a";
   paneId: string;
   buttonTarget?: string;
 };

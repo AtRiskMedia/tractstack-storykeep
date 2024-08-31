@@ -49,22 +49,6 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
     updateBeliefs(isHeld, updatedBeliefs);
   };
 
-  const updateBeliefKey = (
-    isHeld: boolean,
-    oldKey: string,
-    newKey: string
-  ): boolean => {
-    const beliefs = isHeld ? heldBeliefs : withheldBeliefs;
-    if (oldKey === newKey) return true;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    //const { [oldKey]: _, ...rest } = beliefs;
-    return true;
-  };
-
-  const updateBeliefValue = (): boolean => {
-    return true;
-  };
-
   const handleEditingChange = (
     isHeld: boolean,
     key: string,

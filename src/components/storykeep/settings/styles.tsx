@@ -70,6 +70,10 @@ export const PaneAstStyles = (props: {
   const hasHistory = !!$paneFragmentMarkdown[markdownFragmentId].history.length;
   const hasModal = markdownDatum.payload.isModal;
   const markdownLookup = useMemo(() => {
+    console.log(
+      `generating markdownLookup from`,
+      markdownDatum?.markdown?.htmlAst
+    );
     return markdownDatum?.markdown?.htmlAst
       ? generateMarkdownLookup(markdownDatum.markdown.htmlAst)
       : null;
@@ -593,7 +597,7 @@ export const PaneAstStyles = (props: {
   }, [activeTagData]);
 
   if (!tabs) return null;
-
+  console.log(markdownLookup?.linksLookup);
   return (
     <div
       className={classNames(
@@ -616,6 +620,7 @@ export const PaneAstStyles = (props: {
                   onClick={() => {
                     setActiveTag(tab.tag);
                     setImageMeta(false);
+                    setLinkMeta(false);
                     setSelectedStyle(null);
                   }}
                   className={classNames(
@@ -794,6 +799,7 @@ export const PaneAstStyles = (props: {
                   title="Edit Image Metadata"
                   onClick={() => {
                     setImageMeta(true);
+                    setAddClass(false);
                   }}
                 >
                   IMAGE DESCRIPTION
@@ -818,6 +824,7 @@ export const PaneAstStyles = (props: {
                     title="Manage Links"
                     onClick={() => {
                       setLinkMeta(true);
+                      setAddClass(false);
                     }}
                   >
                     MANAGE LINKS

@@ -10,6 +10,7 @@ import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { cloneDeep } from "../../../utils/helpers";
 import { cleanHtmlAst } from "../../../utils/compositor/markdownUtils";
 import ContentEditableField from "../components/ContentEditableField";
+import { classNames } from "../../../utils/helpers";
 import { toHast } from "mdast-util-to-hast";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { fromMarkdown } from "mdast-util-from-markdown";
@@ -22,10 +23,12 @@ interface LinkData extends ButtonData {
   text: string;
   outerIdx: number;
   idx: number;
+  index: number;
 }
 
 const LinksMeta = (props: { paneId: string }) => {
   const { paneId } = props;
+  const [index, setIndex] = useState(0);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -49,6 +52,7 @@ const LinksMeta = (props: { paneId: string }) => {
           ? generateMarkdownLookup(hast)
           : null;
       const initialLinks: Record<string, LinkData> = {};
+      let count = 0;
 
       if (lookup) {
         const linkNodes = findLinkNodes(hast as Element);
@@ -73,7 +77,9 @@ const LinksMeta = (props: { paneId: string }) => {
               classNamesPayload: buttonData?.classNamesPayload || {},
               outerIdx: linkInfo ? linkInfo.parentNth : 0,
               idx: linkInfo ? linkInfo.childNth : 0,
+              index: count,
             };
+            count++;
           }
         });
       }
@@ -155,7 +161,7 @@ const LinksMeta = (props: { paneId: string }) => {
       }
 
       const newBody = toMarkdown(mdast);
-      const newHast = toHast(mdast) as Root;
+      const newHast = cleanHtmlAst(toHast(mdast) as Root);
 
       const updatedButtons: Record<string, ButtonData> = {
         ...(markdownFragment.payload.optionsPayload.buttons || {}),
@@ -221,28 +227,57 @@ const LinksMeta = (props: { paneId: string }) => {
   }
 
   return (
-    <div className="space-y-4">
-      {Object.entries(links).map(([linkKey, linkData]) => (
-        <div key={linkKey} className="border p-4 rounded">
-          <h3 className="font-bold mb-2">Link: {linkData.urlTarget}</h3>
+    <div>
+      <div className="bg-myblue/5 text-md px-2 flex flex-wrap gap-x-2 gap-y-1.5">
+        <span className="py-1">Link:</span>
+        {Object.keys(links).map((_, idx: number) => (
+          <button
+            key={idx}
+            onClick={() => {
+              setIndex(idx);
+            }}
+            className={classNames(
+              "py-1 px-1.5 rounded-md",
+              idx !== index
+                ? "text-md underline underline-offset-2 text-mydarkgrey hover:text-black hover:bg-myorange/20"
+                : "text-md text-black bg-myorange/50 font-bold pointer-events-none"
+            )}
+          >
+            {idx + 1}
+          </button>
+        ))}
+      </div>
+      <div className="max-w-xl mt-4">
+        <div
+          key={Object.entries(links)[index]?.[0]}
+          className="border p-4 rounded"
+        >
           <div className="space-y-2">
             {(["text", "callbackPayload"] as const).map(field => (
               <div key={field}>
                 <label
-                  htmlFor={`${linkKey}-${field}`}
-                  className="block text-sm font-medium text-mydarkgrey"
+                  htmlFor={`${Object.entries(links)[index]?.[0]}-${field}`}
+                  className="block text-sm text-mydarkgrey"
                 >
                   {field === "text" ? "Link Text" : "Callback Payload"}
                 </label>
                 <ContentEditableField
-                  id={`${linkKey}-${field}`}
-                  value={linkData[field]}
+                  id={`${Object.entries(links)[index]?.[0]}-${field}`}
+                  value={Object.entries(links)[index]?.[1][field]}
                   onChange={value => {
-                    handleLinkChange(linkKey, field, value);
+                    handleLinkChange(
+                      Object.entries(links)[index]?.[0],
+                      field,
+                      value
+                    );
                     return true;
                   }}
                   onEditingChange={editing =>
-                    handleEditingChange(editing, linkKey, field)
+                    handleEditingChange(
+                      editing,
+                      Object.entries(links)[index]?.[0],
+                      field
+                    )
                   }
                   placeholder={`Enter ${field === "text" ? "link text" : "callback payload"}`}
                   className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
@@ -251,7 +286,7 @@ const LinksMeta = (props: { paneId: string }) => {
             ))}
           </div>
         </div>
-      ))}
+      </div>
     </div>
   );
 };

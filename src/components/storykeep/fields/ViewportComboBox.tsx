@@ -87,6 +87,7 @@ const ViewportComboBox = ({
                 onKeyDown={handleKeyDown}
                 value={internalValue}
                 displayValue={v => (typeof v === `string` ? v : "")}
+                autoComplete="off"
               />
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                 <ChevronUpDownIcon

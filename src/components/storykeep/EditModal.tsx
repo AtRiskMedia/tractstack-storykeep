@@ -8,10 +8,10 @@ import {
   storyFragmentInit,
   activeEditModalStore,
 } from "../../store/storykeep";
-import { StoryFragmentSettings } from "./settings/storyfragment";
-import { PaneSettings } from "./settings/pane";
-import { PaneInsert } from "./settings/paneInsert";
-import { PaneAstStyles } from "./settings/styles";
+import { StoryFragmentSettings } from "./settings/StoryfragmentSettings";
+import { PaneSettings } from "./settings/PaneSettings";
+import { PaneInsert } from "./settings/PaneInsert";
+import { PaneAstStyles } from "./settings/PaneAstStyles";
 import { handleToggleOff } from "../../utils/storykeep";
 import type { ContentMap } from "../../types";
 

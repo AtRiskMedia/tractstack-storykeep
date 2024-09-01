@@ -790,10 +790,10 @@ export interface StylesVersion {
 
 export interface CodeHookDatum {
   target: string;
-  url: string | undefined;
+  url?: string | undefined;
   options: string | undefined;
-  height: string | undefined;
-  width: string | undefined;
+  height?: string | undefined;
+  width?: string | undefined;
 }
 
 export interface ButtonData {

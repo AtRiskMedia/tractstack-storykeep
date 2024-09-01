@@ -94,7 +94,7 @@ const ImageMeta = (props: {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 min-w-80">
       <div>
         <label
           htmlFor="image-alt-text"
@@ -108,7 +108,7 @@ const ImageMeta = (props: {
           onChange={handleAltTextChange}
           onEditingChange={handleEditingChange}
           placeholder="Enter image description"
-          className="px-2.5 mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
         />
       </div>
       <div>
@@ -119,7 +119,7 @@ const ImageMeta = (props: {
           Image Filename
         </label>
         <div className="mt-1 flex items-center">
-          <span className="px-2.5 h-10 max-w-md overflow-hidden text-sm text-mydarkgrey">
+          <span className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6">
             {filename}
           </span>
         </div>

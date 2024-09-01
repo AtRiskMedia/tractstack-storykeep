@@ -241,7 +241,10 @@ export const StoryFragment = (props: { id: string }) => {
       {$editMode?.mode === `settings` && (
         <div
           title="Close panel"
-          onClick={handleToggleOff}
+          onClick={() => {
+            editModeStore.set(null);
+            handleToggleOff();
+          }}
           className="fixed inset-0 z-[8999] pointer-events-auto cursor-pointer"
         ></div>
       )}

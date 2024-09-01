@@ -174,7 +174,8 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                     handleEditingChange(isHeld, key, null, editing)
                   }
                   placeholder="Enter belief slug"
-                  className="p-1 border border-mylightgrey rounded-md w-full text-sm"
+                  hyphenate={true}
+                  className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
                 />
               </div>
               <div className="flex-1">
@@ -198,7 +199,8 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                             )
                           }
                           placeholder="Value"
-                          className="p-1 border border-mylightgrey rounded-md text-sm w-24"
+                          hyphenate={true}
+                          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
                         />
                         <div className="flex">
                           <button

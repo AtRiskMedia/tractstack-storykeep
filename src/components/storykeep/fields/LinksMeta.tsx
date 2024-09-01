@@ -291,7 +291,7 @@ const LinksMeta = (props: LinksMetaProps) => {
                     )
                   }
                   placeholder={`Enter ${field === "text" ? "link text" : "callback payload"}`}
-                  className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+                  className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
                 />
               </div>
             ))}

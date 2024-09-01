@@ -81,6 +81,11 @@ const EditableContent = ({
   );
 
   const handleEdit = useCallback((newContent: string) => {
+    if (
+      newContent.length === 1 &&
+      ["`", `#`, `*`, `-`, `1`].includes(newContent[0])
+    )
+      return false;
     if (newContent.length <= MAX_LENGTH_CONTENT) {
       setLocalContent(newContent);
       return true;

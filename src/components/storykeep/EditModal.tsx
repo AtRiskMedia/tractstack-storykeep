@@ -10,6 +10,7 @@ import {
 } from "../../store/storykeep";
 import { StoryFragmentSettings } from "./settings/StoryfragmentSettings";
 import { PaneSettings } from "./settings/PaneSettings";
+import { PaneBreakSettings } from "./settings/PaneBreakSettings";
 import { PaneInsert } from "./settings/PaneInsert";
 import { PaneAstStyles } from "./settings/PaneAstStyles";
 import { handleToggleOff } from "../../utils/storykeep";
@@ -130,10 +131,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
             type={type}
           />
         ) : $editMode?.type === `pane` && $editMode?.mode === `break` ? (
-          <div>
-            this is long text to fill space while there isn't proper content yet
-            for this section
-          </div>
+          <PaneBreakSettings id={$editMode.id} />
         ) : null}
       </div>
     </div>

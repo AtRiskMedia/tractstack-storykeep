@@ -764,7 +764,7 @@ export function getActiveTagData(
         tabletIsNegative,
         desktopIsNegative,
         values: tailwindClasses[selectedStyle].values,
-        allowNegative: false,
+        allowNegative: tailwindClasses[selectedStyle]?.allowNegative || false,
       };
     }
     case "img": {

@@ -158,7 +158,41 @@ export const PaneAstStyles = (props: {
     if (!confirm) setConfirm(className);
     else {
       setConfirm(null);
-      console.log(`TODO`, className);
+      const thisTag = linkMode;
+      const thisButtonKey = linkTargetKey;
+      const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+      const payloadForTag =
+        thisButtonKey &&
+        thisTag &&
+        (currentField?.current?.payload?.optionsPayload?.buttons?.[
+          thisButtonKey
+        ]?.classNamesPayload?.[thisTag] as ClassNamesPayloadInnerDatum);
+      if (
+        payloadForTag &&
+        typeof payloadForTag === `object` &&
+        `classes` in payloadForTag &&
+        className in payloadForTag.classes
+      ) {
+        delete (payloadForTag.classes as Record<string, string[]>)[className];
+      }
+      if (thisTag && payloadForTag) {
+        updateStoreField("paneFragmentMarkdown", {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                [thisTag]: payloadForTag,
+              },
+            },
+          },
+        });
+      }
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
     }
   };
 
@@ -225,6 +259,11 @@ export const PaneAstStyles = (props: {
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(targetId.paneId);
     }
+  };
+
+  const removeStyleIntercept = (className: string) => {
+    if (isLink) removeLinkStyle(className);
+    else removeStyle(className);
   };
 
   const handleAddLayer = (start: boolean) => {
@@ -321,8 +360,49 @@ export const PaneAstStyles = (props: {
     viewport: "mobile" | "tablet" | "desktop",
     isNegative: boolean = false
   ) => {
-    console.log(`TODO`, value, viewport, isNegative);
-    console.log(`button: ${linkTargetKey}`, `mode:${linkMode}`);
+    const thisTag = linkMode;
+    const thisClass = selectedStyle;
+    const thisValue =
+      typeof isNegative !== `undefined` && isNegative ? `!${value}` : value;
+    const thisButtonKey = linkTargetKey;
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const payloadForTag =
+      thisButtonKey &&
+      thisTag &&
+      (currentField?.current?.payload?.optionsPayload?.buttons?.[thisButtonKey]
+        ?.classNamesPayload?.[thisTag] as ClassNamesPayloadInnerDatum);
+    const thisTuple =
+      payloadForTag &&
+      thisClass &&
+      !Array.isArray(payloadForTag.classes) &&
+      payloadForTag.classes[thisClass];
+    if (thisTuple && currentField.current.payload.optionsPayload.buttons) {
+      const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
+      (payloadForTag.classes as Record<string, Tuple>)[thisClass] = newTuple;
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        payload: {
+          ...currentField.current.payload,
+          optionsPayload: {
+            ...currentField.current.payload.optionsPayload,
+            buttons: {
+              ...currentField.current.payload.optionsPayload.buttons,
+
+              [thisButtonKey]: {
+                classNamesPayload: {
+                  ...currentField.current.payload.optionsPayload.buttons[
+                    thisButtonKey
+                  ].classNamesPayload,
+                  [thisTag]: payloadForTag,
+                },
+              },
+            },
+          },
+        },
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
+    }
   };
 
   const handleFinalChange = (
@@ -330,7 +410,6 @@ export const PaneAstStyles = (props: {
     viewport: "mobile" | "tablet" | "desktop",
     isNegative: boolean = false
   ) => {
-    console.log(`handleFinalChange`);
     if (activeTagData?.values.includes(value)) {
       const thisTag = activeTagData.tag;
       const thisGlobalNth = activeTagData.globalNth;
@@ -484,7 +563,57 @@ export const PaneAstStyles = (props: {
       setSelectedStyle(selectedClass);
       setSelectedClass("");
       setQuery("");
+      setConfirm(null);
     }
+  };
+
+  const handleAddStyleLink = () => {
+    const thisTag = linkMode;
+    const thisClass = selectedClass;
+    const thisButtonKey = linkTargetKey;
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    const payloadForTag =
+      thisButtonKey &&
+      thisTag &&
+      (currentField?.current?.payload?.optionsPayload?.buttons?.[thisButtonKey]
+        ?.classNamesPayload?.[thisTag] as ClassNamesPayloadInnerDatum);
+    if (payloadForTag && currentField.current.payload.optionsPayload.buttons) {
+      (payloadForTag.classes as Record<string, Tuple>)[thisClass] = [``];
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        payload: {
+          ...currentField.current.payload,
+          optionsPayload: {
+            ...currentField.current.payload.optionsPayload,
+            buttons: {
+              ...currentField.current.payload.optionsPayload.buttons,
+
+              [thisButtonKey]: {
+                classNamesPayload: {
+                  ...currentField.current.payload.optionsPayload.buttons[
+                    thisButtonKey
+                  ].classNamesPayload,
+                  [thisTag]: payloadForTag,
+                },
+              },
+            },
+          },
+        },
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
+
+      setAddClass(false);
+      setSelectedStyle(selectedClass);
+      setSelectedClass("");
+      setQuery("");
+      setConfirm(null);
+    }
+  };
+
+  const handleAddStyleIntercept = () => {
+    if (isLink) handleAddStyleLink();
+    else handleAddStyle();
   };
 
   const cancelRemoveStyle = () => {
@@ -527,7 +656,10 @@ export const PaneAstStyles = (props: {
                 ? tailwindClasses[className].title
                 : className
             }`}
-            onClick={() => setSelectedStyle(className)}
+            onClick={() => {
+              setSelectedStyle(className);
+              setConfirm(null);
+            }}
           >
             {typeof tailwindClasses[className] !== `undefined`
               ? tailwindClasses[className].title
@@ -537,7 +669,7 @@ export const PaneAstStyles = (props: {
             className="ml-[-0.5rem] py-1 px-0.5 bg-myorange/10 text-myorange font-bold rounded-full hover:bg-myorange/50 hover:text-black peer-hover:invisible shadow"
             title="Remove style"
             onClick={() => {
-              !isLink ? removeStyle(className) : removeLinkStyle(className);
+              removeStyleIntercept(className);
             }}
           >
             <XMarkIcon className="w-3 h-6" />
@@ -548,7 +680,7 @@ export const PaneAstStyles = (props: {
           <button
             className="text-md py-1 pl-1.5 pr-3 bg-myorange/20 text-black rounded-md hover:bg-myorange/50"
             title="Remove style"
-            onClick={() => removeStyle(className)}
+            onClick={() => removeStyleIntercept(className)}
           >
             <span className="flex flex-nowrap">
               Are you sure
@@ -739,6 +871,7 @@ export const PaneAstStyles = (props: {
                       title="Button Styles"
                       onClick={() => {
                         setLinkMode(`button`);
+                        setSelectedStyle(null);
                       }}
                     >
                       Button Styles
@@ -751,6 +884,7 @@ export const PaneAstStyles = (props: {
                       title="Hover Styles"
                       onClick={() => {
                         setLinkMode(`hover`);
+                        setSelectedStyle(null);
                       }}
                     >
                       Hover Styles
@@ -786,6 +920,18 @@ export const PaneAstStyles = (props: {
                 >
                   {!linkMode ? `STYLE THIS LINK` : `CONFIGURE THIS LINK`}
                 </button>
+                {linkMode && (
+                  <button
+                    className="my-2 underline"
+                    title="Add a Style to this"
+                    onClick={() => {
+                      setSelectedStyle(null);
+                      setAddClass(true);
+                    }}
+                  >
+                    ADD STYLE
+                  </button>
+                )}
                 <button
                   className="my-2 underline"
                   title="Close Links panel"
@@ -1006,7 +1152,8 @@ export const PaneAstStyles = (props: {
                 />
               </div>
 
-              {tabs.length &&
+              {!isLink &&
+              tabs.length &&
               ![`Pane Styles`, `Modal Styles`].includes(
                 tagTitles[tabs.at(0)!.tag]
               ) ? (
@@ -1116,6 +1263,7 @@ export const PaneAstStyles = (props: {
                         tailwindClasses[className]?.title || ""
                       }
                       onChange={event => setQuery(event.target.value)}
+                      autoComplete="off"
                       placeholder="Select a style to add"
                     />
                     <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -1166,7 +1314,7 @@ export const PaneAstStyles = (props: {
               </div>
 
               <button
-                onClick={handleAddStyle}
+                onClick={handleAddStyleIntercept}
                 className="mt-4 w-full py-2 bg-myorange text-white rounded-md hover:bg-myorange/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-myorange"
               >
                 Add Style

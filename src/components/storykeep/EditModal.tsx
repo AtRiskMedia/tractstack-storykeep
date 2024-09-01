@@ -131,7 +131,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
             type={type}
           />
         ) : $editMode?.type === `pane` && $editMode?.mode === `break` ? (
-          <PaneBreakSettings id={$editMode.id} />
+          <PaneBreakSettings id={$editMode.id} type={type} />
         ) : null}
       </div>
     </div>

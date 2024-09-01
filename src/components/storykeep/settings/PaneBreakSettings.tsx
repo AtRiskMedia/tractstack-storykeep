@@ -14,7 +14,7 @@ import {
 import { paneFragmentIds, paneFragmentBgPane } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { SvgBreaks } from "../../../assets/shapes";
-import { cloneDeep } from "../../../utils/helpers";
+import { cloneDeep,classNames } from "../../../utils/helpers";
 
 const availableCollections = ["kCz"] as const;
 const availableImagesWithPrefix = ["none", ...Object.keys(SvgBreaks)] as const;
@@ -37,9 +37,10 @@ interface LocalSettings {
 
 interface PaneBreakSettingsProps {
   id: string;
+  type: "desktop" | "mobile";
 }
 
-export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
+export const PaneBreakSettings = ({ id,type }: PaneBreakSettingsProps) => {
   const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
   const [fragmentId, setFragmentId] = useState<string | null>(null);
   const $paneFragmentBgPane = useStore(paneFragmentBgPane, {
@@ -251,10 +252,21 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
   };
 
   if (!fragmentId) return <div>Loading...</div>;
-
+console.log(type)
   return (
-    <div className="space-y-4 min-w-80">
-      <div className="mb-4">
+    <div
+      className={classNames(
+        `flex`,
+        type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
+      )}
+    >
+      <div
+        className={classNames(
+          type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
+        )}
+      >
+       <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+ 
         <label className="block text-sm font-medium text-mydarkgrey">
           Collection
         </label>
@@ -297,6 +309,7 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
           Undo
         </button>
       </div>
+    </div>
     </div>
   );
 };

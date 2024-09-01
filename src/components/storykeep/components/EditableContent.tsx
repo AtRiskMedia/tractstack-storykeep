@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { toHast } from "mdast-util-to-hast";
 import {
   paneFragmentMarkdown,
   lastInteractedTypeStore,
@@ -8,11 +10,13 @@ import {
 import {
   updateMarkdownElement,
   markdownToHtmlAst,
+  cleanHtmlAst,
 } from "../../../utils/compositor/markdownUtils";
 import ContentEditableField from "./ContentEditableField";
 import { MAX_LENGTH_CONTENT } from "../../../constants";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import type { KeyboardEvent } from "react";
+import type { Element, Root } from "hast";
 
 interface EditableContentProps {
   content: string;
@@ -48,11 +52,40 @@ const EditableContent = ({
     originalContentRef.current = content;
   }, [content]);
 
+  const findLinks = (node: Element): Record<string, { text: string }> => {
+    const links: Record<string, { text: string }> = {};
+
+    const traverse = (n: Element) => {
+      if (
+        n.tagName === "a" &&
+        n.properties &&
+        typeof n.properties.href === "string"
+      ) {
+        const text =
+          n.children[0] && "value" in n.children[0] ? n.children[0].value : "";
+        links[n.properties.href] = { text };
+      }
+      if (n.children) {
+        n.children.forEach(child => {
+          if ("tagName" in child) {
+            traverse(child);
+          }
+        });
+      }
+    };
+
+    traverse(node);
+    return links;
+  };
+
   const updateStore = useCallback(
     (newContent: string) => {
       if (!markdownFragmentId) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
+      const mdast = fromMarkdown(newContent);
+      const hast = cleanHtmlAst(toHast(mdast) as Root) as Element;
+      const newLinks = findLinks(hast);
       const newBody = updateMarkdownElement(
         $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
         newContent,
@@ -60,15 +93,41 @@ const EditableContent = ({
         outerIdx,
         idx
       );
-      updateStoreField("paneFragmentMarkdown", {
-        ...($paneFragmentMarkdown[markdownFragmentId]?.current || {}),
+      const updatedFragment = {
+        ...$paneFragmentMarkdown[markdownFragmentId]?.current,
         markdown: {
-          ...($paneFragmentMarkdown[markdownFragmentId]?.current?.markdown ||
-            {}),
+          ...$paneFragmentMarkdown[markdownFragmentId]?.current?.markdown,
           body: newBody,
           htmlAst: markdownToHtmlAst(newBody),
         },
-      });
+      };
+      if (Object.keys(newLinks).length > 0) {
+        const currentButtons =
+          updatedFragment.payload.optionsPayload.buttons || {};
+        const updatedButtons = {
+          ...currentButtons,
+          ...Object.fromEntries(
+            Object.entries(newLinks).map(([url]) => [
+              url,
+              currentButtons[url] || {
+                urlTarget: url,
+                callbackPayload: "",
+                className: "",
+                classNamesPayload: {
+                  [`button`]: {
+                    classes: {},
+                  },
+                  [`hover`]: {
+                    classes: {},
+                  },
+                },
+              },
+            ])
+          ),
+        };
+        updatedFragment.payload.optionsPayload.buttons = updatedButtons;
+      }
+      updateStoreField("paneFragmentMarkdown", updatedFragment);
     },
     [
       markdownFragmentId,
@@ -77,6 +136,7 @@ const EditableContent = ({
       idx,
       $paneFragmentMarkdown,
       updateStoreField,
+      paneId,
     ]
   );
 

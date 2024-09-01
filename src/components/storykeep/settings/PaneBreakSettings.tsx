@@ -14,7 +14,7 @@ import {
 import { paneFragmentIds, paneFragmentBgPane } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { SvgBreaks } from "../../../assets/shapes";
-import { cloneDeep,classNames } from "../../../utils/helpers";
+import { cloneDeep, classNames } from "../../../utils/helpers";
 
 const availableCollections = ["kCz"] as const;
 const availableImagesWithPrefix = ["none", ...Object.keys(SvgBreaks)] as const;
@@ -40,7 +40,7 @@ interface PaneBreakSettingsProps {
   type: "desktop" | "mobile";
 }
 
-export const PaneBreakSettings = ({ id,type }: PaneBreakSettingsProps) => {
+export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
   const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
   const [fragmentId, setFragmentId] = useState<string | null>(null);
   const $paneFragmentBgPane = useStore(paneFragmentBgPane, {
@@ -252,7 +252,7 @@ export const PaneBreakSettings = ({ id,type }: PaneBreakSettingsProps) => {
   };
 
   if (!fragmentId) return <div>Loading...</div>;
-console.log(type)
+  console.log(type);
   return (
     <div
       className={classNames(
@@ -265,51 +265,50 @@ console.log(type)
           type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
         )}
       >
-       <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
- 
-        <label className="block text-sm font-medium text-mydarkgrey">
-          Collection
-        </label>
-        <select
-          value={localSettings.collection}
-          onChange={e =>
-            handleChange("collection", e.target.value as Collection)
-          }
-          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-        >
-          <option value="">Select a collection</option>
-          {availableCollections.map(collection => (
-            <option key={collection} value={collection}>
-              {collection}
-            </option>
-          ))}
-        </select>
+        <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+          <label className="block text-sm font-medium text-mydarkgrey">
+            Collection
+          </label>
+          <select
+            value={localSettings.collection}
+            onChange={e =>
+              handleChange("collection", e.target.value as Collection)
+            }
+            className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          >
+            <option value="">Select a collection</option>
+            {availableCollections.map(collection => (
+              <option key={collection} value={collection}>
+                {collection}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-mydarkgrey">
+            Colour (applies to all viewports)
+          </label>
+          <input
+            type="color"
+            value={localSettings.colour}
+            onChange={e => handleChange("colour", e.target.value)}
+            className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          />
+        </div>
+        {renderViewportSettings("desktop")}
+        {renderViewportSettings("tablet")}
+        {renderViewportSettings("mobile")}
+        <div className="flex justify-end">
+          <button
+            onClick={() => handleUndo("paneFragmentBgPane", fragmentId)}
+            className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white"
+            disabled={$paneFragmentBgPane[fragmentId]?.history.length === 0}
+          >
+            <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
+            Undo
+          </button>
+        </div>
       </div>
-      <div className="mb-4">
-        <label className="block text-sm font-medium text-mydarkgrey">
-          Colour (applies to all viewports)
-        </label>
-        <input
-          type="color"
-          value={localSettings.colour}
-          onChange={e => handleChange("colour", e.target.value)}
-          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-        />
-      </div>
-      {renderViewportSettings("desktop")}
-      {renderViewportSettings("tablet")}
-      {renderViewportSettings("mobile")}
-      <div className="flex justify-end">
-        <button
-          onClick={() => handleUndo("paneFragmentBgPane", fragmentId)}
-          className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white"
-          disabled={$paneFragmentBgPane[fragmentId]?.history.length === 0}
-        >
-          <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
-          Undo
-        </button>
-      </div>
-    </div>
     </div>
   );
 };

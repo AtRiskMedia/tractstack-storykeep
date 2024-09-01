@@ -68,7 +68,7 @@ const contentMap: ContentMap[] = await getContentMap();
        rounded-bl-xl transition-all duration-300"
     >
       <EditModal
-        client:only="react"
+        client:media="(min-width: 1368px)"
         type="desktop"
         contentMap={contentMap}
         id={storyfragment.id}
@@ -82,7 +82,7 @@ const contentMap: ContentMap[] = await getContentMap();
            rounded-tl-xl transition-all duration-300"
     >
       <EditModal
-        client:only="react"
+        client:media="(max-width: 1367px)"
         type="mobile"
         contentMap={contentMap}
         id={storyfragment.id}

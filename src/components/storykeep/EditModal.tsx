@@ -6,7 +6,6 @@ import {
   editModeStore,
   paneInit,
   storyFragmentInit,
-  activeEditModalStore,
 } from "../../store/storykeep";
 import { StoryFragmentSettings } from "./settings/StoryfragmentSettings";
 import { PaneSettings } from "./settings/PaneSettings";
@@ -28,7 +27,6 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
   const contentId = `${$editMode?.targetId?.tag}-${$editMode?.targetId?.outerIdx}${typeof $editMode?.targetId?.idx === "number" ? `-${$editMode.targetId.idx}` : ""}-${$editMode?.id}`;
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $paneInit = useStore(paneInit);
-  const $activeEditModal = useStore(activeEditModalStore);
 
   useEffect(() => {
     if (
@@ -39,21 +37,6 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
     )
       setIsClient(true);
   }, [$storyFragmentInit, $paneInit, $editMode]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 1368) {
-        activeEditModalStore.set("desktop");
-      } else {
-        activeEditModalStore.set("mobile");
-      }
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -82,7 +65,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
     handleToggleOff();
   };
 
-  if (!isClient || $activeEditModal !== type) return null;
+  if (!isClient) return null;
 
   return (
     <div className="relative">

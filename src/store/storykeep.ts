@@ -37,7 +37,6 @@ export const uncleanDataStore = map<Record<string, Record<StoreKey, boolean>>>(
 export const temporaryErrorsStore = map<
   Record<string, Record<StoreKey, boolean>>
 >({});
-export const activeEditModalStore = atom<"desktop" | "mobile" | null>(null);
 export const viewportKeyStore = map<{
   value: "mobile" | "tablet" | "desktop";
 }>({

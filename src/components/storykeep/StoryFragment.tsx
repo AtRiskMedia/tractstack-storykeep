@@ -148,7 +148,7 @@ export const StoryFragment = (props: { id: string }) => {
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       if ((event as any).handledByComponent) {
         return;
       }

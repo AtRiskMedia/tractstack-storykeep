@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useEffect, useCallback } from "react";
+import { useRef,memo, useMemo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { classNames } from "../../utils/helpers";
 import { handleToggleOn } from "../../utils/storykeep";
@@ -66,6 +66,7 @@ const Pane = (props: {
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [id],
   });
+  const markdownFragmentId = $paneMarkdownFragmentId[id]?.current;
   const $paneHasOverflowHidden = useStore(paneHasOverflowHidden, {
     keys: [id],
   });
@@ -74,7 +75,7 @@ const Pane = (props: {
 
   const fragmentIds = $paneFragmentIds[id]?.current || [];
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
-    keys: fragmentIds,
+    keys: [markdownFragmentId],
   });
   const $paneFragmentBgPane = useStore(paneFragmentBgPane, {
     keys: fragmentIds,
@@ -124,12 +125,15 @@ const Pane = (props: {
       $paneHeightOffsetDesktop[id]?.current,
       $paneFragmentIds[id]?.current,
       $paneMarkdownFragmentId[id]?.current,
+      $paneFragmentMarkdown[markdownFragmentId]?.current,
       $paneFragmentBgColour,
+      $paneFragmentBgPane,
       toolMode,
       toolAddMode,
       viewportKey,
     ]
   );
+  console.log(memoizedPaneData)
 
   useEffect(() => {
     if ($paneInit[id]?.init) setIsClient(true);
@@ -253,4 +257,4 @@ const Pane = (props: {
   );
 };
 
-export default Pane;
+export default memo(Pane);

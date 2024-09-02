@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
   storyFragmentInit,
@@ -41,33 +41,44 @@ export const StoryFragment = (props: { id: string }) => {
   const $lastInteractedType = useStore(lastInteractedTypeStore);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
   const $visiblePanes = useStore(visiblePanesStore);
-  const $toolMode = useStore(toolModeStore);
-  const toolMode = $toolMode.value || ``;
-  const $toolAddMode = useStore(toolAddModeStore);
-  const toolAddMode = $toolAddMode.value || ``;
   const $viewport = useStore(viewportStore);
   const $viewportKey = useStore(viewportKeyStore);
   const viewportKey = $viewportKey.value;
   const $viewportSet = useStore(viewportSetStore);
   const $editMode = useStore(editModeStore);
+  const $toolMode = useStore(toolModeStore);
+  const toolMode = $toolMode.value || ``;
+  const $toolAddMode = useStore(toolAddModeStore);
+  const toolAddMode = $toolAddMode.value || ``;
 
-  const cancelInsert = () => {
+  const cancelInsert = useCallback(() => {
     setShouldScroll(null);
     setThisPaneIds(paneIds);
-  };
-  const doInsert = (newPaneIds: string[]) => {
+  }, [paneIds]);
+
+  const doInsert = useCallback((newPaneIds: string[]) => {
     setThisPaneIds(newPaneIds);
-  };
-  const insertPane = (paneId: string, position: `above` | `below`) => {
-    const index = paneIds.indexOf(paneId);
-    if (index >= 0) {
-      const newPaneIds = [...paneIds];
-      const insertIndex = position === "above" ? index : index + 1;
-      newPaneIds.splice(insertIndex, 0, "insert");
-      setThisPaneIds(newPaneIds);
-      setShouldScroll(insertIndex);
-    }
-  };
+  }, []);
+
+  const insertPane = useCallback(
+    (paneId: string, position: `above` | `below`) => {
+      const index = paneIds.indexOf(paneId);
+      if (index >= 0) {
+        const newPaneIds = [...paneIds];
+        const insertIndex = position === "above" ? index : index + 1;
+        newPaneIds.splice(insertIndex, 0, "insert");
+        setThisPaneIds(newPaneIds);
+        setShouldScroll(insertIndex);
+      }
+    },
+    [paneIds]
+  );
+
+  const isDesigningNew = useMemo(
+    () =>
+      thisPaneIds && paneIds ? thisPaneIds.length !== paneIds.length : false,
+    [thisPaneIds, paneIds]
+  );
 
   useEffect(() => {
     setThisPaneIds(paneIds);
@@ -124,7 +135,7 @@ export const StoryFragment = (props: { id: string }) => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [$viewportSet]);
 
   useEffect(() => {
     if ($lastInteractedPane && $lastInteractedType === "markdown") {
@@ -137,7 +148,7 @@ export const StoryFragment = (props: { id: string }) => {
 
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
+  /* eslint-disable @typescript-eslint/no-explicit-any */
       if ((event as any).handledByComponent) {
         return;
       }
@@ -161,7 +172,6 @@ export const StoryFragment = (props: { id: string }) => {
               }
             }
           } else if (interactedType === "bgpane") {
-            // Handle undo for bgpane
             console.log("Undo for bgpane not yet implemented");
           }
         }
@@ -179,7 +189,6 @@ export const StoryFragment = (props: { id: string }) => {
   }, [id, $storyFragmentInit]);
 
   useEffect(() => {
-    // set initial viewportKey based on width of screen (assumes Viewport=auto)
     const scrollBarOffset =
       window.innerWidth - document.documentElement.clientWidth;
     const previewWidth = window.innerWidth;
@@ -197,7 +206,6 @@ export const StoryFragment = (props: { id: string }) => {
     }
     viewportKeyStore.set({ value: newViewportKey });
 
-    // Slight delay to ensure styles are applied
     const timerId = setTimeout(() => {
       const cleanup = handleEditorResize();
       return () => {
@@ -234,6 +242,63 @@ export const StoryFragment = (props: { id: string }) => {
     }
   }, [$viewport]);
 
+  const memoizedPanes = useMemo(
+    () =>
+      thisPaneIds?.map((paneId: string, idx: number) => (
+        <div key={paneId}>
+          {paneId === `insert` ? (
+            <div id={`design-new-pane-${idx}`}>
+              <DesignNewPane
+                id={id}
+                index={idx}
+                cancelInsert={cancelInsert}
+                doInsert={doInsert}
+                tailwindBgColour={
+                  tailwindBgColour ? tailwindBgColour : `bg-white`
+                }
+                viewportKey={viewportKey}
+                paneIds={paneIds}
+              />
+            </div>
+          ) : isDesigningNew && paneId !== `insert` ? (
+            <div className="relative">
+              <div className="absolute inset-0 bg-black/85 z-[8999]"></div>
+              <PaneWrapper
+                id={paneId}
+                viewportKey={viewportKey}
+                insertPane={insertPane}
+                toolMode={toolMode}
+                toolAddMode={toolAddMode}
+                isDesigningNew={isDesigningNew}
+              />
+            </div>
+          ) : (
+            <PaneWrapper
+              id={paneId}
+              viewportKey={viewportKey}
+              insertPane={insertPane}
+              toolMode={toolMode}
+              toolAddMode={toolAddMode}
+              isDesigningNew={isDesigningNew}
+            />
+          )}
+        </div>
+      )),
+    [
+      thisPaneIds,
+      id,
+      cancelInsert,
+      doInsert,
+      tailwindBgColour,
+      viewportKey,
+      paneIds,
+      isDesigningNew,
+      insertPane,
+      toolMode,
+      toolAddMode,
+    ]
+  );
+
   if (!isClient || !thisPaneIds) return <div>Loading...</div>;
 
   return (
@@ -265,46 +330,7 @@ export const StoryFragment = (props: { id: string }) => {
                 : ``
         )}
       >
-        {thisPaneIds.map((paneId: string, idx: number) => (
-          <div key={`${idx}-${paneId}`}>
-            {paneId === `insert` ? (
-              <div id={`design-new-pane-${idx}`}>
-                <DesignNewPane
-                  id={id}
-                  index={idx}
-                  cancelInsert={cancelInsert}
-                  doInsert={doInsert}
-                  tailwindBgColour={
-                    tailwindBgColour ? tailwindBgColour : `bg-white`
-                  }
-                  viewportKey={viewportKey}
-                  paneIds={paneIds}
-                />
-              </div>
-            ) : thisPaneIds.length !== paneIds.length && paneId !== `insert` ? (
-              <div className="relative">
-                <div className="absolute inset-0 bg-black/85 z-[8999]"></div>
-                <PaneWrapper
-                  id={paneId}
-                  viewportKey={viewportKey}
-                  insertPane={insertPane}
-                  toolMode={toolMode}
-                  toolAddMode={toolAddMode}
-                  isDesigningNew={thisPaneIds.length !== paneIds.length}
-                />
-              </div>
-            ) : (
-              <PaneWrapper
-                id={paneId}
-                viewportKey={viewportKey}
-                insertPane={insertPane}
-                toolMode={toolMode}
-                toolAddMode={toolAddMode}
-                isDesigningNew={thisPaneIds.length !== paneIds.length}
-              />
-            )}
-          </div>
-        ))}
+        {memoizedPanes}
       </div>
     </>
   );

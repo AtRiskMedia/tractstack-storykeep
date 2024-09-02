@@ -95,66 +95,32 @@ export const PaneSettings = (props: {
       <hr className="w-full" />
       {activeTab === `settings` ? (
         <div className="my-4">
-          <p className="text-md mb-2 text-mydarkgrey italic">
-            Note: title + slug used for analytics and may (if enabled) be used
-            as part of the "fast travel" map shown to users.{" "}
-          </p>
-          <div className="flex flex-wrap gap-x-16 gap-y-6">
-            <div className="flex-grow w-96">
-              <PaneTitle
-                id={id}
-                handleEditingChange={handleInterceptEdit}
-                updateStoreField={handleUpdateStoreField}
-                handleUndo={handleUndo}
-              />
-            </div>
-            <div className="flex-grow w-64">
-              <PaneSlug
-                id={id}
-                handleEditingChange={handleEditingChange}
-                updateStoreField={handleUpdateStoreField}
-                handleUndo={handleUndo}
-              />
+          <div className="flex flex-wrap gap-x-16 gap-y-2">
+            <div className="flex flex-wrap w-80">
+              <div className="flex-grow w-80">
+                <PaneTitle
+                  id={id}
+                  handleEditingChange={handleInterceptEdit}
+                  updateStoreField={handleUpdateStoreField}
+                  handleUndo={handleUndo}
+                />
+              </div>
+              <div className="flex-grow w-80">
+                <PaneSlug
+                  id={id}
+                  handleEditingChange={handleEditingChange}
+                  updateStoreField={handleUpdateStoreField}
+                  handleUndo={handleUndo}
+                />
+              </div>
+              <p className="text-sm my-2 text-mydarkgrey italic">
+                Note: title + slug used for analytics and may (if enabled) be
+                used as part of the "fast travel" map shown to users.
+              </p>
             </div>
 
             <div className="flex-grow">
               <PaneBgColour paneId={id} />
-            </div>
-
-            <div className="flex-grow">
-              <div className="flex items-center">
-                <Switch
-                  checked={$paneIsHiddenPane[id].current}
-                  onChange={newValue =>
-                    updateStoreField("paneIsHiddenPane", newValue)
-                  }
-                  className={`${
-                    $paneIsHiddenPane[id].current
-                      ? "bg-myorange"
-                      : "bg-mydarkgrey"
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                >
-                  <span
-                    className={`${
-                      $paneIsHiddenPane[id].current
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />
-                </Switch>
-                <div className="ml-3">
-                  <div className="text-md text-black font-bold">
-                    {$paneIsHiddenPane[id].current
-                      ? `Hidden or decorative pane`
-                      : `Monitor engagement`}
-                  </div>
-                  <div className="text-md text-mydarkgrey">
-                    {$paneIsHiddenPane[id].current
-                      ? `No pane analytics will be collected`
-                      : `Pane analytics will be collected`}
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -221,6 +187,42 @@ export const PaneSettings = (props: {
                   {$paneHasMaxHScreen[id].current
                     ? `Apply Max height screen`
                     : `No max height applied`}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-grow">
+              <div className="flex items-center">
+                <Switch
+                  checked={$paneIsHiddenPane[id].current}
+                  onChange={newValue =>
+                    updateStoreField("paneIsHiddenPane", newValue)
+                  }
+                  className={`${
+                    $paneIsHiddenPane[id].current
+                      ? "bg-myorange"
+                      : "bg-mydarkgrey"
+                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+                >
+                  <span
+                    className={`${
+                      $paneIsHiddenPane[id].current
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                  />
+                </Switch>
+                <div className="ml-3">
+                  <div className="text-md text-black font-bold">
+                    {$paneIsHiddenPane[id].current
+                      ? `Hidden or decorative pane`
+                      : `Monitor engagement`}
+                  </div>
+                  <div className="text-md text-mydarkgrey">
+                    {$paneIsHiddenPane[id].current
+                      ? `No pane analytics will be collected`
+                      : `Pane analytics will be collected`}
+                  </div>
                 </div>
               </div>
             </div>

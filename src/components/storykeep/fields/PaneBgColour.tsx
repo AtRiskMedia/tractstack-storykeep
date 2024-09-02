@@ -121,7 +121,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
   ]);
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-2">
       <div className="flex items-center space-x-4">
         <span className="text-md leading-6 text-mydarkgrey flex-shrink-0">
           Background Color

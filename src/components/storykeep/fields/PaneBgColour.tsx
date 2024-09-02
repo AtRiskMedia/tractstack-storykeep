@@ -11,6 +11,7 @@ import {
 } from "../../../utils/storykeep";
 import { tailwindToHex } from "../../../utils/helpers";
 import ColorPickerWrapper from "../components/ColorPickerWrapper";
+import TailwindColorCombobox from "../fields/TailwindColorCombobox";
 import { ulid } from "ulid";
 
 interface PaneBgColourProps {
@@ -30,6 +31,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
   );
 
   const [color, setColor] = useState<string | null>(null);
+  const [selectedTailwindColor, setSelectedTailwindColor] = useState("");
 
   useEffect(() => {
     const fragmentIds = $paneFragmentIds[paneId]?.current;
@@ -42,8 +44,10 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
         const bgColor =
           $paneFragmentBgColour[colorFragmentId]?.current?.bgColour;
         setColor(bgColor ?? null);
+        setSelectedTailwindColor("");
       } else {
         setColor(null);
+        setSelectedTailwindColor("");
       }
     }
   }, [$paneFragmentIds, $paneFragmentBgColour, paneId]);
@@ -51,12 +55,14 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
   const handleColorChange = useCallback(
     (newColor: string) => {
       setColor(newColor);
+      setSelectedTailwindColor(`bg-${newColor}`);
+      const hexColor = tailwindToHex(`bg-${newColor}`);
       if (bgColorFragmentId) {
         updateStoreField(
           "paneFragmentBgColour",
           {
             ...$paneFragmentBgColour[bgColorFragmentId].current,
-            bgColour: tailwindToHex(newColor),
+            bgColour: hexColor,
           },
           bgColorFragmentId
         );
@@ -72,7 +78,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
           [newFragmentId]: createFieldWithHistory({
             id: newFragmentId,
             type: "bgColour",
-            bgColour: tailwindToHex(newColor),
+            bgColour: hexColor,
             hiddenViewports: "none",
           }),
         });
@@ -104,6 +110,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
       paneFragmentBgColour.set(updatedBgColour);
       setBgColorFragmentId(null);
       setColor(null);
+      setSelectedTailwindColor("");
     }
   }, [
     bgColorFragmentId,
@@ -114,39 +121,53 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
   ]);
 
   return (
-    <div className="flex items-center space-x-4 space-y-2">
-      <span className="text-md leading-6 text-mydarkgrey flex-shrink-0">
-        Background Color
-      </span>
-      <ColorPickerWrapper
-        id="paneBackgroundColor"
-        defaultColor={color || "#FFFFFF"}
-        onColorChange={handleColorChange}
-      />
-      {color && (
-        <button
-          onClick={handleRemoveColor}
-          className="text-myorange hover:text-black"
-          title="Remove color"
-        >
-          <XMarkIcon className="h-5 w-5" />
-        </button>
-      )}
-      <button
-        onClick={() =>
-          handleUndo("paneFragmentBgColour", bgColorFragmentId ?? "")
-        }
-        className="disabled:hidden ml-2"
-        disabled={
-          !bgColorFragmentId ||
-          $paneFragmentBgColour[bgColorFragmentId]?.history.length === 0
-        }
-      >
-        <ChevronDoubleLeftIcon
-          className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
-          title="Undo"
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center space-x-4">
+        <span className="text-md leading-6 text-mydarkgrey flex-shrink-0">
+          Background Color
+        </span>
+        <ColorPickerWrapper
+          id="paneBackgroundColor"
+          defaultColor={color || "#FFFFFF"}
+          onColorChange={newColor => {
+            setColor(newColor);
+            handleColorChange(newColor.replace("#", ""));
+          }}
         />
-      </button>
+        {color && (
+          <button
+            onClick={handleRemoveColor}
+            className="text-myorange hover:text-black"
+            title="Remove color"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        )}
+        <button
+          onClick={() =>
+            handleUndo("paneFragmentBgColour", bgColorFragmentId ?? "")
+          }
+          className="disabled:hidden ml-2"
+          disabled={
+            !bgColorFragmentId ||
+            $paneFragmentBgColour[bgColorFragmentId]?.history.length === 0
+          }
+        >
+          <ChevronDoubleLeftIcon
+            className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
+            title="Undo"
+          />
+        </button>
+      </div>
+      <div>
+        <label className="block text-sm text-mydarkgrey mb-1">
+          Tailwind Color Class
+        </label>
+        <TailwindColorCombobox
+          selectedColor={selectedTailwindColor}
+          onColorChange={handleColorChange}
+        />
+      </div>
     </div>
   );
 };

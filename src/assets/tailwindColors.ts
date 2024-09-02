@@ -2,6 +2,29 @@ type TailwindColorPalette = {
   [colorName: string]: string[];
 };
 
+const customColors = [
+  "mywhite",
+  "myoffwhite",
+  "mylightgrey",
+  "myblue",
+  "mygreen",
+  "myorange",
+  "mydarkgrey",
+  "myblack",
+];
+
+export const getTailwindColorOptions = () => {
+  const shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950];
+  return Object.entries(tailwindColors).flatMap(([colorName, colorShades]) =>
+    shades
+      .filter(shade => {
+        const index = shade === 50 ? 0 : shade === 950 ? 10 : shade / 100 - 1;
+        return colorShades[index] !== undefined;
+      })
+      .map(shade => `${colorName}-${shade}`)
+  );
+};
+
 export const tailwindColors: TailwindColorPalette = {
   slate: [
     "#f8fafc",
@@ -534,12 +557,5 @@ export const colorValues = [
   "rose-800",
   "rose-900",
   "rose-950",
-  "mywhite",
-  "myoffwhite",
-  "mylightgrey",
-  "myblue",
-  "mygreen",
-  "myorange",
-  "mydarkgrey",
-  "myblack",
+  ...customColors,
 ];

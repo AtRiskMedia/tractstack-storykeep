@@ -15,8 +15,9 @@ import { paneFragmentIds, paneFragmentBgPane } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { cloneDeep, classNames, tailwindToHex } from "../../../utils/helpers";
 import { SvgBreaks } from "../../../assets/shapes";
-import { tailwindColors } from "../../../assets/tailwindColors";
+import { getTailwindColorOptions } from "../../../assets/tailwindColors";
 import PaneBgColour from "../fields/PaneBgColour";
+import TailwindColorCombobox from "../fields/TailwindColorCombobox";
 
 const availableCollections = ["kCz"] as const;
 const availableImagesWithPrefix = ["none", ...Object.keys(SvgBreaks)] as const;
@@ -50,7 +51,6 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
   });
   const { updateStoreField, handleUndo } = useStoryKeepUtils(fragmentId ?? "");
 
-  const [tailwindColorQuery, setTailwindColorQuery] = useState("");
   const [selectedTailwindColor, setSelectedTailwindColor] = useState("");
 
   const [localSettings, setLocalSettings] = useState<LocalSettings>({
@@ -182,25 +182,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
       colour: newColor,
     }));
   }, []);
-
-  const tailwindColorOptions = useMemo(
-    () =>
-      Object.entries(tailwindColors).flatMap(([colorName, shades]) =>
-        shades.map((_, index) => `${colorName}-${(index + 1) * 100}`)
-      ),
-    []
-  );
-
-  const filteredTailwindColors = useMemo(
-    () =>
-      tailwindColorQuery === ""
-        ? tailwindColorOptions
-        : tailwindColorOptions.filter(color =>
-            color.toLowerCase().includes(tailwindColorQuery.toLowerCase())
-          ),
-    [tailwindColorOptions, tailwindColorQuery]
-  );
-
+  const tailwindColorOptions = useMemo(() => getTailwindColorOptions(), []);
   const handleHexColorChange = useCallback(
     (newHexColor: string) => {
       updateColor(newHexColor);
@@ -395,70 +377,15 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
           <label className="block text-sm text-mydarkgrey">
             Tailwind Color Class
           </label>
-          <Combobox
-            as="div"
-            value={selectedTailwindColor}
-            onChange={handleTailwindColorChange}
-            className="relative mt-1"
-          >
-            <div className="relative">
-              <Combobox.Input
-                className="w-full rounded-md border-0 px-2.5 py-1.5 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange sm:text-sm sm:leading-6"
-                onChange={event => setTailwindColorQuery(event.target.value)}
-                displayValue={(color: string) => color}
-                placeholder="Select a Tailwind color"
-                autoComplete="off"
-              />
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronUpDownIcon
-                  className="h-5 w-5 text-myblue"
-                  aria-hidden="true"
-                />
-              </Combobox.Button>
-            </div>
-            <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {filteredTailwindColors.map(color => (
-                <Combobox.Option
-                  key={color}
-                  value={color}
-                  className={({ active }) =>
-                    classNames(
-                      "relative cursor-default select-none py-2 pl-10 pr-4",
-                      active ? "bg-myorange text-white" : "text-myblack"
-                    )
-                  }
-                >
-                  {({ selected, active }) => (
-                    <>
-                      <span
-                        className={classNames(
-                          "block truncate",
-                          selected ? "font-bold" : "font-normal"
-                        )}
-                      >
-                        {color}
-                      </span>
-                      {selected && (
-                        <span
-                          className={classNames(
-                            "absolute inset-y-0 left-0 flex items-center pl-3",
-                            active ? "text-white" : "text-myorange"
-                          )}
-                        >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                      )}
-                    </>
-                  )}
-                </Combobox.Option>
-              ))}
-            </Combobox.Options>
-          </Combobox>
+          <TailwindColorCombobox
+            selectedColor={selectedTailwindColor}
+            onColorChange={handleTailwindColorChange}
+          />
         </div>
 
         <div className="mb-4">
-         <PaneBgColour paneId={id} />
-         </div>
+          <PaneBgColour paneId={id} />
+        </div>
 
         {renderViewportSettings("mobile")}
         {renderViewportSettings("tablet")}

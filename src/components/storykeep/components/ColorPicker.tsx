@@ -15,7 +15,9 @@ interface ClosestColor {
   shade: number;
 }
 
-const findClosestTailwindColor = (color: string): ClosestColor | null => {
+export const findClosestTailwindColor = (
+  color: string
+): ClosestColor | null => {
   const targetColor = tinycolor(color);
   const targetHsl = targetColor.toHsl();
   let closestColor: ClosestColor | null = null;

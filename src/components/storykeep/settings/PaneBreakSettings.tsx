@@ -16,6 +16,7 @@ import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { cloneDeep, classNames, tailwindToHex } from "../../../utils/helpers";
 import { SvgBreaks } from "../../../assets/shapes";
 import { tailwindColors } from "../../../assets/tailwindColors";
+import PaneBgColour from "../fields/PaneBgColour";
 
 const availableCollections = ["kCz"] as const;
 const availableImagesWithPrefix = ["none", ...Object.keys(SvgBreaks)] as const;
@@ -454,6 +455,10 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
             </Combobox.Options>
           </Combobox>
         </div>
+
+        <div className="mb-4">
+         <PaneBgColour paneId={id} />
+         </div>
 
         {renderViewportSettings("mobile")}
         {renderViewportSettings("tablet")}

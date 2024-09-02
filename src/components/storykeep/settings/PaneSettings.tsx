@@ -7,6 +7,7 @@ import PaneHeightOffset from "../fields/PaneHeightOffset";
 import PaneHeightRatio from "../fields/PaneHeightRatio";
 import PaneImpression from "../fields/PaneImpression";
 import PaneBeliefs from "../fields/PaneBeliefs";
+import PaneBgColour from "../fields/PaneBgColour";
 import CodeHookSettings from "../fields/CodeHook";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
@@ -114,6 +115,10 @@ export const PaneSettings = (props: {
                 updateStoreField={handleUpdateStoreField}
                 handleUndo={handleUndo}
               />
+            </div>
+
+            <div className="flex-grow">
+              <PaneBgColour paneId={id} />
             </div>
 
             <div className="flex-grow">

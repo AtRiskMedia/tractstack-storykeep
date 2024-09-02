@@ -26,6 +26,8 @@ import {
   paneCodeHook,
   paneImpression,
   paneFiles,
+  paneFragmentIds,
+  paneFragmentBgColour,
 } from "../store/storykeep";
 import { debounce, isDeepEqual } from "./helpers";
 import {
@@ -70,6 +72,8 @@ const storeMap: StoreMapType = {
   paneCodeHook,
   paneImpression,
   paneFiles,
+  paneFragmentIds,
+  paneFragmentBgColour,
   // Add other stores here
 };
 
@@ -156,9 +160,17 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   );
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const updateStoreField = (storeKey: StoreKey, newValue: any): boolean => {
+  const updateStoreField = (
+    storeKey: StoreKey,
+    newValue: any,
+    otherId?: string
+  ): boolean => {
+    const thisId = otherId || id;
     const store = storeMap[storeKey];
-    if (!store) return false;
+    if (!store) {
+      console.log(`${storeKey} not found in allowed stores`);
+      return false;
+    }
 
     const isValid =
       isValidValue(storeKey, newValue) &&
@@ -173,19 +185,19 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
       return false;
     }
     if (!isValid || !isPreValidValue) {
-      uncleanDataStore.setKey(id, {
-        ...(uncleanDataStore.get()[id] || {}),
+      uncleanDataStore.setKey(thisId, {
+        ...(uncleanDataStore.get()[thisId] || {}),
         [storeKey]: true,
       });
     } else {
-      uncleanDataStore.setKey(id, {
-        ...(uncleanDataStore.get()[id] || {}),
+      uncleanDataStore.setKey(thisId, {
+        ...(uncleanDataStore.get()[thisId] || {}),
         [storeKey]: false,
       });
     }
 
     const currentStoreValue = store.get();
-    const currentField = currentStoreValue[id];
+    const currentField = currentStoreValue[thisId];
     if (
       currentField &&
       isPreValid &&
@@ -196,11 +208,11 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
       const newField = createNewField(currentField, newValue, newHistory);
       store.set({
         ...currentStoreValue,
-        [id]: newField,
+        [thisId]: newField,
       });
       const isUnsaved = !isDeepEqual(newValue, newField.original);
-      unsavedChangesStore.setKey(id, {
-        ...(unsavedChangesStore.get()[id] || {}),
+      unsavedChangesStore.setKey(thisId, {
+        ...(unsavedChangesStore.get()[thisId] || {}),
         [storeKey]: isUnsaved,
       });
     }

@@ -104,6 +104,7 @@ export type StoreKey =
   | "paneImpression"
   | "paneHeldBeliefs"
   | "paneWithheldBeliefs"
+  | "paneFragmentIds"
   | "paneFragmentBgColour"
   | "paneFragmentBgPane"
   | "paneFragmentMarkdown";

@@ -115,7 +115,11 @@ export const StoryFragmentHeader = memo(
     const headerRef = useRef<HTMLDivElement>(null);
 
     const handleEditModeToggle = () => {
-      if ($editMode?.mode === `settings`) {
+      if (
+        $editMode?.mode === `settings` &&
+        $editMode?.type === `storyfragment` &&
+        $editMode?.id === id
+      ) {
         editModeStore.set(null);
         handleToggleOff();
       } else {

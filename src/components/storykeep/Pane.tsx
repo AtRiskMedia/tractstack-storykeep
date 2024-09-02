@@ -112,21 +112,19 @@ const Pane = (props: {
     }),
     [
       id,
-      $paneSlug,
-      $paneFiles,
-      $paneHasOverflowHidden,
-      $paneHasMaxHScreen,
-      $paneHeightRatioMobile,
-      $paneHeightRatioTablet,
-      $paneHeightRatioDesktop,
-      $paneHeightOffsetMobile,
-      $paneHeightOffsetTablet,
-      $paneHeightOffsetDesktop,
-      fragmentIds,
+      $paneSlug[id]?.current,
+      $paneFiles[id]?.current,
+      $paneHasOverflowHidden[id]?.current,
+      $paneHasMaxHScreen[id]?.current,
+      $paneHeightRatioMobile[id]?.current,
+      $paneHeightRatioTablet[id]?.current,
+      $paneHeightRatioDesktop[id]?.current,
+      $paneHeightOffsetMobile[id]?.current,
+      $paneHeightOffsetTablet[id]?.current,
+      $paneHeightOffsetDesktop[id]?.current,
+      $paneFragmentIds[id]?.current,
+      $paneMarkdownFragmentId[id]?.current,
       $paneFragmentBgColour,
-      $paneFragmentMarkdown,
-      $paneMarkdownFragmentId,
-      $paneFragmentBgPane,
       toolMode,
       toolAddMode,
       viewportKey,
@@ -226,10 +224,6 @@ const Pane = (props: {
     [id, memoizedPaneData, queueUpdate, viewportKey, toolMode, toolAddMode]
   );
 
-  const bgColourStyle = memoizedPaneData.bgColour
-    ? { backgroundColor: memoizedPaneData.bgColour }
-    : {};
-
   const onClick = () => {
     editModeStore.set({
       id: id,
@@ -242,19 +236,19 @@ const Pane = (props: {
   if (!isClient) return null;
 
   return (
-    <div className="relative">
-      <div
-        id={`pane-inner-${id}`}
-        style={bgColourStyle}
-        className={classNames(
-          memoizedPaneData.hasMaxHScreen ? `max-h-screen` : ``,
-          memoizedPaneData.hasOverflowHidden ? `overflow-hidden` : ``,
-          `grid`,
-          memoizedPaneData.bgColour ? `bg-[${memoizedPaneData.bgColour}]` : ""
-        )}
-      >
-        {memoizedPaneData.fragments.map(renderFragment)}
-      </div>
+    <div
+      key={memoizedPaneData.bgColour}
+      id={`pane-inner-${id}`}
+      style={{
+        backgroundColor: memoizedPaneData.bgColour || `current`,
+      }}
+      className={classNames(
+        memoizedPaneData.hasMaxHScreen ? `max-h-screen` : ``,
+        memoizedPaneData.hasOverflowHidden ? `overflow-hidden` : ``,
+        `grid`
+      )}
+    >
+      {memoizedPaneData.fragments.map(renderFragment)}
     </div>
   );
 };

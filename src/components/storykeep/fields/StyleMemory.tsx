@@ -5,6 +5,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { stylesMemoryStore } from "../../../store/storykeep";
 import { classNames } from "../../../utils/helpers";
+import { tagNames } from "../../../types";
 import type { ClassNamesPayloadDatumValue, AllTag } from "../../../types";
 
 interface StyleMemoryProps {
@@ -46,7 +47,7 @@ const StyleMemory = ({
       <button
         onClick={handleCopy}
         className="p-1 hover:bg-myorange/20 rounded"
-        title="Copy styles"
+        title={`Copy ${tagNames[currentKey]} styles`}
       >
         <ClipboardIcon className="h-5 w-5" />
       </button>
@@ -57,7 +58,7 @@ const StyleMemory = ({
           isDisabled ? "opacity-50 cursor-not-allowed" : ""
         )}
         disabled={isDisabled}
-        title="Paste styles"
+        title={`Overwrite ${tagNames[currentKey]} styles`}
       >
         <ClipboardDocumentIcon className="h-5 w-5" />
       </button>

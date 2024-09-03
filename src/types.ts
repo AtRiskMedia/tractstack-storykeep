@@ -42,6 +42,22 @@ interface IndexedItem {
   childNth: number;
 }
 
+export const tagNames = {
+  button: `button`,
+  hover: `button hover`,
+  modal: `modal`,
+  parent: `pane outer`,
+  p: `paragraph`,
+  h2: `heading 2`,
+  h3: `heading 3`,
+  h4: `heading 4`,
+  img: `image`,
+  li: `list item`,
+  ol: `aside text container`,
+  ul: `container`,
+  code: `widget`,
+};
+
 export type Tag =
   | "modal"
   | "parent"

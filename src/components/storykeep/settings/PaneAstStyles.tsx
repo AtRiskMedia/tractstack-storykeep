@@ -143,6 +143,22 @@ export const PaneAstStyles = (props: {
         ? markdownDatum.payload.optionsPayload.buttons[linkTargetLookup]
             .classNamesPayload.hover
         : null;
+  const buttonClassNamesPayloadArray = useMemo(() => {
+    if (
+      isLink &&
+      linkTargetLookup &&
+      linkTargetLookup !== "*" &&
+      markdownDatum?.payload?.optionsPayload?.buttons
+    ) {
+      const buttonData =
+        markdownDatum.payload.optionsPayload.buttons[linkTargetLookup];
+      return [
+        buttonData.classNamesPayload.button.classes,
+        buttonData.classNamesPayload.hover.classes,
+      ] as ClassNamesPayloadDatumValue[];
+    }
+    return [] as ClassNamesPayloadDatumValue[];
+  }, [isLink, linkTargetLookup, markdownDatum]);
 
   const classNamesPayload =
     isLink && buttonClassNamesPayload
@@ -917,11 +933,8 @@ export const PaneAstStyles = (props: {
                       </button>
                     </div>
                     <StyleMemory
-                      currentKey={linkMode}
-                      classNamesPayload={
-                        (buttonClassNamesPayload?.classes ||
-                          {}) as ClassNamesPayloadDatumValue
-                      }
+                      currentKey="button"
+                      classNamesPayload={buttonClassNamesPayloadArray}
                       onPaste={pastedPayload => {
                         console.log(pastedPayload);
                       }}

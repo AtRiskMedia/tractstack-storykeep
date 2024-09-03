@@ -1140,6 +1140,7 @@ export const PaneAstStyles = (props: {
                   viewport="tablet"
                   allowNegative={activeTagData?.allowNegative}
                   isNegative={activeTagData?.tabletIsNegative ?? false}
+                  isInferred={tabletValue === mobileValue}
                 />
                 <ViewportComboBox
                   value={desktopValue}
@@ -1149,6 +1150,7 @@ export const PaneAstStyles = (props: {
                   viewport="desktop"
                   allowNegative={activeTagData?.allowNegative ?? false}
                   isNegative={activeTagData?.desktopIsNegative ?? false}
+                  isInferred={desktopValue === tabletValue}
                 />
               </div>
 

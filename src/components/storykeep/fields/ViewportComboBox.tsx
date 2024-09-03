@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
+import { classNames } from "../../../utils/helpers";
 import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
@@ -19,6 +20,7 @@ interface ViewportComboBoxProps {
   viewport: "mobile" | "tablet" | "desktop";
   allowNegative?: boolean;
   isNegative?: boolean;
+  isInferred?: boolean;
 }
 
 const ViewportComboBox = ({
@@ -29,6 +31,7 @@ const ViewportComboBox = ({
   viewport,
   allowNegative = false,
   isNegative = false,
+  isInferred = false,
 }: ViewportComboBoxProps) => {
   const [internalValue, setInternalValue] = useState(value ?? "");
   const [isNowNegative, setIsNowNegative] = useState(isNegative);
@@ -82,7 +85,10 @@ const ViewportComboBox = ({
             <div className="relative flex-grow">
               <Combobox.Input
                 ref={inputRef}
-                className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
+                className={classNames(
+                  "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
+                  isInferred ? "text-black/20" : "text-black"
+                )}
                 onChange={event => handleChange(event.target.value)}
                 onKeyDown={handleKeyDown}
                 value={internalValue}

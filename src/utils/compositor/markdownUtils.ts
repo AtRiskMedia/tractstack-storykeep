@@ -709,6 +709,50 @@ function processClassValues(
   ];
 }
 
+export const findCodeNode = (
+  ast: HastRoot,
+  targetIdx: number
+): string | null => {
+  const targetAst = ast.children[targetIdx];
+
+  const traverse = (node: HastRoot | HastElement | HastText): string | null => {
+    if (
+      node.type === "element" &&
+      ["ul", "li", "code"].includes(node.tagName)
+    ) {
+      if (node.children) {
+        for (const child of node.children) {
+          if (
+            node.tagName === "ul" &&
+            child.type === "element" &&
+            child.tagName === "li"
+          ) {
+            return traverse(child);
+          } else if (
+            node.tagName === "li" &&
+            child.type === "element" &&
+            child.tagName === "code"
+          ) {
+            return traverse(child);
+          } else if (
+            node.tagName === "code" &&
+            child.type === "text" &&
+            typeof child.value === "string"
+          ) {
+            return child.value;
+          }
+        }
+      }
+    }
+    return null;
+  };
+
+  if (targetAst) {
+    return traverse(targetAst as HastRoot | HastElement | HastText);
+  }
+  return null;
+};
+
 export function getActiveTagData(
   activeTag: Tag | null,
   selectedStyle: string | null,

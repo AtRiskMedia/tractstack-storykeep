@@ -10,6 +10,8 @@ import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdo
 import {
   getActiveTagData,
   updateViewportTuple,
+  findCodeNode,
+  cleanHtmlAst,
 } from "../../../utils/compositor/markdownUtils";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import ViewportComboBox from "../fields/ViewportComboBox";
@@ -25,6 +27,7 @@ import { tagTitles } from "../../../constants";
 import ImageMeta from "../fields/ImageMeta";
 import LinksMeta from "../fields/LinksMeta";
 import StyleMemory from "../fields/StyleMemory";
+import type { Root } from "hast";
 import type {
   ClassNamesPayloadInnerDatum,
   ClassNamesPayloadDatumValue,
@@ -48,6 +51,8 @@ export const PaneAstStyles = (props: {
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
+  const [widgetConfigMode, setWidgetConfigMode] = useState(false);
+  const [widgetData, setWidgetData] = useState<string[]>([]);
   const [imageMeta, setImageMeta] = useState(false);
   const [linkTargetKey, setLinkTargetKey] = useState<string>(``);
   const [linkMode, setLinkMode] = useState<`button` | `hover` | null>(null);
@@ -283,6 +288,56 @@ export const PaneAstStyles = (props: {
     if (isLink) removeLinkStyle(className);
     else removeStyle(className);
   };
+
+  const handleWidgetConfig = () => {
+    if (
+      markdownDatum?.markdown?.htmlAst &&
+      typeof targetId.outerIdx === "number"
+    ) {
+      const codeNode =
+        markdownDatum?.markdown?.htmlAst &&
+        findCodeNode(
+          cleanHtmlAst(markdownDatum.markdown.htmlAst as Root) as Root,
+          targetId.outerIdx
+        );
+      if (codeNode) {
+        const widgetData = codeNode.split("|").map(item => item.trim());
+        setWidgetData(widgetData);
+      }
+    }
+    setWidgetConfigMode(true);
+    setSelectedStyle(null);
+    setAddClass(false);
+  };
+
+  const WidgetConfigPlaceholder = ({
+    widgetData,
+  }: {
+    widgetData: string[];
+  }) => (
+    <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+      <h3 className="text-lg font-bold">Widget Configuration</h3>
+      <span className="flex gap-x-6 w-full">
+        <button
+          className="my-2 underline"
+          title="Close Widget Config panel"
+          onClick={() => {
+            setSelectedStyle(null);
+            setAddClass(false);
+            setWidgetConfigMode(false);
+          }}
+        >
+          BACK
+        </button>
+      </span>
+      <div className="w-full mt-2">
+        <h4 className="text-md font-semibold">Extracted Data:</h4>
+        <pre className="bg-gray-100 p-2 rounded mt-1">
+          {JSON.stringify(widgetData, null, 2)}
+        </pre>
+      </div>
+    </div>
+  );
 
   const handleAddLayer = (start: boolean) => {
     const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
@@ -753,21 +808,25 @@ export const PaneAstStyles = (props: {
   };
 
   const mergeClassesWithAllOverrides = (
-  classNamesPayload: ClassNamesPayloadInnerDatum
-): ClassNamesPayloadDatumValue => {
-  const mergedClasses: ClassNamesPayloadDatumValue = Array.isArray(classNamesPayload.classes)
-    ? {}
-    : { ...classNamesPayload.classes };
-  const globalNth = targetId.globalNth || 0;
-  if (classNamesPayload.override) {
-    Object.entries(classNamesPayload.override).forEach(([className, overrides]) => {
-      if (globalNth in overrides) {
-        mergedClasses[className] = overrides[globalNth];
-      }
-    });
-  }
-  return mergedClasses;
-};
+    classNamesPayload: ClassNamesPayloadInnerDatum
+  ): ClassNamesPayloadDatumValue => {
+    const mergedClasses: ClassNamesPayloadDatumValue = Array.isArray(
+      classNamesPayload.classes
+    )
+      ? {}
+      : { ...classNamesPayload.classes };
+    const globalNth = targetId.globalNth || 0;
+    if (classNamesPayload.override) {
+      Object.entries(classNamesPayload.override).forEach(
+        ([className, overrides]) => {
+          if (globalNth in overrides) {
+            mergedClasses[className] = overrides[globalNth];
+          }
+        }
+      );
+    }
+    return mergedClasses;
+  };
 
   const handlePasteStyles = (
     pastedPayload: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumValue[]
@@ -779,14 +838,14 @@ export const PaneAstStyles = (props: {
       }
       if (!currentField.current.payload.optionsPayload.buttons[linkTargetKey]) {
         currentField.current.payload.optionsPayload.buttons[linkTargetKey] = {
-  urlTarget: linkTargetKey,
-  callbackPayload: "",
-  className: "",
-  classNamesPayload: {
-    button: { classes: {} },
-    hover: { classes: {} },
-  },
-};
+          urlTarget: linkTargetKey,
+          callbackPayload: "",
+          className: "",
+          classNamesPayload: {
+            button: { classes: {} },
+            hover: { classes: {} },
+          },
+        };
       }
       if (Array.isArray(pastedPayload) && pastedPayload.length === 2) {
         currentField.current.payload.optionsPayload.buttons[
@@ -935,7 +994,7 @@ export const PaneAstStyles = (props: {
         )}
       >
         <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
-          {!linkTargetKey && (
+          {!linkTargetKey && !widgetConfigMode && (
             <>
               <div className="flex justify-between items-center">
                 <nav
@@ -1006,8 +1065,12 @@ export const PaneAstStyles = (props: {
               <hr />
             </>
           )}
+          {widgetConfigMode && (
+            <WidgetConfigPlaceholder widgetData={widgetData} />
+          )}
           {!imageMeta &&
             !linkTargetKey &&
+            !widgetConfigMode &&
             activeTag &&
             ![`parent`, `modal`].includes(activeTag) && (
               <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
@@ -1216,7 +1279,7 @@ export const PaneAstStyles = (props: {
               )}
             </div>
           )}
-          {!imageMeta && !linkTargetKey && (
+          {!imageMeta && !linkTargetKey && !widgetConfigMode && (
             <span className="flex gap-x-6">
               <button
                 className="my-2 underline"
@@ -1244,9 +1307,7 @@ export const PaneAstStyles = (props: {
                 <button
                   className="my-2 underline"
                   title="Configure Widget"
-                  onClick={() => {
-                    console.log(`todo: NOT YET IMPLEMENTED`);
-                  }}
+                  onClick={handleWidgetConfig}
                 >
                   CONFIGURE WIDGET
                 </button>

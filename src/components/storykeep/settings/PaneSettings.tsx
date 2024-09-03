@@ -103,16 +103,9 @@ export const PaneSettings = (props: {
   const handleRemove = () => {
     const currentPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
     const updatedPaneIds = currentPaneIds.filter(paneId => paneId !== id);
-
     updateStoreField("storyFragmentPaneIds", updatedPaneIds, storyFragmentId);
-
-    // Close the settings panel
     editModeStore.set(null);
     handleToggleOff();
-
-    console.log(
-      `Pane with id: ${id} has been removed from storyFragmentPaneIds`
-    );
   };
 
   return (

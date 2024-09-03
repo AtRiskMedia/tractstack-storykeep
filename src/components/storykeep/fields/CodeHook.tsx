@@ -45,36 +45,14 @@ const CodeHook = ({ id }: CodeHookProps) => {
     [updateStoreField, localCodeHook]
   );
 
-  const getUniqueKey = useCallback(
-    (baseKey: string): string => {
-      const options = JSON.parse(localCodeHook.options || "{}");
-      let newKey = baseKey;
-      let counter = 1;
-      while (newKey in options) {
-        newKey = `${baseKey}${counter}`;
-        counter++;
-      }
-      return newKey;
-    },
-    [localCodeHook.options]
-  );
-
-  const addOption = useCallback(() => {
-    const options = JSON.parse(localCodeHook.options || "{}");
-    const newKey = getUniqueKey("newOption");
-    options[newKey] = "";
-    setLocalCodeHook(prev => ({
-      ...prev,
-      options: JSON.stringify(options),
-    }));
-  }, [localCodeHook.options, getUniqueKey]);
-
   const handleOptionChange = useCallback(
     (oldKey: string, field: "key" | "value", newValue: string) => {
       setLocalCodeHook(prev => {
         const options = JSON.parse(prev.options || "{}");
         if (field === "key") {
-          optionKeysRef.current[oldKey] = newValue;
+          if (newValue.trim() !== "") {
+            optionKeysRef.current[oldKey] = newValue;
+          }
         } else {
           options[oldKey] = newValue;
         }
@@ -89,50 +67,49 @@ const CodeHook = ({ id }: CodeHookProps) => {
   );
 
   const handleOptionEditingChange = useCallback(
-    (editing: boolean, key: string) => {
-      if (!editing) {
-        setLocalCodeHook(prev => {
-          const options = JSON.parse(prev.options || "{}");
-          const newKey = optionKeysRef.current[key] || key;
-
-          if (newKey !== key) {
-            // Find the old key (case-insensitive)
-            const oldKey = Object.keys(options).find(
-              k => k.toLowerCase() === key.toLowerCase()
-            );
-
-            if (oldKey) {
-              // If the old key exists, update it
-              const value = options[oldKey];
-              delete options[oldKey];
-
-              // If the new key already exists, merge the values
-              if (newKey in options) {
-                if (
-                  typeof options[newKey] === "object" &&
-                  typeof value === "object"
-                ) {
-                  options[newKey] = { ...options[newKey], ...value };
-                } else {
-                  options[newKey] = value;
-                }
-              } else {
-                options[newKey] = value;
-              }
-            }
+  (editing: boolean, key: string) => {
+    if (!editing) {
+      setLocalCodeHook(prev => {
+        const options = JSON.parse(prev.options || "{}");
+        const newKey = optionKeysRef.current[key] || key;
+        if (newKey !== key) {
+          if (options.hasOwnProperty(newKey)) {
+            delete optionKeysRef.current[key];
+            return prev;
           }
+          const oldKey = Object.keys(options).find(
+            k => k.toLowerCase() === key.toLowerCase()
+          );
+          if (oldKey) {
+            const value = options[oldKey];
+            delete options[oldKey];
+            options[newKey] = value;
+          }
+        }
+        optionKeysRef.current = {};
+        const updatedCodeHook = {
+          ...prev,
+          options: JSON.stringify(options),
+        };
+        updateStoreField("paneCodeHook", updatedCodeHook);
+        return updatedCodeHook;
+      });
+    }
+  },
+  [updateStoreField]
+);
 
-          optionKeysRef.current = {};
-          return {
-            ...prev,
-            options: JSON.stringify(options),
-          };
-        });
-        updateStoreField("paneCodeHook", localCodeHook);
-      }
-    },
-    [updateStoreField, localCodeHook]
-  );
+  const addOption = useCallback(() => {
+    setLocalCodeHook(prev => {
+      const options = JSON.parse(prev.options || "{}");
+      const newKey = `newOption${Object.keys(options).length + 1}`;
+      options[newKey] = "";
+      return {
+        ...prev,
+        options: JSON.stringify(options),
+      };
+    });
+  }, []);
 
   const removeOption = useCallback((key: string) => {
     setLocalCodeHook(prev => {

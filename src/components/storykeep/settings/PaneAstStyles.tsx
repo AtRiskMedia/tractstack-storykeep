@@ -752,6 +752,132 @@ export const PaneAstStyles = (props: {
     });
   };
 
+  const mergeClassesWithAllOverrides = (
+  classNamesPayload: ClassNamesPayloadInnerDatum
+): ClassNamesPayloadDatumValue => {
+  const mergedClasses: ClassNamesPayloadDatumValue = Array.isArray(classNamesPayload.classes)
+    ? {}
+    : { ...classNamesPayload.classes };
+  const globalNth = targetId.globalNth || 0;
+  if (classNamesPayload.override) {
+    Object.entries(classNamesPayload.override).forEach(([className, overrides]) => {
+      if (globalNth in overrides) {
+        mergedClasses[className] = overrides[globalNth];
+      }
+    });
+  }
+  return mergedClasses;
+};
+
+  const handlePasteStyles = (
+    pastedPayload: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumValue[]
+  ) => {
+    if (linkMode) {
+      const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+      if (!currentField.current.payload.optionsPayload.buttons) {
+        currentField.current.payload.optionsPayload.buttons = {};
+      }
+      if (!currentField.current.payload.optionsPayload.buttons[linkTargetKey]) {
+        currentField.current.payload.optionsPayload.buttons[linkTargetKey] = {
+  urlTarget: linkTargetKey,
+  callbackPayload: "",
+  className: "",
+  classNamesPayload: {
+    button: { classes: {} },
+    hover: { classes: {} },
+  },
+};
+      }
+      if (Array.isArray(pastedPayload) && pastedPayload.length === 2) {
+        currentField.current.payload.optionsPayload.buttons[
+          linkTargetKey
+        ].classNamesPayload.button.classes = pastedPayload[0];
+        currentField.current.payload.optionsPayload.buttons[
+          linkTargetKey
+        ].classNamesPayload.hover.classes = pastedPayload[1];
+        updateStoreField("paneFragmentMarkdown", currentField.current);
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(targetId.paneId);
+      }
+    } else if (activeTag) {
+      if (activeTag === "parent") {
+        const currentField = cloneDeep(
+          $paneFragmentMarkdown[markdownFragmentId]
+        );
+        const payloadForTag = currentField.current.payload.optionsPayload
+          .classNamesPayload.parent as ClassNamesPayloadInnerDatum;
+        if (
+          Array.isArray(pastedPayload) &&
+          Array.isArray(payloadForTag.classes)
+        ) {
+          payloadForTag.classes = pastedPayload;
+        }
+        updateStoreField("paneFragmentMarkdown", {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                parent: payloadForTag,
+              },
+            },
+          },
+        });
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(targetId.paneId);
+      } else {
+        const currentField = cloneDeep(
+          $paneFragmentMarkdown[markdownFragmentId]
+        );
+        const payloadForTag = currentField.current.payload.optionsPayload
+          .classNamesPayload[activeTag] as ClassNamesPayloadInnerDatum;
+        if (activeTagData?.hasOverride && activeTagData.globalNth !== null) {
+          if (!payloadForTag.override) {
+            payloadForTag.override = {};
+          }
+          Object.entries(pastedPayload).forEach(([className, value]) => {
+            if (payloadForTag?.override && !payloadForTag.override[className]) {
+              payloadForTag.override[className] = [];
+            }
+            if (
+              payloadForTag?.override &&
+              className in payloadForTag.override &&
+              activeTagData?.globalNth &&
+              activeTagData?.globalNth in payloadForTag.override[className]
+            )
+              payloadForTag.override[className][activeTagData.globalNth] =
+                value as Tuple;
+          });
+        } else {
+          payloadForTag.classes = {
+            ...payloadForTag.classes,
+            ...pastedPayload,
+          };
+        }
+
+        updateStoreField("paneFragmentMarkdown", {
+          ...currentField.current,
+          payload: {
+            ...currentField.current.payload,
+            optionsPayload: {
+              ...currentField.current.payload.optionsPayload,
+              classNamesPayload: {
+                ...currentField.current.payload.optionsPayload
+                  .classNamesPayload,
+                [activeTag]: payloadForTag,
+              },
+            },
+          },
+        });
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(targetId.paneId);
+      }
+    }
+  };
+
   useEffect(() => {
     if (activeTag)
       setTabs(prevItems =>
@@ -864,18 +990,14 @@ export const PaneAstStyles = (props: {
                         activeTag === `parent` &&
                         parentClassNamesPayload?.classes &&
                         Array.isArray(parentClassNamesPayload.classes)
-                          ? ((parentClassNamesPayload?.classes ||
-                              {}) as ClassNamesPayloadDatumValue[])
+                          ? parentClassNamesPayload.classes
                           : activeTag === `modal`
-                            ? ((modalClassNamesPayload?.classes ||
-                                {}) as ClassNamesPayloadDatumValue)
-                            : ((classNamesPayload?.classes ||
-                                {}) as ClassNamesPayloadDatumValue)
+                            ? modalClassNamesPayload?.classes || {}
+                            : mergeClassesWithAllOverrides(
+                                classNamesPayload || { classes: {} }
+                              )
                       }
-                      onPaste={pastedPayload => {
-                        console.log(pastedPayload);
-                        if (activeTag === `parent`) console.log(parentLayer);
-                      }}
+                      onPaste={handlePasteStyles}
                     />
                   )}
                 </div>
@@ -935,9 +1057,7 @@ export const PaneAstStyles = (props: {
                     <StyleMemory
                       currentKey="button"
                       classNamesPayload={buttonClassNamesPayloadArray}
-                      onPaste={pastedPayload => {
-                        console.log(pastedPayload);
-                      }}
+                      onPaste={handlePasteStyles}
                     />
                   </div>
                   <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
@@ -987,6 +1107,7 @@ export const PaneAstStyles = (props: {
                   title="Close Links panel"
                   onClick={() => {
                     setSelectedStyle(null);
+                    setAddClass(false);
                     setLinkMode(null);
                     setLinkTargetKey(``);
                   }}

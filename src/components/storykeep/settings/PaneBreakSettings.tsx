@@ -352,56 +352,63 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
   return (
     <div
       className={classNames(
-        `flex`,
-        type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
+        `rounded-md bg-white px-3.5 py-1.5 shadow-inner`,
+        type === `mobile` ? `mr-2` : `mr-6`
       )}
     >
       <div
         className={classNames(
-          type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
+          `flex`,
+          type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
         )}
       >
-        <div className="mb-2">
-          <label className="block text-sm font-medium text-mydarkgrey">
-            Colour (applies to all viewports)
-          </label>
-          <input
-            type="color"
-            value={localSettings.colour}
-            onChange={e => handleHexColorChange(e.target.value)}
-            className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-          />
-        </div>
+        <div
+          className={classNames(
+            type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
+          )}
+        >
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-mydarkgrey">
+              Colour (applies to all viewports)
+            </label>
+            <input
+              type="color"
+              value={localSettings.colour}
+              onChange={e => handleHexColorChange(e.target.value)}
+              className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+            />
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-sm text-mydarkgrey">
-            Tailwind Color Class
-          </label>
-          <TailwindColorCombobox
-            selectedColor={selectedTailwindColor}
-            onColorChange={handleTailwindColorChange}
-          />
-        </div>
+          <div className="mb-4">
+            <label className="block text-sm text-mydarkgrey">
+              Tailwind Color Class
+            </label>
+            <TailwindColorCombobox
+              selectedColor={selectedTailwindColor}
+              onColorChange={handleTailwindColorChange}
+            />
+          </div>
 
-        <div className="mb-4">
-          <PaneBgColour paneId={id} />
-        </div>
+          <div className="mb-4">
+            <PaneBgColour paneId={id} />
+          </div>
 
-        {renderViewportSettings("mobile")}
-        {renderViewportSettings("tablet")}
-        {renderViewportSettings("desktop")}
-        <div className="flex justify-end">
-          <button
-            onClick={handleUndoClick}
-            className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
-            disabled={
-              !fragmentId ||
-              $paneFragmentBgPane[fragmentId]?.history.length === 0
-            }
-          >
-            <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
-            Undo
-          </button>
+          {renderViewportSettings("mobile")}
+          {renderViewportSettings("tablet")}
+          {renderViewportSettings("desktop")}
+          <div className="flex justify-end">
+            <button
+              onClick={handleUndoClick}
+              className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
+              disabled={
+                !fragmentId ||
+                $paneFragmentBgPane[fragmentId]?.history.length === 0
+              }
+            >
+              <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
+              Undo
+            </button>
+          </div>
         </div>
       </div>
     </div>

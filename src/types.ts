@@ -77,6 +77,12 @@ export type StylesMemory = {
   [key in AllTag]?: ClassNamesPayloadDatumValue;
 };
 
+export interface LinkInfo {
+  globalNth: number;
+  parentNth: number;
+  childNth: number;
+}
+
 export interface MarkdownLookup {
   images: { [key: number]: IndexedItem };
   codeItems: { [key: number]: IndexedItem };
@@ -86,6 +92,7 @@ export interface MarkdownLookup {
   codeItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   listItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   linksLookup: { [parentNth: number]: { [childNth: number]: number } };
+  linksByTarget: { [target: string]: LinkInfo };
   nthTag: { [key: number]: Tag };
   nthTagLookup: { [key: string]: { [key: number]: { nth: number } } };
 }

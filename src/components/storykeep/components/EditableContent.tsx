@@ -1,20 +1,24 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import { fromMarkdown } from "mdast-util-from-markdown";
+import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
 import {
   paneFragmentMarkdown,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  editModeStore,
 } from "../../../store/storykeep";
 import {
   updateMarkdownElement,
   markdownToHtmlAst,
   cleanHtmlAst,
 } from "../../../utils/compositor/markdownUtils";
+import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
+
 import ContentEditableField from "./ContentEditableField";
 import { MAX_LENGTH_CONTENT } from "../../../constants";
-import { useStoryKeepUtils } from "../../../utils/storykeep";
+import { useStoryKeepUtils, handleToggleOn } from "../../../utils/storykeep";
 import type { KeyboardEvent } from "react";
 import type { Element, Root } from "hast";
 
@@ -83,9 +87,75 @@ const EditableContent = ({
       if (!markdownFragmentId) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
+
       const mdast = fromMarkdown(newContent);
-      const hast = cleanHtmlAst(toHast(mdast) as Root) as Element;
-      const newLinks = findLinks(hast);
+      let hast = cleanHtmlAst(toHast(mdast) as Root) as Element;
+      let newLinks = findLinks(hast);
+
+      const currentButtons =
+        $paneFragmentMarkdown[markdownFragmentId].current.payload.optionsPayload
+          .buttons || {};
+
+      const updatedButtons = { ...currentButtons };
+      let markdownUpdated = false;
+
+      const getUniqueKey = (baseKey: string): string => {
+        let newKey = baseKey;
+        let counter = 1;
+        while (newKey in updatedButtons) {
+          newKey = `${baseKey}${counter}`;
+          counter++;
+        }
+        return newKey;
+      };
+
+      const updateMarkdownAndButtons = (oldUrl: string, newUrl: string) => {
+        mdast.children = mdast.children.map(node => {
+          if (node.type === "paragraph") {
+            node.children = node.children.map(child => {
+              if (child.type === "link" && child.url === oldUrl) {
+                return { ...child, url: newUrl };
+              }
+              return child;
+            });
+          }
+          return node;
+        });
+        updatedButtons[newUrl] = {
+          urlTarget: newUrl,
+          callbackPayload: "",
+          className: "",
+          classNamesPayload: {
+            [`button`]: { classes: {} },
+            [`hover`]: { classes: {} },
+          },
+        };
+        markdownUpdated = true;
+      };
+
+      Object.keys(newLinks).forEach(url => {
+        if (updatedButtons[url] && url !== updatedButtons[url].urlTarget) {
+          const newUrl = getUniqueKey(url);
+          updateMarkdownAndButtons(url, newUrl);
+        } else if (!updatedButtons[url]) {
+          updatedButtons[url] = {
+            urlTarget: url,
+            callbackPayload: "",
+            className: "",
+            classNamesPayload: {
+              [`button`]: { classes: {} },
+              [`hover`]: { classes: {} },
+            },
+          };
+        }
+      });
+
+      if (markdownUpdated) {
+        newContent = toMarkdown(mdast);
+        hast = cleanHtmlAst(toHast(mdast) as Root) as Element;
+        newLinks = findLinks(hast);
+      }
+
       const newBody = updateMarkdownElement(
         $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
         newContent,
@@ -93,6 +163,7 @@ const EditableContent = ({
         outerIdx,
         idx
       );
+
       const updatedFragment = {
         ...$paneFragmentMarkdown[markdownFragmentId]?.current,
         markdown: {
@@ -100,33 +171,41 @@ const EditableContent = ({
           body: newBody,
           htmlAst: markdownToHtmlAst(newBody),
         },
+        payload: {
+          ...$paneFragmentMarkdown[markdownFragmentId]?.current?.payload,
+          optionsPayload: {
+            ...$paneFragmentMarkdown[markdownFragmentId]?.current?.payload
+              .optionsPayload,
+            buttons: updatedButtons,
+          },
+        },
       };
-      if (Object.keys(newLinks).length > 0) {
-        const currentButtons =
-          updatedFragment.payload.optionsPayload.buttons || {};
-        const updatedButtons = {
-          ...currentButtons,
-          ...Object.fromEntries(
-            Object.entries(newLinks).map(([url]) => [
-              url,
-              currentButtons[url] || {
-                urlTarget: url,
-                callbackPayload: "",
-                className: "",
-                classNamesPayload: {
-                  [`button`]: {
-                    classes: {},
-                  },
-                  [`hover`]: {
-                    classes: {},
-                  },
-                },
-              },
-            ])
-          ),
-        };
-        updatedFragment.payload.optionsPayload.buttons = updatedButtons;
+
+      const newHtmlAst = markdownToHtmlAst(updatedFragment.markdown.body);
+      const newMarkdownLookup = generateMarkdownLookup(newHtmlAst);
+      const firstNewLink = Object.keys(newLinks).find(
+        url => !currentButtons[url]
+      );
+      if (firstNewLink) {
+        const linkInfo = newMarkdownLookup.linksByTarget[firstNewLink];
+        if (linkInfo) {
+          editModeStore.set({
+            id: paneId,
+            mode: "styles",
+            type: "pane",
+            targetId: {
+              paneId,
+              outerIdx: linkInfo.parentNth,
+              idx: linkInfo.childNth,
+              globalNth: linkInfo.globalNth,
+              tag: "a",
+              buttonTarget: firstNewLink,
+            },
+          });
+          handleToggleOn("styles");
+        }
       }
+
       updateStoreField("paneFragmentMarkdown", updatedFragment);
     },
     [

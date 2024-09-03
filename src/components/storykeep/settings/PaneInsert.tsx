@@ -47,7 +47,7 @@ import type {
   ContentMap,
   StoreKey,
   BeliefDatum,
-  PaneDesign
+  PaneDesign,
 } from "../../../types";
 
 export const PaneInsert = (props: {
@@ -168,54 +168,58 @@ export const PaneInsert = (props: {
     $paneFragmentBgColour,
   ]);
 
-const modifyPaneDesign = useCallback(
-  (design: PaneDesign) => {
-    const { prevColor, nextColor } = getAdjacentPaneColors();
-    const isFromAbove = payload.selectedDesign.orientation === `above`;
-    const modifiedDesign = cloneDeep(design);
-    if (isFromAbove && prevColor) {
-      modifiedDesign.fragments = modifiedDesign.fragments
-        ?.map(f => {
-          if (f.type === "bgPane") {
-            return {
-              ...f,
-              optionsPayload: {
-                ...f.optionsPayload,
-                artpack: {
-                  ...f.optionsPayload?.artpack,
-                  desktop: {
-                    ...f.optionsPayload?.artpack?.desktop,
-                    svgFill: prevColor,
+  const modifyPaneDesign = useCallback(
+    (design: PaneDesign) => {
+      const { prevColor, nextColor } = getAdjacentPaneColors();
+      const isFromAbove = payload.selectedDesign.orientation === `above`;
+      const modifiedDesign = cloneDeep(design);
+      if (isFromAbove && prevColor) {
+        modifiedDesign.fragments =
+          modifiedDesign.fragments
+            ?.map(f => {
+              if (f.type === "bgPane") {
+                return {
+                  ...f,
+                  optionsPayload: {
+                    ...f.optionsPayload,
+                    artpack: {
+                      ...f.optionsPayload?.artpack,
+                      desktop: {
+                        ...f.optionsPayload?.artpack?.desktop,
+                        svgFill: prevColor,
+                      },
+                      tablet: {
+                        ...f.optionsPayload?.artpack?.tablet,
+                        svgFill: prevColor,
+                      },
+                      mobile: {
+                        ...f.optionsPayload?.artpack?.mobile,
+                        svgFill: prevColor,
+                      },
+                    },
                   },
-                  tablet: {
-                    ...f.optionsPayload?.artpack?.tablet,
-                    svgFill: prevColor,
-                  },
-                  mobile: {
-                    ...f.optionsPayload?.artpack?.mobile,
-                    svgFill: prevColor,
-                  },
-                },
-              },
-            } as PaneDesignBgPane;
-          }
-          return f;
-        })
-        .filter((f): f is PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum => 
-          f.type === "bgPane" || f.type === "markdown" || f.type === "bgColour"
-        ) ?? [];
-    }
+                } as PaneDesignBgPane;
+              }
+              return f;
+            })
+            .filter(
+              (f): f is PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum =>
+                f.type === "bgPane" ||
+                f.type === "markdown" ||
+                f.type === "bgColour"
+            ) ?? [];
+      }
 
-    if (!isFromAbove && nextColor) {
-      modifiedDesign.panePayload = {
-        ...modifiedDesign.panePayload,
-        bgColour: nextColor,
-      };
-    }
-    return modifiedDesign;
-  },
-  [getAdjacentPaneColors, payload.selectedDesign.orientation]
-);
+      if (!isFromAbove && nextColor) {
+        modifiedDesign.panePayload = {
+          ...modifiedDesign.panePayload,
+          bgColour: nextColor,
+        };
+      }
+      return modifiedDesign;
+    },
+    [getAdjacentPaneColors, payload.selectedDesign.orientation]
+  );
 
   const handleSave = () => {
     if (!payload.selectedDesign) {

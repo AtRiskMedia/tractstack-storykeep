@@ -366,7 +366,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks1",
     slug: "breaks1",
-    name: "Stepped",
+    name: "Stepped from above",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -375,7 +375,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -421,7 +421,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks2",
     slug: "breaks2",
-    name: "Cut 1",
+    name: "Cut 1 into below",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -430,7 +430,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -476,7 +476,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks3",
     slug: "breaks3",
-    name: "Cut 2",
+    name: "Cut 2 into below",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -485,7 +485,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -531,7 +531,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks4",
     slug: "breaks4",
-    name: "Low Cut 1",
+    name: "Low Cut 1 into below",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -540,7 +540,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -586,7 +586,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks5",
     slug: "breaks5",
-    name: "Low Cut 2",
+    name: "Low Cut 2 into below",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -595,7 +595,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -641,7 +641,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks6",
     slug: "breaks6",
-    name: "Jag",
+    name: "Jag from above",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -650,7 +650,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -696,7 +696,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks7",
     slug: "breaks7",
-    name: "Burst 1",
+    name: "Burst 1 from above",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -705,7 +705,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -751,7 +751,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks8",
     slug: "breaks8",
-    name: "Burst 2",
+    name: "Burst 2 from above",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -760,7 +760,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: null,
+      bgColour: false,
       codeHook: null,
     },
     files: [],
@@ -806,7 +806,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "breaks9",
     slug: "breaks9",
-    name: "Crooked",
+    name: "Crooked from above",
     type: `break`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -815,7 +815,7 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: `#10120d`,
+      bgColour: false,
       codeHook: null,
     },
     files: [],

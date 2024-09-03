@@ -190,7 +190,7 @@ const PaneFromAst = ({
         tag: thisTag,
       },
     });
-    handleToggleOn(`styles`,thisId);
+    handleToggleOn(`styles`, thisId);
   }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);
 
   const handleToolModeLinkClick = useCallback(() => {
@@ -210,7 +210,7 @@ const PaneFromAst = ({
         buttonTarget,
       },
     });
-    handleToggleOn(`styles`,thisId);
+    handleToggleOn(`styles`, thisId);
   }, [paneId]);
 
   // Extract class names

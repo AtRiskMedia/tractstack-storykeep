@@ -178,6 +178,7 @@ export interface PaneDesign {
   };
   files: FileDatum[];
   fragments: (PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum)[];
+  orientation?: `above` | `below`;
 }
 
 export type PaneAstTargetId = {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ulid } from "ulid";
 import preparePreviewPane from "../../../utils/compositor/preparePreviewPane";
 import { useStore } from "@nanostores/react";
@@ -35,15 +35,19 @@ import {
   createFieldWithHistory,
   useStoryKeepUtils,
 } from "../../../utils/storykeep";
+import { cloneDeep } from "../../../utils/helpers";
 import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
 import type {
   BgPaneDatum,
-  BgColourDatum,
+  PaneDesignBgPane,
   MarkdownPaneDatum,
+  PaneDesignMarkdown,
+  BgColourDatum,
   ContentMap,
   StoreKey,
   BeliefDatum,
+  PaneDesign
 } from "../../../types";
 
 export const PaneInsert = (props: {
@@ -70,8 +74,10 @@ export const PaneInsert = (props: {
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
     keys: [storyFragmentId],
   });
+  const $paneFragmentIds = useStore(paneFragmentIds);
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
+  const $paneFragmentBgColour = useStore(paneFragmentBgColour);
   const usedSlugs = contentMap
     .filter(item => item.type === "Pane")
     .map(item => item.slug);
@@ -130,8 +136,94 @@ export const PaneInsert = (props: {
     return handleEditingChange(storeKey, editing);
   };
 
+  const getAdjacentPaneColors = useCallback(() => {
+    const currentPaneIds =
+      $storyFragmentPaneIds[storyFragmentId]?.current || [];
+    const insertIndex = payload.index; // This should be the index where we're inserting the new pane
+
+    const prevPaneId = insertIndex > 0 ? currentPaneIds[insertIndex - 1] : null;
+    const nextPaneId =
+      insertIndex < currentPaneIds.length ? currentPaneIds[insertIndex] : null;
+
+    const getColor = (id: string | null) => {
+      if (!id) return null;
+      const fragmentIds = $paneFragmentIds[id]?.current || [];
+      for (const fragmentId of fragmentIds) {
+        const bgColor = $paneFragmentBgColour[fragmentId]?.current?.bgColour;
+        if (bgColor) return bgColor;
+      }
+      return null;
+    };
+    const prevColor = getColor(prevPaneId);
+    const nextColor = getColor(nextPaneId);
+    return {
+      prevColor: prevColor || "#FFFFFF", // Default to white if no previous color
+      nextColor: nextColor || "#FFFFFF", // Default to white if no next color
+    };
+  }, [
+    storyFragmentId,
+    payload.index,
+    $storyFragmentPaneIds,
+    $paneFragmentIds,
+    $paneFragmentBgColour,
+  ]);
+
+const modifyPaneDesign = useCallback(
+  (design: PaneDesign) => {
+    const { prevColor, nextColor } = getAdjacentPaneColors();
+    const isFromAbove = payload.selectedDesign.orientation === `above`;
+    const modifiedDesign = cloneDeep(design);
+    if (isFromAbove && prevColor) {
+      modifiedDesign.fragments = modifiedDesign.fragments
+        ?.map(f => {
+          if (f.type === "bgPane") {
+            return {
+              ...f,
+              optionsPayload: {
+                ...f.optionsPayload,
+                artpack: {
+                  ...f.optionsPayload?.artpack,
+                  desktop: {
+                    ...f.optionsPayload?.artpack?.desktop,
+                    svgFill: prevColor,
+                  },
+                  tablet: {
+                    ...f.optionsPayload?.artpack?.tablet,
+                    svgFill: prevColor,
+                  },
+                  mobile: {
+                    ...f.optionsPayload?.artpack?.mobile,
+                    svgFill: prevColor,
+                  },
+                },
+              },
+            } as PaneDesignBgPane;
+          }
+          return f;
+        })
+        .filter((f): f is PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum => 
+          f.type === "bgPane" || f.type === "markdown" || f.type === "bgColour"
+        ) ?? [];
+    }
+
+    if (!isFromAbove && nextColor) {
+      modifiedDesign.panePayload = {
+        ...modifiedDesign.panePayload,
+        bgColour: nextColor,
+      };
+    }
+    return modifiedDesign;
+  },
+  [getAdjacentPaneColors, payload.selectedDesign.orientation]
+);
+
   const handleSave = () => {
-    const paneData = preparePreviewPane(payload.selectedDesign);
+    if (!payload.selectedDesign) {
+      return;
+    }
+    const paneData = preparePreviewPane(
+      modifyPaneDesign(payload.selectedDesign)
+    );
     const newPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
     newPaneIds.splice(payload.index, 0, paneId);
     const paneStores = [

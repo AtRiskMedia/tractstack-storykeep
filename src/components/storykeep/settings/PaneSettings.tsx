@@ -5,6 +5,7 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   XMarkIcon,
+  CheckIcon,
 } from "@heroicons/react/20/solid";
 import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
@@ -34,6 +35,7 @@ export const PaneSettings = (props: {
   contentMap: ContentMap[];
 }) => {
   const { id, storyFragmentId, contentMap } = props;
+  const [confirmRemoval, setConfirmRemoval] = useState(false);
   const usedSlugs = contentMap
     .filter(item => item.type === "Pane")
     .map(item => item.slug);
@@ -101,11 +103,16 @@ export const PaneSettings = (props: {
   };
 
   const handleRemove = () => {
-    const currentPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
-    const updatedPaneIds = currentPaneIds.filter(paneId => paneId !== id);
-    updateStoreField("storyFragmentPaneIds", updatedPaneIds, storyFragmentId);
-    editModeStore.set(null);
-    handleToggleOff();
+    if (confirmRemoval) {
+      const currentPaneIds = [
+        ...$storyFragmentPaneIds[storyFragmentId].current,
+      ];
+      const updatedPaneIds = currentPaneIds.filter(paneId => paneId !== id);
+      updateStoreField("storyFragmentPaneIds", updatedPaneIds, storyFragmentId);
+      editModeStore.set(null);
+      handleToggleOff();
+      setConfirmRemoval(false);
+    } else setConfirmRemoval(true);
   };
 
   return (
@@ -172,29 +179,53 @@ export const PaneSettings = (props: {
 
             <PaneBgColour paneId={id} />
             <div className="flex flex-col">
-              <button
-                title="Move up"
-                onClick={handleMoveUp}
-                disabled={isFirstPane}
-                className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isFirstPane ? "disabled:hidden" : ""}`}
-              >
-                <ArrowUpIcon className="w-5 h-5" />
-              </button>
-              <button
-                title="Move down"
-                onClick={handleMoveDown}
-                disabled={isLastPane}
-                className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isLastPane ? "disabled:hidden" : ""}`}
-              >
-                <ArrowDownIcon className="w-5 h-5" />
-              </button>
-              <button
-                title="Remove pane"
-                onClick={handleRemove}
-                className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
+              <div className="flex-shrink">
+                <button
+                  title="Move up"
+                  onClick={handleMoveUp}
+                  disabled={isFirstPane}
+                  className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isFirstPane ? "disabled:hidden" : ""}`}
+                >
+                  <ArrowUpIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-shrink">
+                <button
+                  title="Move down"
+                  onClick={handleMoveDown}
+                  disabled={isLastPane}
+                  className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isLastPane ? "disabled:hidden" : ""}`}
+                >
+                  <ArrowDownIcon className="w-5 h-5" />
+                </button>
+              </div>
+              {confirmRemoval ? (
+                <div className="flex flex-nowrap space-x-2">
+                  <span>Are you sure?</span>
+                  <button
+                    title="Remove pane"
+                    onClick={handleRemove}
+                    className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                  >
+                    <CheckIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    title="Cancel and keep pane"
+                    onClick={() => setConfirmRemoval(false)}
+                    className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  title="Remove pane"
+                  onClick={handleRemove}
+                  className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
         </div>

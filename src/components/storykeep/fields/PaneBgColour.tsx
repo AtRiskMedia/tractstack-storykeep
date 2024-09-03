@@ -9,7 +9,7 @@ import {
   useStoryKeepUtils,
   createFieldWithHistory,
 } from "../../../utils/storykeep";
-import { tailwindToHex } from "../../../utils/helpers";
+import { tailwindToHex, hexToTailwind } from "../../../assets/tailwindColors";
 import ColorPickerWrapper from "../components/ColorPickerWrapper";
 import TailwindColorCombobox from "../fields/TailwindColorCombobox";
 import { ulid } from "ulid";
@@ -44,7 +44,8 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
         const bgColor =
           $paneFragmentBgColour[colorFragmentId]?.current?.bgColour;
         setColor(bgColor ?? null);
-        setSelectedTailwindColor("");
+        const matchingTailwindColor = hexToTailwind(bgColor || "");
+        setSelectedTailwindColor(matchingTailwindColor || "");
       } else {
         setColor(null);
         setSelectedTailwindColor("");
@@ -54,9 +55,11 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
 
   const handleColorChange = useCallback(
     (newColor: string) => {
-      setColor(newColor);
-      setSelectedTailwindColor(`bg-${newColor}`);
-      const hexColor = tailwindToHex(`bg-${newColor}`);
+      const hexColor = newColor.startsWith("#") ? newColor : `#${newColor}`;
+      setColor(hexColor);
+      const matchingTailwindColor = hexToTailwind(hexColor);
+      setSelectedTailwindColor(matchingTailwindColor || "");
+
       if (bgColorFragmentId) {
         updateStoreField(
           "paneFragmentBgColour",
@@ -99,6 +102,14 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
     ]
   );
 
+  const handleTailwindColorChange = useCallback(
+    (newTailwindColor: string) => {
+      const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
+      handleColorChange(hexColor);
+    },
+    [handleColorChange]
+  );
+
   const handleRemoveColor = useCallback(() => {
     if (bgColorFragmentId) {
       const updatedFragmentIds = $paneFragmentIds[paneId].current.filter(
@@ -120,6 +131,17 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
     updateStoreField,
   ]);
 
+  const handleUndoCallback = useCallback(() => {
+    if (bgColorFragmentId) {
+      handleUndo("paneFragmentBgColour", bgColorFragmentId);
+      const undoneColor =
+        $paneFragmentBgColour[bgColorFragmentId]?.current?.bgColour;
+      setColor(undoneColor || null);
+      const matchingTailwindColor = hexToTailwind(undoneColor || "");
+      setSelectedTailwindColor(matchingTailwindColor || "");
+    }
+  }, [handleUndo, bgColorFragmentId, $paneFragmentBgColour]);
+
   return (
     <div className="flex flex-col space-y-2">
       <div className="flex items-center space-x-4">
@@ -129,10 +151,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
         <ColorPickerWrapper
           id="paneBackgroundColor"
           defaultColor={color || "#FFFFFF"}
-          onColorChange={newColor => {
-            setColor(newColor);
-            handleColorChange(newColor.replace("#", ""));
-          }}
+          onColorChange={handleColorChange}
         />
         {color && (
           <button
@@ -144,9 +163,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
           </button>
         )}
         <button
-          onClick={() =>
-            handleUndo("paneFragmentBgColour", bgColorFragmentId ?? "")
-          }
+          onClick={handleUndoCallback}
           className="disabled:hidden ml-2"
           disabled={
             !bgColorFragmentId ||
@@ -165,7 +182,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
         </label>
         <TailwindColorCombobox
           selectedColor={selectedTailwindColor}
-          onColorChange={handleColorChange}
+          onColorChange={handleTailwindColorChange}
         />
       </div>
     </div>

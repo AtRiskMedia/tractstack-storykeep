@@ -13,11 +13,15 @@ import {
 } from "@heroicons/react/24/outline";
 import { paneFragmentIds, paneFragmentBgPane } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
-import { cloneDeep, classNames, tailwindToHex } from "../../../utils/helpers";
+import { classNames } from "../../../utils/helpers";
 import { SvgBreaks } from "../../../assets/shapes";
-import { getTailwindColorOptions } from "../../../assets/tailwindColors";
+import {
+  tailwindToHex,
+  getTailwindColorOptions,
+} from "../../../assets/tailwindColors";
 import PaneBgColour from "../fields/PaneBgColour";
 import TailwindColorCombobox from "../fields/TailwindColorCombobox";
+import { isDeepEqual } from "../../../utils/helpers";
 
 const availableCollections = ["kCz"] as const;
 const availableImagesWithPrefix = ["none", ...Object.keys(SvgBreaks)] as const;
@@ -55,7 +59,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
 
   const [localSettings, setLocalSettings] = useState<LocalSettings>({
     collection: "",
-    colour: "#10120d",
+    colour: "",
     desktop: { image: "none" },
     tablet: { image: "none" },
     mobile: { image: "none" },
@@ -77,17 +81,14 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
   }, [query, availableImages]);
 
   const updateStore = useCallback(
-    (
-      newSettings: LocalSettings,
-      viewport?: Viewport,
-      newImage?: ImageOption
-    ) => {
+    (newSettings: LocalSettings) => {
       if (fragmentId) {
+        const oldPane = $paneFragmentBgPane[fragmentId].current;
+
         const hiddenViewports = (["desktop", "tablet", "mobile"] as const)
           .filter(vp => newSettings[vp].image === "none")
           .join(",");
 
-        const oldPane = $paneFragmentBgPane[fragmentId].current;
         const newBgPane = {
           ...oldPane,
           hiddenViewports: hiddenViewports || "none",
@@ -95,51 +96,46 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
             ...oldPane.optionsPayload,
             artpack: {
               desktop: {
+                ...oldPane?.optionsPayload?.artpack?.desktop,
                 collection: newSettings.collection,
                 image:
                   newSettings.desktop.image === "none"
                     ? ""
                     : newSettings.desktop.image,
-                mode: "break",
                 svgFill: newSettings.colour,
               },
               tablet: {
+                ...oldPane?.optionsPayload?.artpack?.tablet,
                 collection: newSettings.collection,
                 image:
                   newSettings.tablet.image === "none"
                     ? ""
                     : newSettings.tablet.image,
-                mode: "break",
                 svgFill: newSettings.colour,
               },
               mobile: {
+                ...oldPane?.optionsPayload?.artpack?.mobile,
                 collection: newSettings.collection,
                 image:
                   newSettings.mobile.image === "none"
                     ? ""
                     : newSettings.mobile.image,
-                mode: "break",
                 svgFill: newSettings.colour,
               },
             },
           },
         };
-
-        // If a specific viewport was updated, only update that viewport
-        if (viewport && newImage) {
-          newBgPane.optionsPayload.artpack[viewport].image =
-            newImage === "none" ? "" : newImage;
+        if (!isDeepEqual(oldPane, newBgPane)) {
+          updateStoreField("paneFragmentBgPane", newBgPane);
+          updateStoreField(
+            "paneFragmentIds",
+            [...$paneFragmentIds[id].current],
+            id
+          );
         }
-
-        updateStoreField("paneFragmentBgPane", newBgPane);
-        updateStoreField(
-          "paneFragmentIds",
-          [...$paneFragmentIds[id].current],
-          id
-        );
       }
     },
-    [fragmentId, $paneFragmentBgPane, updateStoreField]
+    [fragmentId, $paneFragmentBgPane, updateStoreField, $paneFragmentIds, id]
   );
 
   const handleUndoClick = useCallback(() => {
@@ -164,10 +160,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
               },
             }
           : { ...prev, [field]: value };
-
-        // Immediately update the store
-        updateStore(newSettings, viewport, value as ImageOption);
-
+        updateStore(newSettings);
         return newSettings;
       });
 
@@ -176,29 +169,41 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
     [updateStore]
   );
 
-  const updateColor = useCallback((newColor: string) => {
-    setLocalSettings(prev => ({
-      ...prev,
-      colour: newColor,
-    }));
-  }, []);
   const tailwindColorOptions = useMemo(() => getTailwindColorOptions(), []);
+
   const handleHexColorChange = useCallback(
     (newHexColor: string) => {
-      updateColor(newHexColor);
+      setLocalSettings(prev => {
+        const newSettings = {
+          ...prev,
+          colour: newHexColor,
+        };
+        updateStore(newSettings);
+        return newSettings;
+      });
       const matchingTailwindColor = tailwindColorOptions.find(
         color => tailwindToHex(`bg-${color}`) === newHexColor
       );
       setSelectedTailwindColor(matchingTailwindColor || "");
     },
-    [tailwindColorOptions]
+    [updateStore, tailwindColorOptions]
   );
 
-  const handleTailwindColorChange = useCallback((newTailwindColor: string) => {
-    const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
-    updateColor(hexColor);
-    setSelectedTailwindColor(newTailwindColor);
-  }, []);
+  const handleTailwindColorChange = useCallback(
+    (newTailwindColor: string) => {
+      const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
+      setLocalSettings(prev => {
+        const newSettings = {
+          ...prev,
+          colour: hexColor,
+        };
+        updateStore(newSettings);
+        return newSettings;
+      });
+      setSelectedTailwindColor(newTailwindColor);
+    },
+    [updateStore]
+  );
 
   useEffect(() => {
     const fragmentIds = $paneFragmentIds[id]?.current;
@@ -216,10 +221,9 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
       const matchingTailwindColor = tailwindColorOptions.find(
         color => tailwindToHex(`bg-${color}`) === currentColor
       );
-      if (matchingTailwindColor) {
-        setSelectedTailwindColor(matchingTailwindColor);
-      }
-      setLocalSettings({
+
+      setLocalSettings(prevSettings => ({
+        ...prevSettings,
         collection: (artpack?.desktop?.collection || "") as Collection,
         colour: currentColor,
         desktop: {
@@ -237,41 +241,13 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
             ? "none"
             : artpack?.mobile?.image || "none") as ImageOption,
         },
-      });
-    }
-  }, [fragmentId, $paneFragmentBgPane, tailwindColorOptions]);
+      }));
 
-  useEffect(() => {
-    if (fragmentId && $paneFragmentBgPane[fragmentId]?.current) {
-      const currentSettings = $paneFragmentBgPane[fragmentId].current;
-      const currentColor =
-        currentSettings.optionsPayload.artpack?.desktop?.svgFill;
-
-      if (currentColor !== localSettings.colour) {
-        const newBgPane = {
-          ...cloneDeep(currentSettings),
-          optionsPayload: {
-            ...currentSettings.optionsPayload,
-            artpack: {
-              desktop: {
-                ...currentSettings.optionsPayload?.artpack?.desktop,
-                svgFill: localSettings.colour,
-              },
-              tablet: {
-                ...currentSettings.optionsPayload?.artpack?.tablet,
-                svgFill: localSettings.colour,
-              },
-              mobile: {
-                ...currentSettings.optionsPayload?.artpack?.mobile,
-                svgFill: localSettings.colour,
-              },
-            },
-          },
-        };
-        updateStoreField("paneFragmentBgPane", newBgPane);
+      if (matchingTailwindColor) {
+        setSelectedTailwindColor(matchingTailwindColor);
       }
     }
-  }, [fragmentId, localSettings.colour, $paneFragmentBgPane, updateStoreField]);
+  }, [fragmentId, $paneFragmentBgPane, tailwindColorOptions]);
 
   const renderViewportSettings = (viewport: Viewport) => {
     const Icon =

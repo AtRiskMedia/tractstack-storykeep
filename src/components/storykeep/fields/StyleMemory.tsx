@@ -9,8 +9,12 @@ import type { ClassNamesPayloadDatumValue, AllTag } from "../../../types";
 
 interface StyleMemoryProps {
   currentKey: AllTag;
-  classNamesPayload: ClassNamesPayloadDatumValue;
-  onPaste: (payload: ClassNamesPayloadDatumValue) => void;
+  classNamesPayload:
+    | ClassNamesPayloadDatumValue
+    | ClassNamesPayloadDatumValue[];
+  onPaste: (
+    payload: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumValue[]
+  ) => void;
 }
 
 const StyleMemory = ({
@@ -19,7 +23,7 @@ const StyleMemory = ({
   onPaste,
 }: StyleMemoryProps) => {
   const $stylesMemory = useStore(stylesMemoryStore);
-  console.log(currentKey, classNamesPayload,$stylesMemory[currentKey])
+  console.log(currentKey, classNamesPayload, $stylesMemory[currentKey]);
 
   const handleCopy = () => {
     stylesMemoryStore.set({

@@ -3,8 +3,14 @@ import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useStore } from "@nanostores/react";
 import { storyFragmentTailwindBgColour } from "../../../store/storykeep";
 import ColorPickerWrapper from "../components/ColorPickerWrapper";
-import { tailwindToHex, debounce } from "../../../utils/helpers";
+import { debounce } from "../../../utils/helpers";
+import {
+  hexToTailwind,
+  tailwindToHex,
+  getTailwindColorOptions,
+} from "../../../assets/tailwindColors";
 import type { StoreKey } from "../../../types";
+import TailwindColorCombobox from "../fields/TailwindColorCombobox";
 
 interface StoryFragmentTailwindBgColourProps {
   id: string;
@@ -25,8 +31,10 @@ const StoryFragmentTailwindBgColour = ({
   const [localValue, setLocalValue] = useState(
     $storyFragmentTailwindBgColour[id]?.current || ""
   );
+  const [selectedTailwindColor, setSelectedTailwindColor] = useState("");
 
   const hexColor = useMemo(() => tailwindToHex(localValue), [localValue]);
+  const tailwindColorOptions = useMemo(() => getTailwindColorOptions(), []);
 
   const debouncedUpdateField = useRef(
     debounce((newValue: string) => {
@@ -36,12 +44,26 @@ const StoryFragmentTailwindBgColour = ({
 
   useEffect(() => {
     setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
+    const currentColor = $storyFragmentTailwindBgColour[id]?.current || "";
+    const matchingTailwindColor = hexToTailwind(tailwindToHex(currentColor));
+    setSelectedTailwindColor(matchingTailwindColor || "");
   }, [$storyFragmentTailwindBgColour[id]?.current]);
 
-  const handleChange = useCallback(
-    (newColor: string) => {
-      setLocalValue(newColor);
-      debouncedUpdateField(`bg-${newColor}`);
+  const handleHexColorChange = useCallback(
+    (newHexColor: string) => {
+      setLocalValue(newHexColor.replace("#", ""));
+      debouncedUpdateField(`bg-${newHexColor.replace("#", "")}`);
+      const matchingTailwindColor = hexToTailwind(newHexColor);
+      setSelectedTailwindColor(matchingTailwindColor || "");
+    },
+    [debouncedUpdateField]
+  );
+
+  const handleTailwindColorChange = useCallback(
+    (newTailwindColor: string) => {
+      setLocalValue(newTailwindColor);
+      debouncedUpdateField(`bg-${newTailwindColor}`);
+      setSelectedTailwindColor(newTailwindColor);
     },
     [debouncedUpdateField]
   );
@@ -49,33 +71,45 @@ const StoryFragmentTailwindBgColour = ({
   const handleUndoCallback = useCallback(() => {
     handleUndo("storyFragmentTailwindBgColour", id);
     setLocalValue($storyFragmentTailwindBgColour[id]?.current || "");
-  }, [handleUndo, $storyFragmentTailwindBgColour, id]);
+    const matchingTailwindColor = tailwindColorOptions.find(
+      color =>
+        tailwindToHex(`bg-${color}`) ===
+        tailwindToHex($storyFragmentTailwindBgColour[id]?.current || "")
+    );
+    setSelectedTailwindColor(matchingTailwindColor || "");
+  }, [handleUndo, $storyFragmentTailwindBgColour, id, tailwindColorOptions]);
 
   return (
-    <div className="flex items-center space-x-4 space-y-2">
-      <span
-        id="storyFragmentTailwindBgColour-label"
-        className="text-md leading-6 text-mydarkgrey flex-shrink-0"
-      >
-        <span className="hidden md:inline-block">Tailwind</span>
-        {` `}
-        Bg Color
-      </span>
-      <ColorPickerWrapper
-        id="storyFragmentTailwindBgColour"
-        defaultColor={hexColor}
-        onColorChange={handleChange}
-      />
-      <button
-        onClick={handleUndoCallback}
-        className="disabled:hidden ml-2"
-        disabled={$storyFragmentTailwindBgColour[id]?.history.length === 0}
-      >
-        <ChevronDoubleLeftIcon
-          className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
-          title="Undo"
+    <div className="flex flex-col space-y-4">
+      <div className="flex items-center space-x-4">
+        <span className="text-md leading-6 text-mydarkgrey flex-shrink-0">
+          Background Color
+        </span>
+        <ColorPickerWrapper
+          id="storyFragmentTailwindBgColour"
+          defaultColor={hexColor}
+          onColorChange={handleHexColorChange}
         />
-      </button>
+        <button
+          onClick={handleUndoCallback}
+          className="disabled:hidden ml-2"
+          disabled={$storyFragmentTailwindBgColour[id]?.history.length === 0}
+        >
+          <ChevronDoubleLeftIcon
+            className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
+            title="Undo"
+          />
+        </button>
+      </div>
+      <div>
+        <label className="block text-sm text-mydarkgrey mb-1">
+          Tailwind Color Class
+        </label>
+        <TailwindColorCombobox
+          selectedColor={selectedTailwindColor}
+          onColorChange={handleTailwindColorChange}
+        />
+      </div>
     </div>
   );
 };

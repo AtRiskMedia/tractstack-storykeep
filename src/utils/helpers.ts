@@ -1,6 +1,5 @@
 //import { storySteps } from "../store/events";
 import { getImage } from "astro:assets";
-import { tailwindColors } from "../assets/tailwindColors";
 import type {
   GraphNodes,
   GraphNode,
@@ -342,19 +341,6 @@ export function debounce<T extends (...args: any[]) => void>(
     timeout = setTimeout(later, wait);
   };
 }
-
-export const tailwindToHex = (tailwindColor: string): string => {
-  const [colorName, shade] = tailwindColor.replace("bg-", "").split("-");
-  if (
-    colorName in tailwindColors &&
-    shade &&
-    Number(shade) / 100 - 1 >= 0 &&
-    Number(shade) / 100 - 1 < (tailwindColors as any)[colorName].length
-  ) {
-    return (tailwindColors as any)[colorName][Number(shade) / 100 - 1];
-  }
-  return "#FFFFFF"; // Default to white if color not found
-};
 
 export function cloneDeep<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));

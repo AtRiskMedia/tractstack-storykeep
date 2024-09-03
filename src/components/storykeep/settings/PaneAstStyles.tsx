@@ -18,7 +18,6 @@ import {
   paneFragmentMarkdown,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
-  stylesMemoryStore,
 } from "../../../store/storykeep";
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
@@ -843,15 +842,25 @@ export const PaneAstStyles = (props: {
                     </button>
                   ) : null}
                   {activeTag && (
-                  <StyleMemory
-                    currentKey={activeTag}
-                    classNamesPayload={
-                      classNamesPayload?.classes as ClassNamesPayloadDatumValue
-                    }
-                    onPaste={pastedPayload => {
-                      console.log(pastedPayload);
-                    }}
-                  />
+                    <StyleMemory
+                      currentKey={activeTag}
+                      classNamesPayload={
+                        activeTag === `parent` &&
+                        parentClassNamesPayload?.classes &&
+                        Array.isArray(parentClassNamesPayload.classes)
+                          ? ((parentClassNamesPayload?.classes ||
+                              {}) as ClassNamesPayloadDatumValue[])
+                          : activeTag === `modal`
+                            ? ((modalClassNamesPayload?.classes ||
+                                {}) as ClassNamesPayloadDatumValue)
+                            : ((classNamesPayload?.classes ||
+                                {}) as ClassNamesPayloadDatumValue)
+                      }
+                      onPaste={pastedPayload => {
+                        console.log(pastedPayload);
+                        if (activeTag === `parent`) console.log(parentLayer);
+                      }}
+                    />
                   )}
                 </div>
               </div>
@@ -879,37 +888,40 @@ export const PaneAstStyles = (props: {
               {linkMode && linkTargetKey !== `*` ? (
                 <div className="w-80">
                   <div className="flex flex-nowrap justify-between">
-                <div className="flex flex-nowrap gap-x-4">
-                    <button
-                      className={classNames(
-                        linkMode === `button` ? `font-bold` : `underline`,
-                        "my-2"
-                      )}
-                      title="Button Styles"
-                      onClick={() => {
-                        setLinkMode(`button`);
-                        setSelectedStyle(null);
-                      }}
-                    >
-                      Button Styles
-                    </button>
-                    <button
-                      className={classNames(
-                        linkMode === `hover` ? `font-bold` : `underline`,
-                        "my-2"
-                      )}
-                      title="Hover Styles"
-                      onClick={() => {
-                        setLinkMode(`hover`);
-                        setSelectedStyle(null);
-                      }}
-                    >
-                      Hover Styles
-                    </button>
+                    <div className="flex flex-nowrap gap-x-4">
+                      <button
+                        className={classNames(
+                          linkMode === `button` ? `font-bold` : `underline`,
+                          "my-2"
+                        )}
+                        title="Button Styles"
+                        onClick={() => {
+                          setLinkMode(`button`);
+                          setSelectedStyle(null);
+                        }}
+                      >
+                        Button Styles
+                      </button>
+                      <button
+                        className={classNames(
+                          linkMode === `hover` ? `font-bold` : `underline`,
+                          "my-2"
+                        )}
+                        title="Hover Styles"
+                        onClick={() => {
+                          setLinkMode(`hover`);
+                          setSelectedStyle(null);
+                        }}
+                      >
+                        Hover Styles
+                      </button>
                     </div>
                     <StyleMemory
                       currentKey={linkMode}
-                      classNamesPayload={(buttonClassNamesPayload?.classes || {}) as ClassNamesPayloadDatumValue}
+                      classNamesPayload={
+                        (buttonClassNamesPayload?.classes ||
+                          {}) as ClassNamesPayloadDatumValue
+                      }
                       onPaste={pastedPayload => {
                         console.log(pastedPayload);
                       }}

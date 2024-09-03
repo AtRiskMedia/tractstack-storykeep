@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { Switch } from "@headlessui/react";
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
 import PaneTitle from "../fields/PaneTitle";
 import PaneSlug from "../fields/PaneSlug";
 import PaneHeightOffset from "../fields/PaneHeightOffset";
@@ -9,7 +14,7 @@ import PaneImpression from "../fields/PaneImpression";
 import PaneBeliefs from "../fields/PaneBeliefs";
 import PaneBgColour from "../fields/PaneBgColour";
 import CodeHookSettings from "../fields/CodeHook";
-import { useStoryKeepUtils } from "../../../utils/storykeep";
+import { handleToggleOff, useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
   paneSlug,
@@ -17,15 +22,18 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneCodeHook,
+  storyFragmentPaneIds,
+  editModeStore,
 } from "../../../store/storykeep";
 import { cleanString, classNames } from "../../../utils/helpers";
 import type { ContentMap, StoreKey } from "../../../types";
 
 export const PaneSettings = (props: {
   id: string;
+  storyFragmentId: string;
   contentMap: ContentMap[];
 }) => {
-  const { id, contentMap } = props;
+  const { id, storyFragmentId, contentMap } = props;
   const usedSlugs = contentMap
     .filter(item => item.type === "Pane")
     .map(item => item.slug);
@@ -40,9 +48,20 @@ export const PaneSettings = (props: {
     keys: [id],
   });
   const hasCodeHook = $paneCodeHook[id].current;
+  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
+    keys: [storyFragmentId],
+  });
   const tabs = [`settings`, `advanced`, `beliefs`, `impression`];
   if (hasCodeHook) tabs.unshift(`codeHook`);
   const [activeTab, setActiveTab] = useState(tabs[0]);
+  const [isFirstPane, setIsFirstPane] = useState(false);
+  const [isLastPane, setIsLastPane] = useState(false);
+
+  useEffect(() => {
+    const paneIds = $storyFragmentPaneIds[storyFragmentId]?.current || [];
+    setIsFirstPane(paneIds[0] === id);
+    setIsLastPane(paneIds[paneIds.length - 1] === id);
+  }, [$storyFragmentPaneIds, storyFragmentId, id]);
 
   const handleUpdateStoreField = (storeKey: StoreKey, newValue: string) => {
     return updateStoreField(storeKey, newValue);
@@ -55,6 +74,45 @@ export const PaneSettings = (props: {
       updateStoreField(`paneSlug`, newVal);
     }
     return handleEditingChange(storeKey, editing);
+  };
+
+  const handleMoveUp = () => {
+    const paneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
+    const currentIndex = paneIds.indexOf(id);
+    if (currentIndex > 0) {
+      [paneIds[currentIndex - 1], paneIds[currentIndex]] = [
+        paneIds[currentIndex],
+        paneIds[currentIndex - 1],
+      ];
+      updateStoreField("storyFragmentPaneIds", paneIds, storyFragmentId);
+    }
+  };
+
+  const handleMoveDown = () => {
+    const paneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
+    const currentIndex = paneIds.indexOf(id);
+    if (currentIndex < paneIds.length - 1) {
+      [paneIds[currentIndex], paneIds[currentIndex + 1]] = [
+        paneIds[currentIndex + 1],
+        paneIds[currentIndex],
+      ];
+      updateStoreField("storyFragmentPaneIds", paneIds, storyFragmentId);
+    }
+  };
+
+  const handleRemove = () => {
+    const currentPaneIds = [...$storyFragmentPaneIds[storyFragmentId].current];
+    const updatedPaneIds = currentPaneIds.filter(paneId => paneId !== id);
+
+    updateStoreField("storyFragmentPaneIds", updatedPaneIds, storyFragmentId);
+
+    // Close the settings panel
+    editModeStore.set(null);
+    handleToggleOff();
+
+    console.log(
+      `Pane with id: ${id} has been removed from storyFragmentPaneIds`
+    );
   };
 
   return (
@@ -119,8 +177,31 @@ export const PaneSettings = (props: {
               </p>
             </div>
 
-            <div className="flex-grow">
-              <PaneBgColour paneId={id} />
+            <PaneBgColour paneId={id} />
+            <div className="flex flex-col">
+              <button
+                title="Move up"
+                onClick={handleMoveUp}
+                disabled={isFirstPane}
+                className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isFirstPane ? "disabled:hidden" : ""}`}
+              >
+                <ArrowUpIcon className="w-5 h-5" />
+              </button>
+              <button
+                title="Move down"
+                onClick={handleMoveDown}
+                disabled={isLastPane}
+                className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isLastPane ? "disabled:hidden" : ""}`}
+              >
+                <ArrowDownIcon className="w-5 h-5" />
+              </button>
+              <button
+                title="Remove pane"
+                onClick={handleRemove}
+                className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>

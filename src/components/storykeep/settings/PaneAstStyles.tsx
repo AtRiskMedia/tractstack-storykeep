@@ -18,14 +18,17 @@ import {
   paneFragmentMarkdown,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  stylesMemoryStore,
 } from "../../../store/storykeep";
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
 import { tagTitles } from "../../../constants";
 import ImageMeta from "../fields/ImageMeta";
 import LinksMeta from "../fields/LinksMeta";
+import StyleMemory from "../fields/StyleMemory";
 import type {
   ClassNamesPayloadInnerDatum,
+  ClassNamesPayloadDatumValue,
   PaneAstTargetId,
   Tag,
   Tuple,
@@ -820,24 +823,37 @@ export const PaneAstStyles = (props: {
                     </button>
                   ))}
                 </nav>
-                {hasHistory ? (
-                  <button
-                    onClick={() => {
-                      handleUndo("paneFragmentMarkdown", markdownFragmentId);
-                      setImageMeta(false);
-                      setLinkTargetKey(``);
-                      setLinkMode(null);
-                      setSelectedStyle(null);
-                    }}
-                    className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
-                    disabled={
-                      $paneFragmentMarkdown[markdownFragmentId]?.history
-                        .length === 0
+                <div className="flex flex-nowrap gap-x-4">
+                  {hasHistory ? (
+                    <button
+                      onClick={() => {
+                        handleUndo("paneFragmentMarkdown", markdownFragmentId);
+                        setImageMeta(false);
+                        setLinkTargetKey(``);
+                        setLinkMode(null);
+                        setSelectedStyle(null);
+                      }}
+                      className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
+                      disabled={
+                        $paneFragmentMarkdown[markdownFragmentId]?.history
+                          .length === 0
+                      }
+                    >
+                      Undo
+                    </button>
+                  ) : null}
+                  {activeTag && (
+                  <StyleMemory
+                    currentKey={activeTag}
+                    classNamesPayload={
+                      classNamesPayload?.classes as ClassNamesPayloadDatumValue
                     }
-                  >
-                    Undo
-                  </button>
-                ) : null}
+                    onPaste={pastedPayload => {
+                      console.log(pastedPayload);
+                    }}
+                  />
+                  )}
+                </div>
               </div>
 
               <hr />
@@ -861,8 +877,9 @@ export const PaneAstStyles = (props: {
           {linkTargetKey && (
             <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
               {linkMode && linkTargetKey !== `*` ? (
-                <div className="min-w-80">
-                  <span className="flex gap-x-6 w-full">
+                <div className="w-80">
+                  <div className="flex flex-nowrap justify-between">
+                <div className="flex flex-nowrap gap-x-4">
                     <button
                       className={classNames(
                         linkMode === `button` ? `font-bold` : `underline`,
@@ -889,7 +906,15 @@ export const PaneAstStyles = (props: {
                     >
                       Hover Styles
                     </button>
-                  </span>
+                    </div>
+                    <StyleMemory
+                      currentKey={linkMode}
+                      classNamesPayload={(buttonClassNamesPayload?.classes || {}) as ClassNamesPayloadDatumValue}
+                      onPaste={pastedPayload => {
+                        console.log(pastedPayload);
+                      }}
+                    />
+                  </div>
                   <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
                     {classNamesPayload?.classes &&
                     Object.keys(classNamesPayload.classes).length ? (
@@ -1121,7 +1146,6 @@ export const PaneAstStyles = (props: {
                 {isLink ? `Button` : tabs.length && tagTitles[tabs.at(0)!.tag]}
                 {isLink ? null : !activeTagData?.hasOverride ? `s` : null}
               </h4>
-
               <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
                 <ViewportComboBox
                   value={mobileValue}
@@ -1230,7 +1254,7 @@ export const PaneAstStyles = (props: {
                             <>
                               <span
                                 className={`block truncate ${
-                                  selected ? "font-medium" : "font-normal"
+                                  selected ? "font-bold" : "font-normal"
                                 }`}
                               >
                                 {option.label}
@@ -1290,7 +1314,7 @@ export const PaneAstStyles = (props: {
                           <>
                             <span
                               className={`block truncate ${
-                                selected ? "font-medium" : "font-normal"
+                                selected ? "font-bold" : "font-normal"
                               }`}
                             >
                               {classInfo.title}

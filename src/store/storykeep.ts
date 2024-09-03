@@ -17,6 +17,7 @@ import type {
   ToolMode,
   ToolAddMode,
   EditModeValue,
+  StylesMemory,
 } from "../types";
 import { toolAddModes } from "../constants";
 
@@ -56,6 +57,9 @@ export const toolAddModeStore = map<{ value: ToolAddMode }>({
 });
 
 export const editModeStore = atom<EditModeValue | null>(null);
+
+// styles memory
+export const stylesMemoryStore = map<StylesMemory>({});
 
 // datums from turso
 export const menu = map<Record<string, FieldWithHistory<MenuDatum>>>();

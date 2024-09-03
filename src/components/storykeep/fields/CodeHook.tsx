@@ -67,37 +67,37 @@ const CodeHook = ({ id }: CodeHookProps) => {
   );
 
   const handleOptionEditingChange = useCallback(
-  (editing: boolean, key: string) => {
-    if (!editing) {
-      setLocalCodeHook(prev => {
-        const options = JSON.parse(prev.options || "{}");
-        const newKey = optionKeysRef.current[key] || key;
-        if (newKey !== key) {
-          if (options.hasOwnProperty(newKey)) {
-            delete optionKeysRef.current[key];
-            return prev;
+    (editing: boolean, key: string) => {
+      if (!editing) {
+        setLocalCodeHook(prev => {
+          const options = JSON.parse(prev.options || "{}");
+          const newKey = optionKeysRef.current[key] || key;
+          if (newKey !== key) {
+            if (newKey in options) {
+              delete optionKeysRef.current[key];
+              return prev;
+            }
+            const oldKey = Object.keys(options).find(
+              k => k.toLowerCase() === key.toLowerCase()
+            );
+            if (oldKey) {
+              const value = options[oldKey];
+              delete options[oldKey];
+              options[newKey] = value;
+            }
           }
-          const oldKey = Object.keys(options).find(
-            k => k.toLowerCase() === key.toLowerCase()
-          );
-          if (oldKey) {
-            const value = options[oldKey];
-            delete options[oldKey];
-            options[newKey] = value;
-          }
-        }
-        optionKeysRef.current = {};
-        const updatedCodeHook = {
-          ...prev,
-          options: JSON.stringify(options),
-        };
-        updateStoreField("paneCodeHook", updatedCodeHook);
-        return updatedCodeHook;
-      });
-    }
-  },
-  [updateStoreField]
-);
+          optionKeysRef.current = {};
+          const updatedCodeHook = {
+            ...prev,
+            options: JSON.stringify(options),
+          };
+          updateStoreField("paneCodeHook", updatedCodeHook);
+          return updatedCodeHook;
+        });
+      }
+    },
+    [updateStoreField]
+  );
 
   const addOption = useCallback(() => {
     setLocalCodeHook(prev => {

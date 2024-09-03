@@ -55,6 +55,12 @@ export type Tag =
   | "ul"
   | "code";
 
+export type AllTag = Tag | "button" | "hover";
+
+export type StylesMemory = {
+  [key in AllTag]?: ClassNamesPayloadDatumValue;
+};
+
 export interface MarkdownLookup {
   images: { [key: number]: IndexedItem };
   codeItems: { [key: number]: IndexedItem };

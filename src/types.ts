@@ -77,6 +77,10 @@ export type StylesMemory = {
   [key in AllTag]?: ClassNamesPayloadDatumValue;
 };
 
+export type ButtonStyleClass = {
+  [key: string]: string[];
+}[];
+
 export interface LinkInfo {
   globalNth: number;
   parentNth: number;

@@ -1,6 +1,6 @@
 import { useStore } from "@nanostores/react";
 import {
-  ClipboardIcon,
+  EyeDropperIcon,
   ClipboardDocumentIcon,
 } from "@heroicons/react/24/outline";
 import { stylesMemoryStore } from "../../../store/storykeep";
@@ -48,7 +48,7 @@ const StyleMemory = ({
         className="p-1 hover:bg-myorange/20 rounded"
         title={`Copy ${tagNames[currentKey]} styles`}
       >
-        <ClipboardIcon className="h-5 w-5" />
+        <EyeDropperIcon className="h-5 w-5" />
       </button>
       <button
         onClick={handlePaste}

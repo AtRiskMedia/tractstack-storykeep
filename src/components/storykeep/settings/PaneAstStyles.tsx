@@ -23,6 +23,10 @@ import {
 } from "../../../store/storykeep";
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
+import {
+  buttonStyleOptions,
+  buttonStyleClasses,
+} from "../../../assets/paneDesigns";
 import { tagTitles } from "../../../constants";
 import ImageMeta from "../fields/ImageMeta";
 import LinksMeta from "../fields/LinksMeta";
@@ -34,6 +38,7 @@ import type {
   PaneAstTargetId,
   Tag,
   Tuple,
+  ButtonStyleClass
 } from "../../../types";
 
 interface StyleTab {
@@ -77,13 +82,6 @@ export const PaneAstStyles = (props: {
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
   const hasHistory = !!$paneFragmentMarkdown[markdownFragmentId].history.length;
   const hasModal = markdownDatum.payload.isModal;
-  const [selectedButtonStyle, setSelectedButtonStyle] =
-    useState("Plain text inline");
-  const buttonStyleOptions = [
-    "Plain text inline",
-    "Fancy text inline",
-    "Fancy button",
-  ];
   const markdownLookup = useMemo(() => {
     return markdownDatum?.markdown?.htmlAst
       ? generateMarkdownLookup(markdownDatum.markdown.htmlAst)
@@ -183,10 +181,40 @@ export const PaneAstStyles = (props: {
             ? listItemClassNamesPayload
             : outerTagClassNamesPayload;
 
-  const handleButtonStyleChange = (option: string) => {
-    setSelectedButtonStyle(option);
-    console.log(option);
-  };
+const handleButtonStyleChange = (option: string) => {
+  if (linkMode && linkTargetKey) {
+    const index = parseInt(option);
+    const buttonStyle = buttonStyleClasses[index] as ButtonStyleClass;
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+    if (!currentField.current.payload.optionsPayload.buttons) {
+      currentField.current.payload.optionsPayload.buttons = {};
+    }
+    if (!currentField.current.payload.optionsPayload.buttons[linkTargetKey]) {
+      currentField.current.payload.optionsPayload.buttons[linkTargetKey] = {
+        urlTarget: linkTargetKey,
+        callbackPayload: "",
+        className: "",
+        classNamesPayload: {
+          button: { classes: {} },
+          hover: { classes: {} },
+        },
+      };
+    }
+    currentField.current.payload.optionsPayload.buttons[
+      linkTargetKey
+    ].classNamesPayload.button.classes = Object.fromEntries(
+      Object.entries(buttonStyle[0]).map(([key, value]) => [key, value as Tuple])
+    ) as ClassNamesPayloadDatumValue;
+    currentField.current.payload.optionsPayload.buttons[
+      linkTargetKey
+    ].classNamesPayload.hover.classes = Object.fromEntries(
+      Object.entries(buttonStyle[1]).map(([key, value]) => [key, value as Tuple])
+    ) as ClassNamesPayloadDatumValue;
+    updateStoreField("paneFragmentMarkdown", currentField.current);
+    lastInteractedTypeStore.set(`markdown`);
+    lastInteractedPaneStore.set(targetId.paneId);
+  }
+};
 
   const removeLinkStyle = (className: string) => {
     setSelectedStyle(null);
@@ -1176,13 +1204,13 @@ export const PaneAstStyles = (props: {
                           Apply default button styles
                         </label>
                         <Listbox
-                          value={selectedButtonStyle}
+                          value={buttonStyleOptions.at(0)}
                           onChange={handleButtonStyleChange}
                         >
                           <div className="relative mt-1">
                             <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
                               <span className="block truncate">
-                                {selectedButtonStyle}
+                                {buttonStyleOptions.at(0)}
                               </span>
                               <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                 <ChevronUpDownIcon
@@ -1192,7 +1220,7 @@ export const PaneAstStyles = (props: {
                               </span>
                             </Listbox.Button>
                             <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                              {buttonStyleOptions.map(option => (
+                              {buttonStyleOptions.map((option, idx) => (
                                 <Listbox.Option
                                   key={option}
                                   className={({ active }) =>
@@ -1202,7 +1230,7 @@ export const PaneAstStyles = (props: {
                                         : "text-black"
                                     }`
                                   }
-                                  value={option}
+                                  value={idx}
                                 >
                                   {({ selected }) => (
                                     <>

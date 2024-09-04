@@ -2,6 +2,55 @@
 //import type { Root } from "hast";
 import type { PaneDesign, OptionsPayloadDatum } from "../types";
 
+export const buttonStyleOptions = [
+  "Plain text inline",
+  "Fancy text inline",
+  "Fancy button",
+];
+export const buttonStyleClasses = [
+  [
+    {
+      fontWEIGHT: ["bold"],
+      px: ["2"],
+      textDECORATION: ["underline"],
+      rounded: ["lg"],
+      textCOLOR: ["myblue"],
+    },
+    {
+      bgCOLOR: ["myorange"],
+    },
+  ],
+  [
+    {
+      bgCOLOR: ["mygreen"],
+      fontWEIGHT: ["bold"],
+      px: ["2"],
+      py: ["2.5"],
+      rounded: ["lg"],
+      textCOLOR: ["black"],
+    },
+    {
+      bgCOLOR: ["myorange"],
+    },
+  ],
+  [
+    {
+      bgCOLOR: ["mygreen"],
+      display: ["inline-block"],
+      fontWEIGHT: ["bold"],
+      px: ["2"],
+      py: ["2.5"],
+      rotate: ["!1"],
+      rounded: ["lg"],
+      textCOLOR: ["black"],
+    },
+    {
+      bgCOLOR: ["myorange"],
+      rotate: ["2"],
+    },
+  ],
+];
+
 export const paneDesigns: PaneDesign[] = [
   {
     id: "titleText",

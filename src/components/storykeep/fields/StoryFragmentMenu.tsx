@@ -66,7 +66,7 @@ const StoryFragmentMenuId = ({
         <Combobox value={selectedMenu} onChange={handleMenuChange}>
           <div className="relative">
             <Combobox.Input
-              className="w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+              className="w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
               onChange={event => setQuery(event.target.value)}
               onFocus={() => handleEditingChange("storyFragmentMenuId", true)}
               displayValue={(menu: MenuDatum | null) => menu?.title || ""}
@@ -80,7 +80,7 @@ const StoryFragmentMenuId = ({
             </Combobox.Button>
           </div>
 
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
             <Combobox.Option
               value={null}
               className={({ active }) =>
@@ -93,7 +93,7 @@ const StoryFragmentMenuId = ({
                 <>
                   <span
                     className={`block truncate ${
-                      selected ? "font-medium" : "font-normal"
+                      selected ? "font-bold" : "font-normal"
                     }`}
                   >
                     No menu
@@ -124,7 +124,7 @@ const StoryFragmentMenuId = ({
                   <>
                     <span
                       className={`block truncate ${
-                        selected ? "font-medium" : "font-normal"
+                        selected ? "font-bold" : "font-normal"
                       }`}
                     >
                       {menu.title}

@@ -90,7 +90,7 @@ export const ShoppingCart = () => {
 
       <div className="">
         {$cart && $cart.lines?.nodes.length > 0 ? (
-          <div className="border-t border-slate-200 py-6 px-4 sm:px-6">
+          <div className="border-t border-slate-200 py-6 px-4 xs:px-6">
             <div className="flex justify-between text-base text-mydarkgrey">
               <p>Subtotal</p>
               <p>

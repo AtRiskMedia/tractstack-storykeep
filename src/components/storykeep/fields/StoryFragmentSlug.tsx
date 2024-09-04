@@ -50,7 +50,7 @@ const StoryFragmentSlug = ({
               handleEditingChange("storyFragmentSlug", editing)
             }
             placeholder="Enter slug here"
-            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
             hyphenate={true}
           />
           {($uncleanData[id]?.storyFragmentSlug ||

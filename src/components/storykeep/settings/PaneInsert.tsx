@@ -366,10 +366,10 @@ export const PaneInsert = (props: {
   if (!isClient) return <div>Loading...</div>;
 
   return (
-    <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner mr-6">
-      <p className="text-lg my-1 text-black">
+    <div className="rounded-lg bg-white px-3.5 py-1.5 mr-6">
+      <h2 className="text-xl font-bold mb-2 text-myblack">
         <strong>Please provide a descriptive title and slug.</strong>
-      </p>
+      </h2>
       <p className="text-md mb-2 text-mydarkgrey">
         Note: used for analytics and may (if enabled) be used as part of the
         "fast travel" map shown to users. Enter a short but meaningful

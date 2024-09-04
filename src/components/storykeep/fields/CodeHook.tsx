@@ -134,14 +134,14 @@ const CodeHook = ({ id }: CodeHookProps) => {
   }, []);
 
   const commonInputClass =
-    "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6";
+    "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6";
 
   return (
     <div className="space-y-4">
       <div>
         <label
           htmlFor="code-hook-target"
-          className="block text-sm font-medium text-mydarkgrey"
+          className="block text-sm text-mydarkgrey"
         >
           Target
         </label>
@@ -157,9 +157,7 @@ const CodeHook = ({ id }: CodeHookProps) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-mydarkgrey">
-          Options
-        </label>
+        <label className="block text-sm text-mydarkgrey">Options</label>
         {Object.entries(JSON.parse(localCodeHook.options || "{}")).map(
           ([key, value]) => (
             <div key={key} className="flex items-center space-x-2 mt-2">

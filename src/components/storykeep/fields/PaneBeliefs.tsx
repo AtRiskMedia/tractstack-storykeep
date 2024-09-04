@@ -133,7 +133,7 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
     return (
       <div className="mb-4 w-96">
         <div className="flex justify-between items-center mb-2">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg font-bold">
             {isHeld ? "Held Beliefs" : "Withheld Beliefs"}
           </h3>
           <div className="flex items-center">
@@ -175,7 +175,7 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                   }
                   placeholder="Enter belief slug"
                   hyphenate={true}
-                  className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+                  className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
                 />
               </div>
               <div className="flex-1">
@@ -200,7 +200,7 @@ const PaneBeliefs = ({ id }: PaneBeliefsProps) => {
                           }
                           placeholder="Value"
                           hyphenate={true}
-                          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+                          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
                         />
                         <div className="flex">
                           <button

@@ -42,7 +42,7 @@ const PaneTitle = ({
           onChange={newValue => updateStoreField("paneTitle", newValue)}
           onEditingChange={editing => handleEditingChange("paneTitle", editing)}
           placeholder="Enter pane title"
-          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
         />
         {($uncleanData[id]?.paneTitle || $temporaryErrors[id]?.paneTitle) && (
           <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">

@@ -23,7 +23,7 @@ export const Impression = ({ payload }: { payload: ImpressionDatum }) => {
       <h3 className="text-md font-action leading-6 text-black">
         {payload.title}
       </h3>
-      <div className="mt-2 sm:flex sm:items-start sm:justify-between">
+      <div className="mt-2 xs:flex xs:items-start xs:justify-between">
         <div className="max-w-xl text-sm text-black">
           <p>
             {payload.body}

@@ -354,6 +354,7 @@ export const tailwindColors: TailwindColorPalette = {
 };
 
 export const colorValues = [
+  ...Object.keys(customColors),
   "slate-50",
   "slate-100",
   "slate-200",
@@ -596,5 +597,4 @@ export const colorValues = [
   "rose-800",
   "rose-900",
   "rose-950",
-  ...Object.keys(customColors),
 ];

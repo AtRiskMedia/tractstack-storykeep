@@ -222,7 +222,7 @@ const DesignNewPane = ({
             )}
             <div className="relative">
               <Combobox.Input
-                className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg sm:text-md sm:leading-6"
+                className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg xs:text-md xs:leading-6"
                 onChange={event => setQuery(event.target.value)}
                 displayValue={(design: PaneDesign | null) => design?.name ?? ""}
               />
@@ -233,7 +233,7 @@ const DesignNewPane = ({
                 />
               </Combobox.Button>
               {filteredDesigns.length > 0 && (
-                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
                   {filteredDesigns.map(design => (
                     <Combobox.Option
                       key={design.id}
@@ -247,7 +247,7 @@ const DesignNewPane = ({
                       {({ selected, active }) => (
                         <>
                           <span
-                            className={`block truncate ${selected ? "font-semibold" : "font-normal"}`}
+                            className={`block truncate ${selected ? "font-bold" : "font-normal"}`}
                           >
                             {design.name}
                           </span>

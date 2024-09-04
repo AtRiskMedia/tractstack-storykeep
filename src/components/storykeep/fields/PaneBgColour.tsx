@@ -105,7 +105,6 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
   const handleTailwindColorChange = useCallback(
     (newTailwindColor: string) => {
       const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
-      console.log(hexColor, newTailwindColor);
       handleColorChange(hexColor);
     },
     [handleColorChange]

@@ -34,7 +34,7 @@ const TailwindColorCombobox = ({
     >
       <div className="relative">
         <Combobox.Input
-          className="w-full rounded-md border-0 px-2.5 py-1.5 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange sm:text-sm sm:leading-6"
+          className="w-full rounded-md border-0 px-2.5 py-1.5 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-sm xs:leading-6"
           onChange={event => setQuery(event.target.value)}
           displayValue={(color: string) => color}
           placeholder="Select a Tailwind color"
@@ -47,7 +47,7 @@ const TailwindColorCombobox = ({
           />
         </Combobox.Button>
       </div>
-      <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+      <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
         {filteredColors.map(color => (
           <Combobox.Option
             key={color}

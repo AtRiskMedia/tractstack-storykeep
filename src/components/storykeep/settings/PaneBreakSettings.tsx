@@ -271,7 +271,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
           >
             <div className="relative mt-1 flex-grow">
               <Combobox.Input
-                className="w-full border-mydarkgrey rounded-md py-2 pl-3 pr-10 shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+                className="w-full border-mydarkgrey rounded-md py-2 pl-3 pr-10 shadow-sm focus:border-myblue focus:ring-myblue xs:text-sm"
                 autoComplete="off"
                 displayValue={(image: ImageOption) => image}
                 onChange={event => setQuery(event.target.value)}
@@ -283,7 +283,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
                 />
               </Combobox.Button>
             </div>
-            <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
               {filteredImages.map(image => (
                 <Combobox.Option
                   key={image}
@@ -326,64 +326,66 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
   if (!fragmentId) return <div>Loading...</div>;
 
   return (
-    <div
-      className={classNames(
-        `rounded-md bg-white px-3.5 py-1.5 shadow-inner`,
-        type === `mobile` ? `mr-2` : `mr-6`
-      )}
-    >
+    <div className="px-3.5 py-1.5">
       <div
         className={classNames(
-          `flex`,
-          type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
+          `rounded-lg bg-white px-3.5 py-1.5 pr-10`,
+          type === `mobile` ? `mr-2` : `mr-6`
         )}
       >
         <div
           className={classNames(
-            type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
+            `flex`,
+            type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
           )}
         >
-          <div className="mb-2">
-            <label className="block text-sm font-medium text-mydarkgrey">
-              Colour (applies to all viewports)
-            </label>
-            <input
-              type="color"
-              value={localSettings.colour}
-              onChange={e => handleHexColorChange(e.target.value)}
-              className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-            />
-          </div>
+          <div
+            className={classNames(
+              type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
+            )}
+          >
+            <div className="mb-2">
+              <label className="block text-sm text-mydarkgrey">
+                Colour (applies to all viewports)
+              </label>
+              <input
+                type="color"
+                value={localSettings.colour}
+                onChange={e => handleHexColorChange(e.target.value)}
+                className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue xs:text-sm"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm text-mydarkgrey">
-              Tailwind Color Class
-            </label>
-            <TailwindColorCombobox
-              selectedColor={selectedTailwindColor}
-              onColorChange={handleTailwindColorChange}
-            />
-          </div>
+            <div className="mb-4">
+              <label className="block text-sm text-mydarkgrey">
+                Tailwind Color Class
+              </label>
+              <TailwindColorCombobox
+                selectedColor={selectedTailwindColor}
+                onColorChange={handleTailwindColorChange}
+              />
+            </div>
 
-          <div className="mb-4">
-            <PaneBgColour paneId={id} />
-          </div>
+            <div className="mb-4">
+              <PaneBgColour paneId={id} />
+            </div>
 
-          {renderViewportSettings("mobile")}
-          {renderViewportSettings("tablet")}
-          {renderViewportSettings("desktop")}
-          <div className="flex justify-end">
-            <button
-              onClick={handleUndoClick}
-              className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
-              disabled={
-                !fragmentId ||
-                $paneFragmentBgPane[fragmentId]?.history.length === 0
-              }
-            >
-              <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
-              Undo
-            </button>
+            {renderViewportSettings("mobile")}
+            {renderViewportSettings("tablet")}
+            {renderViewportSettings("desktop")}
+            <div className="flex justify-end">
+              <button
+                onClick={handleUndoClick}
+                className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
+                disabled={
+                  !fragmentId ||
+                  $paneFragmentBgPane[fragmentId]?.history.length === 0
+                }
+              >
+                <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
+                Undo
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -301,16 +301,16 @@ export const PaneAstStyles = (props: {
           targetId.outerIdx
         );
       if (codeNode) {
-      const match = codeNode.match(/(\w+)\((.*?)\)/);
-      if (match) {
-        const [, key, valuesString] = match;
-        const values = valuesString.split('|').map(item => item.trim());
-        setWidgetData([key, ...values]);
-      } else {
-        console.error('Invalid widget format:', codeNode);
-        setWidgetData([]);
+        const match = codeNode.match(/(\w+)\((.*?)\)/);
+        if (match) {
+          const [, key, valuesString] = match;
+          const values = valuesString.split("|").map(item => item.trim());
+          setWidgetData([key, ...values]);
+        } else {
+          console.error("Invalid widget format:", codeNode);
+          setWidgetData([]);
+        }
       }
-    }
     }
     setWidgetConfigMode(true);
     setSelectedStyle(null);
@@ -497,9 +497,6 @@ export const PaneAstStyles = (props: {
       const thisValue =
         typeof isNegative !== `undefined` && isNegative ? `!${value}` : value;
       const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-      console.log(thisTag, thisValue, thisClass);
-
-      // Initialize the classNamesPayload for this tag if it doesn't exist
       if (
         !currentField.current.payload.optionsPayload.classNamesPayload[thisTag]
       ) {
@@ -508,17 +505,12 @@ export const PaneAstStyles = (props: {
             classes: {},
           };
       }
-
       const payloadForTag = currentField.current.payload.optionsPayload
         .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
-
-      // Initialize classes if it doesn't exist
       if (!payloadForTag.classes) {
         payloadForTag.classes = {};
       }
-
       let thisTuple: Tuple;
-
       if (
         activeTagData.tag === `parent` &&
         Array.isArray(payloadForTag.classes)
@@ -544,9 +536,7 @@ export const PaneAstStyles = (props: {
           thisClass
         ] || ["", "", ""];
       }
-
       const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
-
       if (
         activeTagData.tag === `parent` &&
         Array.isArray(payloadForTag.classes)
@@ -559,7 +549,6 @@ export const PaneAstStyles = (props: {
       } else {
         (payloadForTag.classes as Record<string, Tuple>)[thisClass] = newTuple;
       }
-
       updateStoreField("paneFragmentMarkdown", {
         ...currentField.current,
         payload: {

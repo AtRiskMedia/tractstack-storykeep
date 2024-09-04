@@ -374,7 +374,7 @@ const PaneFromAst = ({
           : isTextContainerItem
             ? `Style this text`
             : `UNKNOWN`;
-      if (tip && (toolMode === `styles` || isWidget || isImage ))
+      if (tip && (toolMode === `styles` || isWidget || isImage))
         return (
           <EditableInnerElementWrapper
             id={thisId}

@@ -258,7 +258,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
           : ComputerDesktopIcon;
 
     return (
-      <div key={viewport} className="mb-4">
+      <div key={viewport} className="mb-0.5">
         <div className="flex items-center space-x-2">
           <Icon className="h-6 w-6 flex-shrink-0" aria-hidden="true" />
           <Combobox

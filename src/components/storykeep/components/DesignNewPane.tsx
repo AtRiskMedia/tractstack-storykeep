@@ -26,7 +26,7 @@ const DesignNewPane = ({
   id: string;
   index: number;
   cancelInsert: () => void;
-  doInsert: (newPaneIds: string[]) => void;
+  doInsert: (newPaneIds: string[], newPaneId: string) => void;
   tailwindBgColour: string;
   viewportKey: ViewportAuto;
   paneIds: string[];

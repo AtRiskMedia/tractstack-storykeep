@@ -56,8 +56,14 @@ export const StoryFragment = (props: { id: string }) => {
     setThisPaneIds(paneIds);
   }, [paneIds]);
 
-  const doInsert = useCallback((newPaneIds: string[]) => {
+  const doInsert = useCallback((newPaneIds: string[], newPaneId: string) => {
     setThisPaneIds(newPaneIds);
+    setTimeout(() => {
+      const newPaneElement = document.getElementById(`pane-inner-${newPaneId}`);
+      if (newPaneElement) {
+        newPaneElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 100);
   }, []);
 
   const insertPane = useCallback(

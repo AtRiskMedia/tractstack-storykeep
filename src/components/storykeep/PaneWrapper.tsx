@@ -152,6 +152,7 @@ const PaneWrapper = (props: {
           if (
             currentEditMode?.type === "pane" &&
             (currentEditMode.mode === "settings" ||
+              currentEditMode.mode === "break" ||
               currentEditMode.mode === "styles") &&
             currentEditMode.id === id
           ) {

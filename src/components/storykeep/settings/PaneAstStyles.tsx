@@ -48,7 +48,6 @@ export const PaneAstStyles = (props: {
   type: "desktop" | "mobile";
 }) => {
   const { id, targetId, type } = props;
-  console.log(targetId);
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");

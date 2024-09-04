@@ -58,7 +58,7 @@ export const PaneInsert = (props: {
   reuse: boolean;
   contentMap: ContentMap[];
   toggleOff: () => void;
-  doInsert: (newPaneIds: string[]) => void | null;
+  doInsert: (newPaneIds: string[], newPaneId: string) => void | null;
 }) => {
   const {
     reuse,
@@ -157,8 +157,8 @@ export const PaneInsert = (props: {
     const prevColor = getColor(prevPaneId);
     const nextColor = getColor(nextPaneId);
     return {
-      prevColor: prevColor || "#FFFFFF", // Default to white if no previous color
-      nextColor: nextColor || "#FFFFFF", // Default to white if no next color
+      prevColor: prevColor || nextColor === "#FFFFFF" ? "#000000" : "#FFFFFF",
+      nextColor: nextColor || "#FFFFFF",
     };
   }, [
     storyFragmentId,
@@ -359,7 +359,7 @@ export const PaneInsert = (props: {
     });
     // and close edit mode
     toolModeStore.set({ value: `text` });
-    if (doInsert) doInsert(newPaneIds);
+    if (doInsert) doInsert(newPaneIds, paneId);
     toggleOff();
   };
 

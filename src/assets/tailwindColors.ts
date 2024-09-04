@@ -11,6 +11,8 @@ export const customColors = {
   myorange: "#f58333",
   mydarkgrey: "#393d34",
   myblack: "#10120d",
+  black: "#000000",
+  white: "#ffffff",
 };
 
 export const getTailwindColorOptions = () => {

@@ -934,9 +934,25 @@ export const PaneAstStyles = (props: {
         );
         const payloadForTag = currentField.current.payload.optionsPayload
           .classNamesPayload[activeTag] as ClassNamesPayloadInnerDatum;
-        if (`override` in payloadForTag) delete payloadForTag.override;
-        if (`count` in payloadForTag) delete payloadForTag.count;
+        const currentGlobalNth = activeTagData?.globalNth ?? null;
+        if (payloadForTag.override && currentGlobalNth !== null) {
+          Object.keys(payloadForTag.override).forEach(className => {
+            if (
+              currentGlobalNth &&
+              payloadForTag.override![className][currentGlobalNth] !== undefined
+            ) {
+              delete payloadForTag.override![className][currentGlobalNth];
+            }
+            if (Object.keys(payloadForTag.override![className]).length === 0) {
+              delete payloadForTag.override![className];
+            }
+          });
+          if (Object.keys(payloadForTag.override).length === 0) {
+            delete payloadForTag.override;
+          }
+        }
         payloadForTag.classes = {
+          ...payloadForTag.classes,
           ...pastedPayload,
         };
         updateStoreField("paneFragmentMarkdown", {

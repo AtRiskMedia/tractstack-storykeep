@@ -8,6 +8,7 @@ import ContentEditableField from "../components/ContentEditableField";
 
 interface WidgetMeta {
   [key: string]: {
+    title: string;
     valueLabels: string[];
     valueDefaults: string[];
     multi: boolean[];
@@ -102,6 +103,7 @@ const Widget = ({ id, values }: WidgetProps) => {
   );
 
   const meta = widgetMeta[widgetId] || {
+    title: ``,
     valueLabels: [],
     valueDefaults: [],
     multi: [],
@@ -172,19 +174,6 @@ const Widget = ({ id, values }: WidgetProps) => {
           )}
         </div>
       ))}
-      <span className="flex gap-x-6">
-        <button
-          className="my-2 underline"
-          title="Close Widget Config panel"
-          onClick={() => {
-            setSelectedStyle(null);
-            setAddClass(false);
-            setWidgetConfigMode(false);
-          }}
-        >
-          BACK
-        </button>
-      </span>
     </div>
   );
 };

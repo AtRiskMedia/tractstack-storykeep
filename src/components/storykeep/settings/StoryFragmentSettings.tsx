@@ -12,7 +12,7 @@ export const StoryFragmentSettings = (props: { id: string }) => {
     useStoryKeepUtils(id);
 
   return (
-    <div className="rounded-lg px-3.5 py-1.5 mr-12 bg-white shadow-inner">
+    <div className="rounded-lg px-1.5 py-1.5 mr-12 bg-white shadow-inner">
       <div className="space-y-4">
         <StoryFragmentTailwindBgColour
           id={id}

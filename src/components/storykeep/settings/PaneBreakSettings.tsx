@@ -329,7 +329,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
     <div>
       <div
         className={classNames(
-          `rounded-lg bg-white px-3.5 py-1.5 pr-10`,
+          `rounded-lg bg-white px-1.5 py-1.5 pr-10`,
           type === `mobile` ? `mr-2` : `mr-6`
         )}
       >

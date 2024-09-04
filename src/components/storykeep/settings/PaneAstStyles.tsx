@@ -1039,7 +1039,7 @@ export const PaneAstStyles = (props: {
     <div>
       <div
         className={classNames(
-          `rounded-lg bg-white px-3.5 py-1.5 pr-10`,
+          `rounded-lg bg-white px-1.5 py-1.5 pr-10`,
           type === `mobile` ? `mr-2` : `mr-6`
         )}
       >
@@ -1126,7 +1126,22 @@ export const PaneAstStyles = (props: {
               </>
             )}
             {widgetConfigMode && (
-              <WidgetConfigPlaceholder widgetData={widgetData} />
+              <div>
+                <WidgetConfigPlaceholder widgetData={widgetData} />
+                <span className="flex gap-x-6">
+                  <button
+                    className="my-2 underline"
+                    title="Close Widget Config panel"
+                    onClick={() => {
+                      setSelectedStyle(null);
+                      setAddClass(false);
+                      setWidgetConfigMode(false);
+                    }}
+                  >
+                    BACK
+                  </button>
+                </span>
+              </div>
             )}
             {!imageMeta &&
               !linkTargetKey &&

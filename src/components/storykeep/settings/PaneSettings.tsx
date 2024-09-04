@@ -116,7 +116,7 @@ export const PaneSettings = (props: {
   };
 
   return (
-    <div className="rounded-lg px-3.5 py-1.5 mr-12 bg-white shadow-inner">
+    <div className="rounded-lg px-1.5 py-1.5 mr-12 bg-white shadow-inner">
       <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
         <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
           {tabs.map((tab: string, idx: number) => (

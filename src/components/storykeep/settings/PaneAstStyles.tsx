@@ -77,6 +77,13 @@ export const PaneAstStyles = (props: {
   const markdownDatum = $paneFragmentMarkdown[markdownFragmentId].current;
   const hasHistory = !!$paneFragmentMarkdown[markdownFragmentId].history.length;
   const hasModal = markdownDatum.payload.isModal;
+  const [selectedButtonStyle, setSelectedButtonStyle] =
+    useState("Plain text inline");
+  const buttonStyleOptions = [
+    "Plain text inline",
+    "Fancy text inline",
+    "Fancy button",
+  ];
   const markdownLookup = useMemo(() => {
     return markdownDatum?.markdown?.htmlAst
       ? generateMarkdownLookup(markdownDatum.markdown.htmlAst)
@@ -175,6 +182,11 @@ export const PaneAstStyles = (props: {
           : activeTag === `li`
             ? listItemClassNamesPayload
             : outerTagClassNamesPayload;
+
+  const handleButtonStyleChange = (option: string) => {
+    setSelectedButtonStyle(option);
+    console.log(option);
+  };
 
   const removeLinkStyle = (className: string) => {
     setSelectedStyle(null);
@@ -922,30 +934,11 @@ export const PaneAstStyles = (props: {
         );
         const payloadForTag = currentField.current.payload.optionsPayload
           .classNamesPayload[activeTag] as ClassNamesPayloadInnerDatum;
-        if (activeTagData?.hasOverride && activeTagData.globalNth !== null) {
-          if (!payloadForTag.override) {
-            payloadForTag.override = {};
-          }
-          Object.entries(pastedPayload).forEach(([className, value]) => {
-            if (payloadForTag?.override && !payloadForTag.override[className]) {
-              payloadForTag.override[className] = [];
-            }
-            if (
-              payloadForTag?.override &&
-              className in payloadForTag.override &&
-              activeTagData?.globalNth &&
-              activeTagData?.globalNth in payloadForTag.override[className]
-            )
-              payloadForTag.override[className][activeTagData.globalNth] =
-                value as Tuple;
-          });
-        } else {
-          payloadForTag.classes = {
-            ...payloadForTag.classes,
-            ...pastedPayload,
-          };
-        }
-
+        if (`override` in payloadForTag) delete payloadForTag.override;
+        if (`count` in payloadForTag) delete payloadForTag.count;
+        payloadForTag.classes = {
+          ...pastedPayload,
+        };
         updateStoreField("paneFragmentMarkdown", {
           ...currentField.current,
           payload: {
@@ -1159,7 +1152,59 @@ export const PaneAstStyles = (props: {
                         ClassTag(className)
                       )
                     ) : (
-                      <span>No styles</span>
+                      <div className="w-full">
+                        <label
+                          htmlFor="button-style-listbox"
+                          className="block text-sm text-mydarkgrey mb-2"
+                        >
+                          Apply default button styles
+                        </label>
+                        <Listbox
+                          value={selectedButtonStyle}
+                          onChange={handleButtonStyleChange}
+                        >
+                          <div className="relative mt-1">
+                            <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                              <span className="block truncate">
+                                {selectedButtonStyle}
+                              </span>
+                              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                <ChevronUpDownIcon
+                                  className="h-5 w-5 text-mydarkgrey"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            </Listbox.Button>
+                            <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                              {buttonStyleOptions.map(option => (
+                                <Listbox.Option
+                                  key={option}
+                                  className={({ active }) =>
+                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                      active
+                                        ? "bg-myorange/10 text-black"
+                                        : "text-black"
+                                    }`
+                                  }
+                                  value={option}
+                                >
+                                  {({ selected }) => (
+                                    <>
+                                      <span
+                                        className={`block truncate ${
+                                          selected ? "font-bold" : "font-normal"
+                                        }`}
+                                      >
+                                        {option}
+                                      </span>
+                                    </>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </div>
+                        </Listbox>
+                      </div>
                     )}
                   </div>
                 </div>

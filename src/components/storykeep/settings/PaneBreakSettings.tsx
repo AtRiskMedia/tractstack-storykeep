@@ -326,7 +326,7 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
   if (!fragmentId) return <div>Loading...</div>;
 
   return (
-    <div className="px-3.5 py-1.5">
+    <div>
       <div
         className={classNames(
           `rounded-lg bg-white px-3.5 py-1.5 pr-10`,

@@ -370,27 +370,7 @@ export const PaneAstStyles = (props: {
     widgetData: string[];
   }) => (
     <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-      <h3 className="text-lg font-bold">Widget Configuration</h3>
-      <span className="flex gap-x-6 w-full">
-        <button
-          className="my-2 underline"
-          title="Close Widget Config panel"
-          onClick={() => {
-            setSelectedStyle(null);
-            setAddClass(false);
-            setWidgetConfigMode(false);
-          }}
-        >
-          BACK
-        </button>
-      </span>
       <Widget id={widgetData[0]} values={widgetData.slice(1)} />
-      <div className="w-full mt-2">
-        <h4 className="text-md font-bold">Extracted Data:</h4>
-        <pre className="bg-gray-100 p-2 rounded mt-1">
-          {JSON.stringify(widgetData, null, 2)}
-        </pre>
-      </div>
     </div>
   );
 
@@ -1056,7 +1036,7 @@ export const PaneAstStyles = (props: {
   if (!tabs) return null;
 
   return (
-    <div className="px-3.5 py-1.5">
+    <div>
       <div
         className={classNames(
           `rounded-lg bg-white px-3.5 py-1.5 pr-10`,
@@ -1167,7 +1147,7 @@ export const PaneAstStyles = (props: {
             {linkTargetKey && (
               <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
                 {linkMode && linkTargetKey !== `*` ? (
-                  <div className="w-80">
+                  <div>
                     <div className="flex flex-nowrap justify-between">
                       <div className="flex flex-nowrap gap-x-4">
                         <button

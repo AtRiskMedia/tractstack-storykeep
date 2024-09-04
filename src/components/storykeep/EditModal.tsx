@@ -68,7 +68,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
   if (!isClient) return null;
 
   return (
-    <div className="relative bg-mywhite shadow-md rounded-lg">
+    <div className="relative  shadow-inner rounded-lg">
       <div className="absolute inset-x-0 top-0 z-[9001]">
         <div className="flex justify-end">
           <button
@@ -82,7 +82,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
           </button>
         </div>
       </div>
-      <div className="px-3.5 py-1.5">
+      <div>
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
           <StoryFragmentSettings id={$editMode.id} />

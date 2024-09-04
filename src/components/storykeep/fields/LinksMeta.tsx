@@ -237,7 +237,7 @@ const LinksMeta = (props: LinksMetaProps) => {
   }
 
   return (
-    <div className="min-w-80">
+    <div>
       <div className="bg-myblue/5 text-md px-2 flex flex-wrap gap-x-2 gap-y-1.5">
         <span className="py-1">Link:</span>
         {Object.keys(links).map((linkKey, idx: number) => (

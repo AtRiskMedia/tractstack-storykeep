@@ -94,7 +94,7 @@ const ImageMeta = (props: {
   );
 
   return (
-    <div className="space-y-4 min-w-80">
+    <div className="space-y-4">
       <div>
         <label
           htmlFor="image-alt-text"

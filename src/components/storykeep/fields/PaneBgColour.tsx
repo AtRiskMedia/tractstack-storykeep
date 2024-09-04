@@ -55,7 +55,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
 
   const handleColorChange = useCallback(
     (newColor: string) => {
-      const hexColor = newColor.startsWith("#") ? newColor : `#${newColor}`;
+      const hexColor = tailwindToHex(`bg-${newColor}`);
       setColor(hexColor);
       const matchingTailwindColor = hexToTailwind(hexColor);
       setSelectedTailwindColor(matchingTailwindColor || "");
@@ -105,6 +105,7 @@ const PaneBgColour = ({ paneId }: PaneBgColourProps) => {
   const handleTailwindColorChange = useCallback(
     (newTailwindColor: string) => {
       const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
+      console.log(hexColor, newTailwindColor);
       handleColorChange(hexColor);
     },
     [handleColorChange]

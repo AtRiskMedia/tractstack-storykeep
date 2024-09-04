@@ -678,19 +678,19 @@ function processClassValues(
   const mobileVal =
     overrideClasses && overrideClasses.length
       ? String(overrideClasses[0])
-      : Array.isArray(classes) && classes.length
+      : Array.isArray(classes) && classes.length && classes[0] !== ``
         ? String(classes[0])
         : null;
   const tabletVal =
     overrideClasses && overrideClasses.length > 1
       ? String(overrideClasses[1])
-      : Array.isArray(classes) && classes.length > 1
+      : Array.isArray(classes) && classes.length > 1 && classes[1] !== ``
         ? String(classes[1])
         : mobileVal;
   const desktopVal =
     overrideClasses && overrideClasses.length > 2
       ? String(overrideClasses[2])
-      : Array.isArray(classes) && classes.length > 2
+      : Array.isArray(classes) && classes.length > 2 && classes[2] !== ``
         ? String(classes[2])
         : tabletVal;
   const mobileValNegative =

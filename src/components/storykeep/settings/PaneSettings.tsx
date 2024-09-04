@@ -172,8 +172,8 @@ export const PaneSettings = (props: {
                 />
               </div>
               <p className="text-sm my-2 text-mydarkgrey italic">
-                Note: title + slug used for analytics and may (if enabled) be
-                used as part of the "fast travel" map shown to users.
+                Note: title + slug used for analytics and as part of the "fast
+                travel" map shown to users (if enabled).
               </p>
             </div>
 

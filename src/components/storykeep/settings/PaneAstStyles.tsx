@@ -490,51 +490,84 @@ export const PaneAstStyles = (props: {
       const thisValue =
         typeof isNegative !== `undefined` && isNegative ? `!${value}` : value;
       const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+      console.log(thisTag, thisValue, thisClass);
+
+      // Initialize the classNamesPayload for this tag if it doesn't exist
+      if (
+        !currentField.current.payload.optionsPayload.classNamesPayload[thisTag]
+      ) {
+        currentField.current.payload.optionsPayload.classNamesPayload[thisTag] =
+          {
+            classes: {},
+          };
+      }
+
       const payloadForTag = currentField.current.payload.optionsPayload
         .classNamesPayload[thisTag] as ClassNamesPayloadInnerDatum;
-      const thisTuple =
-        activeTagData.tag === `parent` && Array.isArray(payloadForTag.classes)
-          ? (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
-              thisClass
-            ]
-          : !activeTagData.hasOverride
-            ? (payloadForTag?.classes as Record<string, Tuple>)[thisClass]
-            : payloadForTag.override?.[thisClass]?.[thisGlobalNth as number];
-      if (thisTuple) {
-        const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
-        if (
-          activeTagData.tag === `parent` &&
-          Array.isArray(payloadForTag.classes)
-        ) {
-          (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
-            thisClass
-          ] = newTuple;
-        } else if (activeTagData?.hasOverride) {
-          if (!payloadForTag.override) payloadForTag.override = {};
-          if (!payloadForTag.override[thisClass])
-            payloadForTag.override[thisClass] = [];
-          payloadForTag.override[thisClass][thisGlobalNth as number] = newTuple;
-        } else {
-          (payloadForTag.classes as Record<string, Tuple>)[thisClass] =
-            newTuple;
+
+      // Initialize classes if it doesn't exist
+      if (!payloadForTag.classes) {
+        payloadForTag.classes = {};
+      }
+
+      let thisTuple: Tuple;
+
+      if (
+        activeTagData.tag === `parent` &&
+        Array.isArray(payloadForTag.classes)
+      ) {
+        if (!payloadForTag.classes[parentLayer]) {
+          payloadForTag.classes[parentLayer] = {};
         }
-        updateStoreField("paneFragmentMarkdown", {
-          ...currentField.current,
-          payload: {
-            ...currentField.current.payload,
-            optionsPayload: {
-              ...currentField.current.payload.optionsPayload,
-              classNamesPayload: {
-                ...currentField.current.payload.optionsPayload
-                  .classNamesPayload,
-                [thisTag]: payloadForTag,
-              },
+        thisTuple = (
+          payloadForTag.classes[parentLayer] as Record<string, Tuple>
+        )[thisClass] || ["", "", ""];
+      } else if (activeTagData?.hasOverride) {
+        if (!payloadForTag.override) {
+          payloadForTag.override = {};
+        }
+        if (!payloadForTag.override[thisClass]) {
+          payloadForTag.override[thisClass] = [];
+        }
+        thisTuple = payloadForTag.override[thisClass][
+          thisGlobalNth as number
+        ] || ["", "", ""];
+      } else {
+        thisTuple = (payloadForTag.classes as Record<string, Tuple>)[
+          thisClass
+        ] || ["", "", ""];
+      }
+
+      const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
+
+      if (
+        activeTagData.tag === `parent` &&
+        Array.isArray(payloadForTag.classes)
+      ) {
+        (payloadForTag.classes[parentLayer] as Record<string, Tuple>)[
+          thisClass
+        ] = newTuple;
+      } else if (activeTagData?.hasOverride) {
+        payloadForTag.override![thisClass][thisGlobalNth as number] = newTuple;
+      } else {
+        (payloadForTag.classes as Record<string, Tuple>)[thisClass] = newTuple;
+      }
+
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        payload: {
+          ...currentField.current.payload,
+          optionsPayload: {
+            ...currentField.current.payload.optionsPayload,
+            classNamesPayload: {
+              ...currentField.current.payload.optionsPayload.classNamesPayload,
+              [thisTag]: payloadForTag,
             },
           },
-        });
-        lastInteractedTypeStore.set(`markdown`);
-        lastInteractedPaneStore.set(targetId.paneId);
-      }
+        },
+      });
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(targetId.paneId);
     }
   };
 
@@ -980,7 +1013,7 @@ export const PaneAstStyles = (props: {
   }, [activeTagData]);
 
   if (!tabs) return null;
-
+  console.log(mobileValue, tabletValue, desktopValue);
   return (
     <div
       className={classNames(

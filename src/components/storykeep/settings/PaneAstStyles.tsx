@@ -301,9 +301,16 @@ export const PaneAstStyles = (props: {
           targetId.outerIdx
         );
       if (codeNode) {
-        const widgetData = codeNode.split("|").map(item => item.trim());
-        setWidgetData(widgetData);
+      const match = codeNode.match(/(\w+)\((.*?)\)/);
+      if (match) {
+        const [, key, valuesString] = match;
+        const values = valuesString.split('|').map(item => item.trim());
+        setWidgetData([key, ...values]);
+      } else {
+        console.error('Invalid widget format:', codeNode);
+        setWidgetData([]);
       }
+    }
     }
     setWidgetConfigMode(true);
     setSelectedStyle(null);
@@ -1013,7 +1020,7 @@ export const PaneAstStyles = (props: {
   }, [activeTagData]);
 
   if (!tabs) return null;
-  console.log(mobileValue, tabletValue, desktopValue);
+
   return (
     <div
       className={classNames(

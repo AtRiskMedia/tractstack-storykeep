@@ -329,22 +329,17 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
     <div>
       <div
         className={classNames(
-          `rounded-lg bg-white px-1.5 py-1.5 pr-10`,
+          `px-1.5 py-1.5 pr-10`,
           type === `mobile` ? `mr-2` : `mr-6`
         )}
       >
         <div
           className={classNames(
-            `flex`,
-            type === `mobile` ? `flex-nowrap gap-x-4 gap-y-2` : `flex-wrap`
+            type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
           )}
         >
-          <div
-            className={classNames(
-              type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
-            )}
-          >
-            <div className="mb-2">
+          <div className="px-3.5 py-1.5">
+            <div className="my-4">
               <label className="block text-sm text-mydarkgrey">
                 Colour (applies to all viewports)
               </label>

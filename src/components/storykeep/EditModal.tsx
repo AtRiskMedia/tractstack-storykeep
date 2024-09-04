@@ -69,7 +69,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
 
   return (
     <div className="relative shadow-inner rounded-lg">
-      <div className="absolute inset-x-0 top-0 z-[9001]">
+      <div className="absolute top-0 z-[9003] right-0 w-16">
         <div className="flex justify-end">
           <button
             className="bg-myorange/20 text-black p-2 rounded-md hover:bg-black hover:text-white m-2"

@@ -55,7 +55,7 @@ const StoryFragmentMenuId = ({
   };
 
   return (
-    <div className="flex items-center space-x-4 py-3">
+    <div className="flex items-center space-x-4 py-3 max-w-80">
       <span
         id="storyFragmentMenuId-label"
         className="flex items-center text-md text-mydarkgrey flex-shrink-0"

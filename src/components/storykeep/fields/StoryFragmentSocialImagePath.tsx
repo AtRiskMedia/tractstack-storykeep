@@ -34,7 +34,7 @@ const StoryFragmentSocialImagePath = ({
 
   return (
     <>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 max-w-80">
         <span
           id="storyFragmentSocialImagePath-label"
           className="flex items-center text-md text-mydarkgrey flex-shrink-0"

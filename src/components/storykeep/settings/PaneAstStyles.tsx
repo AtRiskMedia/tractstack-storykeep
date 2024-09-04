@@ -1039,7 +1039,7 @@ export const PaneAstStyles = (props: {
     <div>
       <div
         className={classNames(
-          `rounded-lg bg-white px-1.5 py-1.5 pr-10`,
+          `px-1.5 py-1.5 pr-10`,
           type === `mobile` ? `mr-2` : `mr-6`
         )}
       >
@@ -1048,7 +1048,7 @@ export const PaneAstStyles = (props: {
             type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
           )}
         >
-          <div className="rounded-md bg-white px-3.5 py-1.5 shadow-inner px-3.5 py-1.5">
+          <div className="px-3.5 py-1.5">
             {!linkTargetKey && !widgetConfigMode && (
               <>
                 <div className="flex justify-between items-center">

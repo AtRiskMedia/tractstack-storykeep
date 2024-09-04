@@ -86,6 +86,13 @@ export const StoryFragment = (props: { id: string }) => {
     [thisPaneIds, paneIds]
   );
 
+  const resetInsertMode = useCallback(() => {
+    if (isDesigningNew) {
+      setShouldScroll(null);
+      setThisPaneIds(paneIds);
+    }
+  }, [isDesigningNew, paneIds]);
+
   useEffect(() => {
     setThisPaneIds(paneIds);
   }, [paneIds]);
@@ -142,6 +149,12 @@ export const StoryFragment = (props: { id: string }) => {
       window.removeEventListener("resize", handleResize);
     };
   }, [$viewportSet]);
+
+  useEffect(() => {
+    if (toolMode !== "insert") {
+      resetInsertMode();
+    }
+  }, [toolMode]);
 
   useEffect(() => {
     if ($lastInteractedPane && $lastInteractedType === "markdown") {

@@ -368,13 +368,13 @@ const PaneFromAst = ({
           </EraserWrapper>
         );
       const tip = isImage
-        ? `Style this image`
+        ? `Manage this image`
         : isWidget
-          ? `Style this widget`
+          ? `Manage this widget`
           : isTextContainerItem
             ? `Style this text`
             : `UNKNOWN`;
-      if (tip && toolMode === `styles`)
+      if (tip && (toolMode === `styles` || isWidget || isImage ))
         return (
           <EditableInnerElementWrapper
             id={thisId}

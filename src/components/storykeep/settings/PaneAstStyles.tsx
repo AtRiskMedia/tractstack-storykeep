@@ -548,7 +548,7 @@ export const PaneAstStyles = (props: {
         }
         thisTuple = (
           payloadForTag.classes[parentLayer] as Record<string, Tuple>
-        )[thisClass] || ["", "", ""];
+        )[thisClass] || [""];
       } else if (activeTagData?.hasOverride) {
         if (!payloadForTag.override) {
           payloadForTag.override = {};
@@ -558,11 +558,11 @@ export const PaneAstStyles = (props: {
         }
         thisTuple = payloadForTag.override[thisClass][
           thisGlobalNth as number
-        ] || ["", "", ""];
+        ] || [""];
       } else {
         thisTuple = (payloadForTag.classes as Record<string, Tuple>)[
           thisClass
-        ] || ["", "", ""];
+        ] || [""];
       }
       const newTuple = updateViewportTuple(thisTuple, viewport, thisValue);
       if (

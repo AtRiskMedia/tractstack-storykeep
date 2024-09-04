@@ -1039,8 +1039,8 @@ export const PaneAstStyles = (props: {
     <div>
       <div
         className={classNames(
-          `px-1.5 py-1.5 pr-10`,
-          type === `mobile` ? `mr-2` : `mr-6`
+          "rounded-lg px-1.5 py-1.5 shadow-inner bg-white",
+          type === `mobile` ? `mr-12` : `mr-6`
         )}
       >
         <div

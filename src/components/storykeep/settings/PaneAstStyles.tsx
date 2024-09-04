@@ -28,6 +28,7 @@ import {
   buttonStyleClasses,
 } from "../../../assets/paneDesigns";
 import { tagTitles } from "../../../constants";
+import Widget from "../fields/Widget";
 import ImageMeta from "../fields/ImageMeta";
 import LinksMeta from "../fields/LinksMeta";
 import StyleMemory from "../fields/StyleMemory";
@@ -383,6 +384,7 @@ export const PaneAstStyles = (props: {
           BACK
         </button>
       </span>
+      <Widget id={widgetData[0]} values={widgetData.slice(1)} />
       <div className="w-full mt-2">
         <h4 className="text-md font-bold">Extracted Data:</h4>
         <pre className="bg-gray-100 p-2 rounded mt-1">

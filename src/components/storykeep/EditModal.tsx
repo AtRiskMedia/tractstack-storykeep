@@ -82,7 +82,7 @@ export const EditModal = ({ type, contentMap, id }: EditModalProps) => {
           </button>
         </div>
       </div>
-      <div className="z-[9002]">
+      <div className="relative z-[9002]">
         {$editMode?.type === `storyfragment` &&
         $editMode?.mode === `settings` ? (
           <StoryFragmentSettings id={$editMode.id} />

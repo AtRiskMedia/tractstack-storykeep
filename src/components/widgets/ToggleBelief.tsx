@@ -9,29 +9,34 @@ import type { BeliefDatum, EventStream } from "../../types";
 export const ToggleBelief = ({
   belief,
   prompt,
+  readonly = false,
 }: {
   belief: string;
   prompt: string;
+  readonly?: boolean;
 }) => {
   const [enabled, setEnabled] = useState<undefined | boolean>(undefined);
   const $heldBeliefsAll = useStore(heldBeliefs);
 
   useEffect(() => {
-    const hasMatchingBelief = $heldBeliefsAll
-      .filter((e: BeliefDatum) => e.slug === belief)
-      .at(0);
-    if (
-      hasMatchingBelief &&
-      hasMatchingBelief?.slug &&
-      typeof enabled === `boolean`
-    )
-      setEnabled(!enabled);
-    else if (hasMatchingBelief && hasMatchingBelief?.verb)
-      setEnabled(hasMatchingBelief.verb === `BELIEVES_YES`);
-    else if (typeof enabled === `undefined`) setEnabled(false);
-  }, [heldBeliefs]);
+    if (!readonly) {
+      const hasMatchingBelief = $heldBeliefsAll
+        .filter((e: BeliefDatum) => e.slug === belief)
+        .at(0);
+      if (
+        hasMatchingBelief &&
+        hasMatchingBelief?.slug &&
+        typeof enabled === `boolean`
+      )
+        setEnabled(!enabled);
+      else if (hasMatchingBelief && hasMatchingBelief?.verb)
+        setEnabled(hasMatchingBelief.verb === `BELIEVES_YES`);
+      else if (typeof enabled === `undefined`) setEnabled(false);
+    }
+  }, [heldBeliefs, readonly]);
 
   const handleClick = () => {
+    if (readonly) return false;
     const event = {
       verb: enabled ? `BELIEVES_NO` : `BELIEVES_YES`,
       id: belief,

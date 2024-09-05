@@ -179,9 +179,9 @@ const value3 =
   ) : null
 }
 {
-  Tag === `code` && hook === `youtube` && value1 ? (
+  Tag === `code` && hook === `youtube` && value1 && value2 ? (
     <div class={injectClassNames}>
-      <YouTubeWrapper client:visible title={value1} />
+      <YouTubeWrapper client:visible embedCode={value1} title={value2} />
     </div>
   ) : null
 }

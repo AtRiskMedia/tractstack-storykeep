@@ -17,6 +17,9 @@ import InsertWrapper from "./InsertWrapper";
 import StylesWrapper from "./StylesWrapper";
 import { handleToggleOn } from "../../../utils/storykeep";
 import { classNames } from "../../../utils/helpers";
+import { Belief } from "@components/widgets/Belief";
+import { IdentifyAs } from "@components/widgets/IdentifyAs";
+import { ToggleBelief } from "@components/widgets/ToggleBelief";
 import type { MouseEvent, ReactNode } from "react";
 import type {
   ButtonData,
@@ -512,17 +515,32 @@ const PaneFromAst = ({
 
   if (Tag === "code") {
     if (hook === "resource" && value1) {
-      return <div className={injectClassNames}>ResourceWrapper: {value1}</div>;
+      return (
+        <div className={injectClassNames}>
+          <div>
+            <strong>Resource Template (not yet implemented):</strong> {value1},{" "}
+            {value2}
+          </div>
+        </div>
+      );
     }
 
-    if (hook === "youtube" && value1) {
-      return <div className={injectClassNames}>YouTubeWrapper: {value1}</div>;
+    if (hook === "youtube" && value1 && value2) {
+      return (
+        <div className={injectClassNames}>
+          <div>
+            <strong>YouTube Video Embed Code:</strong> {value1} ({value2})
+          </div>
+        </div>
+      );
     }
 
     if (hook === "bunny" && value1 && value2) {
       return (
         <div className={injectClassNames}>
-          BunnyVideo: {value1} {value2}
+          <div>
+            <strong>Bunny Video Embed Code:</strong> {value1} ({value2})
+          </div>
         </div>
       );
     }
@@ -530,7 +548,10 @@ const PaneFromAst = ({
     if (hook === "bunnyContext" && value1 && value2) {
       return (
         <div className={injectClassNames}>
-          BunnyVideo on Context Page: {value1} {value2}
+          <div>
+            <strong>Bunny Video Embed Code on Context Page:</strong> {value1} (
+            {value2})
+          </div>
         </div>
       );
     }
@@ -538,7 +559,11 @@ const PaneFromAst = ({
     if (hook === "belief" && value1 && value2) {
       return (
         <div className={injectClassNames}>
-          Belief slug: {value1}, scale: {value2}, extra: {value3}
+          <Belief
+            key={value2}
+            value={{ slug: value1, scale: value2, extra: value3 }}
+            readonly={true}
+          />
         </div>
       );
     }
@@ -546,7 +571,10 @@ const PaneFromAst = ({
     if (hook === "identifyAs" && value1 && value2) {
       return (
         <div className={injectClassNames}>
-          IdentifyAs: slug: {value1}, target: {value2}, extra: {value3}
+          <IdentifyAs
+            value={{ slug: value1, target: value2, extra: value3 || `` }}
+            readonly={true}
+          />
         </div>
       );
     }
@@ -554,7 +582,7 @@ const PaneFromAst = ({
     if (hook === "toggle" && value1 && value2) {
       return (
         <div className={injectClassNames}>
-          ToggleBelief {value1} {value2}
+          <ToggleBelief belief={value1} prompt={value2} readonly={true} />
         </div>
       );
     }

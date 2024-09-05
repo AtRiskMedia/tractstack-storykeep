@@ -12,8 +12,10 @@ import type { BeliefOptionDatum, BeliefDatum, EventStream } from "../../types";
 
 export const Belief = ({
   value,
+  readonly = false,
 }: {
   value: { slug: string; scale: string; extra: string };
+  readonly?: boolean;
 }) => {
   const $heldBeliefsAll = useStore(heldBeliefs);
   const thisScaleLookup = value.scale as keyof typeof heldBeliefsScales;
@@ -35,20 +37,25 @@ export const Belief = ({
   const [selected, setSelected] = useState(start);
 
   useEffect(() => {
-    const hasMatchingBelief = $heldBeliefsAll
-      .filter((e: BeliefDatum) => e.slug === value.slug)
-      .at(0);
-    const knownOffset =
-      typeof hasMatchingBelief?.verb === `string`
-        ? thisScale
-            .filter((e: BeliefOptionDatum) => e.slug === hasMatchingBelief.verb)
-            .at(0)
-        : false;
-    if (knownOffset && knownOffset?.slug) setSelected(knownOffset);
-    else setSelected(start);
-  }, [$heldBeliefsAll]);
+    if (!readonly) {
+      const hasMatchingBelief = $heldBeliefsAll
+        .filter((e: BeliefDatum) => e.slug === value.slug)
+        .at(0);
+      const knownOffset =
+        typeof hasMatchingBelief?.verb === `string`
+          ? thisScale
+              .filter(
+                (e: BeliefOptionDatum) => e.slug === hasMatchingBelief.verb
+              )
+              .at(0)
+          : false;
+      if (knownOffset && knownOffset?.slug) setSelected(knownOffset);
+      else setSelected(start);
+    }
+  }, [$heldBeliefsAll, readonly]);
 
   const handleClick = (e: BeliefOptionDatum) => {
+    if (readonly) return false;
     if (e.id > 0) {
       const event = {
         verb: e.slug,

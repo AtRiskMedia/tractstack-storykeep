@@ -80,14 +80,22 @@ export function allowTagInsert(
     case `img`:
       break;
     case `yt`:
-      break;
     case `bunny`:
-      break;
     case `belief`:
-      break;
     case `identify`:
-      break;
     case `toggle`:
+      {
+        if (typeof idx !== `number`) {
+          // only allow if no adjascent ul
+          const parentBeforeTag =
+            outerIdx === 0 ||
+            (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ul`);
+          const parentAfterTag =
+            outerIdx < Object.keys(markdownLookup.nthTag).length &&
+            markdownLookup.nthTag[outerIdx + 1] !== `ul`;
+          return { before: parentBeforeTag, after: parentAfterTag };
+        }
+      }
       break;
     case `aside`: {
       const parentTag = markdownLookup.nthTag[outerIdx];

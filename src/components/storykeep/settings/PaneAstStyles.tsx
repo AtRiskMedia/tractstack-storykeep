@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import { Switch, Combobox, Listbox } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import {
@@ -20,6 +20,7 @@ import {
   paneFragmentMarkdown,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  editModeStore,
 } from "../../../store/storykeep";
 import { classNames, cloneDeep } from "../../../utils/helpers";
 import { tailwindClasses } from "../../../assets/tailwindClasses";
@@ -71,6 +72,7 @@ export const PaneAstStyles = (props: {
   const [tabletValue, setTabletValue] = useState<string>(``);
   const [desktopValue, setDesktopValue] = useState<string>(``);
   const [confirm, setConfirm] = useState<string | null>(null);
+  const $editMode = useStore(editModeStore);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [targetId.paneId],
   });
@@ -336,16 +338,17 @@ export const PaneAstStyles = (props: {
     else removeStyle(className);
   };
 
-  const handleWidgetConfig = () => {
+  const handleWidgetConfig = useCallback(() => {
     if (
       markdownDatum?.markdown?.htmlAst &&
-      typeof targetId.outerIdx === "number"
+      (typeof targetId.outerIdx === "number" ||
+        $editMode?.targetId?.outerIdx !== undefined)
     ) {
       const codeNode =
         markdownDatum?.markdown?.htmlAst &&
         findCodeNode(
           cleanHtmlAst(markdownDatum.markdown.htmlAst as Root) as Root,
-          targetId.outerIdx
+          $editMode?.targetId?.outerIdx ?? targetId.outerIdx
         );
       if (codeNode) {
         const match = codeNode.match(/(\w+)\((.*?)\)/);
@@ -362,7 +365,7 @@ export const PaneAstStyles = (props: {
     setWidgetConfigMode(true);
     setSelectedStyle(null);
     setAddClass(false);
-  };
+  }, [markdownDatum, targetId, $editMode]);
 
   const handleAddLayer = (start: boolean) => {
     const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
@@ -818,6 +821,19 @@ export const PaneAstStyles = (props: {
       )}
     </div>
   );
+
+  useEffect(() => {
+    if (
+      $editMode?.type === "pane" &&
+      $editMode?.mode === "styles" &&
+      $editMode?.targetId?.mustConfig
+    ) {
+      setWidgetConfigMode(true);
+      handleWidgetConfig();
+    } else if ($editMode === null) {
+      setWidgetConfigMode(false);
+    }
+  }, [$editMode]);
 
   useEffect(() => {
     const thisTabs: StyleTab[] = [];

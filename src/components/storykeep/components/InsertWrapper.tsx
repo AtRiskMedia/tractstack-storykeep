@@ -4,6 +4,7 @@ import {
   unsavedChangesStore,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  editModeStore,
 } from "../../../store/storykeep";
 import {
   insertElementIntoMarkdown,
@@ -15,6 +16,7 @@ import {
   toolAddModeInsertDefault,
 } from "../../../constants";
 import { cloneDeep } from "../../../utils/helpers";
+import { handleToggleOn } from "../../../utils/storykeep";
 import type { ReactNode } from "react";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
 
@@ -80,6 +82,20 @@ const InsertWrapper = ({
         ...$unsavedChanges[paneId],
         paneFragmentMarkdown: true,
       });
+      editModeStore.set({
+        id: paneId,
+        mode: "styles",
+        type: "pane",
+        targetId: {
+          paneId,
+          outerIdx: position === "before" ? outerIdx : (outerIdx ?? 0) + 1,
+          globalNth: null,
+          idx: 0,
+          tag: "code",
+          mustConfig: true,
+        },
+      });
+      handleToggleOn("styles", contentId);
     });
   };
 

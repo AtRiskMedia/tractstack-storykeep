@@ -196,9 +196,10 @@ export type PaneAstTargetId = {
   outerIdx: number;
   idx: number | null;
   globalNth: number | null;
-  tag: "p" | "h2" | "h3" | "h4" | "li" | "a";
+  tag: "p" | "h2" | "h3" | "h4" | "li" | "a" | "code";
   paneId: string;
   buttonTarget?: string;
+  mustConfig?: boolean;
 };
 
 export type EditModeValue = {

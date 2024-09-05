@@ -122,3 +122,58 @@ export const toolModeButtons = [
     title: "Edit settings",
   },
 ] as const;
+
+interface WidgetMeta {
+  [key: string]: {
+    title: string;
+    valueLabels: string[];
+    valueDefaults: string[];
+    multi: boolean[];
+    isScale: boolean[];
+  };
+}
+
+export const widgetMeta: WidgetMeta = {
+  belief: {
+    title: `Belief Widget`,
+    valueLabels: ["Belief Tag", "Scale", "Question Prompt"],
+    valueDefaults: ["BELIEF", "yn", "Prompt"],
+    multi: [false, false, false],
+    isScale: [false, true, false],
+  },
+  identifyAs: {
+    title: `Identify As Widget`,
+    valueLabels: ["Belief Tag", "Belief Matching Value(s)", "Question Prompt"],
+    valueDefaults: ["BELIEF", "*", "Prompt"],
+    multi: [false, true, false],
+    isScale: [false, false, false],
+  },
+  toggle: {
+    title: `Toggle Belief Widget`,
+    valueLabels: ["Belief Tag", "Question Prompt"],
+    valueDefaults: ["BELIEF", "Prompt"],
+    multi: [false, false],
+    isScale: [false, false],
+  },
+  youtube: {
+    title: `YouTube Video Embed`,
+    valueLabels: ["Embed Code", "Title"],
+    valueDefaults: ["*", "Descriptive Title"],
+    multi: [false, false],
+    isScale: [false, false],
+  },
+  bunny: {
+    title: `BunnyCDN Video Embed`,
+    valueLabels: ["Embed Code", "Title"],
+    valueDefaults: ["*", "Descriptive Title"],
+    multi: [false, false],
+    isScale: [false, false],
+  },
+  bunnyContext: {
+    title: `BunnyCDN Video Embed on context page`,
+    valueLabels: ["Embed Code", "Title"],
+    valueDefaults: ["*", "Descriptive Title"],
+    multi: [false, false],
+    isScale: [false, false],
+  },
+};

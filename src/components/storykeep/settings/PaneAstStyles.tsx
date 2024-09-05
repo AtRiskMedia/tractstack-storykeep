@@ -364,16 +364,6 @@ export const PaneAstStyles = (props: {
     setAddClass(false);
   };
 
-  const WidgetConfigPlaceholder = ({
-    widgetData,
-  }: {
-    widgetData: string[];
-  }) => (
-    <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-      <Widget id={widgetData[0]} values={widgetData.slice(1)} />
-    </div>
-  );
-
   const handleAddLayer = (start: boolean) => {
     const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
     const payloadForTag = currentField.current.payload.optionsPayload
@@ -1127,7 +1117,15 @@ export const PaneAstStyles = (props: {
             )}
             {widgetConfigMode && (
               <div>
-                <WidgetConfigPlaceholder widgetData={widgetData} />
+                <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+                  <Widget
+                    id={widgetData[0]}
+                    values={widgetData.slice(1)}
+                    paneId={targetId.paneId}
+                    outerIdx={targetId.outerIdx}
+                    idx={targetId.idx}
+                  />
+                </div>
                 <span className="flex gap-x-6">
                   <button
                     className="my-2 underline"

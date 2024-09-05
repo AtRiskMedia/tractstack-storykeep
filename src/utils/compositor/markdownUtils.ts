@@ -182,6 +182,20 @@ function processMarkdownElement(
         }
         currentOuterIdx++;
       }
+    } else if (/`[^`\n]+`/.test(line)) {
+      // Inline code handling
+      if (tag === "code" && currentOuterIdx === outerIdx) {
+        const codeMatch = line.match(/`([^`\n]+)`/);
+        if (codeMatch) {
+          if (action === "extract") {
+            return codeMatch[1];
+          } else if (action === "update" && newContent) {
+            lines[i] = line.replace(/`[^`\n]+`/, `\`${newContent}\``);
+            return lines.join("\n");
+          }
+        }
+      }
+      currentOuterIdx++;
     } else if (
       /^\d+\.\s/.test(line) ||
       /^\*\s/.test(line) ||

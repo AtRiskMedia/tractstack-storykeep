@@ -535,7 +535,6 @@ const PaneFromAst = ({
       );
     }
 
-
     if (hook === "belief" && value1 && value2) {
       return (
         <div className={injectClassNames}>

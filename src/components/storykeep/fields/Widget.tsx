@@ -1,87 +1,59 @@
 import { useState, useEffect, useCallback } from "react";
+import { useStore } from "@nanostores/react";
 import {
   XMarkIcon,
   PlusIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
 import ContentEditableField from "../components/ContentEditableField";
-
-interface WidgetMeta {
-  [key: string]: {
-    title: string;
-    valueLabels: string[];
-    valueDefaults: string[];
-    multi: boolean[];
-    isScale: boolean[];
-  };
-}
-
-const widgetMeta: WidgetMeta = {
-  belief: {
-    title: `Belief Widget`,
-    valueLabels: ["Belief Tag", "Scale", "Question Prompt"],
-    valueDefaults: ["BELIEF", "yn", "Prompt"],
-    multi: [false, false, false],
-    isScale: [false,true,false]
-  },
-  identifyAs: {
-    title: `Identify As Widget`,
-    valueLabels: ["Belief Tag", "Belief Matching Value(s)", "Question Prompt"],
-    valueDefaults: ["BELIEF", "*", "Prompt"],
-    multi: [false, true, false],
-    isScale: [false,false,false]
-  },
-  toggle: {
-    title: `Toggle Belief Widget`,
-    valueLabels: ["Belief Tag", "Question Prompt"],
-    valueDefaults: ["BELIEF", "Prompt"],
-    multi: [false, false],
-    isScale: [false,false]
-  },
-  youtube: {
-    title: `YouTube Video Embed`,
-    valueLabels: ["Embed Code", "Title"],
-    valueDefaults: ["*", "Descriptive Title"],
-    multi: [false, false],
-    isScale: [false,false]
-  },
-  bunny: {
-    title: `BunnyCDN Video Embed`,
-    valueLabels: ["Embed Code", "Title"],
-    valueDefaults: ["*", "Descriptive Title"],
-    multi: [false, false],
-    isScale: [false,false]
-  },
-  bunnyContext: {
-    title: `BunnyCDN Video Embed on context page`,
-    valueLabels: ["Embed Code", "Title"],
-    valueDefaults: ["*", "Descriptive Title"],
-    multi: [false, false],
-    isScale: [false,false]
-  },
-  
-};
+import {
+  paneFragmentMarkdown,
+  paneMarkdownFragmentId,
+  lastInteractedTypeStore,
+  lastInteractedPaneStore,
+} from "../../../store/storykeep";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
+import {
+  updateMarkdownElement,
+  extractMarkdownElement,
+  markdownToHtmlAst,
+} from "../../../utils/compositor/markdownUtils";
+import { cloneDeep } from "../../../utils/helpers";
+import { widgetMeta } from "../../../constants";
 
 interface WidgetProps {
   id: string;
   values: string[];
+  paneId: string;
+  outerIdx: number;
+  idx: number | null;
 }
 
-const Widget = ({ id, values }: WidgetProps) => {
+const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
   const [widgetId, setWidgetId] = useState(id);
   const [widgetValues, setWidgetValues] = useState<string[]>([]);
+
+  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
+    keys: [paneId],
+  });
+  const markdownFragmentId = $paneMarkdownFragmentId[paneId]?.current;
+  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
+    keys: [markdownFragmentId || ""],
+  });
+  const { updateStoreField, handleUndo } = useStoryKeepUtils(
+    markdownFragmentId || ""
+  );
 
   useEffect(() => {
     setWidgetId(id);
     const meta = widgetMeta[id] || { valueDefaults: [], multi: [] };
     const initialValues = values.length > 0 ? values : meta.valueDefaults;
-    console.log(id,meta,initialValues)
     setWidgetValues(
       initialValues.map((value, index) =>
         meta.multi[index] && value === "" ? meta.valueDefaults[index] : value
       )
     );
-  }, [id, values]);
+  }, [id, values, paneId, markdownFragmentId, $paneFragmentMarkdown]);
 
   const handleValueChange = useCallback(
     (index: number, subIndex: number | null, newValue: string) => {
@@ -99,15 +71,65 @@ const Widget = ({ id, values }: WidgetProps) => {
         }
         return newValues;
       });
-      console.log("Local state updated");
       return true;
     },
     [widgetId]
   );
 
   const handleFinalChange = useCallback(() => {
-    console.log("Update nanostore with:", widgetId, widgetValues);
-  }, [widgetId, widgetValues]);
+    if (!markdownFragmentId) {
+      console.error("markdownFragmentId is undefined");
+      return;
+    }
+
+    lastInteractedTypeStore.set(`markdown`);
+    lastInteractedPaneStore.set(paneId);
+    const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
+
+    if (
+      !currentField ||
+      !currentField.current ||
+      !currentField.current.markdown
+    ) {
+      console.error("Invalid markdown data structure");
+      return;
+    }
+
+    const oldContent = extractMarkdownElement(
+      currentField.current.markdown.body,
+      "code",
+      outerIdx,
+      idx
+    );
+    const newContent = `${widgetId}(${widgetValues.join("|")})`;
+    if (oldContent !== newContent) {
+      const newBody = updateMarkdownElement(
+        currentField.current.markdown.body,
+        newContent,
+        "code",
+        outerIdx,
+        idx
+      );
+      const newHtmlAst = markdownToHtmlAst(newBody);
+      updateStoreField("paneFragmentMarkdown", {
+        ...currentField.current,
+        markdown: {
+          ...currentField.current.markdown,
+          body: newBody,
+          htmlAst: newHtmlAst,
+        },
+      });
+    }
+  }, [
+    widgetId,
+    widgetValues,
+    paneId,
+    markdownFragmentId,
+    outerIdx,
+    idx,
+    $paneFragmentMarkdown,
+    updateStoreField,
+  ]);
 
   const addValue = useCallback((index: number) => {
     setWidgetValues(prev => {
@@ -135,22 +157,37 @@ const Widget = ({ id, values }: WidgetProps) => {
     [widgetId]
   );
 
+  const handleUndoClick = useCallback(() => {
+    if (markdownFragmentId) {
+      handleUndo("paneFragmentMarkdown", markdownFragmentId);
+    } else {
+      console.error("Cannot undo: markdownFragmentId is undefined");
+    }
+  }, [handleUndo, markdownFragmentId]);
+
   const meta = widgetMeta[widgetId] || {
     title: ``,
     valueLabels: [],
     valueDefaults: [],
     multi: [],
   };
-  console.log(meta.title);
+
+  if (!markdownFragmentId || !$paneFragmentMarkdown[markdownFragmentId]) {
+    return <div>Loading widget data...</div>;
+  }
+
   return (
     <div className="space-y-4 max-w-md min-w-80">
       <div className="flex flex-nowrap justify-between">
         <h3 className="text-lg font-bold">{meta.title}</h3>
         <div className="flex justify-end">
           <button
-            onClick={() => console.log("Undo functionality to be implemented")}
-            disabled={true}
+            onClick={handleUndoClick}
             className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
+            disabled={
+              !markdownFragmentId ||
+              $paneFragmentMarkdown[markdownFragmentId]?.history.length === 0
+            }
           >
             <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
             Undo

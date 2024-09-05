@@ -33,7 +33,7 @@ export const ToggleBelief = ({
         setEnabled(hasMatchingBelief.verb === `BELIEVES_YES`);
       else if (typeof enabled === `undefined`) setEnabled(false);
     }
-  }, [heldBeliefs, readonly]);
+  }, [$heldBeliefsAll, readonly]);
 
   const handleClick = () => {
     if (readonly) return false;
@@ -58,7 +58,7 @@ export const ToggleBelief = ({
     events.set([...prevEvents, event]);
   };
 
-  if (typeof enabled === `undefined`) return <div />;
+  if (typeof enabled === `undefined` && !readonly) return <div />;
   return (
     <Switch.Group as="div" className={classNames(`flex items-center mt-6`)}>
       <Switch

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useStore } from "@nanostores/react";
 import {
   XMarkIcon,
@@ -30,8 +30,8 @@ interface WidgetProps {
 }
 
 const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
-  const [widgetId, setWidgetId] = useState(id);
   const [widgetValues, setWidgetValues] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
@@ -44,22 +44,48 @@ const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
     markdownFragmentId || ""
   );
 
-  useEffect(() => {
-    setWidgetId(id);
-    const meta = widgetMeta[id] || { valueDefaults: [], multi: [] };
-    const initialValues = values.length > 0 ? values : meta.valueDefaults;
-    setWidgetValues(
-      initialValues.map((value, index) =>
-        meta.multi[index] && value === "" ? meta.valueDefaults[index] : value
-      )
+  const meta = useMemo(
+    () => widgetMeta[id] || { valueDefaults: [], multi: [] },
+    [id]
+  );
+
+  const extractWidgetValues = useCallback(() => {
+    if (
+      !markdownFragmentId ||
+      !$paneFragmentMarkdown[markdownFragmentId]?.current?.markdown?.body
+    ) {
+      return values.length > 0 ? values : meta.valueDefaults;
+    }
+    const content = extractMarkdownElement(
+      $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
+      "code",
+      outerIdx,
+      idx
     );
-  }, [id, values, paneId, markdownFragmentId, $paneFragmentMarkdown]);
+    const match = content.match(/(\w+)\((.*?)\)/);
+    if (match) {
+      const [, , valuesString] = match;
+      return valuesString
+        .split("|")
+        .map((value, index) =>
+          meta.multi[index] && value === "" ? meta.valueDefaults[index] : value
+        );
+    }
+    return values.length > 0 ? values : meta.valueDefaults;
+  }, [markdownFragmentId, $paneFragmentMarkdown, outerIdx, idx, values, meta]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      const extractedValues = extractWidgetValues();
+      setWidgetValues(extractedValues);
+    }
+  }, [$paneFragmentMarkdown, markdownFragmentId, isEditing]);
 
   const handleValueChange = useCallback(
     (index: number, subIndex: number | null, newValue: string) => {
+      setIsEditing(true);
       setWidgetValues(prev => {
         const newValues = [...prev];
-        const meta = widgetMeta[widgetId] || { multi: [] };
         if (meta.multi[index]) {
           const values = newValues[index].split(",").map(v => v.trim());
           if (subIndex !== null) {
@@ -73,65 +99,49 @@ const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
       });
       return true;
     },
-    [widgetId]
+    [meta]
   );
 
   const handleFinalChange = useCallback(() => {
-    if (!markdownFragmentId) {
-      console.error("markdownFragmentId is undefined");
-      return;
-    }
+    if (!markdownFragmentId) return;
 
     lastInteractedTypeStore.set(`markdown`);
     lastInteractedPaneStore.set(paneId);
     const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
 
-    if (
-      !currentField ||
-      !currentField.current ||
-      !currentField.current.markdown
-    ) {
-      console.error("Invalid markdown data structure");
-      return;
-    }
+    if (!currentField?.current?.markdown) return;
 
-    const oldContent = extractMarkdownElement(
+    const newContent = `${id}(${widgetValues.join("|")})`;
+    const newBody = updateMarkdownElement(
       currentField.current.markdown.body,
+      newContent,
       "code",
       outerIdx,
       idx
     );
-    const newContent = `${widgetId}(${widgetValues.join("|")})`;
-    if (oldContent !== newContent) {
-      const newBody = updateMarkdownElement(
-        currentField.current.markdown.body,
-        newContent,
-        "code",
-        outerIdx,
-        idx
-      );
-      const newHtmlAst = markdownToHtmlAst(newBody);
-      updateStoreField("paneFragmentMarkdown", {
-        ...currentField.current,
-        markdown: {
-          ...currentField.current.markdown,
-          body: newBody,
-          htmlAst: newHtmlAst,
-        },
-      });
-    }
+    const newHtmlAst = markdownToHtmlAst(newBody);
+    updateStoreField("paneFragmentMarkdown", {
+      ...currentField.current,
+      markdown: {
+        ...currentField.current.markdown,
+        body: newBody,
+        htmlAst: newHtmlAst,
+      },
+    });
+    setIsEditing(false);
   }, [
-    widgetId,
+    id,
     widgetValues,
-    paneId,
     markdownFragmentId,
+    $paneFragmentMarkdown,
+    paneId,
     outerIdx,
     idx,
-    $paneFragmentMarkdown,
     updateStoreField,
   ]);
 
   const addValue = useCallback((index: number) => {
+    setIsEditing(true);
     setWidgetValues(prev => {
       const newValues = [...prev];
       const values = newValues[index].split(",").map(v => v.trim());
@@ -143,6 +153,7 @@ const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
 
   const removeValue = useCallback(
     (index: number, subIndex: number) => {
+      setIsEditing(true);
       setWidgetValues(prev => {
         const newValues = [...prev];
         const values = newValues[index].split(",").map(v => v.trim());
@@ -150,32 +161,23 @@ const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
         newValues[index] =
           values.length > 0
             ? values.join(",")
-            : widgetMeta[widgetId]?.valueDefaults[index] || "";
+            : meta.valueDefaults[index] || "";
         return newValues;
       });
     },
-    [widgetId]
+    [meta]
   );
 
   const handleUndoClick = useCallback(() => {
     if (markdownFragmentId) {
       handleUndo("paneFragmentMarkdown", markdownFragmentId);
-    } else {
-      console.error("Cannot undo: markdownFragmentId is undefined");
+      setIsEditing(false);
     }
   }, [handleUndo, markdownFragmentId]);
-
-  const meta = widgetMeta[widgetId] || {
-    title: ``,
-    valueLabels: [],
-    valueDefaults: [],
-    multi: [],
-  };
 
   if (!markdownFragmentId || !$paneFragmentMarkdown[markdownFragmentId]) {
     return <div>Loading widget data...</div>;
   }
-
   return (
     <div className="space-y-4 max-w-md min-w-80">
       <div className="flex flex-nowrap justify-between">
@@ -185,7 +187,6 @@ const Widget = ({ id, values, paneId, outerIdx, idx }: WidgetProps) => {
             onClick={handleUndoClick}
             className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
             disabled={
-              !markdownFragmentId ||
               $paneFragmentMarkdown[markdownFragmentId]?.history.length === 0
             }
           >

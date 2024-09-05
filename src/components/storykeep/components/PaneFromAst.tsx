@@ -264,7 +264,7 @@ const PaneFromAst = ({
 
   // Handle code hooks
   const regexpHook =
-    /(identifyAs|youtube|bunny|toggle|resource|belief)\((.*?)\)/;
+    /(identifyAs|youtube|bunny|bunnyContext|toggle|resource|belief)\((.*?)\)/;
   const regexpValues = /((?:[^\\|]+|\\\|?)+)/g;
   const thisHookRaw =
     thisAst?.children?.length && thisAst.children[0].value?.match(regexpHook);
@@ -511,6 +511,10 @@ const PaneFromAst = ({
   }
 
   if (Tag === "code") {
+    if (hook === "resource" && value1) {
+      return <div className={injectClassNames}>ResourceWrapper: {value1}</div>;
+    }
+
     if (hook === "youtube" && value1) {
       return <div className={injectClassNames}>YouTubeWrapper: {value1}</div>;
     }
@@ -522,6 +526,15 @@ const PaneFromAst = ({
         </div>
       );
     }
+
+    if (hook === "bunnyContext" && value1 && value2) {
+      return (
+        <div className={injectClassNames}>
+          BunnyVideo on Context Page: {value1} {value2}
+        </div>
+      );
+    }
+
 
     if (hook === "belief" && value1 && value2) {
       return (

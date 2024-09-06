@@ -827,10 +827,10 @@ export const PaneAstStyles = (props: {
       $editMode?.mode === "styles" &&
       $editMode?.targetId?.mustConfig
     ) {
-      setWidgetConfigMode(true);
-      handleWidgetConfig();
-    } else if ($editMode === null) {
-      setWidgetConfigMode(false);
+      if ($editMode?.targetId?.tag === `code`) {
+        setWidgetConfigMode(true);
+        handleWidgetConfig();
+      } else if ($editMode?.targetId?.tag === `img`) setImageMeta(true);
     }
   }, [$editMode]);
 
@@ -856,8 +856,10 @@ export const PaneAstStyles = (props: {
     setMobileValue(``);
     setTabletValue(``);
     setDesktopValue(``);
-    if (targetId.buttonTarget && !linkTargetKey)
+    if (targetId.buttonTarget && !linkTargetKey) {
       setLinkTargetKey(targetId.buttonTarget);
+      setLinkMode(`button`);
+    }
   }, [id, targetId]);
 
   const sortByActiveTag = (arr: StyleTab[], activeTag: Tag): StyleTab[] => {

@@ -12,33 +12,28 @@ export const StoryFragmentSettings = (props: { id: string }) => {
     useStoryKeepUtils(id);
 
   return (
-    <div>
-      <div className="flex flex-row space-x-16 my-4">
-        <StoryFragmentTailwindBgColour
-          id={id}
-          updateStoreField={updateStoreField}
-          handleUndo={handleUndo}
-        />
-        <div className="flex flex-col space-y-4">
-          <StoryFragmentMenu
-            id={id}
-            isEditing={isEditing}
-            handleEditingChange={handleEditingChange}
-            updateStoreField={updateStoreField}
-            handleUndo={handleUndo}
-            payload={[]}
-            // this needs to pull from nanostore
-          />
+    <div className="w-full space-y-4 my-4">
+      <StoryFragmentTailwindBgColour
+        id={id}
+        updateStoreField={updateStoreField}
+        handleUndo={handleUndo}
+      />
+      <StoryFragmentMenu
+        id={id}
+        isEditing={isEditing}
+        handleEditingChange={handleEditingChange}
+        updateStoreField={updateStoreField}
+        handleUndo={handleUndo}
+        payload={[]}
+      />
 
-          <StoryFragmentSocialImagePath
-            id={id}
-            isEditing={isEditing}
-            handleEditingChange={handleEditingChange}
-            updateStoreField={updateStoreField}
-            handleUndo={handleUndo}
-          />
-        </div>
-      </div>
+      <StoryFragmentSocialImagePath
+        id={id}
+        isEditing={isEditing}
+        handleEditingChange={handleEditingChange}
+        updateStoreField={updateStoreField}
+        handleUndo={handleUndo}
+      />
     </div>
   );
 };

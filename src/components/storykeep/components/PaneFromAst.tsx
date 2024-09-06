@@ -191,6 +191,7 @@ const PaneFromAst = ({
         idx,
         globalNth: thisGlobalNth,
         tag: thisTag,
+        mustConfig: toolMode===`text`
       },
     });
     handleToggleOn(`styles`, thisId);

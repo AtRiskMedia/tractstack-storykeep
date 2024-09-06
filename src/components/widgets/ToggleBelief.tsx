@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 import { useStore } from "@nanostores/react";
 import { Switch } from "@headlessui/react";
 import { classNames } from "../../utils/helpers";
@@ -15,50 +15,40 @@ export const ToggleBelief = ({
   prompt: string;
   readonly?: boolean;
 }) => {
-  const [enabled, setEnabled] = useState<undefined | boolean>(undefined);
   const $heldBeliefsAll = useStore(heldBeliefs);
-
-  useEffect(() => {
-    if (!readonly) {
-      const hasMatchingBelief = $heldBeliefsAll
-        .filter((e: BeliefDatum) => e.slug === belief)
-        .at(0);
-      if (
-        hasMatchingBelief &&
-        hasMatchingBelief?.slug &&
-        typeof enabled === `boolean`
-      )
-        setEnabled(!enabled);
-      else if (hasMatchingBelief && hasMatchingBelief?.verb)
-        setEnabled(hasMatchingBelief.verb === `BELIEVES_YES`);
-      else if (typeof enabled === `undefined`) setEnabled(false);
-    }
-  }, [$heldBeliefsAll, readonly]);
+  const enabled = useMemo(() => {
+    const hasMatchingBelief = $heldBeliefsAll
+      .filter((e: BeliefDatum) => e.slug === belief)
+      .at(0);
+    if (hasMatchingBelief && hasMatchingBelief?.verb)
+      return hasMatchingBelief.verb === `BELIEVES_YES`;
+    return false;
+  }, [$heldBeliefsAll]);
 
   const handleClick = () => {
-    if (readonly) return false;
-    const event = {
-      verb: enabled ? `BELIEVES_NO` : `BELIEVES_YES`,
-      id: belief,
-      type: `Belief`,
-    };
-    const thisBelief = {
-      id: belief,
-      slug: belief,
-      verb: enabled ? `BELIEVES_NO` : `BELIEVES_YES`,
-    };
-    setEnabled(!enabled);
-    const prevBeliefs = $heldBeliefsAll.filter(
-      (b: BeliefDatum) => b.slug !== belief
-    );
-    heldBeliefs.set([...prevBeliefs, thisBelief]);
-    const prevEvents = events
-      .get()
-      .filter((e: EventStream) => !(e.type === `Belief` && e.id === belief));
-    events.set([...prevEvents, event]);
+    if (!readonly) {
+      const event = {
+        verb: enabled ? `BELIEVES_NO` : `BELIEVES_YES`,
+        id: belief,
+        type: `Belief`,
+      };
+      const thisBelief = {
+        id: belief,
+        slug: belief,
+        verb: enabled ? `BELIEVES_NO` : `BELIEVES_YES`,
+      };
+      //setEnabled(!enabled);
+      const prevBeliefs = $heldBeliefsAll.filter(
+        (b: BeliefDatum) => b.slug !== belief
+      );
+      heldBeliefs.set([...prevBeliefs, thisBelief]);
+      const prevEvents = events
+        .get()
+        .filter((e: EventStream) => !(e.type === `Belief` && e.id === belief));
+      events.set([...prevEvents, event]);
+    }
   };
 
-  if (typeof enabled === `undefined` && !readonly) return <div />;
   return (
     <Switch.Group as="div" className={classNames(`flex items-center mt-6`)}>
       <Switch

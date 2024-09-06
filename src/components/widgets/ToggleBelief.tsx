@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "@nanostores/react";
 import { Switch } from "@headlessui/react";
 import { classNames } from "../../utils/helpers";
@@ -16,15 +16,8 @@ export const ToggleBelief = ({
   readonly?: boolean;
 }) => {
   const $heldBeliefsAll = useStore(heldBeliefs);
-  const enabled = useMemo(() => {
-    const hasMatchingBelief = $heldBeliefsAll
-      .filter((e: BeliefDatum) => e.slug === belief)
-      .at(0);
-    if (hasMatchingBelief && hasMatchingBelief?.verb)
-      return hasMatchingBelief.verb === `BELIEVES_YES`;
-    return false;
-  }, [$heldBeliefsAll]);
-
+  const [isClient, setIsClient] = useState(true);
+  const [enabled, setEnabled] = useState(false);
   const handleClick = () => {
     if (!readonly) {
       const event = {
@@ -48,6 +41,18 @@ export const ToggleBelief = ({
       events.set([...prevEvents, event]);
     }
   };
+
+  useEffect(() => {
+    const hasMatchingBelief = $heldBeliefsAll
+      .filter((e: BeliefDatum) => e.slug === belief)
+      .at(0);
+    if (hasMatchingBelief && hasMatchingBelief?.verb)
+      setEnabled(hasMatchingBelief.verb === `BELIEVES_YES`);
+    else setEnabled(false);
+    setIsClient(true);
+  }, [$heldBeliefsAll]);
+
+  if (!isClient) return null;
 
   return (
     <Switch.Group as="div" className={classNames(`flex items-center mt-6`)}>

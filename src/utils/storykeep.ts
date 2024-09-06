@@ -309,17 +309,7 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
 };
 
 export function initStoryKeep() {
-  const websiteContent = document.getElementById(
-    "website-content"
-  ) as HTMLElement;
-  const editPane = document.getElementById("edit-pane") as HTMLElement;
-  const editModalMobile = document.getElementById(
-    "edit-modal-mobile"
-  ) as HTMLElement;
   const header = document.getElementById("main-header") as HTMLElement;
-
-  let editMode = ``;
-  let activeElement: HTMLElement | null = null;
 
   function handleHeaderBehavior(): void {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
@@ -328,148 +318,16 @@ export function initStoryKeep() {
     header.style.zIndex = "9000";
   }
 
-  function adjustEditPanePosition(): void {
-    const headerHeight = header.offsetHeight;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const isHeaderVisible = scrollTop < headerHeight;
-    const isHeaderSticky = header.classList.contains("sticky");
-
-    if (isHeaderVisible || isHeaderSticky) {
-      editPane.style.top = `${headerHeight}px`;
-    } else {
-      editPane.style.top = "0";
-    }
-  }
-
-  function handleEditModeLayout(): void {
-    const fullScreen = [`settings`, `insert`].includes(editMode);
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
-
-    editPane.style.zIndex = editMode ? "9001" : "8000";
-    editModalMobile.style.zIndex = editMode ? "9001" : "8000";
-
-    // toggle full width based on editMode+
-    if (!isDesktop && editModalMobile && (fullScreen || isShortScreen))
-      editModalMobile.classList.add("w-full");
-    else if (!isDesktop && editModalMobile)
-      editModalMobile.classList.remove("w-full");
-    if (isDesktop && editPane && fullScreen) editPane.classList.add("w-full");
-    else if (isDesktop && editPane) editPane.classList.remove("w-full");
-
-    if (isDesktop) {
-      editPane.style.transform = editMode
-        ? "translateX(0)"
-        : "translateX(100%)";
-      editModalMobile.style.transform = "translateY(100%)";
-      if (editMode) adjustEditPanePosition();
-    } else {
-      editPane.style.transform = "translateX(100%)";
-      if (editMode) {
-        if (isShortScreen) {
-          editModalMobile.style.top = "0";
-          editModalMobile.style.height = "100%";
-          websiteContent.classList.add("hidden");
-        } else {
-          editModalMobile.style.top = "auto";
-          editModalMobile.style.height = `${window.innerHeight / 2.5}px`;
-          websiteContent.classList.remove("hidden");
-          websiteContent.style.paddingBottom = `${window.innerHeight / 2.5}px`;
-        }
-        editModalMobile.style.transform = "translateY(0)";
-      } else {
-        editModalMobile.style.transform = "translateY(100%)";
-        websiteContent.style.paddingBottom = "0";
-        websiteContent.classList.remove("hidden");
-      }
-    }
-
-    //if (editMode && !preventHeaderScroll) {
-    //scrollHeaderOutOfView();
-    //}
-
-    if (editMode && activeElement) {
-      scrollElementIntoView(activeElement);
-    }
-  }
-
-  function scrollElementIntoView(element: HTMLElement): void {
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    const header = document.getElementById("main-header");
-    const headerHeight = header ? header.offsetHeight : 0;
-    const elementRect = element.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    let targetScroll;
-    if (isDesktop) {
-      // For desktop, center the element in the available space
-      const availableSpace = viewportHeight - headerHeight;
-      const idealTop = headerHeight + (availableSpace - elementRect.height) / 2;
-      targetScroll = window.scrollY + elementRect.top - idealTop;
-    } else {
-      // Keep the existing mobile logic
-      const editModalHeight = window.innerHeight / 3;
-      const availableSpace = viewportHeight - headerHeight - editModalHeight;
-      if (elementRect.height <= availableSpace) {
-        // If the element fits in the available space, center it
-        const idealTop =
-          headerHeight + (availableSpace - elementRect.height) / 2;
-        targetScroll = window.scrollY + elementRect.top - idealTop;
-      } else {
-        // If the element is taller than available space, align the centers
-        const elementCenter = elementRect.top + elementRect.height / 2;
-        const availableSpaceCenter = headerHeight + availableSpace / 2;
-        targetScroll = window.scrollY + elementCenter - availableSpaceCenter;
-      }
-    }
-    // Ensure we don't scroll past the top of the document
-    targetScroll = Math.max(0, targetScroll);
-    // Perform the scroll
-    window.scrollTo({
-      top: targetScroll,
-      behavior: "smooth",
-    });
-  }
-
-  //function scrollHeaderOutOfView(): void {
-  //  const headerHeight = header.offsetHeight;
-  //  const currentScrollTop =
-  //    window.scrollY || document.documentElement.scrollTop;
-  //  window.scrollTo({
-  //    top: Math.max(currentScrollTop, headerHeight),
-  //    behavior: "smooth",
-  //  });
-  //}
-
   function handleResize(): void {
     handleHeaderBehavior();
-    handleEditModeLayout();
   }
 
   function handleScroll(): void {
     handleHeaderBehavior();
-    if (window.innerWidth >= BREAKPOINTS.xl) {
-      adjustEditPanePosition();
-    }
   }
+
   const debouncedHandleScroll = debounce(handleScroll, 50);
   const debouncedHandleResize = debounce(handleResize, 50);
-
-  // Event listeners for React components
-  document.addEventListener("toggle-on-edit-modal", ((event: CustomEvent) => {
-    const mode = event.detail?.mode || ``;
-    const targetElementId = event.detail?.targetElementId;
-    editMode = mode;
-    if (targetElementId) {
-      activeElement = document.getElementById(targetElementId);
-    }
-    handleEditModeLayout();
-  }) as EventListener);
-
-  document.addEventListener("toggle-off-edit-modal", (() => {
-    editMode = ``;
-    activeElement = null;
-    handleEditModeLayout();
-  }) as EventListener);
 
   // Initialize
   handleHeaderBehavior();

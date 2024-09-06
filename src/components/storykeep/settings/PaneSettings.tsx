@@ -116,173 +116,202 @@ export const PaneSettings = (props: {
   };
 
   return (
-    <div className="rounded-lg px-1.5 py-1.5 mr-12 shadow-inner bg-white">
-      <div className="px-1.5 py-1.5 mr-12">
-        <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
-          <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
-            {tabs.map((tab: string, idx: number) => (
-              <button
-                key={idx}
-                aria-current={tab === activeTab ? "page" : undefined}
-                onClick={() => {
-                  setActiveTab(tab);
-                }}
-                className={classNames(
-                  tab === activeTab
-                    ? "text-black font-bold"
-                    : "text-mydarkgrey hover:text-black underline",
-                  "text-md"
-                )}
-              >
-                {tab === `settings`
-                  ? `Pane Settings`
-                  : tab === `advanced`
-                    ? `Advanced Settings`
-                    : tab === `impression`
-                      ? `Add Impression`
-                      : tab === `beliefs`
-                        ? `Add Story Paths`
-                        : tab === `codeHook`
-                          ? `Manage Code Hook`
-                          : tab === `buttons`
-                            ? `Images`
-                            : ``}
-              </button>
-            ))}
-          </nav>
-        </div>
-        <hr className="w-full" />
-        {activeTab === `settings` ? (
-          <div className="my-4">
-            <div className="flex flex-wrap gap-x-16 gap-y-2">
-              <div className="flex flex-wrap w-80">
-                <div className="flex-grow w-80">
-                  <PaneTitle
-                    id={id}
-                    handleEditingChange={handleInterceptEdit}
-                    updateStoreField={handleUpdateStoreField}
-                    handleUndo={handleUndo}
-                  />
-                </div>
-                <div className="flex-grow w-80">
-                  <PaneSlug
-                    id={id}
-                    handleEditingChange={handleEditingChange}
-                    updateStoreField={handleUpdateStoreField}
-                    handleUndo={handleUndo}
-                  />
-                </div>
-                <p className="text-sm my-2 text-mydarkgrey italic">
-                  Note: title + slug used for analytics and as part of the "fast
-                  travel" map shown to users (if enabled).
-                </p>
+    <div>
+      <div className="flex flex-col xs:flex-row justify-between items-start xs:items-center space-y-2 xs:space-y-0">
+        <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
+          {tabs.map((tab: string, idx: number) => (
+            <button
+              key={idx}
+              aria-current={tab === activeTab ? "page" : undefined}
+              onClick={() => {
+                setActiveTab(tab);
+              }}
+              className={classNames(
+                tab === activeTab
+                  ? "text-black font-bold"
+                  : "text-mydarkgrey hover:text-black underline",
+                "text-md"
+              )}
+            >
+              {tab === `settings`
+                ? `Pane Settings`
+                : tab === `advanced`
+                  ? `Advanced Settings`
+                  : tab === `impression`
+                    ? `Add Impression`
+                    : tab === `beliefs`
+                      ? `Add Story Paths`
+                      : tab === `codeHook`
+                        ? `Manage Code Hook`
+                        : tab === `buttons`
+                          ? `Images`
+                          : ``}
+            </button>
+          ))}
+        </nav>
+      </div>
+      <hr className="w-full" />
+      {activeTab === `settings` ? (
+        <div className="my-4">
+          <div className="flex flex-wrap gap-x-16 gap-y-2">
+            <div className="flex flex-wrap w-80">
+              <div className="flex-grow w-80">
+                <PaneTitle
+                  id={id}
+                  handleEditingChange={handleInterceptEdit}
+                  updateStoreField={handleUpdateStoreField}
+                  handleUndo={handleUndo}
+                />
               </div>
+              <div className="flex-grow w-80">
+                <PaneSlug
+                  id={id}
+                  handleEditingChange={handleEditingChange}
+                  updateStoreField={handleUpdateStoreField}
+                  handleUndo={handleUndo}
+                />
+              </div>
+              <p className="text-sm my-2 text-mydarkgrey italic">
+                Note: title + slug used for analytics and as part of the "fast
+                travel" map shown to users (if enabled).
+              </p>
+            </div>
 
-              <PaneBgColour paneId={id} />
-              <div className="flex flex-col">
-                <div className="flex-shrink">
-                  <button
-                    title="Move up"
-                    onClick={handleMoveUp}
-                    disabled={isFirstPane}
-                    className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isFirstPane ? "disabled:hidden" : ""}`}
-                  >
-                    <ArrowUpIcon className="w-5 h-5" />
-                  </button>
-                </div>
-                <div className="flex-shrink">
-                  <button
-                    title="Move down"
-                    onClick={handleMoveDown}
-                    disabled={isLastPane}
-                    className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isLastPane ? "disabled:hidden" : ""}`}
-                  >
-                    <ArrowDownIcon className="w-5 h-5" />
-                  </button>
-                </div>
-                {confirmRemoval ? (
-                  <div className="flex flex-nowrap space-x-2">
-                    <span>Are you sure?</span>
-                    <button
-                      title="Remove pane"
-                      onClick={handleRemove}
-                      className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
-                    >
-                      <CheckIcon className="w-5 h-5" />
-                    </button>
-                    <button
-                      title="Cancel and keep pane"
-                      onClick={() => setConfirmRemoval(false)}
-                      className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
-                    >
-                      <XMarkIcon className="w-5 h-5" />
-                    </button>
-                  </div>
-                ) : (
+            <PaneBgColour paneId={id} />
+            <div className="flex flex-col">
+              <div className="flex-shrink">
+                <button
+                  title="Move up"
+                  onClick={handleMoveUp}
+                  disabled={isFirstPane}
+                  className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isFirstPane ? "disabled:hidden" : ""}`}
+                >
+                  <ArrowUpIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="flex-shrink">
+                <button
+                  title="Move down"
+                  onClick={handleMoveDown}
+                  disabled={isLastPane}
+                  className={`my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ${isLastPane ? "disabled:hidden" : ""}`}
+                >
+                  <ArrowDownIcon className="w-5 h-5" />
+                </button>
+              </div>
+              {confirmRemoval ? (
+                <div className="flex flex-nowrap space-x-2">
+                  <span>Are you sure?</span>
                   <button
                     title="Remove pane"
                     onClick={handleRemove}
                     className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                   >
+                    <CheckIcon className="w-5 h-5" />
+                  </button>
+                  <button
+                    title="Cancel and keep pane"
+                    onClick={() => setConfirmRemoval(false)}
+                    className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                  >
                     <XMarkIcon className="w-5 h-5" />
                   </button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <button
+                  title="Remove pane"
+                  onClick={handleRemove}
+                  className="my-0.5 py-1 rounded-md px-2 shadow-sm bg-myorange/20 hover:bg-myorange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              )}
             </div>
           </div>
-        ) : activeTab === `advanced` ? (
-          <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
-            <div className="flex-grow">
-              <PaneHeightOffset id={id} />
-            </div>
-            <div className="flex-grow">
-              <PaneHeightRatio id={id} />
-            </div>
-            <div className="w-fit-contents flex gap-x-16 gap-y-6">
-              <div className="flex items-center">
-                <Switch
-                  checked={$paneHasOverflowHidden[id].current}
-                  onChange={newValue =>
-                    updateStoreField("paneHasOverflowHidden", newValue)
-                  }
+        </div>
+      ) : activeTab === `advanced` ? (
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <div className="flex-grow">
+            <PaneHeightOffset id={id} />
+          </div>
+          <div className="flex-grow">
+            <PaneHeightRatio id={id} />
+          </div>
+          <div className="w-fit-contents flex gap-x-16 gap-y-6">
+            <div className="flex items-center">
+              <Switch
+                checked={$paneHasOverflowHidden[id].current}
+                onChange={newValue =>
+                  updateStoreField("paneHasOverflowHidden", newValue)
+                }
+                className={`${
+                  $paneHasOverflowHidden[id].current
+                    ? "bg-myorange"
+                    : "bg-mydarkgrey"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+              >
+                <span
                   className={`${
                     $paneHasOverflowHidden[id].current
-                      ? "bg-myorange"
-                      : "bg-mydarkgrey"
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                >
-                  <span
-                    className={`${
-                      $paneHasOverflowHidden[id].current
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />
-                </Switch>
-                <div className="ml-3">
-                  <div className="text-md text-black font-bold">
-                    {$paneHasOverflowHidden[id].current
-                      ? `Apply overflow hidden`
-                      : `No overflow hidden applied`}
-                  </div>
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+              </Switch>
+              <div className="ml-3">
+                <div className="text-md text-black font-bold">
+                  {$paneHasOverflowHidden[id].current
+                    ? `Apply overflow hidden`
+                    : `No overflow hidden applied`}
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center">
-                <Switch
-                  checked={$paneHasMaxHScreen[id].current}
-                  onChange={newValue =>
-                    updateStoreField("paneHasMaxHScreen", newValue)
-                  }
+            <div className="flex items-center">
+              <Switch
+                checked={$paneHasMaxHScreen[id].current}
+                onChange={newValue =>
+                  updateStoreField("paneHasMaxHScreen", newValue)
+                }
+                className={`${
+                  $paneHasMaxHScreen[id].current
+                    ? "bg-myorange"
+                    : "bg-mydarkgrey"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+              >
+                <span
                   className={`${
                     $paneHasMaxHScreen[id].current
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+              </Switch>
+              <div className="ml-3">
+                <div className="text-md text-black font-bold">
+                  {$paneHasMaxHScreen[id].current
+                    ? `Apply Max height screen`
+                    : `No max height applied`}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-grow">
+              <div className="flex items-center">
+                <Switch
+                  checked={$paneIsHiddenPane[id].current}
+                  onChange={newValue =>
+                    updateStoreField("paneIsHiddenPane", newValue)
+                  }
+                  className={`${
+                    $paneIsHiddenPane[id].current
                       ? "bg-myorange"
                       : "bg-mydarkgrey"
                   } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
                 >
                   <span
                     className={`${
-                      $paneHasMaxHScreen[id].current
+                      $paneIsHiddenPane[id].current
                         ? "translate-x-6"
                         : "translate-x-1"
                     } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
@@ -290,64 +319,33 @@ export const PaneSettings = (props: {
                 </Switch>
                 <div className="ml-3">
                   <div className="text-md text-black font-bold">
-                    {$paneHasMaxHScreen[id].current
-                      ? `Apply Max height screen`
-                      : `No max height applied`}
+                    {$paneIsHiddenPane[id].current
+                      ? `Hidden or decorative pane`
+                      : `Monitor engagement`}
                   </div>
-                </div>
-              </div>
-
-              <div className="flex-grow">
-                <div className="flex items-center">
-                  <Switch
-                    checked={$paneIsHiddenPane[id].current}
-                    onChange={newValue =>
-                      updateStoreField("paneIsHiddenPane", newValue)
-                    }
-                    className={`${
-                      $paneIsHiddenPane[id].current
-                        ? "bg-myorange"
-                        : "bg-mydarkgrey"
-                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                  >
-                    <span
-                      className={`${
-                        $paneIsHiddenPane[id].current
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                    />
-                  </Switch>
-                  <div className="ml-3">
-                    <div className="text-md text-black font-bold">
-                      {$paneIsHiddenPane[id].current
-                        ? `Hidden or decorative pane`
-                        : `Monitor engagement`}
-                    </div>
-                    <div className="text-md text-mydarkgrey">
-                      {$paneIsHiddenPane[id].current
-                        ? `No pane analytics will be collected`
-                        : `Pane analytics will be collected`}
-                    </div>
+                  <div className="text-md text-mydarkgrey">
+                    {$paneIsHiddenPane[id].current
+                      ? `No pane analytics will be collected`
+                      : `Pane analytics will be collected`}
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        ) : activeTab === `beliefs` ? (
-          <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
-            <PaneBeliefs id={id} />
-          </div>
-        ) : activeTab === `impression` ? (
-          <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
-            <PaneImpression id={id} />
-          </div>
-        ) : activeTab === `codeHook` ? (
-          <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
-            <CodeHookSettings id={id} />
-          </div>
-        ) : null}
-      </div>
+        </div>
+      ) : activeTab === `beliefs` ? (
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <PaneBeliefs id={id} />
+        </div>
+      ) : activeTab === `impression` ? (
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <PaneImpression id={id} />
+        </div>
+      ) : activeTab === `codeHook` ? (
+        <div className="flex flex-wrap gap-x-16 gap-y-6 my-4">
+          <CodeHookSettings id={id} />
+        </div>
+      ) : null}
     </div>
   );
 };

@@ -13,7 +13,6 @@ import {
 } from "@heroicons/react/24/outline";
 import { paneFragmentIds, paneFragmentBgPane } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
-import { classNames } from "../../../utils/helpers";
 import { SvgBreaks } from "../../../assets/shapes";
 import {
   tailwindToHex,
@@ -44,10 +43,9 @@ interface LocalSettings {
 
 interface PaneBreakSettingsProps {
   id: string;
-  type: "desktop" | "mobile";
 }
 
-export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
+export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
   const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
   const [fragmentId, setFragmentId] = useState<string | null>(null);
   const $paneFragmentBgPane = useStore(paneFragmentBgPane, {
@@ -327,62 +325,46 @@ export const PaneBreakSettings = ({ id, type }: PaneBreakSettingsProps) => {
 
   return (
     <div>
-      <div
-        className={classNames(
-          `px-1.5 py-1.5 pr-10`,
-          type === `mobile` ? `mr-2` : `mr-6`
-        )}
-      >
-        <div
-          className={classNames(
-            type === `mobile` ? `max-w-5/12` : `w-fit-contents mr-8`
-          )}
+      <div className="my-4">
+        <label className="block text-sm text-mydarkgrey">
+          Colour (applies to all viewports)
+        </label>
+        <input
+          type="color"
+          value={localSettings.colour}
+          onChange={e => handleHexColorChange(e.target.value)}
+          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue xs:text-sm"
+        />
+      </div>
+
+      <div className="mb-4">
+        <label className="block text-sm text-mydarkgrey">
+          Tailwind Color Class
+        </label>
+        <TailwindColorCombobox
+          selectedColor={selectedTailwindColor}
+          onColorChange={handleTailwindColorChange}
+        />
+      </div>
+
+      <div className="mb-4">
+        <PaneBgColour paneId={id} />
+      </div>
+
+      {renderViewportSettings("mobile")}
+      {renderViewportSettings("tablet")}
+      {renderViewportSettings("desktop")}
+      <div className="flex justify-end">
+        <button
+          onClick={handleUndoClick}
+          className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
+          disabled={
+            !fragmentId || $paneFragmentBgPane[fragmentId]?.history.length === 0
+          }
         >
-          <div className="px-3.5 py-1.5">
-            <div className="my-4">
-              <label className="block text-sm text-mydarkgrey">
-                Colour (applies to all viewports)
-              </label>
-              <input
-                type="color"
-                value={localSettings.colour}
-                onChange={e => handleHexColorChange(e.target.value)}
-                className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue xs:text-sm"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm text-mydarkgrey">
-                Tailwind Color Class
-              </label>
-              <TailwindColorCombobox
-                selectedColor={selectedTailwindColor}
-                onColorChange={handleTailwindColorChange}
-              />
-            </div>
-
-            <div className="mb-4">
-              <PaneBgColour paneId={id} />
-            </div>
-
-            {renderViewportSettings("mobile")}
-            {renderViewportSettings("tablet")}
-            {renderViewportSettings("desktop")}
-            <div className="flex justify-end">
-              <button
-                onClick={handleUndoClick}
-                className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
-                disabled={
-                  !fragmentId ||
-                  $paneFragmentBgPane[fragmentId]?.history.length === 0
-                }
-              >
-                <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
-                Undo
-              </button>
-            </div>
-          </div>
-        </div>
+          <ChevronDoubleLeftIcon className="h-5 w-5 mr-1" />
+          Undo
+        </button>
       </div>
     </div>
   );

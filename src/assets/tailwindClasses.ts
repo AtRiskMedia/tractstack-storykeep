@@ -879,15 +879,6 @@ export const tailwindClasses: TailwindClasses = {
     prefix: "gap-",
     priority: 1,
   },
-  border: {
-    values: ["true"],
-    group: "Borders",
-    title: "Border",
-    className: "border",
-    prefix: "",
-    useKeyAsClass: true,
-    priority: 2,
-  },
   borderSTYLE: {
     values: ["solid", "dashed", "dotted", "double", "hidden", "none"],
     group: "Borders",

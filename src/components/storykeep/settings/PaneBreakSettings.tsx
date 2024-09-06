@@ -324,37 +324,9 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
   if (!fragmentId) return <div>Loading...</div>;
 
   return (
-    <div>
-      <div className="my-4">
-        <label className="block text-sm text-mydarkgrey">
-          Colour (applies to all viewports)
-        </label>
-        <input
-          type="color"
-          value={localSettings.colour}
-          onChange={e => handleHexColorChange(e.target.value)}
-          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue xs:text-sm"
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm text-mydarkgrey">
-          Tailwind Color Class
-        </label>
-        <TailwindColorCombobox
-          selectedColor={selectedTailwindColor}
-          onColorChange={handleTailwindColorChange}
-        />
-      </div>
-
-      <div className="mb-4">
-        <PaneBgColour paneId={id} />
-      </div>
-
-      {renderViewportSettings("mobile")}
-      {renderViewportSettings("tablet")}
-      {renderViewportSettings("desktop")}
-      <div className="flex justify-end">
+    <div className="flex flex-col space-y-6 my-4">
+      <div className="flex justify-between">
+        <p className="text-md text-black font-bold">Transition Shape</p>
         <button
           onClick={handleUndoClick}
           className="flex items-center text-myblack bg-mygreen/50 px-2 py-1 rounded hover:bg-myorange hover:text-white disabled:hidden"
@@ -366,6 +338,36 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
           Undo
         </button>
       </div>
+
+      <div>
+        {renderViewportSettings("mobile")}
+        {renderViewportSettings("tablet")}
+        {renderViewportSettings("desktop")}
+      </div>
+
+      <div>
+        <label className="block text-sm text-mydarkgrey">
+          Colour (applies to all viewports)
+        </label>
+        <input
+          type="color"
+          value={localSettings.colour}
+          onChange={e => handleHexColorChange(e.target.value)}
+          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue xs:text-sm"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm text-mydarkgrey">
+          Tailwind Color Class
+        </label>
+        <TailwindColorCombobox
+          selectedColor={selectedTailwindColor}
+          onColorChange={handleTailwindColorChange}
+        />
+      </div>
+
+      <PaneBgColour paneId={id} />
     </div>
   );
 };

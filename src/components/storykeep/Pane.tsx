@@ -23,6 +23,7 @@ import {
 } from "../../store/storykeep";
 import BgPane from "./components/BgPane";
 import MarkdownWrapper from "./components/MarkdownWrapper";
+import { StylesWrapper } from "./components/StylesWrapper";
 import type {
   BgColourDatum,
   BgPaneDatum,
@@ -195,30 +196,28 @@ const Pane = (props: {
             </div>
           );
         case "bgPane":
-          if (toolMode === `styles`)
-            return (
+          return (
+            <StylesWrapper
+              key={`bgpane-${index}`}
+              paneId={id}
+              outerIdx={index}
+              idx={null}
+            >
               <div
-                key={`bgPane-${index}`}
-                className="relative"
-                title="Style this shape"
+                className="relative w-full h-auto justify-self-start"
+                style={{ gridArea: "1/1/1/1" }}
               >
                 <BgPane payload={fragment} viewportKey={viewportKey} />
-                <div
-                  onClick={onClick}
-                  className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-50 hover:outline-white
+                {toolMode === "styles" && (
+                  <div
+                    onClick={onClick}
+                    className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-50 hover:outline-white
                    outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
-                   mix-blend-exclusion"
-                />
+                   mix-blend-exclusion cursor-pointer"
+                  />
+                )}
               </div>
-            );
-          return (
-            <div
-              key={`bgpane-${index}`}
-              className="relative w-full h-auto justify-self-start"
-              style={{ gridArea: "1/1/1/1" }}
-            >
-              <BgPane payload={fragment} viewportKey={viewportKey} />
-            </div>
+            </StylesWrapper>
           );
         default:
           return null;

@@ -173,11 +173,13 @@ export const PaneInsert = (props: {
       const { prevColor, nextColor } = getAdjacentPaneColors();
       const isFromAbove = payload.selectedDesign.orientation === `above`;
       const modifiedDesign = cloneDeep(design);
+      let isModified = false;
       if (isFromAbove && prevColor) {
         modifiedDesign.fragments =
           modifiedDesign.fragments
             ?.map(f => {
               if (f.type === "bgPane") {
+                isModified = true;
                 return {
                   ...f,
                   optionsPayload: {
@@ -210,7 +212,7 @@ export const PaneInsert = (props: {
             ) ?? [];
       }
 
-      if (!isFromAbove && nextColor) {
+      if (!isFromAbove && nextColor && isModified) {
         modifiedDesign.panePayload = {
           ...modifiedDesign.panePayload,
           bgColour: nextColor,

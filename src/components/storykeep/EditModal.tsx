@@ -105,7 +105,7 @@ export const EditModal = ({ id, contentMap }: EditModalProps) => {
           <div className="sticky top-0 z-[9001] w-full bg-myorange p-2 flex justify-end">
             <button
               onClick={toggleOffEditModal}
-              className="bg-myorange hover:bg-myorange/80 text-white rounded-full p-2 shadow-lg transition-all duration-300 ease-in-out"
+              className="bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg transition-all duration-300 ease-in-out"
               title={
                 $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`
               }
@@ -117,7 +117,7 @@ export const EditModal = ({ id, contentMap }: EditModalProps) => {
           <button
             onClick={toggleOffEditModal}
             className={classNames(
-              "absolute z-[9001] bg-myorange hover:bg-myorange/80 text-white rounded-full p-2 shadow-lg",
+              "absolute z-[9001] bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg",
               "transition-all duration-300 ease-in-out",
               type === "desktop" ? "-left-12 top-2" : "-top-12 right-2"
             )}
@@ -144,7 +144,7 @@ export const EditModal = ({ id, contentMap }: EditModalProps) => {
                 ? "rounded-t-lg"
                 : type === `desktop`
                   ? "rounded-l-lg py-1.5"
-                  : "rounded-t-lg pt-1.5",
+                  : "rounded-t-lg pt-1.5 pb-2.5",
               "bg-white px-3.5 relative flex-grow overflow-y-auto"
             )}
           >

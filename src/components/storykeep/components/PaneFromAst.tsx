@@ -14,7 +14,7 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
-import StylesWrapper from "./StylesWrapper";
+import { wrapWithStylesIndicator } from "./StylesWrapper";
 import { handleToggleOn } from "../../../utils/storykeep";
 import { classNames } from "../../../utils/helpers";
 import { Belief } from "@components/widgets/Belief";
@@ -171,8 +171,8 @@ const PaneFromAst = ({
     typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`
       ? typeof markdownLookup.codeItemsLookup[outerIdx][idx] === `number`
       : false;
-
-  // Callback fns for toolMode
+  const wrapContent = (content: ReactNode, span: boolean = false) =>
+    wrapWithStylesIndicator(content, span, paneId, outerIdx, idx);
   const updateLastInteracted = (paneId: string) => {
     lastInteractedPaneStore.set(paneId);
     lastInteractedTypeStore.set(`markdown`);
@@ -288,17 +288,6 @@ const PaneFromAst = ({
       ? thisHookValuesRaw[2]
       : "";
 
-  const wrapWithStylesIndicator = (content: ReactNode) => {
-    if (toolMode === "styles" && !readonly) {
-      return (
-        <StylesWrapper paneId={paneId} outerIdx={outerIdx} idx={idx}>
-          {content}
-        </StylesWrapper>
-      );
-    }
-    return content;
-  };
-
   // if editable as text
   if (
     !readonly &&
@@ -406,14 +395,15 @@ const PaneFromAst = ({
 
       const tip = toolMode === `styles` ? `Click to update style/design` : ``;
       if (tip)
-        return wrapWithStylesIndicator(
+        return wrapContent(
           <EditableOuterWrapper
             id={thisId}
             tooltip={tip}
             onClick={handleToolModeClick}
           >
             {child}
-          </EditableOuterWrapper>
+          </EditableOuterWrapper>,
+          false
         );
     }
     if (showInsertOverlay) {
@@ -452,21 +442,20 @@ const PaneFromAst = ({
         {thisAst.children[0].value}
       </a>
     );
-    if (!showOverlay) return child;
-    // no eraser mode on internal links yet
-    if (toolMode === `eraser`) return child;
+    if (!showOverlay) return wrapContent(child, true);
+    if (toolMode === `eraser`) return wrapContent(child, true);
     if (toolMode === `styles`)
-      return (
+      return wrapContent(
         <EditableInnerWrapper
           id={thisId}
           tooltip={`Manage this Link`}
           onClick={handleToolModeLinkClick}
         >
           {child}
-        </EditableInnerWrapper>
+        </EditableInnerWrapper>,
+        true
       );
   }
-
   if (
     Tag === "a" &&
     !isExternalUrl &&
@@ -487,35 +476,31 @@ const PaneFromAst = ({
         text={thisAst.children[0].value}
       />
     );
-    if (!showOverlay) return child;
-    if (toolMode === `eraser`) return child;
-    // will add lateron
-    //return (
-    //  <EraserWrapper fragmentId={markdownFragmentId} outerIdx={outerIdx} idx={idx}>
-    //    {child}
-    //  </EraserWrapper>
-    //);
+    if (!showOverlay) return wrapContent(child, true);
+    if (toolMode === `eraser`) return wrapContent(child, true);
     if (toolMode === `styles`)
-      return (
+      return wrapContent(
         <EditableInnerWrapper
           id={thisId}
           tooltip={`Manage this Link`}
           onClick={handleToolModeLinkClick}
         >
           {child}
-        </EditableInnerWrapper>
+        </EditableInnerWrapper>,
+        true
       );
   }
 
   if (Tag === "img" && imageSrc) {
-    return wrapWithStylesIndicator(
+    return wrapContent(
       <img className={injectClassNames} src={imageSrc} alt={altText} />
     );
   }
 
   if (Tag === "code") {
+    let widgetContent;
     if (hook === "resource" && value1) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <div>
             <strong>Resource Template (not yet implemented):</strong> {value1},{" "}
@@ -526,7 +511,7 @@ const PaneFromAst = ({
     }
 
     if (hook === "youtube" && value1 && value2) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <div>
             <strong>YouTube Video Embed Code:</strong> {value1} ({value2})
@@ -536,7 +521,7 @@ const PaneFromAst = ({
     }
 
     if (hook === "bunny" && value1 && value2) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <div>
             <strong>Bunny Video Embed Code:</strong> {value1} ({value2})
@@ -546,7 +531,7 @@ const PaneFromAst = ({
     }
 
     if (hook === "bunnyContext" && value1 && value2) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <div>
             <strong>Bunny Video Embed Code on Context Page:</strong> {value1} (
@@ -557,7 +542,7 @@ const PaneFromAst = ({
     }
 
     if (hook === "belief" && value1 && value2) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <Belief
             key={value2}
@@ -569,7 +554,7 @@ const PaneFromAst = ({
     }
 
     if (hook === "identifyAs" && value1 && value2) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <IdentifyAs
             value={{ slug: value1, target: value2, extra: value3 || `` }}
@@ -580,11 +565,30 @@ const PaneFromAst = ({
     }
 
     if (hook === "toggle" && value1 && value2) {
-      return (
+      widgetContent = (
         <div className={injectClassNames}>
           <ToggleBelief belief={value1} prompt={value2} readonly={true} />
         </div>
       );
+    }
+
+    if (widgetContent) {
+      const isInlineWidget = false;
+      if (!showOverlay) return wrapContent(widgetContent, isInlineWidget);
+      if (toolMode === `eraser`)
+        return wrapContent(widgetContent, isInlineWidget);
+      if (toolMode === `styles`)
+        return wrapContent(
+          <EditableInnerElementWrapper
+            id={thisId}
+            tooltip={`Manage this Widget`}
+            onClick={handleToolModeClick}
+          >
+            {widgetContent}
+          </EditableInnerElementWrapper>,
+          isInlineWidget
+        );
+      else return widgetContent;
     }
   }
 

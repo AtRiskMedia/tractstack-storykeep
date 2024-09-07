@@ -47,7 +47,6 @@ const MarkdownWrapper = ({
   toolMode,
   toolAddMode,
 }: Props) => {
-  if (!markdownFragmentId) return null;
   const thisPayload = payload as MarkdownPaneDatum;
   const thisModalPayload =
     thisPayload.isModal &&
@@ -101,7 +100,7 @@ const MarkdownWrapper = ({
   );
 
   const renderContent = () => {
-    if (isModal && thisModalPayload) {
+    if (isModal && thisModalPayload && markdownFragmentId) {
       return (
         <MarkdownInsideModal
           readonly={readonly}
@@ -140,7 +139,7 @@ const MarkdownWrapper = ({
           queueUpdate={queueUpdate}
         />
       );
-    } else if (!isModal && !hasTextShapeOutside) {
+    } else if (!isModal && !hasTextShapeOutside && markdownFragmentId) {
       return (
         <MarkdownPane
           readonly={readonly}
@@ -166,7 +165,7 @@ const MarkdownWrapper = ({
 
   return (
     <>
-      {mustIntercept ? (
+      {mustIntercept && markdownFragmentId ? (
         <InsertWrapper
           isEmpty={isEmptyMarkdown}
           fragmentId={markdownFragmentId}

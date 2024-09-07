@@ -75,7 +75,6 @@ const InsertWrapper = ({
         const thisIdx = newAsideContainer ? null : idx;
         const thisOuterIdx = isEmpty ? 0 : outerIdx;
         const thisPosition = isEmpty ? "before" : position;
-
         const newValue = insertElementIntoMarkdown(
           currentField.current,
           thisNewContent,
@@ -85,13 +84,11 @@ const InsertWrapper = ({
           thisPosition,
           markdownLookup
         );
-
         const newMarkdownLookup = generateMarkdownLookup(
           newValue.markdown.htmlAst
         );
         let newOuterIdx = thisOuterIdx;
-        let newIdx = thisIdx;
-
+        let newIdx = thisIdx || 0;
         if (position === "after" && !isEmpty) {
           if (idx === null) {
             newOuterIdx = outerIdx + 1;
@@ -99,36 +96,51 @@ const InsertWrapper = ({
             newIdx = idx + 1;
           }
         }
-        console.log(`newMarkdownLookup`, newMarkdownLookup);
-
         const newTag =
           toolAddMode === "img"
-            ? "img"
-            : toolAddMode === "aside"
-              ? "li"
-              : toolAddMode;
-        console.log(`newtag`, newTag);
-        const newGlobalNth = getGlobalNth(
-          newTag,
-          newIdx,
-          newOuterIdx,
-          newMarkdownLookup
-        );
-        console.log(`newGlobalNth`, newGlobalNth);
+            ? `img`
+            : [
+                  `code`,
+                  `img`,
+                  `yt`,
+                  `bunny`,
+                  `belief`,
+                  `toggle`,
+                  `identify`,
+                ].includes(toolAddMode)
+              ? `code`
+              : toolAddMode === `aside`
+                ? `li`
+                : toolAddMode;
+        const newGlobalNth =
+          getGlobalNth(newTag, newIdx, newOuterIdx, newMarkdownLookup) || 0;
 
-        editModeStore.set({
-          id: paneId,
-          mode: "styles",
-          type: "pane",
-          targetId: {
-            paneId,
-            outerIdx: newOuterIdx,
-            idx: newIdx,
-            globalNth: newGlobalNth,
-            tag: newTag,
-            mustConfig: true,
-          },
-        });
+        if (
+          [
+            `img`,
+            `code`,
+            `img`,
+            `yt`,
+            `bunny`,
+            `belief`,
+            `toggle`,
+            `identify`,
+          ].includes(toolAddMode)
+        ) {
+          editModeStore.set({
+            id: paneId,
+            mode: "styles",
+            type: "pane",
+            targetId: {
+              paneId,
+              outerIdx: newOuterIdx,
+              idx: newIdx,
+              globalNth: newGlobalNth,
+              tag: newTag,
+              mustConfig: true,
+            },
+          });
+        }
 
         paneFragmentMarkdown.setKey(fragmentId, {
           ...currentField,

@@ -337,6 +337,9 @@ export const PaneAstStyles = (props: {
     else removeStyle(className);
   };
 
+  const handleWidgetStyle = () => {
+    setWidgetConfigMode(false);
+  };
   const handleWidgetConfig = useCallback(() => {
     if (
       markdownDatum?.markdown?.htmlAst &&
@@ -359,7 +362,6 @@ export const PaneAstStyles = (props: {
           console.error("Invalid widget format:", codeNode);
           setWidgetData([]);
         }
-        console.log(`HIT`);
         setWidgetConfigMode(true);
       }
     }
@@ -405,8 +407,8 @@ export const PaneAstStyles = (props: {
       (currentField.current.payload.optionsPayload.classNamesPayload[
         thisTag
       ] as ClassNamesPayloadInnerDatum | undefined);
-
     if (payloadForTag && markdownLookup) {
+      // already has override; edit in place
       if (activeTagData?.hasOverride && typeof thisGlobalNth === `number`) {
         if (payloadForTag?.override?.[thisClass]) {
           delete payloadForTag.override[thisClass][thisGlobalNth];
@@ -422,18 +424,23 @@ export const PaneAstStyles = (props: {
           delete payloadForTag.count;
         }
       } else {
+        // must generate the override
         const count =
-          thisTag === `li`
-            ? Object.keys(markdownLookup.listItems).length
-            : markdownLookup?.nthTagLookup[
-                  thisTag as keyof typeof markdownLookup.nthTagLookup
-                ]
-              ? Object.keys(
-                  markdownLookup.nthTagLookup[
-                    thisTag as keyof typeof markdownLookup.nthTagLookup
-                  ]
-                ).length
-              : 0;
+          thisTag === `img`
+            ? Object.keys(markdownLookup.images).length
+            : thisTag === `code`
+              ? Object.keys(markdownLookup.codeItems).length
+              : thisTag === `li`
+                ? Object.keys(markdownLookup.listItems).length
+                : markdownLookup?.nthTagLookup[
+                      thisTag as keyof typeof markdownLookup.nthTagLookup
+                    ]
+                  ? Object.keys(
+                      markdownLookup.nthTagLookup[
+                        thisTag as keyof typeof markdownLookup.nthTagLookup
+                      ]
+                    ).length
+                  : 0;
         payloadForTag.count = count;
         if (payloadForTag && typeof thisGlobalNth === "number") {
           if (!payloadForTag.override) {
@@ -830,8 +837,6 @@ export const PaneAstStyles = (props: {
   );
 
   useEffect(() => {
-    if ($editMode)
-      console.log($editMode.type, $editMode.mode, $editMode.targetId);
     if (
       $editMode?.type === "pane" &&
       $editMode?.mode === "styles" &&
@@ -841,8 +846,6 @@ export const PaneAstStyles = (props: {
         setImageMeta(true);
         setActiveTag(`img`);
       } else if ($editMode?.targetId?.tag === `code`) {
-        console.log(`hit`);
-        console.log($editMode.targetId);
         setWidgetConfigMode(true);
         handleWidgetConfig();
       }
@@ -1151,6 +1154,15 @@ export const PaneAstStyles = (props: {
               >
                 BACK
               </button>
+              {activeTag === `code` && (
+                <button
+                  className="my-2 underline"
+                  title="Apply styles to widget"
+                  onClick={handleWidgetStyle}
+                >
+                  STYLE THIS WIDGET
+                </button>
+              )}
             </span>
           </div>
         )}

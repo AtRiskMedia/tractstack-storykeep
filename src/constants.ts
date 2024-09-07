@@ -75,9 +75,9 @@ export const toolAddModeInsertDefault: Record<ToolAddMode, string> = {
   img: "![Descriptive title](filename)",
   yt: "* `youtube(tag|title)`",
   bunny: "* `bunny(id|title)`",
-  belief: "* `belief(BeliefTag|likert|question)`",
-  identify: "* `identifyAs(BeliefTag|TARGET_VALUE|question)`",
-  toggle: "* `toggle(BeliefTag|likert|question)`",
+  belief: "* `belief(BeliefTag|likert|prompt)`",
+  identify: "* `identifyAs(BeliefTag|TARGET_VALUE|prompt)`",
+  toggle: "* `toggle(BeliefTag|prompt)`",
   aside: "...", // on initial insert must wrap in ol
 };
 

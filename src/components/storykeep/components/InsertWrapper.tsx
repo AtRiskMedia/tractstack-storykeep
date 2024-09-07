@@ -99,6 +99,7 @@ const InsertWrapper = ({
             newIdx = idx + 1;
           }
         }
+        console.log(`newMarkdownLookup`, newMarkdownLookup);
 
         const newTag =
           toolAddMode === "img"
@@ -106,12 +107,14 @@ const InsertWrapper = ({
             : toolAddMode === "aside"
               ? "li"
               : toolAddMode;
+        console.log(`newtag`, newTag);
         const newGlobalNth = getGlobalNth(
           newTag,
           newIdx,
           newOuterIdx,
           newMarkdownLookup
         );
+        console.log(`newGlobalNth`, newGlobalNth);
 
         editModeStore.set({
           id: paneId,

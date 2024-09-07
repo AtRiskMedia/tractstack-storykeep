@@ -162,46 +162,47 @@ const MarkdownWrapper = ({
     return null;
   };
 
-  // if there's no content; but it's a markdown pane...
-  if (mustIntercept) {
-    return (
-      <InsertWrapper
-        isEmpty={isEmptyMarkdown}
-        fragmentId={markdownFragmentId}
-        paneId={paneId}
-        outerIdx={0}
-        idx={null}
-        queueUpdate={queueUpdate}
-        toolAddMode={toolAddMode}
-        markdownLookup={markdownLookup}
-      />
-    );
-  }
+  // if there's no content; but it's a markdown pane show InsertWrapper
 
   return (
-    <div
-      className={classNames(hidden, `h-fit-contents`)}
-      id={`t8k-${markdownFragmentId}-modal-container`}
-    >
-      {isModal && thisModalPayload && (
+    <>
+      {mustIntercept ? (
+        <InsertWrapper
+          isEmpty={isEmptyMarkdown}
+          fragmentId={markdownFragmentId}
+          paneId={paneId}
+          outerIdx={0}
+          idx={null}
+          queueUpdate={queueUpdate}
+          toolAddMode={toolAddMode}
+          markdownLookup={markdownLookup}
+        />
+      ) : (
         <div
-          className="relative w-full h-full justify-self-start"
-          style={paneFragmentStyle}
+          className={classNames(hidden, `h-fit-contents`)}
+          id={`t8k-${markdownFragmentId}-modal-container`}
         >
-          <Modal
-            payload={thisPayload}
-            modalPayload={thisModalPayload}
-            viewportKey={viewportKey}
-          />
+          {isModal && thisModalPayload && (
+            <div
+              className="relative w-full h-full justify-self-start"
+              style={paneFragmentStyle}
+            >
+              <Modal
+                payload={thisPayload}
+                modalPayload={thisModalPayload}
+                viewportKey={viewportKey}
+              />
+            </div>
+          )}
+          <div
+            className="relative w-full h-full justify-self-start"
+            style={paneFragmentStyle}
+          >
+            {renderContent()}
+          </div>
         </div>
       )}
-      <div
-        className="relative w-full h-full justify-self-start"
-        style={paneFragmentStyle}
-      >
-        {renderContent()}
-      </div>
-    </div>
+    </>
   );
 };
 

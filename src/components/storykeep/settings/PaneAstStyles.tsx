@@ -830,17 +830,22 @@ export const PaneAstStyles = (props: {
   );
 
   useEffect(() => {
+    if ($editMode)
+      console.log($editMode.type, $editMode.mode, $editMode.targetId);
     if (
       $editMode?.type === "pane" &&
       $editMode?.mode === "styles" &&
       $editMode?.targetId?.mustConfig
     ) {
-      if ($editMode?.targetId?.tag === `code`) {
+      if ($editMode?.targetId?.tag === `img`) {
+        setImageMeta(true);
+        setActiveTag(`img`);
+      } else if ($editMode?.targetId?.tag === `code`) {
         console.log(`hit`);
         console.log($editMode.targetId);
         setWidgetConfigMode(true);
         handleWidgetConfig();
-      } else if ($editMode?.targetId?.tag === `img`) setImageMeta(true);
+      }
     }
   }, [$editMode]);
 

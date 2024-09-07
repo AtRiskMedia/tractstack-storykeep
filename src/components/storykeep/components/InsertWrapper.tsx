@@ -1,15 +1,20 @@
+import { useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
   paneFragmentMarkdown,
   unsavedChangesStore,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  editModeStore,
+  toolModeStore,
 } from "../../../store/storykeep";
 import {
   insertElementIntoMarkdown,
   updateHistory,
   allowTagInsert,
+  getGlobalNth,
 } from "../../../utils/compositor/markdownUtils";
+import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
   toolAddModeTitles,
   toolAddModeInsertDefault,
@@ -18,15 +23,16 @@ import { cloneDeep } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
 
-interface Props {
+interface InsertWrapperProps {
   fragmentId: string;
   paneId: string;
   outerIdx: number;
   idx: number | null;
   queueUpdate: (id: string, updateFn: () => void) => void;
   toolAddMode: ToolAddMode;
-  children: ReactNode;
+  children?: ReactNode;
   markdownLookup: MarkdownLookup;
+  isEmpty: boolean;
 }
 
 const InsertWrapper = ({
@@ -38,55 +44,135 @@ const InsertWrapper = ({
   toolAddMode,
   children,
   markdownLookup,
-}: Props) => {
+  isEmpty,
+}: InsertWrapperProps) => {
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [fragmentId],
   });
   const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
   const contentId = `${outerIdx}${typeof idx === "number" ? `-${idx}` : ""}-${fragmentId}`;
-  const allowTag = allowTagInsert(toolAddMode, outerIdx, idx, markdownLookup);
+  const allowTag = isEmpty
+    ? { before: true, after: true }
+    : allowTagInsert(toolAddMode, outerIdx, idx, markdownLookup);
 
-  const handleInsert = (position: "before" | "after") => {
-    queueUpdate(contentId, () => {
-      lastInteractedTypeStore.set(`markdown`);
-      lastInteractedPaneStore.set(paneId);
-      const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
-      const now = Date.now();
-      const newHistory = updateHistory(currentField, now);
-      const newContent = toolAddModeInsertDefault[toolAddMode];
-      const parentTag = markdownLookup.nthTag[outerIdx];
-      console.log(`doing insert on ${toolAddMode}`, parentTag, newContent);
-      const newImgContainer = toolAddMode === `img` && parentTag !== `ul`;
-      const newAsideContainer = toolAddMode === `aside` && parentTag !== `ol`;
-      // wrap inside ol if new text container
-      // wrap inside ul if new image
-      const thisNewContent = newImgContainer
-        ? `* ${newContent}`
-        : newAsideContainer
-          ? `1. ${newContent}`
-          : newContent;
-      const thisIdx = newAsideContainer ? null : idx;
-      const newValue = insertElementIntoMarkdown(
-        currentField.current,
-        thisNewContent,
-        toolAddMode,
-        outerIdx,
-        thisIdx,
-        position,
-        markdownLookup
-      );
-      paneFragmentMarkdown.setKey(fragmentId, {
-        ...currentField,
-        current: newValue,
-        history: newHistory,
+  const handleInsert = useCallback(
+    (position: "before" | "after") => {
+      queueUpdate(contentId, () => {
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(paneId);
+        const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
+        const now = Date.now();
+        const newHistory = updateHistory(currentField, now);
+        const newContent = toolAddModeInsertDefault[toolAddMode];
+        const parentTag = isEmpty ? null : markdownLookup.nthTag[outerIdx];
+        const newImgContainer = toolAddMode === `img` && parentTag !== `ul`;
+        const newAsideContainer = toolAddMode === `aside` && parentTag !== `ol`;
+        const thisNewContent = newImgContainer
+          ? `* ${newContent}`
+          : newAsideContainer
+            ? `1. ${newContent}`
+            : newContent;
+        const thisIdx = newAsideContainer ? null : idx;
+        const thisOuterIdx = isEmpty ? 0 : outerIdx;
+        const thisPosition = isEmpty ? "before" : position;
+
+        const newValue = insertElementIntoMarkdown(
+          currentField.current,
+          thisNewContent,
+          toolAddMode,
+          thisOuterIdx,
+          thisIdx,
+          thisPosition,
+          markdownLookup
+        );
+
+        const newMarkdownLookup = generateMarkdownLookup(
+          newValue.markdown.htmlAst
+        );
+        let newOuterIdx = thisOuterIdx;
+        let newIdx = thisIdx;
+
+        if (position === "after" && !isEmpty) {
+          if (idx === null) {
+            newOuterIdx = outerIdx + 1;
+          } else {
+            newIdx = idx + 1;
+          }
+        }
+
+        const newTag =
+          toolAddMode === "img"
+            ? "img"
+            : toolAddMode === "aside"
+              ? "li"
+              : toolAddMode;
+        const newGlobalNth = getGlobalNth(
+          newTag,
+          newIdx,
+          newOuterIdx,
+          newMarkdownLookup
+        );
+
+        editModeStore.set({
+          id: paneId,
+          mode: "styles",
+          type: "pane",
+          targetId: {
+            paneId,
+            outerIdx: newOuterIdx,
+            idx: newIdx,
+            globalNth: newGlobalNth,
+            tag: newTag,
+            mustConfig: true,
+          },
+        });
+
+        paneFragmentMarkdown.setKey(fragmentId, {
+          ...currentField,
+          current: newValue,
+          history: newHistory,
+        });
+        unsavedChangesStore.setKey(paneId, {
+          ...$unsavedChanges[paneId],
+          paneFragmentMarkdown: true,
+        });
+        toolModeStore.set({ value: `text` });
       });
-      // safely assumes this is new/unsaved
-      unsavedChangesStore.setKey(paneId, {
-        ...$unsavedChanges[paneId],
-        paneFragmentMarkdown: true,
-      });
-    });
-  };
+    },
+    [
+      fragmentId,
+      paneId,
+      outerIdx,
+      idx,
+      queueUpdate,
+      toolAddMode,
+      markdownLookup,
+      isEmpty,
+      $paneFragmentMarkdown,
+      $unsavedChanges,
+      contentId,
+    ]
+  );
+
+  if (isEmpty) {
+    return (
+      <div className="min-h-[200px] w-full relative">
+        <button
+          className="relative z-103 w-full h-full bg-mygreen/20 hover:bg-mygreen/50 pointer-events-auto min-h-[200px]"
+          title={`Add ${toolAddModeTitles[toolAddMode]}`}
+          onClick={() => handleInsert("before")}
+        >
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+             text-black bg-mywhite p-2.5 rounded-sm shadow-md
+             text-xl md:text-3xl font-action mx-6"
+          >
+            Add {toolAddModeTitles[toolAddMode]}
+          </div>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative group">

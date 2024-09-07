@@ -411,9 +411,10 @@ const PaneFromAst = ({
     if (showInsertOverlay) {
       return (
         <InsertWrapper
+          isEmpty={false}
+          fragmentId={markdownFragmentId}
           toolAddMode={toolAddMode}
           paneId={paneId}
-          fragmentId={markdownFragmentId}
           outerIdx={outerIdx}
           idx={idx}
           queueUpdate={queueUpdate}

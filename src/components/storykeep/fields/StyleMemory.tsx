@@ -23,7 +23,6 @@ const StyleMemory = ({
   classNamesPayload,
   onPaste,
 }: StyleMemoryProps) => {
-  console.log(`StyleMemory`, currentKey, classNamesPayload);
   const $stylesMemory = useStore(stylesMemoryStore);
 
   const handleCopy = () => {

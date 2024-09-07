@@ -77,48 +77,47 @@ export function allowTagInsert(
         Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
       return { before: idx === 0, after: idx === siblings };
     }
-    case `img`:
-      {
-        const parentTag = markdownLookup.nthTag[outerIdx];
-        const hasWidget =
-          typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`;
-        const hasLinks =
-          typeof markdownLookup.linksLookup[outerIdx] !== `undefined`;
+    case `img`: {
+      const parentTag = markdownLookup.nthTag[outerIdx];
+      const hasWidget =
+        typeof markdownLookup.codeItemsLookup[outerIdx] !== `undefined`;
+      const hasLinks =
+        typeof markdownLookup.linksLookup[outerIdx] !== `undefined`;
 
-        // is this already ul > img ?
-        if (
-          typeof idx === `number` &&
-          parentTag === `ul` &&
-          !hasLinks &&
-          !hasWidget
-        )
-          return { before: true, after: true };
+      // is this already ul > img ?
+      if (
+        typeof idx === `number` &&
+        parentTag === `ul` &&
+        !hasLinks &&
+        !hasWidget
+      )
+        return { before: true, after: true };
 
-        if (typeof idx !== `number`) {
-          // check for adjascent ul
-          const parentBeforeTag =
-            (outerIdx === 0 && parentTag !== `ul`) ||
-            (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ul`);
-          const parentAfterTag =
-            outerIdx < Object.keys(markdownLookup.nthTag).length &&
-            markdownLookup.nthTag[outerIdx + 1] !== `ul`;
-          return { before: parentBeforeTag, after: parentAfterTag };
-        } else {
-          // nested ul > li, allow insert before and after
-          const siblings =
-            Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
-          const parentBeforeTag =
-            outerIdx === 0 ||
-            (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ul`);
-          const parentAfterTag =
-            outerIdx < Object.keys(markdownLookup.nthTag).length &&
-            markdownLookup.nthTag[outerIdx + 1] !== `ul`;
-          return {
-            before: idx === 0 && parentBeforeTag,
-            after: idx === siblings && parentAfterTag,
-          };
-        }
+      if (typeof idx !== `number`) {
+        // check for adjascent ul
+        const parentBeforeTag =
+          (outerIdx === 0 && parentTag !== `ul`) ||
+          (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ul`);
+        const parentAfterTag =
+          outerIdx < Object.keys(markdownLookup.nthTag).length &&
+          markdownLookup.nthTag[outerIdx + 1] !== `ul`;
+        return { before: parentBeforeTag, after: parentAfterTag };
+      } else {
+        // nested ul > li, allow insert before and after
+        const siblings =
+          Object.keys(markdownLookup.listItemsLookup[outerIdx]).length - 1;
+        const parentBeforeTag =
+          outerIdx === 0 ||
+          (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ul`);
+        const parentAfterTag =
+          outerIdx < Object.keys(markdownLookup.nthTag).length &&
+          markdownLookup.nthTag[outerIdx + 1] !== `ul`;
+        return {
+          before: idx === 0 && parentBeforeTag,
+          after: idx === siblings && parentAfterTag,
+        };
       }
+    }
     case `yt`:
     case `bunny`:
     case `belief`:

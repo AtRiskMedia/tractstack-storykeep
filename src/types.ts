@@ -196,7 +196,20 @@ export type PaneAstTargetId = {
   outerIdx: number;
   idx: number | null;
   globalNth: number | null;
-  tag: "p" | "h2" | "h3" | "h4" | "li" | "a" | "code" | "img";
+  tag:
+    | "p"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "li"
+    | "a"
+    | "code"
+    | "img"
+    | "yt"
+    | "bunny"
+    | "belief"
+    | "toggle"
+    | "identify";
   paneId: string;
   buttonTarget?: string;
   mustConfig?: boolean;

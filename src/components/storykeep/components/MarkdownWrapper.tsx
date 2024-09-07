@@ -1,28 +1,11 @@
 import { useMemo } from "react";
-import { useStore } from "@nanostores/react";
 import MarkdownPane from "./MarkdownPane";
 import MarkdownInsidePane from "./MarkdownInsidePane";
 import Modal from "./Modal";
 import MarkdownInsideModal from "./MarkdownInsideModal";
 import { classNames } from "../../../utils/helpers";
-import {
-  toolAddModeTitles,
-  toolAddModeInsertDefault,
-} from "../../../constants";
-import {
-  paneFragmentMarkdown,
-  paneMarkdownFragmentId,
-  unsavedChangesStore,
-  lastInteractedTypeStore,
-  lastInteractedPaneStore,
-  toolModeStore,
-} from "../../../store/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
-import {
-  insertElementIntoMarkdown,
-  updateHistory,
-} from "../../../utils/compositor/markdownUtils";
-import { cloneDeep } from "../../../utils/helpers";
+import InsertWrapper from "./InsertWrapper";
 import type {
   MarkdownDatum,
   MarkdownPaneDatum,
@@ -100,14 +83,6 @@ const MarkdownWrapper = ({
                   : `auto`,
   };
 
-  const $unsavedChanges = useStore(unsavedChangesStore, { keys: [paneId] });
-  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
-    keys: [paneId],
-  });
-  const fragmentId = $paneMarkdownFragmentId[paneId]?.current;
-  const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
-    keys: [fragmentId],
-  });
   const isEmptyMarkdown = markdown.body === ``;
   const mustIntercept = isEmptyMarkdown && toolMode === `insert`;
 
@@ -124,42 +99,6 @@ const MarkdownWrapper = ({
     () => markdown?.htmlAst && generateMarkdownLookup(markdown.htmlAst),
     [markdown?.htmlAst]
   );
-
-  const handleInsert = () => {
-    queueUpdate(fragmentId, () => {
-      const newContent = toolAddModeInsertDefault[toolAddMode as ToolAddMode];
-      lastInteractedTypeStore.set(`markdown`);
-      lastInteractedPaneStore.set(paneId);
-      const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
-      const now = Date.now();
-      const newHistory = updateHistory(currentField, now);
-      const newAsideContainer = toolAddMode === `aside`;
-      // wrap inside ol if new text container
-      const thisNewContent = newAsideContainer
-        ? `1. ${newContent}`
-        : newContent;
-      const newValue = insertElementIntoMarkdown(
-        currentField.current,
-        thisNewContent,
-        toolAddMode,
-        0,
-        null,
-        `before`,
-        markdownLookup
-      );
-      paneFragmentMarkdown.setKey(fragmentId, {
-        ...currentField,
-        current: newValue,
-        history: newHistory,
-      });
-      // safely assumes this is new/unsaved
-      unsavedChangesStore.setKey(paneId, {
-        ...$unsavedChanges[paneId],
-        paneFragmentMarkdown: true,
-      });
-      toolModeStore.set({ value: `text` });
-    });
-  };
 
   const renderContent = () => {
     if (isModal && thisModalPayload) {
@@ -223,23 +162,19 @@ const MarkdownWrapper = ({
     return null;
   };
 
+  // if there's no content; but it's a markdown pane...
   if (mustIntercept) {
     return (
-      <div className="min-h-[200px] w-full relative">
-        <button
-          className="relative z-103 w-full h-full bg-mygreen/20 hover:bg-mygreen/50 pointer-events-auto min-h-[200px]"
-          title={`Add ${toolAddModeTitles[toolAddMode as ToolAddMode]}`}
-          onClick={handleInsert}
-        >
-          <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-             text-black bg-mywhite p-2.5 rounded-sm shadow-md
-             text-xl md:text-3xl font-action mx-6"
-          >
-            Add {toolAddModeTitles[toolAddMode as ToolAddMode]}
-          </div>
-        </button>
-      </div>
+      <InsertWrapper
+        isEmpty={isEmptyMarkdown}
+        fragmentId={markdownFragmentId}
+        paneId={paneId}
+        outerIdx={0}
+        idx={null}
+        queueUpdate={queueUpdate}
+        toolAddMode={toolAddMode}
+        markdownLookup={markdownLookup}
+      />
     );
   }
 

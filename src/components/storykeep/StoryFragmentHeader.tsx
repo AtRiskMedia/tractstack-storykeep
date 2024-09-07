@@ -53,6 +53,7 @@ export const StoryFragmentHeader = memo(
     const viewportKey = $viewportKey.value;
     const { value: toolMode } = useStore(toolModeStore);
     const { value: toolAddMode } = useStore(toolAddModeStore);
+    const toolAddModeRef = useRef<HTMLSelectElement>(null);
     let lastScrollTop = 0;
     const setViewport = (
       newViewport: "auto" | "mobile" | "tablet" | "desktop"
@@ -79,6 +80,13 @@ export const StoryFragmentHeader = memo(
     const setToolAddMode = (newToolAddMode: ToolAddMode) => {
       toolAddModeStore.set({ value: newToolAddMode });
     };
+
+    useEffect(() => {
+      if (toolMode === "insert" && toolAddModeRef.current) {
+        toolAddModeRef.current.focus();
+      }
+    }, [toolMode]);
+
     const $unsavedChanges = useStore(unsavedChangesStore);
     const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
       keys: [id],
@@ -236,6 +244,7 @@ export const StoryFragmentHeader = memo(
               {toolMode === `insert` ? (
                 <div className="ml-4">
                   <ToolAddModeSelector
+                    ref={toolAddModeRef}
                     toolAddMode={toolAddMode}
                     setToolAddMode={setToolAddMode}
                   />

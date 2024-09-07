@@ -56,12 +56,15 @@ const InsertWrapper = ({
       const newContent = toolAddModeInsertDefault[toolAddMode];
       const parentTag = markdownLookup.nthTag[outerIdx];
       console.log(`doing insert on ${toolAddMode}`, parentTag, newContent);
-      // wrap inside ul if new image
+      const newImgContainer = toolAddMode === `img` && parentTag !== `ul`;
       const newAsideContainer = toolAddMode === `aside` && parentTag !== `ol`;
       // wrap inside ol if new text container
-      const thisNewContent = newAsideContainer
-        ? `1. ${newContent}`
-        : newContent;
+      // wrap inside ul if new image
+      const thisNewContent = newImgContainer
+        ? `* ${newContent}`
+        : newAsideContainer
+          ? `1. ${newContent}`
+          : newContent;
       const thisIdx = newAsideContainer ? null : idx;
       const newValue = insertElementIntoMarkdown(
         currentField.current,

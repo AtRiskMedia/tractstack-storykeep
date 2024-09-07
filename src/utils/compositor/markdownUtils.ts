@@ -119,7 +119,6 @@ export function allowTagInsert(
           };
         }
       }
-      break;
     case `yt`:
     case `bunny`:
     case `belief`:
@@ -422,6 +421,39 @@ export function reconcileOptionsPayload(
     }
     return markdownLookup.listItemsLookup[outerIdx][idx];
   };
+  const getImgNth = (outerIdx: number, idx?: number) => {
+    if (outerIdx === 0 && typeof idx !== `number`) return 0;
+    const adjustedIdx =
+      typeof idx === `number` && position === `before`
+        ? outerIdx - 1
+        : typeof idx === `number`
+          ? outerIdx + 1
+          : outerIdx;
+    let highestSibling = 0;
+    if (typeof idx !== `number`) {
+      markdownLookup?.imagesLookup &&
+        Object.keys(markdownLookup.imagesLookup).forEach((key: string) => {
+          const i = parseInt(key);
+          if (!isNaN(i)) {
+            if (
+              (position === `before` && adjustedIdx > i) ||
+              (position === `after` && adjustedIdx >= i)
+            ) {
+              const item = markdownLookup.imagesLookup[i];
+              if (item) {
+                Object.keys(item).forEach((key: string) => {
+                  highestSibling = !highestSibling
+                    ? item[parseInt(key)]
+                    : Math.max(highestSibling, item[parseInt(key)]);
+                });
+              }
+            }
+          }
+        });
+      return highestSibling;
+    }
+    return markdownLookup.imagesLookup[outerIdx][idx];
+  };
 
   const getParentNth = (tag: string) => {
     const tagLookup = markdownLookup.nthTagLookup[tag];
@@ -502,11 +534,8 @@ export function reconcileOptionsPayload(
 
   if (isInsertion) {
     if (toolAddMode === "img") {
-      const liNth =
-        idx === null
-          ? Object.keys(markdownLookup.listItemsLookup[outerIdx] || {}).length
-          : idx;
-      const imgNth = getParentNth("img");
+      const liNth = getLiNth(outerIdx, idx || undefined);
+      const imgNth = getImgNth(outerIdx, idx || undefined);
       processTag("li", liNth, true);
       processTag("img", imgNth, true);
       const parentTag = markdownLookup.nthTag[outerIdx];
@@ -536,6 +565,7 @@ export function reconcileOptionsPayload(
         processTag(parentTag, parentNth, true);
       }
     }
+    // removal
   } else if (typeof idx === `number`) {
     // remove inner element...
     // case 1: was the entire block deleted?

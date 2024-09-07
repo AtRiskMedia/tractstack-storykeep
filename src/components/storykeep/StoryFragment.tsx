@@ -176,6 +176,11 @@ export const StoryFragment = (props: { id: string }) => {
         event.preventDefault();
         toolModeStore.set({ value: `text` });
       }
+      if (event.key === "+") {
+        event.preventDefault();
+        toolModeStore.set({ value: `insert` });
+        toolAddModeStore.set({ value: "p" });
+      }
       if (event.ctrlKey && event.key === "z") {
         event.preventDefault();
 

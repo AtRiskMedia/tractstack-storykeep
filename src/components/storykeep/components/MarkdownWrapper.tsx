@@ -242,8 +242,7 @@ const MarkdownWrapper = ({
       </div>
     );
   }
-  //console.log(markdown.body)
-  //console.log(payload.optionsPayload.classNamesPayload);
+
   return (
     <div
       className={classNames(hidden, `h-fit-contents`)}

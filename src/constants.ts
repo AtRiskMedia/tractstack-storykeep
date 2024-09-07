@@ -72,7 +72,7 @@ export const toolAddModeInsertDefault: Record<ToolAddMode, string> = {
   h2: "## title",
   h3: "### subtitle",
   h4: "#### section title",
-  img: "* ![Descriptive title](filename)",
+  img: "![Descriptive title](filename)",
   yt: "* `youtube(tag|title)`",
   bunny: "* `bunny(id|title)`",
   belief: "* `belief(BeliefTag|likert|question)`",

@@ -26,7 +26,7 @@ const PaneImpression = ({ id }: PaneImpressionProps) => {
   };
 
   const commonClasses =
-    "mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-indigo-500 focus:ring-indigo-500 xs:text-sm px-2 py-1";
+    "mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myorange focus:ring-indigo-500 xs:text-sm px-2 py-1";
 
   return (
     <div className="max-w-2xl flex flex-wrap gap-4">

@@ -265,7 +265,7 @@ const PaneFromAst = ({
   const thisImage = payload?.imageData?.filter(
     (image: any) => image.filename === thisAst.properties?.src
   )[0];
-  const imageSrc = thisImage?.optimizedSrc || thisImage?.src || null;
+  const imageSrc = thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`;
 
   // Handle code hooks
   const regexpHook =

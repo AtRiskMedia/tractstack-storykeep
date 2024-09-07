@@ -359,9 +359,10 @@ export const PaneAstStyles = (props: {
           console.error("Invalid widget format:", codeNode);
           setWidgetData([]);
         }
+        console.log(`HIT`);
+        setWidgetConfigMode(true);
       }
     }
-    setWidgetConfigMode(true);
     setSelectedStyle(null);
     setAddClass(false);
   }, [markdownDatum, targetId, $editMode]);
@@ -404,28 +405,35 @@ export const PaneAstStyles = (props: {
       (currentField.current.payload.optionsPayload.classNamesPayload[
         thisTag
       ] as ClassNamesPayloadInnerDatum | undefined);
-    if (payloadForTag && payloadForTag.override) {
+
+    if (payloadForTag && markdownLookup) {
       if (activeTagData?.hasOverride && typeof thisGlobalNth === `number`) {
-        if (payloadForTag.override[thisClass]) {
+        if (payloadForTag?.override?.[thisClass]) {
           delete payloadForTag.override[thisClass][thisGlobalNth];
           if (Object.keys(payloadForTag.override[thisClass]).length === 0) {
             delete payloadForTag.override[thisClass];
           }
         }
-        if (Object.keys(payloadForTag.override).length === 0) {
+        if (
+          payloadForTag?.override &&
+          Object.keys(payloadForTag.override).length === 0
+        ) {
           delete payloadForTag.override;
           delete payloadForTag.count;
         }
       } else {
-        const count = markdownLookup?.nthTagLookup[
-          thisTag as keyof typeof markdownLookup.nthTagLookup
-        ]
-          ? Object.keys(
-              markdownLookup.nthTagLookup[
-                thisTag as keyof typeof markdownLookup.nthTagLookup
-              ]
-            ).length
-          : 0;
+        const count =
+          thisTag === `li`
+            ? Object.keys(markdownLookup.listItems).length
+            : markdownLookup?.nthTagLookup[
+                  thisTag as keyof typeof markdownLookup.nthTagLookup
+                ]
+              ? Object.keys(
+                  markdownLookup.nthTagLookup[
+                    thisTag as keyof typeof markdownLookup.nthTagLookup
+                  ]
+                ).length
+              : 0;
         payloadForTag.count = count;
         if (payloadForTag && typeof thisGlobalNth === "number") {
           if (!payloadForTag.override) {
@@ -434,7 +442,7 @@ export const PaneAstStyles = (props: {
           if (!payloadForTag.override[thisClass]) {
             payloadForTag.override[thisClass] = [];
           }
-          payloadForTag.override[thisClass][thisGlobalNth] = ["", "", ""];
+          payloadForTag.override[thisClass][thisGlobalNth] = [""];
         }
       }
       updateStoreField("paneFragmentMarkdown", {
@@ -828,6 +836,8 @@ export const PaneAstStyles = (props: {
       $editMode?.targetId?.mustConfig
     ) {
       if ($editMode?.targetId?.tag === `code`) {
+        console.log(`hit`);
+        console.log($editMode.targetId);
         setWidgetConfigMode(true);
         handleWidgetConfig();
       } else if ($editMode?.targetId?.tag === `img`) setImageMeta(true);
@@ -957,11 +967,11 @@ export const PaneAstStyles = (props: {
         );
         const payloadForTag = currentField.current.payload.optionsPayload
           .classNamesPayload[activeTag] as ClassNamesPayloadInnerDatum;
-        const currentGlobalNth = activeTagData?.globalNth ?? null;
+        const currentGlobalNth = targetId.globalNth ?? null;
         if (payloadForTag.override && currentGlobalNth !== null) {
           Object.keys(payloadForTag.override).forEach(className => {
             if (
-              currentGlobalNth &&
+              typeof currentGlobalNth === `number` &&
               payloadForTag.override![className][currentGlobalNth] !== undefined
             ) {
               delete payloadForTag.override![className][currentGlobalNth];
@@ -1486,9 +1496,13 @@ export const PaneAstStyles = (props: {
               <h4 className="text-lg">
                 <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
                 {isLink || activeTagData?.hasOverride ? (
-                  <span className="underline">this</span>
+                  <span className="underline font-bold text-mydarkgrey">
+                    THIS
+                  </span>
                 ) : (
-                  <span className="underline">all</span>
+                  <span className="underline font-bold text-mydarkgrey">
+                    ALL
+                  </span>
                 )}{" "}
                 {isLink ? `Button` : tabs.length && tagTitles[tabs.at(0)!.tag]}
                 {isLink ? null : !activeTagData?.hasOverride ? `s` : null}
@@ -1529,7 +1543,11 @@ export const PaneAstStyles = (props: {
               tabs.length &&
               ![`Pane Styles`, `Modal Styles`].includes(
                 tagTitles[tabs.at(0)!.tag]
-              ) ? (
+              ) &&
+              (mobileValue ||
+                tabletValue ||
+                desktopValue ||
+                activeTagData?.hasOverride) ? (
                 <div className="flex items-center mt-4">
                   <Switch
                     checked={activeTagData?.hasOverride}

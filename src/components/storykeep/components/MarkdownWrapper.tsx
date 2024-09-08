@@ -162,7 +162,9 @@ const MarkdownWrapper = ({
   };
 
   // if there's no content; but it's a markdown pane show InsertWrapper
-
+  //console.log(markdown);
+  //console.log(payload);
+  
   return (
     <>
       {mustIntercept && markdownFragmentId ? (

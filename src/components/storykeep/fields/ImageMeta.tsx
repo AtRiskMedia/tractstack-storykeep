@@ -38,6 +38,7 @@ const ImageMeta = (props: {
     if (markdownFragment && markdownFragment.markdown) {
       const imageNode = findImageNode(
         markdownFragment.markdown.htmlAst as Root,
+        outerIdx,
         idx
       );
       if (imageNode && "properties" in imageNode) {
@@ -132,9 +133,8 @@ export default ImageMeta;
 
 // Helper function to find the image node in the AST
 
-function findImageNode(ast: Root, targetIdx: number): Element | null {
+function findImageNode(ast: Root, outerIdx:number, targetIdx: number): Element | null {
   let currentIdx = 0;
-
   function traverse(node: Root | Element): Element | null {
     if ("tagName" in node && node.tagName === "img") {
       if (currentIdx === targetIdx) {
@@ -142,7 +142,6 @@ function findImageNode(ast: Root, targetIdx: number): Element | null {
       }
       currentIdx++;
     }
-
     const children = "children" in node ? node.children : [];
     for (const child of children) {
       if ("tagName" in child) {
@@ -152,6 +151,5 @@ function findImageNode(ast: Root, targetIdx: number): Element | null {
     }
     return null;
   }
-
-  return traverse(ast);
+  return traverse(ast.children[outerIdx]);
 }

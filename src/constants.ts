@@ -169,10 +169,10 @@ export const widgetMeta: WidgetMeta = {
     multi: [false, false],
     isScale: [false, false],
   },
-  bunnyContext: {
-    title: `BunnyCDN Video Embed on context page`,
-    valueLabels: ["Embed Code", "Title"],
-    valueDefaults: ["*", "Descriptive Title"],
+  resource: {
+    title: `Not yet implemented`,
+    valueLabels: ["Type", "Variation"],
+    valueDefaults: ["?", "?"],
     multi: [false, false],
     isScale: [false, false],
   },

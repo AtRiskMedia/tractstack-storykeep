@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import {
   XMarkIcon,
@@ -19,6 +19,7 @@ import {
   updateMarkdownElement,
 } from "../../../utils/compositor/markdownUtils";
 import type { Root, Element } from "hast";
+import type { ChangeEvent } from "react";
 
 const ImageMeta = (props: {
   paneId: string;
@@ -29,20 +30,21 @@ const ImageMeta = (props: {
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
-  const markdownFragmentId = $paneMarkdownFragmentId[paneId].current;
+  const markdownFragmentId = $paneMarkdownFragmentId[paneId]?.current;
   const $paneFragmentMarkdown = useStore(paneFragmentMarkdown, {
     keys: [markdownFragmentId],
   });
-  const markdownFragment = $paneFragmentMarkdown[markdownFragmentId].current;
+  const markdownFragment = $paneFragmentMarkdown[markdownFragmentId]?.current;
   const $paneFiles = useStore(paneFiles, { keys: [paneId] });
   const files = $paneFiles[paneId]?.current;
-  const { updateStoreField } = useStoryKeepUtils(markdownFragmentId);
+  const { updateStoreField } = useStoryKeepUtils(markdownFragmentId || "");
   const [altText, setAltText] = useState("");
   const [filename, setFilename] = useState("");
   const [imageSrc, setImageSrc] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (markdownFragment && markdownFragment.markdown) {
+    if (markdownFragment?.markdown) {
       const imageNode = findImageNode(
         markdownFragment.markdown.htmlAst as Root,
         outerIdx,
@@ -51,36 +53,26 @@ const ImageMeta = (props: {
       if (imageNode && "properties" in imageNode) {
         setAltText((imageNode.properties?.alt as string) || "");
         setFilename((imageNode.properties?.src as string) || "");
-        const thisImage = files?.filter(
-          /* eslint-disable @typescript-eslint/no-explicit-any */
-          (image: any) => image.filename === imageNode.properties?.src
-        )[0];
+        const thisImage = files?.find(
+          image => image.filename === imageNode.properties?.src
+        );
         setImageSrc(thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`);
       }
     }
-  }, [markdownFragment, idx, outerIdx]);
+  }, [markdownFragment, idx, outerIdx, files]);
 
   const handleAltTextChange = useCallback((newValue: string) => {
     setAltText(newValue);
     return true;
   }, []);
 
-  const handleEditingChange = useCallback(
-    (editing: boolean) => {
-      if (!editing) {
-        updateStore(altText);
-      }
-    },
-    [altText]
-  );
-
   const updateStore = useCallback(
     (newAltText: string) => {
-      if (!markdownFragmentId) return;
+      if (!markdownFragmentId || !markdownFragment) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
       const newBody = updateMarkdownElement(
-        $paneFragmentMarkdown[markdownFragmentId].current.markdown.body,
+        markdownFragment.markdown.body,
         `![${newAltText}](${filename})`,
         "li",
         outerIdx,
@@ -106,14 +98,35 @@ const ImageMeta = (props: {
     ]
   );
 
+  const handleEditingChange = useCallback(
+    (editing: boolean) => {
+      if (!editing) {
+        updateStore(altText);
+      }
+    },
+    [altText, updateStore]
+  );
+
   const handleRemoveFile = () => {
     console.log("Remove file clicked");
     // Implement file removal logic here
   };
 
   const handleUploadFile = () => {
-    console.log("Upload file clicked");
-    // Implement file upload logic here
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const base64 = e.target?.result as string;
+        console.log("Uploaded file as base64:", base64);
+        // Here you can add logic to update the image in the store or send it to the server
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSelectFile = () => {
@@ -181,6 +194,13 @@ const ImageMeta = (props: {
           </div>
         </div>
       </div>
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        style={{ display: "none" }}
+      />
     </div>
   );
 };

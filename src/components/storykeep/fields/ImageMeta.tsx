@@ -5,6 +5,7 @@ import {
   ArrowUpTrayIcon,
   FolderIcon,
 } from "@heroicons/react/24/outline";
+import imageCompression from "browser-image-compression";
 import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
@@ -20,6 +21,8 @@ import {
 } from "../../../utils/compositor/markdownUtils";
 import type { Root, Element } from "hast";
 import type { ChangeEvent } from "react";
+
+const TARGET_WIDTH = 1920;
 
 const ImageMeta = (props: {
   paneId: string;
@@ -41,6 +44,7 @@ const ImageMeta = (props: {
   const [altText, setAltText] = useState("");
   const [filename, setFilename] = useState("");
   const [imageSrc, setImageSrc] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -67,13 +71,13 @@ const ImageMeta = (props: {
   }, []);
 
   const updateStore = useCallback(
-    (newAltText: string) => {
+    (newAltText: string, newFilename?: string) => {
       if (!markdownFragmentId || !markdownFragment) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
       const newBody = updateMarkdownElement(
         markdownFragment.markdown.body,
-        `![${newAltText}](${filename})`,
+        `![${newAltText}](${newFilename || filename})`,
         "li",
         outerIdx,
         idx
@@ -116,16 +120,82 @@ const ImageMeta = (props: {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const upscaleImage = (file: File): Promise<File> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Failed to get canvas context"));
+          return;
+        }
+
+        const scaleFactor = TARGET_WIDTH / img.width;
+        canvas.width = TARGET_WIDTH;
+        canvas.height = img.height * scaleFactor;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(
+          blob => {
+            if (!blob) {
+              reject(new Error("Failed to create blob from canvas"));
+              return;
+            }
+            resolve(new File([blob], file.name, { type: file.type }));
+          },
+          file.type,
+          0.95 // Quality parameter for JPEG compression
+        );
+      };
+      img.onerror = () => reject(new Error("Failed to load image"));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  const compressImage = async (file: File) => {
+    const options = {
+      maxSizeMB: 1,
+      useWebWorker: true,
+    };
+
+    try {
+      const compressedFile = await imageCompression(file, options);
+      return compressedFile;
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      return file;
+    }
+  };
+
+  const processImage = async (file: File) => {
+    setIsProcessing(true);
+    try {
+      const upscaledFile = await upscaleImage(file);
+      const compressedFile = await compressImage(upscaledFile);
+      return compressedFile;
+    } catch (error) {
+      console.error("Error processing image:", error);
+      return file;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const processedFile = await processImage(file);
       const reader = new FileReader();
       reader.onload = e => {
         const base64 = e.target?.result as string;
-        console.log("Uploaded file as base64:", base64);
-        // Here you can add logic to update the image in the store or send it to the server
+        console.log("Processed image as base64:", base64);
+        setImageSrc(base64);
+        setFilename(processedFile.name);
+        updateStore(altText, processedFile.name);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(processedFile);
     }
   };
 
@@ -179,9 +249,10 @@ const ImageMeta = (props: {
               <button
                 onClick={handleUploadFile}
                 className="flex items-center text-sm text-myblue hover:text-myorange"
+                disabled={isProcessing}
               >
                 <ArrowUpTrayIcon className="w-4 h-4 mr-1" />
-                Upload
+                {isProcessing ? "Processing..." : "Upload"}
               </button>
               <button
                 onClick={handleSelectFile}

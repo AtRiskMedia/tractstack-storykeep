@@ -1,10 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import {
+  XMarkIcon,
+  ArrowUpTrayIcon,
+  FolderIcon,
+} from "@heroicons/react/24/outline";
+import {
   paneMarkdownFragmentId,
   paneFragmentMarkdown,
   lastInteractedTypeStore,
   lastInteractedPaneStore,
+  paneFiles,
 } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
@@ -28,11 +34,12 @@ const ImageMeta = (props: {
     keys: [markdownFragmentId],
   });
   const markdownFragment = $paneFragmentMarkdown[markdownFragmentId].current;
-
+  const $paneFiles = useStore(paneFiles, { keys: [paneId] });
+  const files = $paneFiles[paneId]?.current;
   const { updateStoreField } = useStoryKeepUtils(markdownFragmentId);
-
   const [altText, setAltText] = useState("");
   const [filename, setFilename] = useState("");
+  const [imageSrc, setImageSrc] = useState("");
 
   useEffect(() => {
     if (markdownFragment && markdownFragment.markdown) {
@@ -44,9 +51,14 @@ const ImageMeta = (props: {
       if (imageNode && "properties" in imageNode) {
         setAltText((imageNode.properties?.alt as string) || "");
         setFilename((imageNode.properties?.src as string) || "");
+        const thisImage = files?.filter(
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          (image: any) => image.filename === imageNode.properties?.src
+        )[0];
+        setImageSrc(thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`);
       }
     }
-  }, [markdownFragment, idx]);
+  }, [markdownFragment, idx, outerIdx]);
 
   const handleAltTextChange = useCallback((newValue: string) => {
     setAltText(newValue);
@@ -94,6 +106,21 @@ const ImageMeta = (props: {
     ]
   );
 
+  const handleRemoveFile = () => {
+    console.log("Remove file clicked");
+    // Implement file removal logic here
+  };
+
+  const handleUploadFile = () => {
+    console.log("Upload file clicked");
+    // Implement file upload logic here
+  };
+
+  const handleSelectFile = () => {
+    console.log("Select file clicked");
+    // Implement file selection logic here
+  };
+
   return (
     <div className="space-y-4">
       <div>
@@ -115,14 +142,43 @@ const ImageMeta = (props: {
       <div>
         <label
           htmlFor="image-filename"
-          className="block text-sm text-mydarkgrey"
+          className="block text-sm text-mydarkgrey mb-2"
         >
-          Image Filename
+          Image
         </label>
-        <div className="mt-1 flex items-center">
-          <span className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6">
-            {filename}
-          </span>
+        <div className="flex items-center space-x-4">
+          <div className="relative w-24 aspect-video bg-slate-100 rounded-md overflow-hidden">
+            <img
+              src={imageSrc}
+              alt={altText}
+              className="w-full h-full object-contain"
+            />
+            <button
+              onClick={handleRemoveFile}
+              className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-slate-100"
+            >
+              <XMarkIcon className="w-4 h-4 text-mydarkgrey" />
+            </button>
+          </div>
+          <div className="flex-grow">
+            <p className="text-sm text-mydarkgrey truncate">{filename}</p>
+            <div className="mt-2 flex space-x-2">
+              <button
+                onClick={handleUploadFile}
+                className="flex items-center text-sm text-myblue hover:text-myorange"
+              >
+                <ArrowUpTrayIcon className="w-4 h-4 mr-1" />
+                Upload
+              </button>
+              <button
+                onClick={handleSelectFile}
+                className="flex items-center text-sm text-myblue hover:text-myorange"
+              >
+                <FolderIcon className="w-4 h-4 mr-1" />
+                Select
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -132,10 +188,13 @@ const ImageMeta = (props: {
 export default ImageMeta;
 
 // Helper function to find the image node in the AST
-
-function findImageNode(ast: Root, outerIdx:number, targetIdx: number): Element | null {
+function findImageNode(
+  ast: Root,
+  outerIdx: number,
+  targetIdx: number
+): Element | null {
   let currentIdx = 0;
-  function traverse(node: Root | Element): Element | null {
+  function traverse(node: Element): Element | null {
     if ("tagName" in node && node.tagName === "img") {
       if (currentIdx === targetIdx) {
         return node;
@@ -151,5 +210,5 @@ function findImageNode(ast: Root, outerIdx:number, targetIdx: number): Element |
     }
     return null;
   }
-  return traverse(ast.children[outerIdx]);
+  return traverse(ast.children[outerIdx] as Element);
 }

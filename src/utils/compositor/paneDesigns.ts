@@ -34,6 +34,7 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
           optimizedImagesPre.push({
             id: f.id,
             filename: f.filename,
+            altDescription: f.altDescription,
             url: f.url,
           });
       });
@@ -44,6 +45,7 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
           return {
             id: i.id,
             filename: i.filename,
+            altDescription: i.altDescription,
             optimizedSrc: optimizedSrc || undefined,
             src,
           };
@@ -70,6 +72,7 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
           index: idx,
           altText:
             altText ||
+            f.altDescription ||
             `This should be a description of the image; we apologize for this information being unset`,
         } as FileDatum;
       });

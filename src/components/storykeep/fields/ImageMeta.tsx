@@ -68,7 +68,7 @@ const ImageMeta = (props: {
         const properties = imageNode.properties as Properties;
         setAltText(properties.alt?.toString() || "");
         setFilename(properties.src?.toString() || "");
-        const thisImage = thisPaneFiles?.find(
+        const thisImage = files?.find(
           image => image.filename === properties.src?.toString()
         );
         setImageSrc(thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`);
@@ -123,8 +123,10 @@ const ImageMeta = (props: {
   );
 
   const handleRemoveFile = () => {
-    console.log("Remove file clicked");
-    // Implement file removal logic here
+    setSelectedFile(null);
+    setImageSrc(`/static.jpg`);
+    setIsSelectingFile(false);
+    updateStore(`Descriptive title`, `filename`);
   };
 
   const handleUploadFile = () => {
@@ -210,14 +212,13 @@ const ImageMeta = (props: {
         console.log("Processed image as base64:", base64);
         setImageSrc(base64);
         setFilename(processedFile.name);
-        updateStore(altText, processedFile.name);
+        updateStore(`Please provide a description of this image`);
       };
       reader.readAsDataURL(processedFile);
     }
   };
 
   const handleSelectFile = () => {
-    console.log("Select file clicked");
     setIsSelectingFile(true);
   };
 
@@ -227,6 +228,7 @@ const ImageMeta = (props: {
       : files.filter(file =>
           file.filename.toLowerCase().includes(query.toLowerCase())
         );
+  console.log(imageSrc);
 
   return (
     <div className="space-y-4">
@@ -324,7 +326,7 @@ const ImageMeta = (props: {
                   setSelectedFile(file);
                   setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
                   setIsSelectingFile(false);
-                  updateStore(altText, file.filename);
+                  updateStore(file.altDescription, file.filename);
                 }
               }}
             >

@@ -8,11 +8,13 @@ export function cleanTursoFile(rows: Row[]): TursoFileNode[] {
     if (
       typeof r?.id === `string` &&
       typeof r?.filename === `string` &&
+      typeof r?.alt_description === `string` &&
       typeof r?.url === `string`
     )
       return {
         id: r.id,
         filename: r.filename,
+        altDescription: r.alt_description,
         url: r.url,
       } as TursoFileNode;
     return null;

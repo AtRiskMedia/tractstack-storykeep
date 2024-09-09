@@ -17,8 +17,9 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
       ...f,
       id: f.id,
       index: idx,
-      altText:
+      altDescription:
         altText ||
+        f.altDescription ||
         `This should be a description of the image; we apologize for this information being unset`,
     } as FileDatum;
   });

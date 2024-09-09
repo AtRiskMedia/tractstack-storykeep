@@ -259,12 +259,13 @@ const PaneFromAst = ({
       thisAst.properties.href.substring(0, 8) === "https://");
 
   // Handle image properties
-  const altText =
-    thisAst.properties?.alt ||
-    "This should be descriptive text of an image | We apologize the alt text is missing.";
   const thisImage = payload?.imageData?.filter(
     (image: any) => image.filename === thisAst.properties?.src
   )[0];
+  const altText =
+    thisAst.properties?.alt ||
+    thisImage?.altDescription ||
+    "This should be descriptive text of an image | We apologize the alt text is missing.";
   const imageSrc = thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`;
 
   // Handle code hooks

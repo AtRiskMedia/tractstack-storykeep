@@ -22,7 +22,6 @@ const canonicalURL = new URL(`/${lookup !== slug ? slug : ``}`, baseUrl).href;
 
 // get files
 const files = await getAllFileDatum();
-console.log(1, files);
 
 // get storyfragment datum
 const storyfragment = await getStoryFragmentBySlug(slug);

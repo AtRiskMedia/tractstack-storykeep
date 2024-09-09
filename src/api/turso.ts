@@ -41,6 +41,7 @@ file_data AS (
   SELECT json_group_array(json_object(
     'id', id,
     'filename', filename,
+    'alt_description', f.alt_description,
     'url', url
   )) AS files
   FROM file
@@ -169,6 +170,7 @@ export async function getStoryFragmentBySlug(
                                  SELECT json_group_array(json_object(
                                      'id', f.id,
                                      'filename', f.filename,
+                                     'alt_description', f.alt_description,
                                      'url', f.url
                                  ))
                                  FROM (
@@ -228,7 +230,9 @@ export async function getContextPaneBySlug(
                    (
                        SELECT json_group_array(
                            json_object(
+                               'id', f.id,
                                'filename', f.filename,
+                               'alt_description', f.alt_description,
                                'url', f.url
                            )
                        )
@@ -297,6 +301,7 @@ export async function getPaneDesigns(): Promise<PaneDesign[]> {
         SELECT pane_id, json_group_array(json_object(
           'id', f.id,
           'filename', f.filename,
+          'alt_description', f.alt_description,
           'url', f.url
         )) AS files
         FROM (
@@ -342,7 +347,7 @@ export async function getPaneDesigns(): Promise<PaneDesign[]> {
 export async function getAllFileDatum(): Promise<TursoFileNode[]> {
   try {
     const { rows } = await turso.execute(`
-      SELECT id, filename, url
+      SELECT id, filename, alt_description, url
       FROM file
     `);
 

@@ -44,6 +44,7 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
                 optimizedImagesPre.push({
                   id: f.id,
                   filename: f.filename,
+                  altDescription: f.altDescription,
                   url: f.url,
                 });
             });
@@ -56,6 +57,7 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
                 id: i.id,
                 filename: i.filename,
                 optimizedSrc: optimizedSrc || undefined,
+                altDescription: i.altDescription,
                 src,
               };
             })

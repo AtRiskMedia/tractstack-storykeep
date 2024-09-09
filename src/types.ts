@@ -783,11 +783,13 @@ export interface TursoFileNode {
   id: string;
   filename: string;
   url: string;
+  altDescription: string;
 }
 
 export interface FileNode {
   id: string;
   filename: string;
+  altDescription: string;
   src: string;
   optimizedSrc?: string;
 }
@@ -800,14 +802,14 @@ export interface PaneFileNode {
 export interface FileDatum {
   id: string;
   filename: string;
-  altText: string;
+  altDescription: string;
   src: string;
   optimizedSrc?: string;
 }
 
 export interface StoryKeepFileDatum {
   filename: string;
-  altText: string;
+  altDescription: string;
   b64: string;
 }
 

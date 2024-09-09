@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useStore } from "@nanostores/react";
+import { Combobox } from "@headlessui/react";
 import {
   XMarkIcon,
   ArrowUpTrayIcon,
   FolderIcon,
+  CheckIcon,
+  ChevronUpDownIcon,
 } from "@heroicons/react/24/outline";
 import imageCompression from "browser-image-compression";
 import {
@@ -18,9 +21,11 @@ import ContentEditableField from "../components/ContentEditableField";
 import {
   markdownToHtmlAst,
   updateMarkdownElement,
+  findImageNode,
 } from "../../../utils/compositor/markdownUtils";
-import type { Root, Element } from "hast";
+import type { Root, Properties } from "hast";
 import type { ChangeEvent } from "react";
+import type { FileDatum } from "../../../types";
 
 const TARGET_WIDTH = 1920;
 
@@ -28,8 +33,9 @@ const ImageMeta = (props: {
   paneId: string;
   outerIdx: number;
   idx: number;
+  files: FileDatum[];
 }) => {
-  const { paneId, outerIdx, idx } = props;
+  const { paneId, outerIdx, idx, files } = props;
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -39,12 +45,16 @@ const ImageMeta = (props: {
   });
   const markdownFragment = $paneFragmentMarkdown[markdownFragmentId]?.current;
   const $paneFiles = useStore(paneFiles, { keys: [paneId] });
-  const files = $paneFiles[paneId]?.current;
+  const thisPaneFiles = $paneFiles[paneId]?.current;
   const { updateStoreField } = useStoryKeepUtils(markdownFragmentId || "");
   const [altText, setAltText] = useState("");
   const [filename, setFilename] = useState("");
   const [imageSrc, setImageSrc] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState("");
+  const [query, setQuery] = useState("");
+  const [selectedFile, setSelectedFile] = useState<FileDatum | null>(null);
+  const [isSelectingFile, setIsSelectingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,15 +65,16 @@ const ImageMeta = (props: {
         idx
       );
       if (imageNode && "properties" in imageNode) {
-        setAltText((imageNode.properties?.alt as string) || "");
-        setFilename((imageNode.properties?.src as string) || "");
-        const thisImage = files?.find(
-          image => image.filename === imageNode.properties?.src
+        const properties = imageNode.properties as Properties;
+        setAltText(properties.alt?.toString() || "");
+        setFilename(properties.src?.toString() || "");
+        const thisImage = thisPaneFiles?.find(
+          image => image.filename === properties.src?.toString()
         );
         setImageSrc(thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`);
       }
     }
-  }, [markdownFragment, idx, outerIdx, files]);
+  }, [markdownFragment, idx, outerIdx, thisPaneFiles]);
 
   const handleAltTextChange = useCallback((newValue: string) => {
     setAltText(newValue);
@@ -172,20 +183,26 @@ const ImageMeta = (props: {
   const processImage = async (file: File) => {
     setIsProcessing(true);
     try {
+      setProcessingStep("Upscaling image...");
       const upscaledFile = await upscaleImage(file);
+
+      setProcessingStep("Compressing image...");
       const compressedFile = await compressImage(upscaledFile);
+
       return compressedFile;
     } catch (error) {
       console.error("Error processing image:", error);
       return file;
     } finally {
       setIsProcessing(false);
+      setProcessingStep("");
     }
   };
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setProcessingStep("Starting image processing...");
       const processedFile = await processImage(file);
       const reader = new FileReader();
       reader.onload = e => {
@@ -201,8 +218,15 @@ const ImageMeta = (props: {
 
   const handleSelectFile = () => {
     console.log("Select file clicked");
-    // Implement file selection logic here
+    setIsSelectingFile(true);
   };
+
+  const filteredFiles =
+    query === ""
+      ? files
+      : files.filter(file =>
+          file.filename.toLowerCase().includes(query.toLowerCase())
+        );
 
   return (
     <div className="space-y-4">
@@ -230,21 +254,25 @@ const ImageMeta = (props: {
           Image
         </label>
         <div className="flex items-center space-x-4">
-          <div className="relative w-24 aspect-video bg-slate-100 rounded-md overflow-hidden">
+          <div className="relative w-24 aspect-video bg-mylightgrey rounded-md overflow-hidden">
             <img
               src={imageSrc}
               alt={altText}
               className="w-full h-full object-contain"
             />
-            <button
-              onClick={handleRemoveFile}
-              className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-slate-100"
-            >
-              <XMarkIcon className="w-4 h-4 text-mydarkgrey" />
-            </button>
+            {selectedFile && (
+              <button
+                onClick={handleRemoveFile}
+                className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-mylightgrey"
+              >
+                <XMarkIcon className="w-4 h-4 text-mydarkgrey" />
+              </button>
+            )}
           </div>
           <div className="flex-grow">
-            <p className="text-sm text-mydarkgrey truncate">{filename}</p>
+            <p className="text-sm text-mydarkgrey truncate">
+              {selectedFile?.filename || ""}
+            </p>
             <div className="mt-2 flex space-x-2">
               <button
                 onClick={handleUploadFile}
@@ -272,34 +300,95 @@ const ImageMeta = (props: {
         accept="image/*"
         style={{ display: "none" }}
       />
+
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full text-center">
+            <h3 className="text-xl font-semibold mb-4">Processing Image</h3>
+            <div className="animate-pulse mb-4">
+              <div className="h-2 bg-myorange rounded"></div>
+            </div>
+            <p className="text-lg text-mydarkgrey">{processingStep}</p>
+          </div>
+        </div>
+      )}
+
+      {isSelectingFile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2">Select a file</h3>
+            <Combobox
+              value={selectedFile}
+              onChange={file => {
+                if (file) {
+                  setSelectedFile(file);
+                  setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
+                  setIsSelectingFile(false);
+                  updateStore(altText, file.filename);
+                }
+              }}
+            >
+              <div className="relative mt-1">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
+                    displayValue={(file: FileDatum) => file?.filename || ""}
+                    onChange={event => setQuery(event.target.value)}
+                    placeholder="Search files..."
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  {filteredFiles.map(file => (
+                    <Combobox.Option
+                      key={file.id}
+                      value={file}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                          active ? "bg-myorange text-white" : "text-myblack"
+                        }`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span
+                            className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
+                          >
+                            {file.filename}
+                          </span>
+                          {selected && (
+                            <span
+                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-myorange"}`}
+                            >
+                              <CheckIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              </div>
+            </Combobox>
+            <button
+              className="mt-4 bg-mylightgrey px-4 py-2 rounded-md text-sm text-myblack hover:bg-myorange hover:text-white"
+              onClick={() => setIsSelectingFile(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ImageMeta;
-
-// Helper function to find the image node in the AST
-function findImageNode(
-  ast: Root,
-  outerIdx: number,
-  targetIdx: number
-): Element | null {
-  let currentIdx = 0;
-  function traverse(node: Element): Element | null {
-    if ("tagName" in node && node.tagName === "img") {
-      if (currentIdx === targetIdx) {
-        return node;
-      }
-      currentIdx++;
-    }
-    const children = "children" in node ? node.children : [];
-    for (const child of children) {
-      if ("tagName" in child) {
-        const result = traverse(child);
-        if (result) return result;
-      }
-    }
-    return null;
-  }
-  return traverse(ast.children[outerIdx] as Element);
-}

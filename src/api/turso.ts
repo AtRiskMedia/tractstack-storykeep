@@ -4,6 +4,7 @@ import { cleanTursoPayload } from "../utils/compositor/tursoPayload";
 import { cleanTursoContentMap } from "../utils/compositor/tursoContentMap";
 import { cleanTursoStoryFragment } from "../utils/compositor/tursoStoryFragment";
 import { cleanTursoContextPane } from "../utils/compositor/tursoContextPane";
+import { cleanTursoFile } from "../utils/compositor/tursoFile";
 import { cleanPaneDesigns } from "../utils/compositor/paneDesigns";
 import type {
   ResourceDatum,
@@ -12,6 +13,7 @@ import type {
   ContentMap,
   DatumPayload,
   PaneDesign,
+  TursoFileNode,
 } from "../types.ts";
 
 export const turso = createClient({
@@ -333,6 +335,20 @@ export async function getPaneDesigns(): Promise<PaneDesign[]> {
     return cleanPaneDesigns(rows);
   } catch (error) {
     console.error("Error fetching pane designs:", error);
+    throw error;
+  }
+}
+
+export async function getAllFileDatum(): Promise<TursoFileNode[]> {
+  try {
+    const { rows } = await turso.execute(`
+      SELECT id, filename, url
+      FROM file
+    `);
+
+    return cleanTursoFile(rows);
+  } catch (error) {
+    console.error("Error fetching all file data:", error);
     throw error;
   }
 }

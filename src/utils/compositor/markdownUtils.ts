@@ -801,6 +801,35 @@ function processClassValues(
   ];
 }
 
+export function findImageNode(
+  ast: HastRoot,
+  outerIdx: number,
+  targetIdx: number
+): HastElement | null {
+  let currentIdx = 0;
+  function traverse(node: HastElement): HastElement | null {
+    if (node.tagName === "img") {
+      if (currentIdx === targetIdx) {
+        return node;
+      }
+      currentIdx++;
+    }
+    const children = node.children || [];
+    for (const child of children) {
+      if ("tagName" in child) {
+        const result = traverse(child);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+  const childElement = ast.children[outerIdx];
+  if (childElement && "tagName" in childElement) {
+    return traverse(childElement as HastElement);
+  }
+  return null;
+}
+
 export const findCodeNode = (
   ast: HastRoot,
   targetIdx: number

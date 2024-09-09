@@ -14,14 +14,15 @@ import { PaneInsert } from "./settings/PaneInsert";
 import { PaneAstStyles } from "./settings/PaneAstStyles";
 import { useEditModalDimensions } from "../../hooks/useEditModalDimensions";
 import { classNames } from "../../utils/helpers";
-import type { ContentMap } from "../../types";
+import type { ContentMap, FileDatum } from "../../types";
 
 interface EditModalProps {
   id: string;
   contentMap: ContentMap[];
+  files: FileDatum[];
 }
 
-export const EditModal = ({ id, contentMap }: EditModalProps) => {
+export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
   const contentId = `${$editMode?.targetId?.tag}-${$editMode?.targetId?.outerIdx}${typeof $editMode?.targetId?.idx === "number" ? `-${$editMode.targetId.idx}` : ""}-${$editMode?.id}`;
@@ -183,6 +184,7 @@ export const EditModal = ({ id, contentMap }: EditModalProps) => {
               <PaneAstStyles
                 key={contentId}
                 id={id}
+                files={files}
                 targetId={$editMode.targetId}
               />
             ) : $editMode?.type === `pane` && $editMode?.mode === `break` ? (

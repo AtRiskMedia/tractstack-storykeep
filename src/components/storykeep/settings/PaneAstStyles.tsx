@@ -41,6 +41,7 @@ import type {
   Tag,
   Tuple,
   ButtonStyleClass,
+  FileDatum,
 } from "../../../types";
 
 interface StyleTab {
@@ -52,8 +53,9 @@ interface StyleTab {
 export const PaneAstStyles = (props: {
   id: string;
   targetId: PaneAstTargetId;
+  files: FileDatum[];
 }) => {
-  const { id, targetId } = props;
+  const { id, targetId, files } = props;
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
@@ -1351,6 +1353,7 @@ export const PaneAstStyles = (props: {
                 paneId={targetId.paneId}
                 outerIdx={targetId.outerIdx}
                 idx={targetId.idx}
+                files={files}
               />
               <span className="flex gap-x-6 w-full">
                 <button

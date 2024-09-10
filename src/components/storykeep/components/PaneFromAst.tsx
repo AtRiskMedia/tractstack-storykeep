@@ -126,6 +126,35 @@ const EditableInnerElementWrapper = ({
   );
 };
 
+const ImageWrapper = ({
+  children,
+  showOverlay,
+  toolMode,
+  thisId,
+  handleToolModeClick,
+}: {
+  children: ReactNode;
+  showOverlay: boolean;
+  toolMode: ToolMode;
+  thisId: string;
+  handleToolModeClick: () => void;
+}) => {
+  if (!showOverlay) return children;
+  if (toolMode === "eraser") return children;
+  if (toolMode === "styles") {
+    return (
+      <EditableInnerElementWrapper
+        id={thisId}
+        tooltip="Manage this image"
+        onClick={handleToolModeClick}
+      >
+        {children}
+      </EditableInnerElementWrapper>
+    );
+  }
+  return children;
+};
+
 const PaneFromAst = ({
   readonly,
   payload,
@@ -496,8 +525,15 @@ const PaneFromAst = ({
   }
 
   if (Tag === "img" && imageSrc) {
-    return wrapContent(
-      <img className={injectClassNames} src={imageSrc} alt={altText} />
+    return (
+      <ImageWrapper
+        showOverlay={showOverlay}
+        toolMode={toolMode}
+        thisId={thisId}
+        handleToolModeClick={handleToolModeClick}
+      >
+        <img className={injectClassNames} src={imageSrc} alt={altText} />
+      </ImageWrapper>
     );
   }
 

@@ -54,7 +54,6 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
   const { updateStoreField, handleUndo } = useStoryKeepUtils(fragmentId ?? "");
 
   const [selectedTailwindColor, setSelectedTailwindColor] = useState("");
-
   const [localSettings, setLocalSettings] = useState<LocalSettings>({
     collection: "",
     colour: "",
@@ -63,12 +62,18 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
     mobile: { image: "none" },
   });
 
-  const availableImages = availableImagesWithPrefix.map(img =>
-    img === "none"
-      ? "none"
-      : (img.replace(localSettings.collection, "") as ImageOption)
-  );
   const [query, setQuery] = useState("");
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const availableImages = useMemo(
+    () =>
+      availableImagesWithPrefix.map(img =>
+        img === "none"
+          ? "none"
+          : (img.replace(localSettings.collection, "") as ImageOption)
+      ),
+    [localSettings.collection]
+  );
 
   const filteredImages = useMemo(() => {
     return query === ""
@@ -78,9 +83,11 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
         );
   }, [query, availableImages]);
 
+  const tailwindColorOptions = useMemo(() => getTailwindColorOptions(), []);
+
   const updateStore = useCallback(
     (newSettings: LocalSettings) => {
-      if (fragmentId) {
+      if (fragmentId && isInitialized) {
         const oldPane = $paneFragmentBgPane[fragmentId].current;
 
         const hiddenViewports = (["desktop", "tablet", "mobile"] as const)
@@ -123,6 +130,7 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
             },
           },
         };
+
         if (!isDeepEqual(oldPane, newBgPane)) {
           updateStoreField("paneFragmentBgPane", newBgPane);
           updateStoreField(
@@ -133,14 +141,15 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
         }
       }
     },
-    [fragmentId, $paneFragmentBgPane, updateStoreField, $paneFragmentIds, id]
+    [
+      fragmentId,
+      $paneFragmentBgPane,
+      updateStoreField,
+      $paneFragmentIds,
+      id,
+      isInitialized,
+    ]
   );
-
-  const handleUndoClick = useCallback(() => {
-    if (fragmentId) {
-      handleUndo("paneFragmentBgPane", fragmentId);
-    }
-  }, [fragmentId, handleUndo]);
 
   const handleChange = useCallback(
     <K extends keyof LocalSettings>(
@@ -158,50 +167,40 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
               },
             }
           : { ...prev, [field]: value };
-        updateStore(newSettings);
         return newSettings;
       });
-
-      return true;
     },
-    [updateStore]
+    []
   );
 
-  const tailwindColorOptions = useMemo(() => getTailwindColorOptions(), []);
+  useEffect(() => {
+    if (isInitialized) {
+      updateStore(localSettings);
+    }
+  }, [localSettings, updateStore, isInitialized]);
 
   const handleHexColorChange = useCallback(
     (newHexColor: string) => {
-      setLocalSettings(prev => {
-        const newSettings = {
-          ...prev,
-          colour: newHexColor,
-        };
-        updateStore(newSettings);
-        return newSettings;
-      });
+      setLocalSettings(prev => ({
+        ...prev,
+        colour: newHexColor,
+      }));
       const matchingTailwindColor = tailwindColorOptions.find(
         color => tailwindToHex(`bg-${color}`) === newHexColor
       );
       setSelectedTailwindColor(matchingTailwindColor || "");
     },
-    [updateStore, tailwindColorOptions]
+    [tailwindColorOptions]
   );
 
-  const handleTailwindColorChange = useCallback(
-    (newTailwindColor: string) => {
-      const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
-      setLocalSettings(prev => {
-        const newSettings = {
-          ...prev,
-          colour: hexColor,
-        };
-        updateStore(newSettings);
-        return newSettings;
-      });
-      setSelectedTailwindColor(newTailwindColor);
-    },
-    [updateStore]
-  );
+  const handleTailwindColorChange = useCallback((newTailwindColor: string) => {
+    const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
+    setLocalSettings(prev => ({
+      ...prev,
+      colour: hexColor,
+    }));
+    setSelectedTailwindColor(newTailwindColor);
+  }, []);
 
   useEffect(() => {
     const fragmentIds = $paneFragmentIds[id]?.current;
@@ -220,8 +219,7 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
         color => tailwindToHex(`bg-${color}`) === currentColor
       );
 
-      setLocalSettings(prevSettings => ({
-        ...prevSettings,
+      setLocalSettings({
         collection: (artpack?.desktop?.collection || "") as Collection,
         colour: currentColor,
         desktop: {
@@ -239,13 +237,21 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
             ? "none"
             : artpack?.mobile?.image || "none") as ImageOption,
         },
-      }));
+      });
 
       if (matchingTailwindColor) {
         setSelectedTailwindColor(matchingTailwindColor);
       }
+
+      setIsInitialized(true);
     }
   }, [fragmentId, $paneFragmentBgPane, tailwindColorOptions]);
+
+  const handleUndoClick = useCallback(() => {
+    if (fragmentId) {
+      handleUndo("paneFragmentBgPane", fragmentId);
+    }
+  }, [fragmentId, handleUndo]);
 
   const renderViewportSettings = (viewport: Viewport) => {
     const Icon =

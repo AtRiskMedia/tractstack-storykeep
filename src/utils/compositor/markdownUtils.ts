@@ -633,9 +633,7 @@ export function insertElementIntoMarkdown(
   // but allowInsertTag should ensure conflicts are avoided
   if (
     typeof idx !== `number` ||
-    ([`ol`].includes(parentTag) &&
-      toolAddMode===`img`)
-      ||
+    ([`ol`].includes(parentTag) && toolAddMode === `img`) ||
     ([`ol`, `ul`].includes(parentTag) &&
       [`p`, `h2`, `h3`, `h4`].includes(toolAddMode))
   ) {

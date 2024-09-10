@@ -790,6 +790,7 @@ export interface FileNode {
   id: string;
   filename: string;
   altDescription: string;
+  url?: string;
   src: string;
   optimizedSrc?: string;
 }

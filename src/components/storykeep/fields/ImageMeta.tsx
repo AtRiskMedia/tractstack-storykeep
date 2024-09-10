@@ -326,6 +326,14 @@ const ImageMeta = (props: {
                   setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
                   setIsSelectingFile(false);
                   updateStore(file.altDescription, file.filename);
+                  const currentPaneFiles = $paneFiles[paneId]?.current || [];
+                  const updatedPaneFiles = currentPaneFiles.some(
+                    f => f.id === file.id
+                  )
+                    ? currentPaneFiles
+                    : [...currentPaneFiles, file];
+                  console.log(currentPaneFiles, updatedPaneFiles);
+                  updateStoreField("paneFiles", updatedPaneFiles, paneId);
                 }
               }}
             >

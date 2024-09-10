@@ -266,7 +266,7 @@ const PaneFromAst = ({
     thisAst.properties?.alt ||
     thisImage?.altDescription ||
     "This should be descriptive text of an image | We apologize the alt text is missing.";
-  const imageSrc = thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`;
+  const imageSrc = thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`;
 
   // Handle code hooks
   const regexpHook =

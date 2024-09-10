@@ -129,9 +129,6 @@ const Pane = (props: {
       $paneFragmentMarkdown[markdownFragmentId]?.current,
       $paneFragmentBgColour,
       $paneFragmentBgPane,
-      toolMode,
-      toolAddMode,
-      viewportKey,
     ]
   );
 

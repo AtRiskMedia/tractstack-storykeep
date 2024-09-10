@@ -71,7 +71,7 @@ const ImageMeta = (props: {
         const thisImage = files?.find(
           image => image.filename === properties.src?.toString()
         );
-        setImageSrc(thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`);
+        setImageSrc(thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`);
       }
     }
   }, [markdownFragment, idx, outerIdx, thisPaneFiles]);
@@ -226,9 +226,8 @@ const ImageMeta = (props: {
     query === ""
       ? files
       : files.filter(file =>
-          file.filename.toLowerCase().includes(query.toLowerCase())
+          file.altDescription.toLowerCase().includes(query.toLowerCase())
         );
-  console.log(imageSrc);
 
   return (
     <div className="space-y-4">
@@ -337,6 +336,7 @@ const ImageMeta = (props: {
                     displayValue={(file: FileDatum) => file?.filename || ""}
                     onChange={event => setQuery(event.target.value)}
                     placeholder="Search files..."
+                    autoComplete="off"
                   />
                   <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                     <ChevronUpDownIcon
@@ -361,7 +361,7 @@ const ImageMeta = (props: {
                           <span
                             className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
                           >
-                            {file.filename}
+                            {file.altDescription}
                           </span>
                           {selected && (
                             <span

@@ -804,6 +804,7 @@ export interface FileDatum {
   filename: string;
   altDescription: string;
   src: string;
+  url?: string;
   optimizedSrc?: string;
 }
 

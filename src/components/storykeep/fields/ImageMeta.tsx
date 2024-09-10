@@ -212,7 +212,6 @@ const ImageMeta = (props: {
       const reader = new FileReader();
       reader.onload = e => {
         const base64 = e.target?.result as string;
-        console.log("Processed image as base64:", base64);
         setImageSrc(base64);
         setFilename(processedFile.name);
         updateStore(
@@ -273,7 +272,7 @@ const ImageMeta = (props: {
           Image
         </label>
         <div className="flex items-center space-x-4">
-          <div className="relative w-24 aspect-video bg-mylightgrey rounded-md overflow-hidden">
+          <div className="relative w-24 aspect-video bg-mylightgrey/5 rounded-md overflow-hidden">
             <img
               src={imageSrc}
               alt={altText}
@@ -289,9 +288,6 @@ const ImageMeta = (props: {
             )}
           </div>
           <div className="flex-grow">
-            <p className="text-sm text-mydarkgrey truncate">
-              {selectedFile?.filename || ""}
-            </p>
             <div className="mt-2 flex space-x-2">
               <button
                 onClick={handleUploadFile}

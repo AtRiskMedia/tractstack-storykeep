@@ -71,10 +71,13 @@ const ImageMeta = (props: {
         const thisImage = files?.find(
           image => image.filename === properties.src?.toString()
         );
-        setImageSrc(thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`);
+        if (thisImage || !imageSrc)
+          setImageSrc(
+            thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`
+          );
       }
     }
-  }, [markdownFragment, idx, outerIdx, thisPaneFiles]);
+  }, [markdownFragment, idx, outerIdx, thisPaneFiles, imageSrc]);
 
   const handleAltTextChange = useCallback((newValue: string) => {
     setAltText(newValue);
@@ -212,7 +215,22 @@ const ImageMeta = (props: {
         console.log("Processed image as base64:", base64);
         setImageSrc(base64);
         setFilename(processedFile.name);
-        updateStore(`Please provide a description of this image`);
+        updateStore(
+          `Please provide a description of this image`,
+          processedFile.name
+        );
+
+        const newFile: FileDatum = {
+          id: Date.now().toString(),
+          filename: processedFile.name,
+          altDescription: "Please provide a description of this image",
+          src: base64,
+          optimizedSrc: base64,
+        };
+
+        const currentPaneFiles = $paneFiles[paneId]?.current || [];
+        const updatedPaneFiles = [...currentPaneFiles, newFile];
+        updateStoreField("paneFiles", updatedPaneFiles, paneId);
       };
       reader.readAsDataURL(processedFile);
     }
@@ -332,7 +350,6 @@ const ImageMeta = (props: {
                   )
                     ? currentPaneFiles
                     : [...currentPaneFiles, file];
-                  console.log(currentPaneFiles, updatedPaneFiles);
                   updateStoreField("paneFiles", updatedPaneFiles, paneId);
                 }
               }}

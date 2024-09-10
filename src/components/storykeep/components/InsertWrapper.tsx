@@ -19,7 +19,7 @@ import {
   toolAddModeTitles,
   toolAddModeInsertDefault,
 } from "../../../constants";
-import { cloneDeep } from "../../../utils/helpers";
+import { cloneDeep, classNames } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
 
@@ -192,7 +192,12 @@ const InsertWrapper = ({
   return (
     <div className="relative group">
       {children}
-      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top mix-blend-exclusion">
+      <div
+        className={classNames(
+          "absolute inset-x-0 top-0 h-1/2 z-100 group/top mix-blend-exclusion",
+          allowTag.before ? `cursor-pointer` : ``
+        )}
+      >
         {allowTag.before && (
           <div
             onClick={() => handleInsert("before")}
@@ -205,7 +210,12 @@ const InsertWrapper = ({
           />
         )}
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom mix-blend-exclusion">
+      <div
+        className={classNames(
+          "absolute inset-x-0 bottom-0 h-1/2 z-100 group/bottom mix-blend-exclusion",
+          allowTag.after ? `cursor-pointer` : ``
+        )}
+      >
         {allowTag.after && (
           <div
             onClick={() => handleInsert("after")}

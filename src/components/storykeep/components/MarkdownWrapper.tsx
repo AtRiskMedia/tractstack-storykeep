@@ -48,6 +48,7 @@ const MarkdownWrapper = ({
   toolAddMode,
 }: Props) => {
   const thisPayload = payload as MarkdownPaneDatum;
+  console.log(markdown.body);
   const thisModalPayload =
     thisPayload.isModal &&
     typeof thisPayload?.optionsPayload?.modal !== `undefined`

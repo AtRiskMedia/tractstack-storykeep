@@ -84,6 +84,14 @@ export function allowTagInsert(
       const hasLinks =
         typeof markdownLookup.linksLookup[outerIdx] !== `undefined`;
 
+      // is this already ul > with links or widgets ?
+      if (
+        typeof idx === `number` &&
+        parentTag === `ul` &&
+        (hasLinks || hasWidget)
+      )
+        return { before: false, after: false };
+
       // is this already ul > img ?
       if (
         typeof idx === `number` &&
@@ -93,8 +101,8 @@ export function allowTagInsert(
       )
         return { before: true, after: true };
 
+      // check for adjascent ul
       if (typeof idx !== `number`) {
-        // check for adjascent ul
         const parentBeforeTag =
           (outerIdx === 0 && parentTag !== `ul`) ||
           (outerIdx > 0 && markdownLookup.nthTag[outerIdx - 1] !== `ul`);
@@ -621,6 +629,9 @@ export function insertElementIntoMarkdown(
   const parentTag = markdownLookup.nthTag[outerIdx];
   let insertedTag: string = toolAddMode;
 
+  // this is relative to the parentTag which can be misleading,
+  // e.g. when insert after ul or ol, we mustn't confuse parents
+  // but allowInsertTag should ensure conflicts are avoided
   if (
     typeof idx !== `number` ||
     ([`ol`, `ul`].includes(parentTag) &&

@@ -628,12 +628,14 @@ export function insertElementIntoMarkdown(
   const mdast = fromMarkdown(newMarkdown.markdown.body);
   const parentTag = markdownLookup.nthTag[outerIdx];
   let insertedTag: string = toolAddMode;
-
   // this is relative to the parentTag which can be misleading,
   // e.g. when insert after ul or ol, we mustn't confuse parents
   // but allowInsertTag should ensure conflicts are avoided
   if (
     typeof idx !== `number` ||
+    ([`ol`].includes(parentTag) &&
+      toolAddMode===`img`)
+      ||
     ([`ol`, `ul`].includes(parentTag) &&
       [`p`, `h2`, `h3`, `h4`].includes(toolAddMode))
   ) {

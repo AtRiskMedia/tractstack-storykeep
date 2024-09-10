@@ -55,7 +55,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "titleText",
     slug: "titleText",
-    name: "Title with paragraph",
+    name: "Page section with title",
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -71,7 +71,7 @@ export const paneDesigns: PaneDesign[] = [
     fragments: [
       {
         type: "markdown",
-        markdownBody: `## title\n\n...\n`,
+        markdownBody: `## add a section title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -92,7 +92,9 @@ export const paneDesigns: PaneDesign[] = [
               classes: {
                 fontSTYLE: ["bold"],
                 textCOLOR: ["myblue"],
-                textSIZE: ["3xl", "5xl"],
+                textSIZE: ["3xl", "4xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
               },
             },
             h3: {
@@ -100,12 +102,16 @@ export const paneDesigns: PaneDesign[] = [
                 fontSTYLE: ["bold"],
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
               },
             },
             h4: {
               classes: {
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
               },
             },
             p: {
@@ -113,6 +119,223 @@ export const paneDesigns: PaneDesign[] = [
                 textCOLOR: ["mydarkgrey"],
                 textSIZE: ["lg", "xl"],
                 my: [3, 4],
+                  lineHEIGHT: ["loose"]
+              },
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
+    id: "farzaTitleText",
+    slug: "farzaTitleText",
+    name: "Page section with title (readable width)",
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: false,
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `## add a section title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                { my: [12, 16] },
+                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
+                {
+                  maxW: ["sm","lg"],
+                }
+              ],
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: ["myblue"],
+                textSIZE: ["3xl", "4xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+                maxW: ["md","lg"]
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: ["myblue"],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+                maxW: ["md","lg"]
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: ["myblue"],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+                maxW: ["md","lg"]
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: ["mydarkgrey"],
+                textSIZE: ["lg", "xl"],
+                my: [3, 4],
+                maxW: ["md","lg"],
+                  lineHEIGHT: ["loose"]
+              },
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
+id: "hero-1",
+    slug: "hero-1",
+    name: "Hero section",
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: false,
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `1. Catchy and impactful title\n2. sub heading\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                { my: [12, 16] },
+                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
+                {
+                  alignITEMS: ["center"],
+                  justifyITEMS: ["start"],
+                  display: ["flex"],
+                },
+              ],
+            },
+            ol: {
+              classes: {
+                maxW: ["md","lg"]
+              }
+            },
+            li: {
+              classes: {
+                fontFACE: ["action"],
+                textCOLOR: ["mydarkgrey"],
+                textSIZE: ["xl", "2xl"],
+                my: [6, 8],
+              },
+              count: 3,
+              override: {
+                fontWEIGHT: [["bold"]],
+                textCOLOR: [["myblue"]],
+                textSIZE: [["7xl", "6xl"]],
+              },
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
+    id: "aside-with-image",
+    slug: "aside-with-image",
+    name: "Hero with image",
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: false,
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `1. Catchy and impactful title\n2. sub heading\n\n* ![Descriptive title](filename)\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                { my: [12, 16] },
+                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
+                {
+                  alignITEMS: ["center"],
+                  display: ["flex"],
+                  flexWRAP: ["wrap", "nowrap"],
+                  gap: ["12"],
+                },
+              ],
+            },
+            img: {
+              classes: {
+                aspectRATIO: ["square"],
+                bgSIZE: ["cover"],
+                rounded: ["lg", "xl"],
+                my: [3, 4],
+              },
+            },
+            li: {
+              classes: {
+                fontFACE: ["action"],
+                textCOLOR: ["mydarkgrey"],
+                textSIZE: ["xl", "2xl"],
+                my: [6, 8],
+              },
+              count: 3,
+              override: {
+                fontWEIGHT: [["bold"]],
+                textCOLOR: [["myblue"]],
+                textSIZE: [["7xl", "6xl"]],
               },
             },
           },
@@ -123,7 +346,7 @@ export const paneDesigns: PaneDesign[] = [
   {
     id: "text",
     slug: "text",
-    name: "Just text starter",
+    name: "Quick text",
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -139,7 +362,7 @@ export const paneDesigns: PaneDesign[] = [
     fragments: [
       {
         type: "markdown",
-        markdownBody: `...\n`,
+        markdownBody: `Your story begins here!\n`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -160,7 +383,8 @@ export const paneDesigns: PaneDesign[] = [
               classes: {
                 fontSTYLE: ["bold"],
                 textCOLOR: ["myblue"],
-                textSIZE: ["3xl", "5xl"],
+                textSIZE: ["3xl", "4xl"],
+                my: [8, 12],
               },
             },
             h3: {
@@ -168,12 +392,14 @@ export const paneDesigns: PaneDesign[] = [
                 fontSTYLE: ["bold"],
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "3xl"],
+                my: [8, 12],
               },
             },
             h4: {
               classes: {
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "2xl"],
+                my: [8, 12],
               },
             },
             p: {
@@ -355,7 +581,7 @@ export const paneDesigns: PaneDesign[] = [
     fragments: [
       {
         type: "markdown",
-        markdownBody: `...\n`,
+        markdownBody: `Your story begins here!\n`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -391,7 +617,8 @@ export const paneDesigns: PaneDesign[] = [
               classes: {
                 fontSTYLE: ["bold"],
                 textCOLOR: ["myblue"],
-                textSIZE: ["3xl", "5xl"],
+                textSIZE: ["3xl", "4xl"],
+                my: [8, 12],
               },
             },
             h3: {
@@ -399,12 +626,14 @@ export const paneDesigns: PaneDesign[] = [
                 fontSTYLE: ["bold"],
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "3xl"],
+                my: [8, 12],
               },
             },
             h4: {
               classes: {
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "2xl"],
+                my: [8, 12],
               },
             },
           },

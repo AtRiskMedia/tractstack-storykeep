@@ -459,7 +459,7 @@ export function reconcileOptionsPayload(
         });
       return highestSibling;
     }
-    return markdownLookup.imagesLookup[outerIdx][idx];
+    return markdownLookup.imagesLookup?.[outerIdx]?.[idx] ?? 0;
   };
 
   const getParentNth = (tag: string) => {

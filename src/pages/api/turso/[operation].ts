@@ -1,13 +1,13 @@
 import type { APIRoute } from "astro";
 import { getPaneDesigns } from "../../../api/turso";
 
-export const POST: APIRoute = async ({ /* request, */ params, locals }) => {
-  if (!locals.user?.isAuthenticated) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+export const POST: APIRoute = async ({ /* request, */ params /*, locals */ }) => {
+  //if (!(locals.user?.isAuthenticated || locals.user?.isOpenDemo)) {
+  //  return new Response(JSON.stringify({ error: "Unauthorized" }), {
+  //    status: 401,
+  //    headers: { "Content-Type": "application/json" },
+  //  });
+  //}
 
   const { operation } = params;
   //const body = await request.json();

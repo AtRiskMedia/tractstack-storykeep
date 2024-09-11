@@ -404,9 +404,9 @@ export const paneDesigns: PaneDesign[] = [
               },
               count: 3,
               override: {
-                fontWEIGHT: [, ["bold"]],
-                textCOLOR: [, ["myblue"]],
-                textSIZE: [, ["7xl", "6xl"]],
+                fontWEIGHT: [undefined, ["bold"]],
+                textCOLOR: [undefined, ["myblue"]],
+                textSIZE: [undefined, ["7xl", "6xl"]],
               },
             },
           },

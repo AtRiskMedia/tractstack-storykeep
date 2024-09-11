@@ -9,7 +9,10 @@ import { EditModal } from "@components/storykeep/EditModal";
 import { StoryFragment } from "@components/storykeep/StoryFragment";
 import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
 import { StoryFragmentHeader } from "@components/storykeep/StoryFragmentHeader";
-import type { ContentMap } from "../../types";
+import type { AuthStatus, ContentMap } from "../../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
 
 // which storyfragment?
 const { slug } = Astro.params;
@@ -56,6 +59,7 @@ const contentMap: ContentMap[] = await getContentMap();
         id={storyfragment.id}
         slug={storyfragment.slug}
         contentMap={contentMap}
+        user={user}
       />
     </header>
 

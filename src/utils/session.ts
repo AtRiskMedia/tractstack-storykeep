@@ -5,9 +5,19 @@ export async function isAuthenticated(Astro: AstroGlobal): Promise<boolean> {
   return token === "authenticated";
 }
 
-export function setAuthenticated(Astro: AstroGlobal, value: boolean) {
+export async function isOpenDemoMode(Astro: AstroGlobal): Promise<boolean> {
+  const token = Astro.cookies.get("storykeep_auth_token")?.value;
+  return token === "open_demo";
+}
+
+export function setAuthenticated(
+  Astro: AstroGlobal,
+  value: boolean,
+  isOpenDemo: boolean = false
+) {
   if (value) {
-    Astro.cookies.set("storykeep_auth_token", "authenticated", {
+    const tokenValue = isOpenDemo ? "open_demo" : "authenticated";
+    Astro.cookies.set("storykeep_auth_token", tokenValue, {
       httpOnly: true,
       secure: import.meta.env.PROD,
       sameSite: "lax",

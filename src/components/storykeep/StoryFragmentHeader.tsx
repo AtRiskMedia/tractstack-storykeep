@@ -27,17 +27,25 @@ import {
   handleToggleOff,
 } from "../../utils/storykeep";
 import { cleanString, debounce } from "../../utils/helpers";
-import type { StoreKey, ContentMap, ToolMode, ToolAddMode } from "../../types";
+import type {
+  AuthStatus,
+  StoreKey,
+  ContentMap,
+  ToolMode,
+  ToolAddMode,
+} from "../../types";
 
 export const StoryFragmentHeader = memo(
   ({
     id,
     slug,
     contentMap,
+    user,
   }: {
     id: string;
     slug: string;
     contentMap: ContentMap[];
+    user: AuthStatus;
   }) => {
     const usedSlugs = contentMap
       .filter(item => item.type === "StoryFragment" && item.slug !== slug)
@@ -285,7 +293,16 @@ export const StoryFragmentHeader = memo(
                 </a>
               )}
 
-              {hasUnsavedChanges ? (
+              {user.isOpenDemo ? (
+                <button
+                  type="button"
+                  title="Changes will not be saved! Have fun!"
+                  className="my-1 rounded px-2 py-1 text-lg shadow-sm bg-myorange/20 text-black ml-2"
+                  disabled={true}
+                >
+                  Demo Mode
+                </button>
+              ) : hasUnsavedChanges ? (
                 <button
                   type="button"
                   className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"

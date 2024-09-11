@@ -2,6 +2,11 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+export interface AuthStatus {
+  isAuthenticated: boolean;
+  isOpenDemo: boolean;
+}
+
 export type TursoOperation = "test" | "paneDesigns";
 
 export interface TursoClientError extends Error {

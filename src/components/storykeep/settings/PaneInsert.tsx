@@ -157,8 +157,8 @@ export const PaneInsert = (props: {
     const prevColor = getColor(prevPaneId);
     const nextColor = getColor(nextPaneId);
     return {
-      prevColor: prevColor || nextColor === "#FFFFFF" ? "#000000" : "#FFFFFF",
-      nextColor: nextColor || "#FFFFFF",
+      prevColor: prevColor || nextColor === "#FFFFFF" ? "#e2e8f0" : "#FFFFFF",
+      nextColor: nextColor || null,
     };
   }, [
     storyFragmentId,

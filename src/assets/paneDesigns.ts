@@ -119,7 +119,7 @@ export const paneDesigns: PaneDesign[] = [
                 textCOLOR: ["mydarkgrey"],
                 textSIZE: ["lg", "xl"],
                 my: [3, 4],
-                  lineHEIGHT: ["loose"]
+                lineHEIGHT: ["loose"],
               },
             },
           },
@@ -162,8 +162,8 @@ export const paneDesigns: PaneDesign[] = [
                 { my: [12, 16] },
                 { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
                 {
-                  maxW: ["sm","lg"],
-                }
+                  maxW: ["sm", "lg"],
+                },
               ],
             },
             h2: {
@@ -173,7 +173,7 @@ export const paneDesigns: PaneDesign[] = [
                 textSIZE: ["3xl", "4xl"],
                 my: [8, 12],
                 fontFACE: ["action"],
-                maxW: ["md","lg"]
+                maxW: ["md", "lg"],
               },
             },
             h3: {
@@ -183,7 +183,7 @@ export const paneDesigns: PaneDesign[] = [
                 textSIZE: ["xl", "3xl"],
                 my: [8, 12],
                 fontFACE: ["action"],
-                maxW: ["md","lg"]
+                maxW: ["md", "lg"],
               },
             },
             h4: {
@@ -192,7 +192,7 @@ export const paneDesigns: PaneDesign[] = [
                 textSIZE: ["xl", "2xl"],
                 my: [8, 12],
                 fontFACE: ["action"],
-                maxW: ["md","lg"]
+                maxW: ["md", "lg"],
               },
             },
             p: {
@@ -200,8 +200,8 @@ export const paneDesigns: PaneDesign[] = [
                 textCOLOR: ["mydarkgrey"],
                 textSIZE: ["lg", "xl"],
                 my: [3, 4],
-                maxW: ["md","lg"],
-                  lineHEIGHT: ["loose"]
+                maxW: ["md", "lg"],
+                lineHEIGHT: ["loose"],
               },
             },
           },
@@ -210,7 +210,7 @@ export const paneDesigns: PaneDesign[] = [
     ],
   },
   {
-id: "hero-1",
+    id: "hero-1",
     slug: "hero-1",
     name: "Hero section",
     type: `starter`,
@@ -252,8 +252,8 @@ id: "hero-1",
             },
             ol: {
               classes: {
-                maxW: ["md","lg"]
-              }
+                maxW: ["md", "lg"],
+              },
             },
             li: {
               classes: {

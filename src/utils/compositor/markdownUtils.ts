@@ -394,7 +394,6 @@ export function reconcileOptionsPayload(
   const newOptionsPayload: OptionsPayloadDatum = JSON.parse(
     JSON.stringify(optionsPayload)
   );
-
   const getLiNth = (outerIdx: number, idx?: number) => {
     if (outerIdx === 0 && typeof idx !== `number`) return 0;
     const adjustedIdx =
@@ -520,16 +519,14 @@ export function reconcileOptionsPayload(
         delete tagPayload.override;
       }
     }
-
     if (typeof tagPayload.count === "number") {
       tagPayload.count += isIncrement ? 1 : -1;
-      if (tagPayload.count <= 0) {
+      if (tagPayload.count <= 0 || !tagPayload?.override) {
         delete tagPayload.count;
       }
-    } else if (isIncrement) {
+    } else if (isIncrement && typeof tagPayload?.override !== `undefined`) {
       tagPayload.count = 1;
     }
-
     if (
       Object.keys(tagPayload).length === 1 &&
       "classes" in tagPayload &&

@@ -141,7 +141,6 @@ const InsertWrapper = ({
             },
           });
         }
-
         paneFragmentMarkdown.setKey(fragmentId, {
           ...currentField,
           current: newValue,

@@ -32,7 +32,12 @@ const current: Current = {
   modDatetime={pane.changed}
   stylesUrl={stylesUrl}
 >
-  <Header title={pane.title} slug="context" impressions={pane.impressions} />
+  <Header
+    title={pane.title}
+    slug={pane.slug}
+    isContext={true}
+    impressions={pane.impressions}
+  />
   <main id="main-content" class="min-h-screen">
     <ContextPaneWrapper
       pane={pane.panePayload}
@@ -43,8 +48,13 @@ const current: Current = {
   </main>
   {
     pane.impressions?.length ? (
-      <ImpressionWrapper payload={pane.impressions} client:load />
+      <ImpressionWrapper
+        payload={pane.impressions}
+        slug={pane.slug}
+        isContext={true}
+        client:load
+      />
     ) : null
   }
-  <Footer created={pane.created} />
+  <Footer created={pane.created} slug={pane.slug} isContext={true} />
 </Layout>

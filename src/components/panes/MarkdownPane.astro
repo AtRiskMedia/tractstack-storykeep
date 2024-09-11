@@ -14,10 +14,12 @@ interface Props {
   files: FileNode[];
   paneId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
 }
 
-const { payload, markdown, files, paneId, slug, markdownLookup } = Astro.props;
+const { payload, markdown, files, paneId, slug, isContext, markdownLookup } =
+  Astro.props;
 const hasHidden =
   payload.hiddenViewports.includes(`desktop`) ||
   payload.hiddenViewports.includes(`tablet`) ||
@@ -67,6 +69,7 @@ const parentClasses = Array.isArray(classNamesParent)
           thisClassNames={injectClassNames}
           paneId={paneId}
           slug={slug}
+          isContext={isContext}
           idx={null}
           outerIdx={idx}
           markdownLookup={markdownLookup}

@@ -53,14 +53,24 @@ const InsertAboveBelowWrapper = ({
 
 const PaneWrapper = (props: {
   id: string;
+  slug: string;
+  isContext: boolean;
   viewportKey: ViewportAuto;
   insertPane: (paneId: string, position: `above` | `below`) => void;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
   isDesigningNew: boolean;
 }) => {
-  const { id, toolMode, toolAddMode, viewportKey, insertPane, isDesigningNew } =
-    props;
+  const {
+    id,
+    slug,
+    isContext,
+    toolMode,
+    toolAddMode,
+    viewportKey,
+    insertPane,
+    isDesigningNew,
+  } = props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
@@ -176,6 +186,8 @@ const PaneWrapper = (props: {
     ) : (
       <Pane
         id={id}
+        slug={slug}
+        isContext={isContext}
         toolMode={toolMode}
         toolAddMode={toolAddMode}
         viewportKey={viewportKey}

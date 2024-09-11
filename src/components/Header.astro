@@ -3,19 +3,22 @@ import { Home } from "./icons/Home";
 import Menu from "./Menu";
 import { StorySteps } from "./other/StorySteps";
 import { RememberMe } from "./other/RememberMe";
+import { OpenStoryKeep } from "./other/OpenStoryKeep";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import { CartIcon } from "./other/CartIcon";
 import { WORDMARK_MODE } from "../constants";
-import type { MenuDatum, ImpressionDatum } from "../types";
+import type { AuthStatus, MenuDatum, ImpressionDatum } from "../types";
 
 export interface Props {
   title: string;
   slug: string;
+  user: AuthStatus;
   menu?: MenuDatum | null;
   impressions?: ImpressionDatum[];
+  isContext: boolean;
 }
 
-const { title, slug, menu, impressions } = Astro.props;
+const { title, slug, user, isContext, menu, impressions } = Astro.props;
 const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
 ---
@@ -55,7 +58,11 @@ const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
         }
       </div>
     </a>
-    {!!menu ? <Menu payload={menu} client:load /> : null}
+    {
+      !!menu ? (
+        <Menu payload={menu} slug={slug} isContext={isContext} client:load />
+      ) : null
+    }
   </div>
   <div
     class="flex flex-row flex-nowrap justify-between pt-4 pb-3
@@ -83,6 +90,11 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           >
             <StorySteps client:load />
           </a>
+        ) : null
+      }
+      {
+        user?.isAuthenticated || user?.isOpenDemo ? (
+          <OpenStoryKeep slug={slug} isContext={isContext} client:load />
         ) : null
       }
       <RememberMe client:load />

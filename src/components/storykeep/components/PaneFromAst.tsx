@@ -44,6 +44,7 @@ interface PaneFromAstProps {
   paneFragmentIds: string[];
   markdownFragmentId: string;
   slug: string;
+  isContext: boolean;
   idx: number | null;
   outerIdx: number;
   markdownLookup: MarkdownLookup;
@@ -164,6 +165,7 @@ const PaneFromAst = ({
   paneFragmentIds,
   markdownFragmentId,
   slug,
+  isContext,
   idx = null,
   outerIdx,
   markdownLookup,
@@ -280,7 +282,8 @@ const PaneFromAst = ({
   const buttonTarget = buttonPayload && thisAst.properties.href;
   const callbackPayload =
     buttonPayload?.callbackPayload && lispLexer(buttonPayload?.callbackPayload);
-  const targetUrl = callbackPayload && preParseAction(callbackPayload);
+  const targetUrl =
+    callbackPayload && preParseAction(callbackPayload, slug, isContext);
   const isExternalUrl =
     (typeof targetUrl === "string" &&
       targetUrl.substring(0, 8) === "https://") ||
@@ -364,6 +367,7 @@ const PaneFromAst = ({
             paneFragmentIds={paneFragmentIds}
             markdownFragmentId={markdownFragmentId}
             slug={slug}
+            isContext={isContext}
             idx={!idx ? childIdx : idx}
             outerIdx={outerIdx}
             markdownLookup={markdownLookup}

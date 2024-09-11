@@ -17,6 +17,8 @@ interface PreviewPaneRendererProps {
   viewportKey: ViewportAuto;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
+  slug: string;
+  isContext: boolean;
 }
 
 const PreviewPaneRenderer = ({
@@ -24,6 +26,8 @@ const PreviewPaneRenderer = ({
   viewportKey,
   toolMode,
   toolAddMode,
+  slug,
+  isContext,
 }: PreviewPaneRendererProps) => {
   const {
     id,
@@ -97,11 +101,12 @@ const PreviewPaneRenderer = ({
                     optionsPayload.paneFragmentsPayload?.map(f => f.id) || []
                   }
                   markdownFragmentId={markdown.id}
-                  slug={paneData.slug}
+                  slug={slug}
                   queueUpdate={() => {}} // Mock function, as we don't need real updates in preview
                   toolMode={toolMode}
                   toolAddMode={toolAddMode}
                   viewportKey={viewportKey}
+                  isContext={isContext}
                 />
               </div>
             );

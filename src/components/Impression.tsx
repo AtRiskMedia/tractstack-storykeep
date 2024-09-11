@@ -4,9 +4,17 @@ import { preParseImpression } from "../utils/concierge/preParseImpression";
 import { current, events } from "../store/events";
 import type { ImpressionDatum } from "../types";
 
-export const Impression = ({ payload }: { payload: ImpressionDatum }) => {
+export const Impression = ({
+  payload,
+  slug,
+  isContext,
+}: {
+  payload: ImpressionDatum;
+  slug: string;
+  isContext: boolean;
+}) => {
   const thisButtonPayload = lispLexer(payload.actionsLisp);
-  const actionPayload = preParseAction(thisButtonPayload);
+  const actionPayload = preParseAction(thisButtonPayload, slug, isContext);
   const event = preParseImpression(
     payload.id,
     payload.title,

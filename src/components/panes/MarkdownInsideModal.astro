@@ -24,6 +24,7 @@ interface Props {
   };
   paneId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
 }
 
@@ -35,6 +36,7 @@ const {
   modalPayload,
   paneId,
   slug,
+  isContext,
   markdownLookup,
 } = Astro.props;
 
@@ -143,6 +145,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
                 thisClassNames={thisPayload?.injectClassNames || ``}
                 paneId={paneId}
                 slug={slug}
+                isContext={isContext}
                 idx={null}
                 outerIdx={idx}
                 markdownLookup={markdownLookup}

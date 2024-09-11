@@ -58,6 +58,7 @@ const contentMap: ContentMap[] = await getContentMap();
         client:only="react"
         id={storyfragment.id}
         slug={storyfragment.slug}
+        isContext={false}
         contentMap={contentMap}
         user={user}
       />
@@ -65,7 +66,12 @@ const contentMap: ContentMap[] = await getContentMap();
 
     <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
       <main id="website-content" class="overflow-auto w-full">
-        <StoryFragment id={storyfragment.id} client:only="react" />
+        <StoryFragment
+          id={storyfragment.id}
+          slug={storyfragment.slug}
+          isContext={false}
+          client:only="react"
+        />
       </main>
     </div>
 

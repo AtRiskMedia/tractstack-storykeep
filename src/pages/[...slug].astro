@@ -7,7 +7,10 @@ import HeaderWidget from "../custom/HeaderWidget.astro";
 import Footer from "@components/Footer.astro";
 import { getStoryFragmentBySlug } from "../api/turso";
 import { ENABLE_HEADER_WIDGET } from "../constants";
-import type { Current, StylesVersion } from "../types";
+import type { AuthStatus, Current, StylesVersion } from "../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
 
 // get styles offset
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
@@ -48,14 +51,19 @@ const current: Current = {
 >
   {
     ENABLE_HEADER_WIDGET ? (
-      <HeaderWidget resources={storyfragment.resourcesPayload.headerWidget} />
+      <HeaderWidget
+        slug={lookup}
+        resources={storyfragment.resourcesPayload.headerWidget}
+      />
     ) : null
   }
   <Header
     title={storyfragment.title}
     menu={storyfragment.menuPayload}
     slug={lookup}
+    isContext={false}
     impressions={storyfragment.impressions}
+    user={user}
   />
   <main id="main-content" class="min-h-screen">
     <StoryFragmentWrapper
@@ -67,12 +75,19 @@ const current: Current = {
   </main>
   {
     storyfragment.impressions?.length ? (
-      <ImpressionWrapper payload={storyfragment.impressions} client:idle />
+      <ImpressionWrapper
+        slug={pane.slug}
+        isContext={true}
+        payload={storyfragment.impressions}
+        client:idle
+      />
     ) : null
   }
   <Footer
     created={storyfragment.created}
     menu={storyfragment.menuPayload}
     backToTop={true}
+    slug={lookup}
+    isContext={false}
   />
 </Layout>

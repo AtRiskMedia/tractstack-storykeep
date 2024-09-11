@@ -1,7 +1,11 @@
 //import type {LispTokens} from '../../types.ts';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export const preParseAction = (payload: any) => {
+export const preParseAction = (
+  payload: any,
+  slug: string,
+  isContext: boolean
+) => {
   const thisPayload = (payload && payload[0]) || false;
   const command = (thisPayload && thisPayload[0] && thisPayload[0][0]) || null;
   const parameters =
@@ -14,6 +18,9 @@ export const preParseAction = (payload: any) => {
   switch (command) {
     case `goto`:
       switch (parameterOne) {
+        case `storykeep`:
+          if (!isContext) return `/${slug}/edit`;
+          return `/context/${slug}/edit`;
         case `home`:
           return `/`;
         case `concierge`:

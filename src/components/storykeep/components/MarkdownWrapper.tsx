@@ -26,6 +26,7 @@ interface Props {
   paneFragmentIds: string[];
   markdownFragmentId: string | null;
   slug: string;
+  isContext: boolean;
   queueUpdate: (id: string, updateFn: () => void) => void;
   viewportKey: ViewportAuto;
   toolMode: ToolMode;
@@ -42,6 +43,7 @@ const MarkdownWrapper = ({
   paneFragmentIds,
   markdownFragmentId,
   slug,
+  isContext,
   queueUpdate,
   viewportKey,
   toolMode,
@@ -115,6 +117,7 @@ const MarkdownWrapper = ({
           paneFragmentIds={paneFragmentIds}
           markdownFragmentId={markdownFragmentId}
           slug={slug}
+          isContext={isContext}
           markdownLookup={markdownLookup}
           toolMode={toolMode}
           toolAddMode={toolAddMode}
@@ -134,6 +137,7 @@ const MarkdownWrapper = ({
           paneFragmentIds={paneFragmentIds}
           markdownFragmentId={markdownFragmentId}
           slug={slug}
+          isContext={isContext}
           markdownLookup={markdownLookup}
           toolMode={toolMode}
           toolAddMode={toolAddMode}
@@ -152,6 +156,7 @@ const MarkdownWrapper = ({
           paneFragmentIds={paneFragmentIds}
           markdownFragmentId={markdownFragmentId}
           slug={slug}
+          isContext={isContext}
           markdownLookup={markdownLookup}
           toolMode={toolMode}
           toolAddMode={toolAddMode}

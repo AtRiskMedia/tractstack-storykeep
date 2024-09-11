@@ -12,9 +12,10 @@ import type {
 interface Props {
   payload: PaneDatum;
   slug: string;
+  isContext: boolean;
 }
 
-const { payload, slug } = Astro.props;
+const { payload, slug, isContext } = Astro.props;
 
 // - if paneHeightRatio[Desktop|Tablet|Mobile], calculate height and inject
 const paneHeightRatioDesktop =
@@ -115,6 +116,7 @@ const paneFragments =
                 paneHeight={paneHeight}
                 paneId={payload.id}
                 slug={slug}
+                isContext={isContext}
               />
             ) : null}
           </div>

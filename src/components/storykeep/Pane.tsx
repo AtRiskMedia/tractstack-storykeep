@@ -37,11 +37,13 @@ type FragmentType = MarkdownEditDatum | BgPaneDatum | BgColourDatum;
 
 const Pane = (props: {
   id: string;
+  slug: string;
+  isContext: boolean;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
   viewportKey: ViewportAuto;
 }) => {
-  const { id, toolMode, toolAddMode, viewportKey } = props;
+  const { id, isContext, toolMode, toolAddMode, viewportKey } = props;
   const [isClient, setIsClient] = useState(false);
   const $paneInit = useStore(paneInit, { keys: [id] });
   const $paneSlug = useStore(paneSlug, { keys: [id] });
@@ -185,6 +187,7 @@ const Pane = (props: {
                 paneFragmentIds={memoizedPaneData.paneFragmentIds}
                 markdownFragmentId={memoizedPaneData.markdownFragmentId}
                 slug={memoizedPaneData.slug}
+                isContext={isContext}
                 queueUpdate={queueUpdate}
                 toolMode={toolMode}
                 toolAddMode={toolAddMode}

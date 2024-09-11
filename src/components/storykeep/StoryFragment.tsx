@@ -22,8 +22,12 @@ import DesignNewPane from "./components/DesignNewPane";
 import { classNames, handleEditorResize, debounce } from "../../utils/helpers";
 import type { ViewportKey } from "../../types";
 
-export const StoryFragment = (props: { id: string }) => {
-  const { id } = props;
+export const StoryFragment = (props: {
+  id: string;
+  slug: string;
+  isContext: boolean;
+}) => {
+  const { id, slug, isContext } = props;
   const [isClient, setIsClient] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const { handleUndo } = useStoryKeepUtils(currentId || id, []);
@@ -283,6 +287,8 @@ export const StoryFragment = (props: { id: string }) => {
                 }
                 viewportKey={viewportKey}
                 paneIds={paneIds}
+                slug={slug}
+                isContext={isContext}
               />
             </div>
           ) : isDesigningNew && paneId !== `insert` ? (
@@ -290,6 +296,8 @@ export const StoryFragment = (props: { id: string }) => {
               <div className="absolute inset-0 bg-black/85 z-[8999]"></div>
               <PaneWrapper
                 id={paneId}
+                slug={slug}
+                isContext={isContext}
                 viewportKey={viewportKey}
                 insertPane={insertPane}
                 toolMode={toolMode}
@@ -300,6 +308,8 @@ export const StoryFragment = (props: { id: string }) => {
           ) : (
             <PaneWrapper
               id={paneId}
+              slug={slug}
+              isContext={isContext}
               viewportKey={viewportKey}
               insertPane={insertPane}
               toolMode={toolMode}

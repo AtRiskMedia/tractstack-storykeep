@@ -8,9 +8,13 @@ import type { ImpressionDatum } from "../types";
 
 const ImpressionWrapper = ({
   payload,
+  slug,
+  isContext,
   icon = false,
 }: {
   payload: ImpressionDatum[];
+  slug: string;
+  isContext: boolean;
   icon?: boolean;
 }) => {
   const $inView = useStore(panesVisible);
@@ -76,7 +80,11 @@ const ImpressionWrapper = ({
           <span className="sr-only">Hide impressions</span>
           <XMarkIcon className="h-6 w-6" aria-hidden="true" />
         </button>
-        <Impression payload={currentImpression} />
+        <Impression
+          payload={currentImpression}
+          slug={slug}
+          isContext={isContext}
+        />
       </aside>
     );
   }

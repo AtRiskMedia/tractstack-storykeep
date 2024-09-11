@@ -8,10 +8,18 @@ export interface Props {
   created?: Date;
   menu?: MenuDatum | null;
   backToTop?: boolean;
+  slug: string;
+  isContext: boolean;
 }
 
 const footer = import.meta.env.PUBLIC_FOOTER || ``;
-const { created = new Date(), backToTop = false, menu } = Astro.props;
+const {
+  created = new Date(),
+  backToTop = false,
+  menu,
+  slug,
+  isContext,
+} = Astro.props;
 ---
 
 <div
@@ -33,7 +41,11 @@ const { created = new Date(), backToTop = false, menu } = Astro.props;
     }
   </div>
   <div class="pb-6">
-    {menu ? <FooterMenu payload={menu} /> : null}
+    {
+      menu ? (
+        <FooterMenu payload={menu} slug={slug} isContext={isContext} />
+      ) : null
+    }
     <Socials />
     <div
       class="my-2 flex flex-col items-center justify-center xs:flex-row text-myblue"

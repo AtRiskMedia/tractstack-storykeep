@@ -5,15 +5,19 @@ import { preParseAction } from "../utils/concierge/preParseAction";
 import { lispLexer } from "../utils/concierge/lispLexer";
 import type { MenuDatum, MenuLink } from "../types";
 
-const Menu = (props: { payload: MenuDatum }) => {
-  const { payload } = props;
+const Menu = (props: {
+  slug: string;
+  isContext: boolean;
+  payload: MenuDatum;
+}) => {
+  const { payload, slug, isContext } = props;
   const thisPayload = payload.optionsPayload;
   const additionalLinks = thisPayload
     .filter((e: MenuLink) => !e.featured)
     .map((e: MenuLink) => {
       const item = { ...e };
       const thisPayload = lispLexer(e.actionLisp);
-      const to = preParseAction(thisPayload);
+      const to = preParseAction(thisPayload, slug, isContext);
       if (typeof to === `string`) {
         item.to = to;
         item.internal = true;
@@ -25,7 +29,7 @@ const Menu = (props: { payload: MenuDatum }) => {
     .map((e: MenuLink) => {
       const item = { ...e };
       const thisPayload = lispLexer(e.actionLisp);
-      const to = preParseAction(thisPayload);
+      const to = preParseAction(thisPayload, slug, isContext);
       if (typeof to === `string`) {
         item.to = to;
         item.internal = true;

@@ -80,6 +80,8 @@ const maxHScreen: { [key: string]: boolean } = panesPayload.reduce(function (
           {resourcesPayload?.perCodeHookPayload[idx] ? (
             <div id={pane.slug}>
               <CodeHook
+                slug={current.slug}
+                isContext={false}
                 target={resourcesPayload?.perCodeHookPayload[idx].target}
                 resources={resourcesPayload?.resources?.filter(
                   resource =>
@@ -97,6 +99,7 @@ const maxHScreen: { [key: string]: boolean } = panesPayload.reduce(function (
                 panesPayload.filter((p: PaneDatum) => p.id === pane.id).at(0)!
               }
               slug={current.slug}
+              isContext={false}
             />
           )}
         </div>

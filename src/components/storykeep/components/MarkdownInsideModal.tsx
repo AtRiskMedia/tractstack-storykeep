@@ -31,6 +31,7 @@ interface Props {
   paneFragmentIds: string[];
   markdownFragmentId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
@@ -49,6 +50,7 @@ const MarkdownInsideModal = ({
   paneFragmentIds,
   markdownFragmentId,
   slug,
+  isContext,
   markdownLookup,
   toolMode,
   toolAddMode,
@@ -149,6 +151,7 @@ const MarkdownInsideModal = ({
               paneFragmentIds={paneFragmentIds}
               markdownFragmentId={markdownFragmentId}
               slug={slug}
+              isContext={isContext}
               idx={null}
               outerIdx={idx}
               markdownLookup={markdownLookup}

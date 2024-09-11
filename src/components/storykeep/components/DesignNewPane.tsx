@@ -22,6 +22,8 @@ const DesignNewPane = ({
   tailwindBgColour,
   viewportKey,
   paneIds,
+  slug,
+  isContext,
 }: {
   id: string;
   index: number;
@@ -30,6 +32,8 @@ const DesignNewPane = ({
   tailwindBgColour: string;
   viewportKey: ViewportAuto;
   paneIds: string[];
+  slug: string;
+  isContext: boolean;
 }) => {
   const [mode, setMode] = useState<`design` | `reuse` | `break`>(`design`);
   const [query, setQuery] = useState("");
@@ -321,7 +325,12 @@ const DesignNewPane = ({
           }}
         >
           <div className={`${tailwindBgColour}`}>
-            <PreviewPane design={selectedDesign} viewportKey={viewportKey} />
+            <PreviewPane
+              slug={slug}
+              isContext={isContext}
+              design={selectedDesign}
+              viewportKey={viewportKey}
+            />
           </div>
         </div>
       )}

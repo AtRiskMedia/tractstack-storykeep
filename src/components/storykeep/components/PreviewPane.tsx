@@ -5,9 +5,16 @@ import type { ViewportAuto, PaneDesign } from "../../../types";
 interface PreviewPaneProps {
   design: PaneDesign;
   viewportKey: ViewportAuto;
+  slug: string;
+  isContext: boolean;
 }
 
-const PreviewPane = ({ design, viewportKey }: PreviewPaneProps) => {
+const PreviewPane = ({
+  design,
+  viewportKey,
+  slug,
+  isContext,
+}: PreviewPaneProps) => {
   const paneData = preparePreviewPane(design);
   if (design?.panePayload?.codeHook)
     return (
@@ -24,6 +31,8 @@ const PreviewPane = ({ design, viewportKey }: PreviewPaneProps) => {
         viewportKey={viewportKey}
         toolMode="text"
         toolAddMode="p"
+        slug={slug}
+        isContext={isContext}
       />
       <div className="absolute inset-0 z-[1999]" />
     </div>

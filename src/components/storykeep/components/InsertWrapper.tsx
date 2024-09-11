@@ -90,9 +90,13 @@ const InsertWrapper = ({
         let newOuterIdx = thisOuterIdx;
         let newIdx = thisIdx || 0;
         if (position === "after" && !isEmpty) {
-          if (idx === null) {
+          if (
+            Object.keys(markdownLookup.nthTag).length <
+            Object.keys(newMarkdownLookup.nthTag).length
+          ) {
             newOuterIdx = outerIdx + 1;
-          } else {
+            newIdx = 0;
+          } else if (typeof idx === `number`) {
             newIdx = idx + 1;
           }
         }

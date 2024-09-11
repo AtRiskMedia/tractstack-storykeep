@@ -193,6 +193,7 @@ export const StoryFragment = (props: { id: string }) => {
                 paneMarkdownFragmentId.get()[targetPaneId]?.current;
               if (fragmentId) {
                 handleUndo("paneFragmentMarkdown", fragmentId);
+                setTimeout(() => editModeStore.set(null), 10);
               }
             }
           } else if (interactedType === "bgpane") {

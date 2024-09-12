@@ -101,7 +101,13 @@ px-4 md:px-8 bg-mywhite shadow-inner"
       <CartIcon client:load />
       {
         impressions?.length ? (
-          <ImpressionWrapper payload={impressions} icon={true} client:load />
+          <ImpressionWrapper
+            payload={impressions}
+            icon={true}
+            isContext={isContext}
+            slug={slug}
+            client:load
+          />
         ) : null
       }
     </div>

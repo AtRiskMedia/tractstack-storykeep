@@ -4,6 +4,7 @@ import {
   getAllFileDatum,
   getContextPaneBySlug,
 } from "../../../api/turso";
+import { cleanTursoFileDatum } from "../../../utils/compositor/tursoFileDatum";
 import Layout from "@layouts/StoryKeep.astro";
 import { EditModal } from "@components/storykeep/EditModal";
 import { ContextPane } from "@components/storykeep/ContextPane";
@@ -23,7 +24,8 @@ const baseUrl = new URL(Astro.url.pathname, Astro.site);
 const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
 
 // get files
-const files = await getAllFileDatum();
+const filesRaw = await getAllFileDatum();
+const files = cleanTursoFileDatum(filesRaw);
 
 // get contextPane datum
 const pane = await getContextPaneBySlug(slug);

@@ -5,7 +5,10 @@ import Footer from "@components/Footer.astro";
 import { InformationCircle } from "../../components/icons/InformationCircle";
 import { RememberMeToggle } from "../../components/other/RememberMeToggle";
 import { ProfileSwitch } from "../../components/other/ProfileSwitch";
-import type { StylesVersion } from "../../types";
+import type { AuthStatus, StylesVersion } from "../../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
 
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
 const requestStyles: Response = await fetch(stylesVerUrl);
@@ -22,7 +25,12 @@ const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
   modDatetime={new Date()}
   stylesUrl={stylesUrl}
 >
-  <Header title="Configure your Session" slug="profile" />
+  <Header
+    title="Configure your Session"
+    slug="profile"
+    isContext={false}
+    user={user}
+  />
   <main id="main-content">
     <div class="px-6 font-main text-xl py-24">
       <div class="max-w-3xl mx-auto">
@@ -76,5 +84,5 @@ const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
       </div>
     </div>
   </main>
-  <Footer created={new Date()} />
+  <Footer created={new Date()} slug="profile" isContext={false} />
 </Layout>

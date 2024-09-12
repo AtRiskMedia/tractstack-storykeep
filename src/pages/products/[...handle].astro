@@ -7,7 +7,10 @@ import { Money } from "../../components/other/Money";
 import { AddToCartForm } from "../../components/other/AddToCartForm";
 import { getProductByHandle } from "../../utils/shopify/shopify";
 import { setCache } from "../../utils/shopify/cache";
-import type { StylesVersion } from "../../types";
+import type { StylesVersion, AuthStatus } from "../../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
 
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
 const requestStyles: Response = await fetch(stylesVerUrl);
@@ -35,7 +38,12 @@ setCache.short(Astro);
   modDatetime={new Date()}
   stylesUrl={stylesUrl}
 >
-  <Header title={product?.title || `404`} slug={handle || `404`} />
+  <Header
+    title={product?.title || `404`}
+    slug={handle || `404`}
+    isContext={false}
+    user={user}
+  />
   <main id="main-content">
     <div class="pt-6 pb-16 md:pb-24">
       <div class="mx-auto mt-8 max-w-2xl px-4 md:max-w-7xl md:px-8">
@@ -105,5 +113,5 @@ setCache.short(Astro);
       </a>
     </div>
   </main>
-  <Footer created={new Date()} />
+  <Footer created={new Date()} slug={handle || `404`} isContext={false} />
 </Layout>

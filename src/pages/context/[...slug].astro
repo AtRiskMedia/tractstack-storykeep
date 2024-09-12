@@ -5,7 +5,7 @@ import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import { getContextPaneBySlug } from "../../api/turso";
-import type { StylesVersion, Current } from "../../types";
+import type { StylesVersion, Current, AuthStatus } from "../../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;

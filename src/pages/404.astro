@@ -2,7 +2,10 @@
 import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
-import type { StylesVersion } from "../types";
+import type { StylesVersion, AuthStatus } from "../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
 
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
 const requestStyles: Response = await fetch(stylesVerUrl);
@@ -17,7 +20,7 @@ const stylesUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/frontend.css?v
   modDatetime={new Date()}
   stylesUrl={stylesUrl}
 >
-  <Header title="Page not Found" slug="error" />
+  <Header title="Page not Found" slug="error" isContext={false} user={user} />
   <main id="main-content">
     <h2 class="text-center text-3xl text-myblue">
       This content could not be found.
@@ -32,5 +35,5 @@ const stylesUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/frontend.css?v
       </a>
     </div>
   </main>
-  <Footer created={new Date()} />
+  <Footer created={new Date()} slug="error" isContext={false} />
 </Layout>

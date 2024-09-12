@@ -310,14 +310,14 @@ export const StoryKeepHeader = memo(
               {hasUnsavedChanges ? (
                 <a
                   data-astro-reload
-                  href={`/${$storyFragmentSlug[id]?.original}/edit`}
+                  href={!isContext ? `/${slug}/edit` : `/context/${slug}/edit`}
                   className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
                 >
                   Cancel
                 </a>
               ) : (
                 <a
-                  href={`/${$storyFragmentSlug[id]?.original}`}
+                  href={!isContext ? `/${slug}` : `/context/${slug}`}
                   className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
                 >
                   Close

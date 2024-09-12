@@ -7,6 +7,9 @@ import Footer from "@components/Footer.astro";
 import { getContextPaneBySlug } from "../../api/turso";
 import type { StylesVersion, Current } from "../../types";
 
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
+
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
 const requestStyles = await fetch(stylesVerUrl);
 const stylesVer: StylesVersion =
@@ -37,6 +40,7 @@ const current: Current = {
     slug={pane.slug}
     isContext={true}
     impressions={pane.impressions}
+    user={user}
   />
   <main id="main-content" class="min-h-screen">
     <ContextPaneWrapper

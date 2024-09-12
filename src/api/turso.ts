@@ -14,6 +14,7 @@ import type {
   DatumPayload,
   PaneDesign,
   TursoFileNode,
+  FullContentMap,
 } from "../types.ts";
 
 export const turso = createClient({
@@ -354,6 +355,64 @@ export async function getAllFileDatum(): Promise<TursoFileNode[]> {
     return cleanTursoFile(rows);
   } catch (error) {
     console.error("Error fetching all file data:", error);
+    throw error;
+  }
+}
+
+export async function getFullContentMap(): Promise<FullContentMap[]> {
+  try {
+    const { rows } = await turso.execute(`
+      SELECT id, id as slug, title, 'Menu' as type, theme, NULL as is_context_pane, NULL as category_slug
+      FROM menu
+      UNION ALL
+      SELECT id, slug, title, 'Pane' as type, NULL as theme, is_context_pane, NULL as category_slug
+      FROM pane
+      UNION ALL
+      SELECT id, slug, title, 'Resource' as type, NULL as theme, NULL as is_context_pane, category_slug
+      FROM resource
+      UNION ALL
+      SELECT id, slug, title, 'StoryFragment' as type, NULL as theme, NULL as is_context_pane, NULL as category_slug
+      FROM storyfragment
+      ORDER BY title
+    `);
+
+    return rows.map(row => {
+      const base = {
+        id: row.id as string,
+        title: row.title as string,
+        slug: row.slug as string,
+      };
+
+      switch (row.type) {
+        case "Menu":
+          return {
+            ...base,
+            type: "Menu",
+            theme: row.theme as string,
+          };
+        case "Resource":
+          return {
+            ...base,
+            type: "Resource",
+            categorySlug: row.category_slug as string | null,
+          };
+        case "Pane":
+          return {
+            ...base,
+            type: "Pane",
+            isContext: Boolean(row.is_context_pane),
+          };
+        case "StoryFragment":
+          return {
+            ...base,
+            type: "StoryFragment",
+          };
+        default:
+          throw new Error(`Unknown type: ${row.type}`);
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching full content map:", error);
     throw error;
   }
 }

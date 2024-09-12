@@ -520,6 +520,38 @@ export type ContentMap = {
   isContextPane?: boolean;
 };
 
+export type ContentMapBase = {
+  id: string;
+  title: string;
+  slug: string;
+  type: "Menu" | "Pane" | "Resource" | "StoryFragment";
+};
+
+export type MenuContentMap = ContentMapBase & {
+  type: "Menu";
+  theme: string;
+};
+
+export type ResourceContentMap = ContentMapBase & {
+  type: "Resource";
+  categorySlug: string | null;
+};
+
+export type PaneContentMap = ContentMapBase & {
+  type: "Pane";
+  isContext: boolean;
+};
+
+export type StoryFragmentContentMap = ContentMapBase & {
+  type: "StoryFragment";
+};
+
+export type FullContentMap =
+  | MenuContentMap
+  | ResourceContentMap
+  | PaneContentMap
+  | StoryFragmentContentMap;
+
 export interface TursoStoryFragmentMap {
   id: string;
   title: string;

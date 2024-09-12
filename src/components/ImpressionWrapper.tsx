@@ -51,6 +51,7 @@ const ImpressionWrapper = ({
       if (!alreadyActive.includes(s) && panesWatch.includes(s))
         alreadyActive.push(s);
     });
+    if (slug === `storykeep`) alreadyActive.push(`storykeep`);
     if (alreadyActive.length > start) {
       setActiveImpressions(
         payload.filter((i: ImpressionDatum) =>

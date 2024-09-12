@@ -11,12 +11,14 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const protectedRoutes = [
     "/*/edit",
+    "/storykeep",
     "/storykeep/create",
     "/api/turso/paneDesigns",
     //"/api/concierge/builder/*",
   ];
   const openProtectedRoutes = [
     "/*/edit",
+    "/storykeep",
     "/storykeep/create",
     "/api/turso/paneDesigns",
   ];

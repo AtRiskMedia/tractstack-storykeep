@@ -1,0 +1,103 @@
+---
+import Layout from "@layouts/Layout.astro";
+import Header from "@components/Header.astro";
+import Footer from "@components/Footer.astro";
+import ImpressionWrapper from "@components/ImpressionWrapper";
+import { ContentSearchWrapper } from "../components/storykeep/components/ContentSearchWrapper";
+import { getFullContentMap } from "../api/turso";
+import type {
+  StylesVersion,
+  AuthStatus,
+  ImpressionDatum,
+  MenuDatum,
+} from "../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
+
+// get styles offset
+const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
+const requestStyles = await fetch(stylesVerUrl);
+const stylesVer: StylesVersion =
+  requestStyles.status === 404 ? 0 : await requestStyles.json();
+const stylesUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/frontend.css?v=${stylesVer?.v || 0}`;
+
+// get storykeep datum
+const payload = await getFullContentMap();
+if (!payload) {
+  return Astro.redirect("/404");
+}
+
+// menu
+const menuPayload = {
+  id: `storykeep`,
+  title: "Story Keep Menu",
+  theme: "default",
+  optionsPayload: [
+    {
+      name: "Logout",
+      description: "Close this session",
+      featured: true,
+      actionLisp: "(goto (storykeep logout))",
+    },
+  ],
+} as MenuDatum;
+// impression
+const impressions = user.isOpenDemo
+  ? [
+      {
+        id: `storykeep`,
+        parentId: `storykeep`,
+        title: "Would you like your website to be built with Tract Stack?",
+        body: "We offer Tract Stack as a service with premium agency support.",
+        actionLisp: "",
+        buttonText: "Interested!",
+        actionsLisp: "(goto (storyFragmentPane hello pricing))",
+      },
+    ]
+  : ([] as ImpressionDatum[]);
+---
+
+<Layout title="Welcome to your Story Keep" stylesUrl={stylesUrl}>
+  {
+    user.isOpenDemo ? (
+      <div class="my-1 pt-2 shadow-inner px-1">
+        <span class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black font-action w-full">
+          <span class="font-bold">Demo Mode:</span> &nbsp; No changes will be
+          saved. Have fun!
+        </span>
+      </div>
+    ) : null
+  }
+  <Header
+    title="Welcome to your Story Keep"
+    menu={menuPayload}
+    slug="storykeep"
+    isContext={false}
+    impressions={impressions}
+    user={user}
+  />
+  <main id="main-content" class="min-h-screen">
+    <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
+      <div class="py-1.5 bg-white px-3.5">
+        <ContentSearchWrapper contentMap={payload} client:load />
+      </div>
+    </div>
+  </main>
+  {
+    impressions?.length ? (
+      <ImpressionWrapper
+        slug={`storykeep`}
+        isContext={false}
+        payload={impressions}
+        client:idle
+      />
+    ) : null
+  }
+  <Footer
+    menu={menuPayload}
+    backToTop={true}
+    slug={`storykeep`}
+    isContext={false}
+  />
+</Layout>

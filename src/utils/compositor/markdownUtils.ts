@@ -267,7 +267,7 @@ function processMarkdownElement(
             return line.replace(/^(\d+\.|-)\s*/, "");
           } else if (action === "update" && newContent) {
             const prefix = /^\d+\.\s/.test(line)
-              ? line.match(/^\d+\./)?.at(0) ?? "1."
+              ? (line.match(/^\d+\./)?.at(0) ?? "1.")
               : line[0];
             lines[i] = `${prefix} ${newContent}`;
             return lines.join("\n");
@@ -335,19 +335,19 @@ export function getGlobalNth(
   switch (Tag) {
     case "li":
       return idx !== null
-        ? markdownLookup?.listItemsLookup?.[outerIdx]?.[idx] ?? null
+        ? (markdownLookup?.listItemsLookup?.[outerIdx]?.[idx] ?? null)
         : null;
     case "img":
       return idx !== null
-        ? markdownLookup?.imagesLookup?.[outerIdx]?.[idx] ?? null
+        ? (markdownLookup?.imagesLookup?.[outerIdx]?.[idx] ?? null)
         : null;
     case "code":
       return idx !== null
-        ? markdownLookup?.codeItemsLookup?.[outerIdx]?.[idx] ?? null
+        ? (markdownLookup?.codeItemsLookup?.[outerIdx]?.[idx] ?? null)
         : null;
     case "a":
       return idx !== null
-        ? markdownLookup?.linksLookup?.[outerIdx]?.[idx] ?? null
+        ? (markdownLookup?.linksLookup?.[outerIdx]?.[idx] ?? null)
         : null;
     default:
       return markdownLookup?.nthTagLookup?.[Tag]?.[outerIdx]?.nth ?? null;

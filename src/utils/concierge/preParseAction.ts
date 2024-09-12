@@ -19,6 +19,14 @@ export const preParseAction = (
     case `goto`:
       switch (parameterOne) {
         case `storykeep`:
+          if (parameterTwo) {
+            switch (parameterTwo) {
+              case `logout`:
+                return `/storykeep/logout`;
+              default:
+                console.log(`LispActionPayload preParse misfire`, payload);
+            }
+          }
           if (!isContext) return `/${slug}/edit`;
           return `/context/${slug}/edit`;
         case `home`:

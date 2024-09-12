@@ -93,7 +93,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
         ) : null
       }
       {
-        user?.isAuthenticated || user?.isOpenDemo ? (
+        slug !== `storykeep` && (user?.isAuthenticated || user?.isOpenDemo) ? (
           <OpenStoryKeep slug={slug} isContext={isContext} client:load />
         ) : null
       }

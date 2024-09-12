@@ -29,8 +29,7 @@ export const StoryFragment = (props: {
 }) => {
   const { id, slug, isContext } = props;
   const [isClient, setIsClient] = useState(false);
-  const [currentId, setCurrentId] = useState<string | null>(null);
-  const { handleUndo } = useStoryKeepUtils(currentId || id, []);
+  const { handleUndo } = useStoryKeepUtils(id, []);
   const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
   const $storyFragmentTailwindBgColour = useStore(
@@ -43,7 +42,6 @@ export const StoryFragment = (props: {
   const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
   const $lastInteractedType = useStore(lastInteractedTypeStore);
-  const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId);
   const $visiblePanes = useStore(visiblePanesStore);
   const $viewport = useStore(viewportStore);
   const $viewportKey = useStore(viewportKeyStore);
@@ -161,15 +159,6 @@ export const StoryFragment = (props: {
   }, [toolMode]);
 
   useEffect(() => {
-    if ($lastInteractedPane && $lastInteractedType === "markdown") {
-      const thisId = $paneMarkdownFragmentId[$lastInteractedPane]?.current;
-      setCurrentId(thisId || null);
-    } else {
-      setCurrentId(null);
-    }
-  }, [$lastInteractedPane, $lastInteractedType, $paneMarkdownFragmentId]);
-
-  useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       if ((event as any).handledByComponent) {
@@ -218,6 +207,7 @@ export const StoryFragment = (props: {
   }, [id, $storyFragmentInit]);
 
   useEffect(() => {
+    // ensure correct viewport based on window width
     const scrollBarOffset =
       window.innerWidth - document.documentElement.clientWidth;
     const previewWidth = window.innerWidth;

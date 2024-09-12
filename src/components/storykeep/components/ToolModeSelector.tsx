@@ -5,12 +5,14 @@ interface ToolModeSelectorProps {
   toolMode: ToolMode;
   setToolMode: (toolMode: ToolMode) => void;
   hideElements?: boolean;
+  isContext: boolean;
 }
 
 const ToolModeSelector = ({
   toolMode,
   setToolMode,
   hideElements,
+  isContext,
 }: ToolModeSelectorProps) => {
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
@@ -29,26 +31,28 @@ const ToolModeSelector = ({
           {toolMode}
         </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">
-          {toolModeButtons.map(({ key, Icon, title }, index) => (
-            <button
-              key={key}
-              type="button"
-              title={title}
-              className={classNames(
-                "hover:bg-myorange/50 hover:text-black",
-                toolMode === key
-                  ? "bg-myblue text-white"
-                  : "bg-mylightgrey/20 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",
-                "relative inline-flex items-center px-3 py-2",
-                index === 0 ? "rounded-l-md" : "",
-                index === toolModeButtons.length - 1 ? "rounded-r-md" : ""
-              )}
-              onClick={() => setToolMode(key)}
-            >
-              <span className="sr-only">{key}</span>
-              <Icon className="h-5 w-5" aria-hidden="true" />
-            </button>
-          ))}
+          {toolModeButtons
+            .filter(k => !(isContext && k.key === `pane`))
+            .map(({ key, Icon, title }, index) => (
+              <button
+                key={key}
+                type="button"
+                title={title}
+                className={classNames(
+                  "hover:bg-myorange/50 hover:text-black",
+                  toolMode === key
+                    ? "bg-myblue text-white"
+                    : "bg-mylightgrey/20 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",
+                  "relative inline-flex items-center px-3 py-2",
+                  index === 0 ? "rounded-l-md" : "",
+                  index === toolModeButtons.length - 1 ? "rounded-r-md" : ""
+                )}
+                onClick={() => setToolMode(key)}
+              >
+                <span className="sr-only">{key}</span>
+                <Icon className="h-5 w-5" aria-hidden="true" />
+              </button>
+            ))}
         </span>
       </div>
     </div>

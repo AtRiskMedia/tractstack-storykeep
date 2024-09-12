@@ -3,12 +3,17 @@ import { useStore } from "@nanostores/react";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
 import ToolAddModeSelector from "./components/ToolAddModeSelector";
+import PaneTitle from "./fields/PaneTitle";
+import PaneSlug from "./fields/PaneSlug";
 import StoryFragmentTitle from "./fields/StoryFragmentTitle";
 import StoryFragmentSlug from "./fields/StoryFragmentSlug";
 import {
   editModeStore,
   unsavedChangesStore,
   uncleanDataStore,
+  paneInit,
+  paneSlug,
+  paneTitle,
   storyFragmentInit,
   storyFragmentSlug,
   storyFragmentTitle,
@@ -35,17 +40,19 @@ import type {
   ToolAddMode,
 } from "../../types";
 
-export const StoryFragmentHeader = memo(
+export const StoryKeepHeader = memo(
   ({
     id,
     slug,
     contentMap,
     user,
+    isContext,
   }: {
     id: string;
     slug: string;
     contentMap: ContentMap[];
     user: AuthStatus;
+    isContext: boolean;
   }) => {
     const usedSlugs = contentMap
       .filter(item => item.type === "StoryFragment" && item.slug !== slug)
@@ -53,6 +60,8 @@ export const StoryFragmentHeader = memo(
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(id, usedSlugs);
     const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
+    const $paneTitle = useStore(paneTitle, { keys: [id] });
+    const $paneSlug = useStore(paneSlug, { keys: [id] });
     const $editMode = useStore(editModeStore);
     const $viewportSet = useStore(viewportSetStore);
     const $viewport = useStore(viewportStore);
@@ -124,6 +133,7 @@ export const StoryFragmentHeader = memo(
     }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
 
     const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+    const $paneInit = useStore(paneInit, { keys: [id] });
     const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
     const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
     const [isClient, setIsClient] = useState(false);
@@ -150,7 +160,7 @@ export const StoryFragmentHeader = memo(
 
     const handleInterceptEdit = (storeKey: StoreKey, editing: boolean) => {
       if (
-        storeKey === `storyFragmentTitle` &&
+        [`storyFragmentTitle`, `storyFragmentSlug`].includes(storeKey) &&
         $storyFragmentSlug[id].current === ``
       ) {
         const clean = cleanString($storyFragmentTitle[id].current).substring(
@@ -167,15 +177,33 @@ export const StoryFragmentHeader = memo(
           original: newVal,
           history: [],
         });
+      } else if (
+        [`paneTitle`, `paneSlug`].includes(storeKey) &&
+        $paneSlug[id].current === ``
+      ) {
+        const clean = cleanString($paneTitle[id].current).substring(0, 50);
+        const newVal = !usedSlugs.includes(clean) ? clean : ``;
+        uncleanDataStore.setKey(id, {
+          ...(uncleanDataStore.get()[id] || {}),
+          [`paneSlug`]: newVal.length === 0,
+        });
+        paneSlug.setKey(id, {
+          current: newVal,
+          original: newVal,
+          history: [],
+        });
       }
       return handleEditingChange(storeKey, editing);
     };
 
     useEffect(() => {
-      if ($storyFragmentInit[id]?.init) {
+      if (
+        (!isContext && $storyFragmentInit[id]?.init) ||
+        (isContext && $paneInit[id]?.init)
+      ) {
         setIsClient(true);
       }
-    }, [id, $storyFragmentInit]);
+    }, [id, $storyFragmentInit, $paneInit]);
 
     const handleScroll = useCallback(() => {
       if (headerRef.current) {
@@ -248,6 +276,7 @@ export const StoryFragmentHeader = memo(
                 toolMode={toolMode}
                 setToolMode={setToolMode}
                 hideElements={hideElements}
+                isContext={isContext}
               />
               {toolMode === `insert` ? (
                 <div className="ml-4">
@@ -268,26 +297,28 @@ export const StoryFragmentHeader = memo(
             />
 
             <div className="inline">
-              <button
-                type="button"
-                className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
-                onClick={handleEditModeToggle}
-              >
-                Settings
-              </button>
+              {!isContext ? (
+                <button
+                  type="button"
+                  className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                  onClick={handleEditModeToggle}
+                >
+                  Settings
+                </button>
+              ) : null}
 
               {hasUnsavedChanges ? (
                 <a
                   data-astro-reload
                   href={`/${$storyFragmentSlug[id]?.original}/edit`}
-                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
                 >
                   Cancel
                 </a>
               ) : (
                 <a
                   href={`/${$storyFragmentSlug[id]?.original}`}
-                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
                 >
                   Close
                 </a>
@@ -305,7 +336,7 @@ export const StoryFragmentHeader = memo(
               ) : hasUnsavedChanges ? (
                 <button
                   type="button"
-                  className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/20 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+                  className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
                   disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
                 >
                   Save
@@ -314,20 +345,39 @@ export const StoryFragmentHeader = memo(
             </div>
           </div>
           <div style={{ display: hideElements ? "none" : "block" }}>
-            <StoryFragmentTitle
-              id={id}
-              isEditing={isEditing}
-              handleEditingChange={handleInterceptEdit}
-              updateStoreField={updateStoreField}
-              handleUndo={handleUndo}
-            />
-            <StoryFragmentSlug
-              id={id}
-              isEditing={isEditing}
-              handleEditingChange={handleEditingChange}
-              updateStoreField={updateStoreField}
-              handleUndo={handleUndo}
-            />
+            {!isContext ? (
+              <>
+                <StoryFragmentTitle
+                  id={id}
+                  isEditing={isEditing}
+                  handleEditingChange={handleInterceptEdit}
+                  updateStoreField={updateStoreField}
+                  handleUndo={handleUndo}
+                />
+                <StoryFragmentSlug
+                  id={id}
+                  isEditing={isEditing}
+                  handleEditingChange={handleInterceptEdit}
+                  updateStoreField={updateStoreField}
+                  handleUndo={handleUndo}
+                />
+              </>
+            ) : (
+              <>
+                <PaneTitle
+                  id={id}
+                  handleEditingChange={handleInterceptEdit}
+                  updateStoreField={updateStoreField}
+                  handleUndo={handleUndo}
+                />
+                <PaneSlug
+                  id={id}
+                  handleEditingChange={handleInterceptEdit}
+                  updateStoreField={updateStoreField}
+                  handleUndo={handleUndo}
+                />
+              </>
+            )}
           </div>
         </div>
       </div>

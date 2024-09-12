@@ -2,63 +2,56 @@
 import {
   getContentMap,
   getAllFileDatum,
-  getStoryFragmentBySlug /* getDatumPayload */,
-} from "../../api/turso";
+  getContextPaneBySlug,
+} from "../../../api/turso";
 import Layout from "@layouts/StoryKeep.astro";
 import { EditModal } from "@components/storykeep/EditModal";
-import { StoryFragment } from "@components/storykeep/StoryFragment";
-import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
+import { ContextPane } from "@components/storykeep/ContextPane";
+import { StoryKeepContextStore } from "@components/storykeep/StoryKeepContextStore";
 import { StoryKeepHeader } from "@components/storykeep/StoryKeepHeader";
-import type { AuthStatus, ContentMap } from "../../types";
+import type { AuthStatus, ContentMap } from "../../../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
 
 // which storyfragment?
 const { slug } = Astro.params;
-const lookup = slug || import.meta.env.PUBLIC_HOME;
 if (!slug) return Astro.redirect("/404");
 
 // set the canonicalUrl to the actual storyfragment
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
-const canonicalURL = new URL(`/${lookup !== slug ? slug : ``}`, baseUrl).href;
+const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
 
 // get files
 const files = await getAllFileDatum();
 
-// get storyfragment datum
-const storyfragment = await getStoryFragmentBySlug(slug);
-if (!storyfragment) {
-  return Astro.redirect("/404");
-}
+// get contextPane datum
+const pane = await getContextPaneBySlug(slug);
+if (!pane || !pane.panePayload) return Astro.redirect("/404");
 
 const contentMap: ContentMap[] = await getContentMap();
-
-// get full datum payload (resources, files, tractstacks, menus)
-//const payload = await getDatumPayload();
 ---
 
 <Layout
-  title={storyfragment.title}
-  pubDatetime={storyfragment.created}
-  modDatetime={storyfragment.changed}
-  ogImage={storyfragment.socialImagePath}
+  title={pane.title}
+  pubDatetime={pane.created}
+  modDatetime={pane.changed}
   canonicalURL={canonicalURL}
 >
   <div
     class="m-0 p-0 flex flex-col bg-mylightgrey/10 w-full"
     style="background-image: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(255,255,255, 0.5) 10px, rgba(255,255,255, 0.5) 20px );"
   >
-    <StoryKeepStore client:only="react" storyfragment={storyfragment} />
+    <StoryKeepContextStore client:only="react" pane={pane} />
     <header
       class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
       id="main-header"
     >
       <StoryKeepHeader
         client:only="react"
-        id={storyfragment.id}
-        slug={storyfragment.slug}
-        isContext={false}
+        id={pane.id}
+        slug={pane.slug}
+        isContext={true}
         contentMap={contentMap}
         user={user}
       />
@@ -66,25 +59,20 @@ const contentMap: ContentMap[] = await getContentMap();
 
     <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
       <main id="website-content" class="overflow-auto w-full">
-        <StoryFragment
-          id={storyfragment.id}
-          slug={storyfragment.slug}
-          isContext={false}
-          client:only="react"
-        />
+        <ContextPane id={pane.id} slug={pane.slug} client:only="react" />
       </main>
     </div>
 
     <EditModal
       client:only="react"
-      id={storyfragment.id}
+      id={pane.id}
       files={files}
       contentMap={contentMap}
     />
   </div>
 
   <script>
-    import { initStoryKeep } from "../../utils/storykeep";
+    import { initStoryKeep } from "../../../utils/storykeep";
 
     document.addEventListener("DOMContentLoaded", () => {
       initStoryKeep();

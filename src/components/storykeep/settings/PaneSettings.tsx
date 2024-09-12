@@ -36,13 +36,14 @@ export const PaneSettings = (props: {
 }) => {
   const { id, storyFragmentId, contentMap } = props;
   const [confirmRemoval, setConfirmRemoval] = useState(false);
+  const $paneTitle = useStore(paneTitle, { keys: [id] });
+  const $paneSlug = useStore(paneSlug, { keys: [id] });
   const usedSlugs = contentMap
     .filter(item => item.type === "Pane")
+    .filter(item => item.slug !== $paneSlug[id].original)
     .map(item => item.slug);
   const { updateStoreField, handleEditingChange, handleUndo } =
     useStoryKeepUtils(id, usedSlugs);
-  const $paneTitle = useStore(paneTitle, { keys: [id] });
-  const $paneSlug = useStore(paneSlug, { keys: [id] });
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const $paneIsHiddenPane = useStore(paneIsHiddenPane, { keys: [id] });

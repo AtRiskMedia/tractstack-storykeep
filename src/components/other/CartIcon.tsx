@@ -12,7 +12,7 @@ export const CartIcon = () => {
     if ($cartPayload && $cartPayload.totalQuantity > 0) setShow(true);
   }, [$cartPayload]);
 
-  if (!show) return <div />;
+  if (!show) return null;
   return (
     <a title={`Shopping Cart`} href="/cart" className="pr-2 relative">
       <ShoppingCartIcon className="relative h-6 w-6 mx-2 text-mydarkgrey hover:text-myblue" />

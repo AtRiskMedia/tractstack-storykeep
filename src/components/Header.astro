@@ -69,7 +69,7 @@ const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
 px-4 md:px-8 bg-mywhite shadow-inner"
   >
     <h1 class="text-mydarkgrey truncate text-xl" title={title}>{title}</h1>
-    <div class="flex flex-row flex-nowrap">
+    <div class="flex flex-row flex-nowrap gap-x-2">
       {
         !isHome ? (
           <a
@@ -77,12 +77,12 @@ px-4 md:px-8 bg-mywhite shadow-inner"
             class="text-myblue/80 hover:text-myblue hover:rotate-6"
             title="Go to home page"
           >
-            <Home classes="w-6 h-6 mx-2" />
+            <Home classes="w-6 h-6" />
           </a>
         ) : null
       }
       {
-        !disableFastTravel ? (
+        !disableFastTravel && (
           <a
             href="/concierge/graph"
             class="text-myblue/80 hover:text-myblue hover:rotate-6"
@@ -90,7 +90,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           >
             <StorySteps client:load />
           </a>
-        ) : null
+        )
       }
       {
         slug !== `storykeep` && (user?.isAuthenticated || user?.isOpenDemo) ? (

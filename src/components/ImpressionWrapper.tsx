@@ -96,7 +96,7 @@ const ImpressionWrapper = ({
     <button
       type="button"
       title="Click for notifications"
-      className="h-6 w-6 rounded-full bg-myblue/80 hover:bg-myorange/100 text-white flex justify-center items-center items motion-safe:animate-bounceIn mx-2"
+      className="h-6 w-6 rounded-full bg-myblue/80 hover:bg-myorange/100 text-white flex justify-center items-center items motion-safe:animate-bounceIn"
       onClick={() => showImpressions.set(!$show)}
     >
       <span className="sr-only">Show impressions</span>

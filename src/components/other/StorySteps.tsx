@@ -12,7 +12,7 @@ export const StorySteps = () => {
     if ($sync && $auth.neo4jEnabled) setHidden(false);
     else setHidden(true);
   }, [$sync]);
-  if (hidden) return <div />;
+  if (hidden) return null;
 
-  return <MapIcon className="h-6 w-6 mx-2" />;
+  return <MapIcon className="h-6 w-6" />;
 };

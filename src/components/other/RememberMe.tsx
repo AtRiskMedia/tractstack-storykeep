@@ -16,7 +16,7 @@ export const RememberMe = () => {
     if ($heldBeliefsAll.length) setActive(true);
   }, [$heldBeliefsAll, $authPayload]);
 
-  if (!import.meta.env.PROD || (!active && !consent)) return <div />;
+  if (!import.meta.env.PROD || (!active && !consent)) return null;
   if (!consent)
     return (
       <a
@@ -24,7 +24,7 @@ export const RememberMe = () => {
         className="hover:text-myblue hover:rotate-6"
         title="Session and Profile options"
       >
-        <BoltSlashIcon className="h-6 w-6 mx-2" title="Remember your Session" />
+        <BoltSlashIcon className="h-6 w-6" title="Remember your Session" />
       </a>
     );
   return (
@@ -34,7 +34,7 @@ export const RememberMe = () => {
       title="Session and Profile options"
     >
       <BoltIcon
-        className="h-6 w-6 mx-2 text-myblue/80"
+        className="h-6 w-6 text-myblue/80"
         title="Configure your Session"
       />
     </a>

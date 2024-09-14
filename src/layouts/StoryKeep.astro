@@ -98,6 +98,9 @@ const contentMap: ContentMap[] = await getContentMap();
       import {
         startLoadingAnimation,
         stopLoadingAnimation,
+        handleScroll,
+        scrollToTop,
+        debounce,
       } from "../utils/helpers";
       import { init } from "../utils/init";
 
@@ -113,9 +116,15 @@ const contentMap: ContentMap[] = await getContentMap();
       // Initial setup
       setupEventHandlers();
 
+      // controls scrollToTop button visibility
+      const debouncedHandleScroll = debounce(handleScroll, 50);
+
       document.addEventListener("astro:page-load", () => {
         setupEventHandlers();
+        handleScroll();
         init();
+        scrollToTop();
+        document.addEventListener("scroll", debouncedHandleScroll);
       });
     </script>
 

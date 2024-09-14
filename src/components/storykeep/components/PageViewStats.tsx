@@ -33,7 +33,7 @@ export function PageViewStats() {
         {formattedStats.map(item => (
           <div
             key={item.name}
-            className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow"
+            className="overflow-hidden rounded-lg bg-mywhite px-4 py-5 shadow"
           >
             <dt className="truncate text-md font-bold text-mydarkgrey">
               {item.name}

@@ -78,10 +78,31 @@ const impressions = user.isOpenDemo
   <main id="main-content" class="min-h-screen">
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
       <div class="py-1.5 bg-white px-3.5 flex gap-y-6 flex-col">
-        <ContentSearchWrapper contentMap={payload} client:load />
         <PageViewStats client:load />
         <div class="my-12">
           THIS IS WHERE THE ENGAGEMENT ANALYTICS GRAPH GOES
+        </div>
+        <ContentSearchWrapper contentMap={payload} client:load />
+        <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
+          <div class="px-3.5 py-1.5">
+            <label class="block text-lg leading-6 text-black"
+              >Create new page</label
+            >
+            <div class="mt-1 flex flex-wrap gap-2">
+              <a
+                href="/storykeep/create"
+                class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+              >
+                StoryFragment
+              </a>
+              <a
+                href="/storykeep/create/context"
+                class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+              >
+                Context Page
+              </a>
+            </div>
+          </div>
         </div>
         <div class="my-12">WHAT'S HOT CONTENT TABLE</div>
       </div>

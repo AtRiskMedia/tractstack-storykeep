@@ -45,11 +45,16 @@ export function ContentSearchCombobox({
 
   return (
     <Combobox as="div" value={selectedItem} onChange={handleSelect}>
-      <Combobox.Label className="block text-lg leading-6 text-black">
+      <Combobox.Label
+        htmlFor="quick-find-input"
+        className="block text-lg leading-6 text-black"
+      >
         Quick find
       </Combobox.Label>
       <div className="relative mt-1">
         <Combobox.Input
+          id="quick-find-input"
+          name="quick-find"
           className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-12 text-black shadow-sm ring-1 ring-inset ring-myblack/20 focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6"
           onChange={event => setQuery(event.target.value)}
           onBlur={() => setQuery("")}

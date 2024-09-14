@@ -1,11 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { Switch } from "@headlessui/react";
-import {
-  XMarkIcon,
-  PlusIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/24/outline";
+import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
 import type { EnvSetting } from "../../../types";
@@ -80,7 +76,7 @@ const EnvironmentSettings = () => {
   );
 
   const commonInputClass =
-    "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6";
+    "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-md xs:leading-6";
 
   const reset = useCallback(() => {
     // Mock publish function
@@ -106,87 +102,95 @@ const EnvironmentSettings = () => {
     setHasUnsavedChanges(false);
   }, [localSettings]);
 
+  const getSettingId = (setting: EnvSetting) => `env-setting-${setting.name}`;
+
   return (
     <div className="space-y-8">
-      {localSettings.map((setting, index) => (
-        <div key={setting.name} className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <label
-              htmlFor={`setting-${setting.name}`}
-              className="block text-sm text-mydarkgrey"
-            >
-              {setting.description}
-            </label>
-            <InformationCircleIcon
-              className="h-5 w-5 text-myblue"
-              title={setting.description}
-            />
-          </div>
-          {setting.type === "boolean" ? (
-            <Switch
-              checked={setting.value === "true"}
-              onChange={() => toggleBooleanSetting(index)}
-              className={`${
-                setting.value === "true" ? "bg-myorange" : "bg-mydarkgrey"
-              } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-            >
+      {localSettings.map((setting, index) => {
+        const settingId = getSettingId(setting);
+        return (
+          <div key={setting.name} className="space-y-2">
+            <div className="flex items-center space-x-2">
               <span
-                className={`${
-                  setting.value === "true" ? "translate-x-6" : "translate-x-1"
-                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-              />
-            </Switch>
-          ) : setting.type === "string[]" ? (
-            <div className="space-y-2">
-              {setting.value.split("|").map((value, valueIndex) => (
-                <div key={valueIndex} className="flex items-center space-x-2">
-                  <ContentEditableField
-                    id={`setting-${setting.name}-${valueIndex}`}
-                    value={value}
-                    onChange={newValue => {
-                      const newValues = setting.value.split("|");
-                      newValues[valueIndex] = newValue;
-                      return handleSettingChange(
-                        index,
-                        "value",
-                        newValues.join("|")
-                      );
-                    }}
-                    onEditingChange={handleSettingEditingChange}
-                    placeholder={`Enter ${setting.name} value`}
-                    className={commonInputClass}
-                  />
-                  <button
-                    onClick={() => removeSocialValue(index, valueIndex)}
-                    className="text-myorange hover:text-black"
-                    title="Remove value"
-                  >
-                    <XMarkIcon className="h-5 w-5" />
-                  </button>
-                </div>
-              ))}
-              <button
-                onClick={() => addSocialValue(index)}
-                className="flex items-center text-myblue hover:text-myorange"
+                id={`${settingId}-label`}
+                className="block text-lg text-mydarkgrey"
               >
-                <PlusIcon className="h-5 w-5 mr-1" />
-                Add Value
-              </button>
+                {setting.description}
+              </span>
             </div>
-          ) : (
-            <ContentEditableField
-              id={`setting-${setting.name}`}
-              value={setting.value}
-              onChange={newValue =>
-                handleSettingChange(index, "value", newValue)
-              }
-              onEditingChange={handleSettingEditingChange}
-              placeholder={`Enter ${setting.name}`}
-              className={commonInputClass}
-            />
-          )}
-        </div>
-      ))}
+            {setting.type === "boolean" ? (
+              <Switch
+                checked={setting.value === "true"}
+                onChange={() => toggleBooleanSetting(index)}
+                className={`${
+                  setting.value === "true" ? "bg-myorange" : "bg-mydarkgrey"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+                id={settingId}
+                aria-labelledby={`${settingId}-label`}
+              >
+                <span
+                  className={`${
+                    setting.value === "true" ? "translate-x-6" : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+              </Switch>
+            ) : setting.type === "string[]" ? (
+              <div className="space-y-2">
+                {setting.value.split("|").map((value, valueIndex) => (
+                  <div key={valueIndex} className="flex items-center space-x-2">
+                    <ContentEditableField
+                      id={`${settingId}-${valueIndex}`}
+                      value={value}
+                      onChange={newValue => {
+                        const newValues = setting.value.split("|");
+                        newValues[valueIndex] = newValue;
+                        return handleSettingChange(
+                          index,
+                          "value",
+                          newValues.join("|")
+                        );
+                      }}
+                      onEditingChange={handleSettingEditingChange}
+                      placeholder={`Enter ${setting.name} value`}
+                      className={commonInputClass}
+                      aria-labelledby={`${settingId}-label`}
+                    />
+                    <button
+                      onClick={() => removeSocialValue(index, valueIndex)}
+                      className="text-myorange hover:text-black"
+                      title="Remove value"
+                      aria-label={`Remove ${setting.name} value ${valueIndex + 1}`}
+                    >
+                      <XMarkIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => addSocialValue(index)}
+                  className="flex items-center text-myblue hover:text-myorange"
+                  aria-label={`Add new ${setting.name} value`}
+                >
+                  <PlusIcon className="h-5 w-5 mr-1" />
+                  Add Value
+                </button>
+              </div>
+            ) : (
+              <ContentEditableField
+                id={settingId}
+                value={setting.value}
+                onChange={newValue =>
+                  handleSettingChange(index, "value", newValue)
+                }
+                onEditingChange={handleSettingEditingChange}
+                placeholder={`Enter ${setting.name}`}
+                className={commonInputClass}
+                aria-labelledby={`${settingId}-label`}
+              />
+            )}
+          </div>
+        );
+      })}
+
       <div className="flex justify-end space-x-2">
         {hasUnsavedChanges && (
           <>
@@ -196,7 +200,6 @@ const EnvironmentSettings = () => {
             >
               Cancel
             </button>
-
             <button
               onClick={handlePublish}
               className="flex items-center text-white bg-myblue px-2 py-1 rounded hover:bg-myorange"

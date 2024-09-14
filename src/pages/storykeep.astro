@@ -85,19 +85,28 @@ const impressions = user.isOpenDemo
         <ContentSearchWrapper contentMap={payload} client:load />
         <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
           <div class="px-3.5 py-1.5">
-            <label class="block text-lg leading-6 text-black"
-              >Create new page</label
+            <h2
+              id="create-new-page-heading"
+              class="block text-lg leading-6 text-black mb-2"
             >
-            <div class="mt-1 flex flex-wrap gap-2">
+              Create new page
+            </h2>
+            <div
+              class="mt-1 flex flex-wrap gap-2"
+              role="group"
+              aria-labelledby="create-new-page-heading"
+            >
               <a
                 href="/storykeep/create"
                 class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                role="button"
               >
                 StoryFragment
               </a>
               <a
                 href="/storykeep/create/context"
                 class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                role="button"
               >
                 Context Page
               </a>

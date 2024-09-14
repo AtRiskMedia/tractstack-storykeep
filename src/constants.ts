@@ -6,7 +6,7 @@ import {
   PlusCircleIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
-import type { Tag, ToolMode, ToolAddMode } from "./types";
+import type {EnvSetting, Tag, ToolMode, ToolAddMode } from "./types";
 
 export const CONCIERGE_SYNC_INTERVAL = 4000;
 export const THRESHOLD_READ = import.meta.env.PUBLIC_THRESHOLD_READ || 42000;
@@ -72,7 +72,7 @@ export const toolAddModeInsertDefault: Record<ToolAddMode, string> = {
   h2: "## title",
   h3: "### subtitle",
   h4: "#### section title",
-  img: "![Descriptive title](filename)",
+  img: "![Descriptive title](filename)", // on initial insert must wrap in ul
   yt: "* `youtube(tag|title)`",
   bunny: "* `bunny(id|title)`",
   belief: "* `belief(BeliefTag|likert|prompt)`",
@@ -177,3 +177,134 @@ export const widgetMeta: WidgetMeta = {
     isScale: [false, false],
   },
 };
+
+export const knownEnvSettings: EnvSetting[] = [
+  {
+    name: "PRIVATE_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
+    value: "shpat_1234567890abcdefghijklmnopqrstuv",
+    type: "string",
+    description: "Private access token for Shopify Storefront API",
+  },
+  {
+    name: "PUBLIC_SHOPIFY_SHOP",
+    value: "my-awesome-shop.myshopify.com",
+    type: "string",
+    description: "Your Shopify store URL",
+  },
+  {
+    name: "PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
+    value: "shpat_9876543210zyxwvutsrqponmlkjihgf",
+    type: "string",
+    description: "Public access token for Shopify Storefront API",
+  },
+  {
+    name: "PRIVATE_CONCIERGE_BASE_URL",
+    value: "https://storykeep.example.com/api/v1",
+    type: "string",
+    description: "Base URL for the private Concierge API",
+  },
+  {
+    name: "PUBLIC_CONCIERGE_STYLES_URL",
+    value: "https://storykeep.example.com/api/styles",
+    type: "string",
+    description: "URL for public CSS styles",
+  },
+  {
+    name: "PUBLIC_SITE_URL",
+    value: "https://example.com",
+    type: "string",
+    description: "Public URL of your site",
+  },
+  {
+    name: "PUBLIC_IMAGE_URL",
+    value: "https://example.com",
+    type: "string",
+    description: "Base URL for public images",
+  },
+  {
+    name: "PUBLIC_SOCIALS",
+    value: "facebook.com/mypage|twitter.com/myhandle|instagram.com/myprofile",
+    type: "string[]",
+    description: "Social media links (pipe-separated)",
+  },
+  {
+    name: "PUBLIC_FOOTER",
+    value: "© 2024 My Awesome Company. All rights reserved.",
+    type: "string",
+    description: "Footer text for the website",
+  },
+  {
+    name: "PUBLIC_HOME",
+    value: "home",
+    type: "string",
+    description: "Slug for the home page",
+  },
+  {
+    name: "PUBLIC_IMPRESSIONS_DELAY",
+    value: "5000",
+    type: "number",
+    description: "Delay (in milliseconds) before showing impressions",
+  },
+  {
+    name: "PUBLIC_SLOGAN",
+    value: "Building awesome websites, one story at a time",
+    type: "string",
+    description: "Your company's slogan",
+  },
+  {
+    name: "PUBLIC_READ_THRESHOLD",
+    value: "42000",
+    type: "number",
+    description: "Threshold for considering content as read (in milliseconds)",
+  },
+  {
+    name: "PUBLIC_SOFT_READ_THRESHOLD",
+    value: "7000",
+    type: "number",
+    description:
+      "Soft threshold for considering content as glossed (in milliseconds)",
+  },
+  {
+    name: "PUBLIC_WORDMARK_MODE",
+    value: "default",
+    type: "string",
+    description: "Wordmark mode (default, logo, or wordmark)",
+  },
+  {
+    name: "PUBLIC_GOOGLE_SITE_VERIFICATION",
+    value: "googleXXXXXXXXXXXXXXXX",
+    type: "string",
+    description: "Google site verification code",
+  },
+  {
+    name: "TURSO_DATABASE_URL",
+    value: "libsql://my-db-name.turso.io",
+    type: "string",
+    description: "URL for Turso database",
+  },
+  {
+    name: "TURSO_AUTH_TOKEN",
+    value: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2...",
+    type: "string",
+    description: "Authentication token for Turso",
+  },
+  {
+    name: "PRIVATE_AUTH_SECRET",
+    value: "my-super-secret-auth-key",
+    type: "string",
+    description: "Private authentication secret",
+  },
+  {
+    name: "PUBLIC_USE_CUSTOM_FONTS",
+    value: "false",
+    type: "boolean",
+    description: "Are custom fonts installed?",
+  },
+  {
+    name: "PRIVATE_OPEN_DEMO",
+    value: "true",
+    type: "boolean",
+    description:
+      "Allow visitors to make temporary changes to your site (DEMO MODE)",
+  },
+];

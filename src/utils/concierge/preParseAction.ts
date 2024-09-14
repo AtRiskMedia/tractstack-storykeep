@@ -21,6 +21,8 @@ export const preParseAction = (
         case `storykeep`:
           if (parameterTwo) {
             switch (parameterTwo) {
+              case `dashboard`:
+                return `/storykeep`;
               case `settings`:
                 return `/storykeep/settings`;
               case `logout`:

@@ -157,8 +157,8 @@ export const PaneInsert = (props: {
     const prevColor = getColor(prevPaneId);
     const nextColor = getColor(nextPaneId);
     return {
-      prevColor: prevColor || nextColor === "#FFFFFF" ? "#e2e8f0" : "#FFFFFF",
-      nextColor: nextColor || null,
+      prevColor: prevColor || `#FFFFFF`,
+      nextColor: nextColor || `#000000`,
     };
   }, [
     storyFragmentId,
@@ -174,50 +174,47 @@ export const PaneInsert = (props: {
       const isFromAbove = payload.selectedDesign.orientation === `above`;
       const modifiedDesign = cloneDeep(design);
       let isModified = false;
-      if (isFromAbove && prevColor) {
-        modifiedDesign.fragments =
-          modifiedDesign.fragments
-            ?.map(f => {
-              if (f.type === "bgPane") {
-                isModified = true;
-                return {
-                  ...f,
-                  optionsPayload: {
-                    ...f.optionsPayload,
-                    artpack: {
-                      ...f.optionsPayload?.artpack,
-                      desktop: {
-                        ...f.optionsPayload?.artpack?.desktop,
-                        svgFill: prevColor,
-                      },
-                      tablet: {
-                        ...f.optionsPayload?.artpack?.tablet,
-                        svgFill: prevColor,
-                      },
-                      mobile: {
-                        ...f.optionsPayload?.artpack?.mobile,
-                        svgFill: prevColor,
-                      },
+      modifiedDesign.fragments =
+        modifiedDesign.fragments
+          ?.map(f => {
+            if (f.type === "bgPane") {
+              isModified = true;
+              return {
+                ...f,
+                optionsPayload: {
+                  ...f.optionsPayload,
+                  artpack: {
+                    ...f.optionsPayload?.artpack,
+                    desktop: {
+                      ...f.optionsPayload?.artpack?.desktop,
+                      svgFill: isFromAbove ? prevColor : nextColor,
+                    },
+                    tablet: {
+                      ...f.optionsPayload?.artpack?.tablet,
+                      svgFill: isFromAbove ? prevColor : nextColor,
+                    },
+                    mobile: {
+                      ...f.optionsPayload?.artpack?.mobile,
+                      svgFill: isFromAbove ? prevColor : nextColor,
                     },
                   },
-                } as PaneDesignBgPane;
-              }
-              return f;
-            })
-            .filter(
-              (f): f is PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum =>
-                f.type === "bgPane" ||
-                f.type === "markdown" ||
-                f.type === "bgColour"
-            ) ?? [];
-      }
+                },
+              } as PaneDesignBgPane;
+            }
+            return f;
+          })
+          .filter(
+            (f): f is PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum =>
+              f.type === "bgPane" ||
+              f.type === "markdown" ||
+              f.type === "bgColour"
+          ) ?? [];
 
-      if (!isFromAbove && nextColor && isModified) {
+      if (isModified)
         modifiedDesign.panePayload = {
           ...modifiedDesign.panePayload,
-          bgColour: nextColor,
+          bgColour: isFromAbove ? nextColor : prevColor,
         };
-      }
       return modifiedDesign;
     },
     [getAdjacentPaneColors, payload.selectedDesign.orientation]

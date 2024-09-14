@@ -2,6 +2,15 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+export type EnvSettingType = "string" | "boolean" | "number" | "string[]";
+
+export interface EnvSetting {
+  name: string;
+  value: string;
+  type: EnvSettingType;
+  description: string;
+}
+
 export interface AuthStatus {
   isAuthenticated: boolean;
   isOpenDemo: boolean;
@@ -117,6 +126,7 @@ export type ToolMode =
   | "pane"
   | "eraser";
 export type StoreKey =
+  | "envSettings"
   | "storyFragmentTitle"
   | "storyFragmentSlug"
   | "storyFragmentTractStackId"

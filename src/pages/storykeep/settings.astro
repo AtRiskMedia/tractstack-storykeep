@@ -3,6 +3,7 @@ import StoryKeep from "@layouts/StoryKeep.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
+import EnvironmentSettings from "../../components/storykeep/fields/EnvironmentSettings";
 import type { AuthStatus, ImpressionDatum, MenuDatum } from "../types";
 
 // user authenticated?
@@ -44,9 +45,9 @@ const impressions = user.isOpenDemo
   : ([] as ImpressionDatum[]);
 ---
 
-<StoryKeep title="Story Keep - Advanced Settings">
+<StoryKeep title="Advanced Settings">
   <Header
-    title="Story Keep - Advanced Settings"
+    title="Advanced Settings"
     menu={menuPayload}
     slug="storykeep-settings"
     isContext={false}
@@ -56,7 +57,9 @@ const impressions = user.isOpenDemo
   />
   <main id="main-content" class="min-h-screen">
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
-      <div class="py-1.5 bg-white px-3.5">coming soon</div>
+      <div class="py-1.5 bg-white px-3.5">
+        <EnvironmentSettings client:load />
+      </div>
     </div>
   </main>
   {

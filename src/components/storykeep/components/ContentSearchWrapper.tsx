@@ -81,8 +81,8 @@ export function ContentSearchWrapper({
   };
 
   return (
-    <>
-      <div className="flex flex-wrap md:flex-nowrap gap-12">
+    <div className="w-full">
+      <div className="flex flex-wrap md:flex-nowrap gap-x-12 gap-y-4">
         <div className="w-full md:w-1/2 max-w-lg">
           <ContentSearchCombobox
             items={filteredItems}
@@ -121,7 +121,7 @@ export function ContentSearchWrapper({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 

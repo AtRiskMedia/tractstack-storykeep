@@ -81,17 +81,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           </a>
         ) : null
       }
-      {
-        !disableFastTravel && (
-          <a
-            href="/concierge/graph"
-            class="text-myblue/80 hover:text-myblue hover:rotate-6"
-            title="Your Content Journey"
-          >
-            <StorySteps client:load />
-          </a>
-        )
-      }
+      {!disableFastTravel && <StorySteps client:load />}
       {
         slug !== `storykeep` && (user?.isAuthenticated || user?.isOpenDemo) ? (
           <OpenStoryKeep slug={slug} isContext={isContext} client:load />

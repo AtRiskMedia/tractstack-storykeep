@@ -36,6 +36,7 @@ import {
   MAX_HISTORY_LENGTH,
   SHORT_SCREEN_THRESHOLD,
   MIN_SCROLL_THRESHOLD,
+  reservedSlugs,
 } from "../constants";
 import type {
   StoreKey,
@@ -177,7 +178,10 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
     const isValid =
       isValidValue(storeKey, newValue) &&
       ([`paneSlug`, `storyFragmentSlug`].includes(storeKey)
-        ? usedSlugs && !usedSlugs.includes(newValue)
+        ? !(
+            reservedSlugs.includes(newValue) ||
+            (usedSlugs && usedSlugs.includes(newValue))
+          )
         : true);
     const isPreValid = isPreValidValue(storeKey, newValue);
     if (!isPreValid) {

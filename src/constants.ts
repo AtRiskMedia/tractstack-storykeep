@@ -372,3 +372,13 @@ export const knownEnvSettings: EnvSetting[] = [
     required: false,
   },
 ];
+
+export const reservedSlugs = [
+  `api`,
+  `concierge`,
+  `context`,
+  `products`,
+  `storykeep`,
+  `cart`,
+  `404`,
+];

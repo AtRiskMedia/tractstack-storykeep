@@ -17,18 +17,26 @@ if (!payload) {
 }
 
 // menu
+const links = [
+  {
+    name: "Logout",
+    description: "Close this session",
+    featured: true,
+    actionLisp: "(goto (storykeep logout))",
+  },
+];
+if (user?.isAuthenticated)
+  links.unshift({
+    name: "Settings",
+    description: "Your Story Keep Settings",
+    featured: true,
+    actionLisp: "(goto (storykeep settings))",
+  });
 const menuPayload = {
   id: `storykeep`,
   title: "Story Keep Menu",
   theme: "default",
-  optionsPayload: [
-    {
-      name: "Logout",
-      description: "Close this session",
-      featured: true,
-      actionLisp: "(goto (storykeep logout))",
-    },
-  ],
+  optionsPayload: links,
 } as MenuDatum;
 // impression
 const impressions = user.isOpenDemo

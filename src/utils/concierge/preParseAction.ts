@@ -21,6 +21,8 @@ export const preParseAction = (
         case `storykeep`:
           if (parameterTwo) {
             switch (parameterTwo) {
+              case `settings`:
+                return `/storykeep/settings`;
               case `logout`:
                 return `/storykeep/logout`;
               default:

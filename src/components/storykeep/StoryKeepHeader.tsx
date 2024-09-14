@@ -1,6 +1,10 @@
 import { useCallback, useState, useRef, useEffect, useMemo, memo } from "react";
 import { useStore } from "@nanostores/react";
-import { RectangleGroupIcon } from "@heroicons/react/24/outline";
+import {
+  RectangleGroupIcon,
+  PresentationChartBarIcon,
+} from "@heroicons/react/24/outline";
+import { classNames } from "../../utils/helpers";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
 import ToolAddModeSelector from "./components/ToolAddModeSelector";
@@ -25,6 +29,7 @@ import {
   viewportSetStore,
   toolModeStore,
   toolAddModeStore,
+  showAnalytics,
 } from "../../store/storykeep";
 import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
 import {
@@ -60,6 +65,7 @@ export const StoryKeepHeader = memo(
       .map(item => item.slug);
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(id, usedSlugs);
+    const $showAnalytics = useStore(showAnalytics);
     const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
     const $paneTitle = useStore(paneTitle, { keys: [id] });
     const $paneSlug = useStore(paneSlug, { keys: [id] });
@@ -262,6 +268,10 @@ export const StoryKeepHeader = memo(
       setHasUnsavedChanges(newHasUnsavedChanges);
     }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
 
+    const toggleAnalytics = () => {
+      showAnalytics.set(!$showAnalytics);
+    };
+
     if (!isClient) return <div>Loading...</div>;
 
     return (
@@ -334,6 +344,20 @@ export const StoryKeepHeader = memo(
                   <RectangleGroupIcon className="h-6 w-6" />
                 </a>
               )}
+
+              <button
+                type="button"
+                title="Toggle analytics"
+                onClick={toggleAnalytics}
+                className={classNames(
+                  "my-1 rounded px-2 py-1 text-lg shadow-sm",
+                  $showAnalytics
+                    ? `bg-myorange text-white`
+                    : `bg-myorange/20 text-black`
+                )}
+              >
+                <PresentationChartBarIcon className="h-6 w-6" />
+              </button>
 
               {user.isOpenDemo ? (
                 <button

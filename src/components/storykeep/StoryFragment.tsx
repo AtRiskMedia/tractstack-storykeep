@@ -14,6 +14,7 @@ import {
   toolModeStore,
   toolAddModeStore,
   editModeStore,
+  showAnalytics,
 } from "../../store/storykeep";
 import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
 
@@ -30,6 +31,7 @@ export const StoryFragment = (props: {
   const { id, slug, isContext } = props;
   const [isClient, setIsClient] = useState(false);
   const { handleUndo } = useStoryKeepUtils(id, []);
+  const $showAnalytics = useStore(showAnalytics);
   const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
   const $storyFragmentTailwindBgColour = useStore(
@@ -328,6 +330,9 @@ export const StoryFragment = (props: {
 
   return (
     <>
+      {$showAnalytics && (
+        <div className="bg-myorange">show storyfragment analytics here!</div>
+      )}
       {$editMode?.mode === `settings` && (
         <div
           title="Close panel"

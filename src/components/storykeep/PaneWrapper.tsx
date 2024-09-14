@@ -6,6 +6,7 @@ import {
   lastInteractedPaneStore,
   visiblePanesStore,
   editModeStore,
+  showAnalytics,
 } from "../../store/storykeep";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
@@ -72,6 +73,7 @@ const PaneWrapper = (props: {
     isDesigningNew,
   } = props;
   const [isClient, setIsClient] = useState(false);
+  const $showAnalytics = useStore(showAnalytics);
   const $paneInit = useStore(paneInit, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const $editMode = useStore(editModeStore);
@@ -225,6 +227,9 @@ const PaneWrapper = (props: {
           </div>
         )}
       </div>
+      {$showAnalytics && (
+        <div className="bg-myorange">show pane analytics here!</div>
+      )}
     </div>
   );
 };

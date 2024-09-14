@@ -181,6 +181,8 @@ export const envSettings = map<{
 // all look-ups by ulid
 //
 
+export const showAnalytics = atom<boolean>(false);
+
 // storykeep state
 export const unsavedChangesStore = map<
   Record<string, Record<StoreKey, boolean>>

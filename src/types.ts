@@ -6,9 +6,15 @@ export type EnvSettingType = "string" | "boolean" | "number" | "string[]";
 
 export interface EnvSetting {
   name: string;
-  value: string;
+  defaultValue: string;
   type: EnvSettingType;
   description: string;
+  group: string;
+  priority: boolean;
+  required: boolean;
+}
+export interface EnvSettingDatum extends EnvSetting {
+  value: string;
 }
 
 export interface AuthStatus {

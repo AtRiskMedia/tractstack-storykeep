@@ -1,5 +1,6 @@
 import { useCallback, useState, useRef, useEffect, useMemo, memo } from "react";
 import { useStore } from "@nanostores/react";
+import { RectangleGroupIcon } from "@heroicons/react/24/outline";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
 import ToolAddModeSelector from "./components/ToolAddModeSelector";
@@ -296,11 +297,11 @@ export const StoryKeepHeader = memo(
               hideElements={hideElements}
             />
 
-            <div className="inline">
+            <div className="flex flex-nowrap gap-x-2">
               {!isContext ? (
                 <button
                   type="button"
-                  className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                  className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                   onClick={handleEditModeToggle}
                 >
                   Settings
@@ -311,16 +312,26 @@ export const StoryKeepHeader = memo(
                 <a
                   data-astro-reload
                   href={!isContext ? `/${slug}/edit` : `/context/${slug}/edit`}
-                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                 >
                   Cancel
                 </a>
               ) : (
                 <a
                   href={!isContext ? `/${slug}` : `/context/${slug}`}
-                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange ml-2"
+                  className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                 >
                   Close
+                </a>
+              )}
+
+              {!hasUnsavedChanges && (
+                <a
+                  className="inline-flex items-center justify-center my-1 rounded bg-myblue/20 px-2 py-1 text-lg text-black shadow-sm hover:bg-myorange/50 hover:text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                  href="/storykeep"
+                  title="Story Keep Dashboard"
+                >
+                  <RectangleGroupIcon className="h-6 w-6" />
                 </a>
               )}
 
@@ -328,7 +339,7 @@ export const StoryKeepHeader = memo(
                 <button
                   type="button"
                   title="Changes will not be saved! Have fun!"
-                  className="my-1 rounded px-2 py-1 text-lg shadow-sm bg-myorange/20 text-black ml-2"
+                  className="my-1 rounded px-2 py-1 text-lg shadow-sm bg-myorange/20 text-black"
                   disabled={true}
                 >
                   Demo Mode
@@ -336,7 +347,7 @@ export const StoryKeepHeader = memo(
               ) : hasUnsavedChanges ? (
                 <button
                   type="button"
-                  className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack ml-2 disabled:hidden"
+                  className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack disabled:hidden"
                   disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
                 >
                   Save

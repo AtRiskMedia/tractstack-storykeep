@@ -28,7 +28,7 @@ export function ContentTypeFilter({
             onClick={() => handleChange(type)}
             className={`flex items-center px-3 py-1.5 rounded-md text-sm ${
               selectedTypes.includes(type)
-                ? "bg-myorange text-white"
+                ? "bg-myorange/20 text-black"
                 : "bg-white text-mydarkgrey border border-mydarkgrey"
             }`}
           >

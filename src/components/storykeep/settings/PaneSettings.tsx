@@ -23,6 +23,7 @@ import {
   paneHasOverflowHidden,
   paneHasMaxHScreen,
   paneCodeHook,
+  storyFragmentSlug,
   storyFragmentPaneIds,
   editModeStore,
 } from "../../../store/storykeep";
@@ -36,12 +37,16 @@ export const PaneSettings = (props: {
 }) => {
   const { id, storyFragmentId, contentMap } = props;
   const [confirmRemoval, setConfirmRemoval] = useState(false);
+  const $storyFragmentSlug = useStore(storyFragmentSlug, {
+    keys: [storyFragmentId],
+  });
   const $paneTitle = useStore(paneTitle, { keys: [id] });
   const $paneSlug = useStore(paneSlug, { keys: [id] });
-  const usedSlugs = contentMap
-    .filter(item => item.type === "Pane")
-    .filter(item => item.slug !== $paneSlug[id].original)
-    .map(item => item.slug);
+  const usedSlugs = [
+    ...contentMap.map(item => item.slug),
+    ...Object.keys($paneSlug).map(s => $paneSlug[s].current),
+    ...Object.keys($storyFragmentSlug).map(s => $storyFragmentSlug[s].current),
+  ];
   const { updateStoreField, handleEditingChange, handleUndo } =
     useStoryKeepUtils(id, usedSlugs);
   const $paneHasMaxHScreen = useStore(paneHasMaxHScreen, { keys: [id] });

@@ -60,11 +60,6 @@ export const StoryKeepHeader = memo(
     user: AuthStatus;
     isContext: boolean;
   }) => {
-    const usedSlugs = contentMap
-      .filter(item => item.type === "StoryFragment" && item.slug !== slug)
-      .map(item => item.slug);
-    const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
-      useStoryKeepUtils(id, usedSlugs);
     const $showAnalytics = useStore(showAnalytics);
     const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
     const $paneTitle = useStore(paneTitle, { keys: [id] });
@@ -78,7 +73,24 @@ export const StoryKeepHeader = memo(
     const { value: toolMode } = useStore(toolModeStore);
     const { value: toolAddMode } = useStore(toolAddModeStore);
     const toolAddModeRef = useRef<HTMLSelectElement>(null);
+    const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+    const $paneInit = useStore(paneInit, { keys: [id] });
+    const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
+    const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
+    const [isClient, setIsClient] = useState(false);
+    const [hideElements, setHideElements] = useState(false);
+    const headerRef = useRef<HTMLDivElement>(null);
     let lastScrollTop = 0;
+    const usedSlugs = [
+      ...contentMap.filter(item => item.slug !== slug).map(item => item.slug),
+      ...Object.keys($paneSlug).map(s => $paneSlug[s].current),
+      ...Object.keys($storyFragmentSlug).map(
+        s => $storyFragmentSlug[s].current
+      ),
+    ];
+    const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
+      useStoryKeepUtils(id, usedSlugs);
+
     const setViewport = (
       newViewport: "auto" | "mobile" | "tablet" | "desktop"
     ) => {
@@ -138,14 +150,6 @@ export const StoryKeepHeader = memo(
         storyFragmentChanges || paneChanges || paneFragmentChanges
       );
     }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
-
-    const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
-    const $paneInit = useStore(paneInit, { keys: [id] });
-    const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
-    const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
-    const [isClient, setIsClient] = useState(false);
-    const [hideElements, setHideElements] = useState(false);
-    const headerRef = useRef<HTMLDivElement>(null);
 
     const handleEditModeToggle = () => {
       if (

@@ -5,6 +5,7 @@ import { useStore } from "@nanostores/react";
 import {
   toolModeStore,
   storyFragmentPaneIds,
+  storyFragmentSlug,
   paneInit,
   paneTitle,
   paneSlug,
@@ -74,13 +75,18 @@ export const PaneInsert = (props: {
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
     keys: [storyFragmentId],
   });
+  const $storyFragmentSlug = useStore(storyFragmentSlug, {
+    keys: [storyFragmentId],
+  });
   const $paneFragmentIds = useStore(paneFragmentIds);
   const $paneTitle = useStore(paneTitle);
   const $paneSlug = useStore(paneSlug);
   const $paneFragmentBgColour = useStore(paneFragmentBgColour);
-  const usedSlugs = contentMap
-    .filter(item => item.type === "Pane")
-    .map(item => item.slug);
+  const usedSlugs = [
+    ...contentMap.map(item => item.slug),
+    ...Object.keys($paneSlug).map(s => $paneSlug[s].current),
+    ...Object.keys($storyFragmentSlug).map(s => $storyFragmentSlug[s].current),
+  ];
   const { updateStoreField, handleEditingChange, handleUndo } =
     useStoryKeepUtils(paneId, usedSlugs);
   const newPaneIds = [
@@ -156,10 +162,32 @@ export const PaneInsert = (props: {
     };
     const prevColor = getColor(prevPaneId);
     const nextColor = getColor(nextPaneId);
-    return {
-      prevColor: prevColor || `#FFFFFF`,
-      nextColor: nextColor || `#000000`,
-    };
+    if (!prevColor && !nextColor)
+      return {
+        prevColor: `#000000`,
+        nextColor: `#FFFFFF`,
+      };
+    else if (!prevColor && nextColor && nextColor !== `#000000`)
+      return {
+        prevColor: `#000000`,
+        nextColor,
+      };
+    else if (!prevColor && nextColor && nextColor === `#000000`)
+      return {
+        prevColor: `#FFFFFF`,
+        nextColor,
+      };
+    else if (!nextColor && prevColor && prevColor !== `#000000`)
+      return {
+        nextColor: `#000000`,
+        prevColor,
+      };
+    else if (!nextColor && prevColor && prevColor === `#000000`)
+      return {
+        nextColor: `#FFFFFF`,
+        prevColor,
+      };
+    return { prevColor, nextColor };
   }, [
     storyFragmentId,
     payload.index,
@@ -213,7 +241,9 @@ export const PaneInsert = (props: {
       if (isModified)
         modifiedDesign.panePayload = {
           ...modifiedDesign.panePayload,
-          bgColour: isFromAbove ? nextColor : prevColor,
+          bgColour: isFromAbove
+            ? nextColor || `#FFFFFF`
+            : prevColor || `#000000`,
         };
       return modifiedDesign;
     },

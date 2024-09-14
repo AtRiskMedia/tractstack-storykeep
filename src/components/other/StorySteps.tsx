@@ -18,7 +18,7 @@ export const StorySteps = () => {
   return (
     <a
       href="/concierge/graph"
-      class="text-myblue/80 hover:text-myblue hover:rotate-6"
+      className="text-myblue/80 hover:text-myblue hover:rotate-6"
       title="Your Content Journey"
     >
       <MapIcon className="h-6 w-6" />

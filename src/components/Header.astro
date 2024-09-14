@@ -4,6 +4,7 @@ import Menu from "./Menu";
 import { StorySteps } from "./other/StorySteps";
 import { RememberMe } from "./other/RememberMe";
 import { OpenStoryKeep } from "./other/OpenStoryKeep";
+import { ConfigureStoryKeep } from "./other/ConfigureStoryKeep";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import { CartIcon } from "./other/CartIcon";
 import { WORDMARK_MODE } from "../constants";
@@ -16,11 +17,21 @@ export interface Props {
   menu?: MenuDatum | null;
   impressions?: ImpressionDatum[];
   isContext: boolean;
+  isStoryKeep?: boolean;
 }
 
-const { title, slug, user, isContext, menu, impressions } = Astro.props;
+const {
+  title,
+  slug,
+  user,
+  isContext,
+  menu,
+  impressions,
+  isStoryKeep = false,
+} = Astro.props;
 const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
+console.log(user, slug);
 ---
 
 <header class="relative bg-white shadow-inner">
@@ -71,8 +82,17 @@ px-4 md:px-8 bg-mywhite shadow-inner"
     <h1 class="text-mydarkgrey truncate text-xl" title={title}>{title}</h1>
     <div class="flex flex-row flex-nowrap gap-x-2">
       {
-        !isHome ? (
+        !isHome && !isStoryKeep ? (
           <a
+            href="/"
+            class="text-myblue/80 hover:text-myblue hover:rotate-6"
+            title="Go to home page"
+          >
+            <Home classes="w-6 h-6" />
+          </a>
+        ) : !isHome && isStoryKeep ? (
+          <a
+            data-astro-reload
             href="/"
             class="text-myblue/80 hover:text-myblue hover:rotate-6"
             title="Go to home page"
@@ -84,7 +104,14 @@ px-4 md:px-8 bg-mywhite shadow-inner"
       {!disableFastTravel && <StorySteps client:load />}
       {
         slug !== `storykeep` && (user?.isAuthenticated || user?.isOpenDemo) ? (
-          <OpenStoryKeep slug={slug} isContext={isContext} client:load />
+          <OpenStoryKeep
+            slug={slug}
+            isContext={isContext}
+            isStoryKeep={isStoryKeep}
+            client:load
+          />
+        ) : slug === `storykeep` && user?.isAuthenticated ? (
+          <ConfigureStoryKeep client:load />
         ) : null
       }
       <RememberMe client:load />

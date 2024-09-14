@@ -3,18 +3,10 @@ import StoryKeep from "@layouts/StoryKeep.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
-import { ContentSearchWrapper } from "../components/storykeep/components/ContentSearchWrapper";
-import { getFullContentMap } from "../api/turso";
 import type { AuthStatus, ImpressionDatum, MenuDatum } from "../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
-
-// get storykeep datum
-const payload = await getFullContentMap();
-if (!payload) {
-  return Astro.redirect("/404");
-}
 
 // menu
 const menuPayload = {
@@ -22,6 +14,12 @@ const menuPayload = {
   title: "Story Keep Menu",
   theme: "default",
   optionsPayload: [
+    {
+      name: "Dashboard",
+      description: "Your Story Keep Dashboard",
+      featured: true,
+      actionLisp: "(goto (storykeep))",
+    },
     {
       name: "Logout",
       description: "Close this session",
@@ -46,21 +44,11 @@ const impressions = user.isOpenDemo
   : ([] as ImpressionDatum[]);
 ---
 
-<StoryKeep title="Welcome to your Story Keep">
-  {
-    user.isOpenDemo ? (
-      <div class="my-1 pt-2 shadow-inner px-1">
-        <span class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black font-action w-full justify-center">
-          <span class="font-bold">Demo Mode:</span> &nbsp; No changes will be
-          saved. Have fun!
-        </span>
-      </div>
-    ) : null
-  }
+<StoryKeep title="Story Keep - Advanced Settings">
   <Header
-    title="Welcome to your Story Keep"
+    title="Story Keep - Advanced Settings"
     menu={menuPayload}
-    slug="storykeep"
+    slug="storykeep-settings"
     isContext={false}
     impressions={impressions}
     user={user}
@@ -68,9 +56,7 @@ const impressions = user.isOpenDemo
   />
   <main id="main-content" class="min-h-screen">
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
-      <div class="py-1.5 bg-white px-3.5">
-        <ContentSearchWrapper contentMap={payload} client:load />
-      </div>
+      <div class="py-1.5 bg-white px-3.5">coming soon</div>
     </div>
   </main>
   {
@@ -86,7 +72,7 @@ const impressions = user.isOpenDemo
   <Footer
     menu={menuPayload}
     backToTop={true}
-    slug={`storykeep`}
+    slug={`storykeep-settings`}
     isContext={false}
   />
 </StoryKeep>

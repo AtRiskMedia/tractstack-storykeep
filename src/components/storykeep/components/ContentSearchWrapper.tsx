@@ -106,6 +106,7 @@ export function ContentSearchWrapper({
           <div className="flex flex-nowrap gap-x-3.5">
             <span className="text-mydarkgrey">ACTIONS:</span>
             <a
+              data-astro-reload
               className="underline font-bold text-md hover:text-myorange"
               href={getUrl(`visit`, selectedItem)}
             >

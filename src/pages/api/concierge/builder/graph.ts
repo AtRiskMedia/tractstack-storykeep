@@ -23,7 +23,7 @@ export const GET: APIRoute = async ({ request }) => {
     const data = await response.json();
     return new Response(
       JSON.stringify({
-        ...data,
+        data,
         newRefreshToken,
       }),
       {

@@ -14,7 +14,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
   if (refreshToken) {
     headers.set("X-Refresh-Token", refreshToken); // Add refresh token to headers
   }
-
   const fullUrl = new URL(BASE_URL + url, window.location.origin);
 
   try {

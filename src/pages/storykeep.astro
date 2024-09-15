@@ -11,6 +11,10 @@ import type { AuthStatus, ImpressionDatum, MenuDatum } from "../types";
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
 
+// set the canonicalUrl to the actual storyfragment
+const baseUrl = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(`/storykeep`, baseUrl).href;
+
 // get storykeep datum
 const payload = await getFullContentMap();
 if (!payload) {
@@ -55,7 +59,7 @@ const impressions = user.isOpenDemo
   : ([] as ImpressionDatum[]);
 ---
 
-<StoryKeep title="Welcome to your Story Keep">
+<StoryKeep title="Welcome to your Story Keep" canonicalURL={canonicalURL}>
   {
     user.isOpenDemo ? (
       <div class="my-1 pt-2 shadow-inner px-1">

@@ -5,7 +5,7 @@ import {
   getStoryFragmentBySlug /* getDatumPayload */,
 } from "../../api/turso";
 import { cleanTursoFileDatum } from "../../utils/compositor/tursoFileDatum";
-import Layout from "@layouts/StoryKeep.astro";
+import StoryKeep from "@layouts/StoryKeep.astro";
 import { EditModal } from "@components/storykeep/EditModal";
 import { StoryFragment } from "@components/storykeep/StoryFragment";
 import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
@@ -40,7 +40,7 @@ const contentMap: ContentMap[] = await getContentMap();
 //const payload = await getDatumPayload();
 ---
 
-<Layout
+<StoryKeep
   title={storyfragment.title}
   pubDatetime={storyfragment.created}
   modDatetime={storyfragment.changed}
@@ -92,4 +92,4 @@ const contentMap: ContentMap[] = await getContentMap();
       initStoryKeep();
     });
   </script>
-</Layout>
+</StoryKeep>

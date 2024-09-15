@@ -346,7 +346,7 @@ export const knownEnvSettings: EnvSetting[] = [
     name: "PRIVATE_AUTH_SECRET",
     defaultValue: "my-super-secret-auth-key",
     type: "string",
-    description: "Private authentication secret",
+    description: "Password to access your Story Keep",
     group: "Core",
     priority: false,
     required: true,

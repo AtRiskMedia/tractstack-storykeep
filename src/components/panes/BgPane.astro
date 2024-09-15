@@ -79,7 +79,7 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
   switch (artpackMode) {
     case `break`: {
       return {
-        id: `${viewportKey}-${payload.id}`,
+        id: `${viewportKey}-${artpackCollection}${artpackImage}`,
         artpackMode,
         styles: { fill: (artpack && artpack?.svgFill) || `none` },
         shapeName: `${artpackCollection}${artpackImage}`,

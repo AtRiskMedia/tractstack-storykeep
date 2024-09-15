@@ -244,8 +244,7 @@ export const knownEnvSettings: EnvSetting[] = [
   },
   {
     name: "PUBLIC_SOCIALS",
-    defaultValue:
-      "facebook.com/mypage|twitter.com/myhandle|instagram.com/myprofile",
+    defaultValue: "x|https://x.com/you",
     type: "string[]",
     description: "Social media links",
     group: "Brand",

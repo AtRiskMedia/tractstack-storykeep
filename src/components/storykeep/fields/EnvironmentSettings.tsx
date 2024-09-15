@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-//import { useStore } from "@nanostores/react";
 import { Switch, Combobox } from "@headlessui/react";
 import {
   CheckIcon,
@@ -11,25 +10,33 @@ import {
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
 import { knownEnvSettings } from "../../../constants";
+import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ContentMap, EnvSettingDatum } from "../../../types";
+
+interface EnvironmentSettingsProps {
+  contentMap: ContentMap[];
+}
+
+interface SocialMediaInputProps {
+  value: string;
+  onChange: (newValue: string) => void;
+  onRemove: () => void;
+  availablePlatforms: string[];
+}
 
 const groupOrder = ["Brand", "Core", "Options", "Integrations"];
 
-const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
-  const { contentMap } = props;
-  //const $envSettings = useStore(envSettings);
-  //console.log($envSettings.current)
-
-  const usedSlugs = contentMap
-    .filter(item => item.type === `StoryFragment`)
-    .map(item => {
-      return { slug: item.slug, title: item.title };
-    });
+const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+
+  const commonInputClass =
+    "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
+
+  const usedSlugs = contentMap
+    .filter(item => item.type === "StoryFragment")
+    .map(item => ({ slug: item.slug, title: item.title }));
 
   const initializeSettings = useCallback(() => {
     const initialSettings = knownEnvSettings.map(setting => ({
@@ -45,11 +52,7 @@ const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
   }, [initializeSettings]);
 
   const handleSettingChange = useCallback(
-    (
-      index: number,
-      field: keyof EnvSettingDatum,
-      newValue: string | boolean
-    ) => {
+    (index: number, field: keyof EnvSettingDatum, newValue: string | boolean) => {
       setLocalSettings(prev => {
         const newSettings = [...prev];
         newSettings[index] = { ...newSettings[index], [field]: newValue };
@@ -83,31 +86,118 @@ const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
   const addSocialValue = useCallback((index: number) => {
     setLocalSettings(prev => {
       const newSettings = [...prev];
-      const currentValues = newSettings[index].value.split("|");
-      currentValues.push("");
-      newSettings[index].value = currentValues.join("|");
+      const currentValues = newSettings[index].value.split(",");
+      const usedPlatforms = currentValues.map(value => value.split("|")[0]);
+      const availablePlatforms = socialIconKeys.filter(
+        key => !usedPlatforms.includes(key)
+      );
+
+      if (availablePlatforms.length > 0) {
+        const newPlatform = availablePlatforms[0];
+        currentValues.push(`${newPlatform}|`);
+        newSettings[index].value = currentValues.join(",");
+      }
       return newSettings;
     });
     setHasUnsavedChanges(true);
   }, []);
 
-  const removeSocialValue = useCallback(
-    (settingIndex: number, valueIndex: number) => {
-      setLocalSettings(prev => {
-        const newSettings = [...prev];
-        const currentValues = newSettings[settingIndex].value.split("|");
-        currentValues.splice(valueIndex, 1);
-        newSettings[settingIndex].value = currentValues.join("|");
-        return newSettings;
-      });
-      setHasUnsavedChanges(true);
-    },
-    []
-  );
+  const removeSocialValue = useCallback((index: number, valueIndex: number) => {
+    setLocalSettings(prev => {
+      const newSettings = [...prev];
+      const currentValues = newSettings[index].value.split(",");
+      currentValues.splice(valueIndex, 1);
+      newSettings[index].value = currentValues.join(",");
+      return newSettings;
+    });
+    setHasUnsavedChanges(true);
+  }, []);
 
-  const reset = useCallback(() => {
-    initializeSettings();
-  }, [initializeSettings]);
+  const SocialMediaInput = ({
+    value,
+    onChange,
+    onRemove,
+    availablePlatforms,
+  }: SocialMediaInputProps) => {
+    const [platform, url] = value.split("|");
+
+    return (
+      <div className="flex items-center space-x-2">
+        <Combobox
+          value={platform}
+          onChange={(newPlatform: string) =>
+            onChange(`${newPlatform}|${url || "https://"}`)
+          }
+        >
+          <div className="relative mt-1">
+            <div className="relative w-full cursor-default overflow-hidden rounded-md bg-white text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
+              <Combobox.Input
+                className={`${commonInputClass} pr-10`}
+                displayValue={(platformValue: string) => platformValue}
+                onChange={(event) =>
+                  onChange(`${event.target.value}|${url || "https://"}`)
+                }
+              />
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                <ChevronUpDownIcon
+                  className="h-5 w-5 text-mydarkgrey"
+                  aria-hidden="true"
+                />
+              </Combobox.Button>
+            </div>
+            <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              {availablePlatforms.map((key) => (
+                <Combobox.Option
+                  key={key}
+                  className={({ active }) =>
+                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                      active ? "bg-myorange/10 text-myblack" : "text-mydarkgrey"
+                    }`
+                  }
+                  value={key}
+                >
+                  {({ selected, active }) => (
+                    <>
+                      <span
+                        className={`block truncate ${
+                          selected ? "font-bold" : "font-normal"
+                        }`}
+                      >
+                        {key}
+                      </span>
+                      {selected ? (
+                        <span
+                          className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                            active ? "text-myorange" : "text-myorange"
+                          }`}
+                        >
+                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </Combobox.Option>
+              ))}
+            </Combobox.Options>
+          </div>
+        </Combobox>
+        <input
+          type="text"
+          value={url}
+          onChange={(e) => onChange(`${platform}|${e.target.value}`)}
+          placeholder="https://"
+          className={commonInputClass}
+        />
+        <button
+          onClick={onRemove}
+          className="text-myorange hover:text-black"
+          title="Remove social media"
+        >
+          <XMarkIcon className="h-5 w-5" />
+        </button>
+      </div>
+    );
+  };
 
   const handlePublish = useCallback(() => {
     console.log("Publishing changes:", localSettings);
@@ -141,10 +231,59 @@ const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
 
   const renderSetting = (setting: EnvSettingDatum, index: number) => {
     const settingId = `env-setting-${setting.name}`;
-    const commonInputClass =
-      "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
 
-    if (setting.name === "PUBLIC_HOME") {
+    if (setting.name === "PUBLIC_SOCIALS") {
+      const values = setting.value.split(",");
+      const usedPlatforms = values.map(value => value.split("|")[0]);
+
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          <label
+            id={`${settingId}-label`}
+            className="block text-md text-mydarkgrey"
+          >
+            {setting.description}
+            {setting.required && (
+              <span
+                className="text-myorange ml-1"
+                title="This field is required"
+              >
+                *
+              </span>
+            )}
+          </label>
+          <div className="space-y-2">
+            {values.map((value, valueIndex) => {
+              const availablePlatforms = socialIconKeys.filter(
+                key =>
+                  !usedPlatforms.includes(key) || key === value.split("|")[0]
+              );
+              return (
+                <SocialMediaInput
+                  key={valueIndex}
+                  value={value}
+                  onChange={newValue => {
+                    const newValues = [...values];
+                    newValues[valueIndex] = newValue;
+                    handleSettingChange(index, "value", newValues.join(","));
+                  }}
+                  onRemove={() => removeSocialValue(index, valueIndex)}
+                  availablePlatforms={availablePlatforms}
+                />
+              );
+            })}
+            <button
+              onClick={() => addSocialValue(index)}
+              className="flex items-center text-myblue hover:text-myorange"
+              disabled={usedPlatforms.length === socialIconKeys.length}
+            >
+              <PlusIcon className="h-5 w-5 mr-1" />
+              Add Social Media
+            </button>
+          </div>
+        </div>
+      );
+    } else if (setting.name === "PUBLIC_HOME") {
       return (
         <div key={setting.name} className="space-y-2 mb-4">
           <label
@@ -165,10 +304,10 @@ const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
             value={setting.value}
             onChange={newValue => handleSettingChange(index, "value", newValue)}
           >
-            <div className="relative mt-1 z-10">
+            <div className="relative mt-1">
               <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
                 <Combobox.Input
-                  className={commonInputClass}
+                  className={`${commonInputClass}`}
                   displayValue={(slug: string) => slug}
                   onChange={event =>
                     handleSettingChange(index, "value", event.target.value)
@@ -182,7 +321,7 @@ const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
                   />
                 </Combobox.Button>
               </div>
-              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 {usedSlugs.map(slug => (
                   <Combobox.Option
                     key={slug.slug}
@@ -356,12 +495,12 @@ const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
             users are unlikely to be impacted.
           </p>
           <div className="flex justify-end space-x-2 mt-6">
-            <button
-              onClick={reset}
+            <a
               className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
+              href="/storykeep"
             >
               Cancel
-            </button>
+            </a>
             <button
               onClick={handlePublish}
               className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"

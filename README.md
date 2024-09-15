@@ -8,6 +8,10 @@ by [At Risk Media](https://atriskmedia.com)
 
 Please visit [docs](https://tractstack.org)
 
+## Building + serving
+docker build --network=host -t tractstack-storykeep .
+docker run --net=host -d --restart unless-stopped tractstack-storykeep
+
 ## Queries?
 
 Reach out at hello -at- tractstack -dot- com

@@ -5,7 +5,12 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import EnvironmentSettings from "../../components/storykeep/fields/EnvironmentSettings";
-import type {ContentMap, AuthStatus, ImpressionDatum, MenuDatum } from "../../types";
+import type {
+  ContentMap,
+  AuthStatus,
+  ImpressionDatum,
+  MenuDatum,
+} from "../../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;

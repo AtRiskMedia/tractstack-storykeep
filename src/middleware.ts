@@ -15,7 +15,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/storykeep/create",
     "/storykeep/settings",
     "/api/turso/paneDesigns",
-    //"/api/concierge/builder/*",
   ];
   const openProtectedRoutes = [
     "/*/edit",
@@ -26,7 +25,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const publicRoutes = ["/storykeep/login", "/storykeep/logout"];
 
   const isPublicRoute = publicRoutes.includes(context.url.pathname);
-
   const isProtectedRoute = protectedRoutes.some(route => {
     if (route.includes("*")) {
       const regex = new RegExp("^" + route.replace("*", ".*"));
@@ -34,7 +32,6 @@ export const onRequest = defineMiddleware(async (context, next) => {
     }
     return context.url.pathname === route;
   });
-
   const isOpenProtectedRoute = openProtectedRoutes.some(route => {
     if (route.includes("*")) {
       const regex = new RegExp("^" + route.replace("*", ".*"));
@@ -51,9 +48,15 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   if (!auth && isProtectedRoute && !isPublicRoute) {
-    if (isOpenDemo && isOpenProtectedRoute && !forceLogin) {
-      return next();
+    if (isOpenDemo) {
+      if (isOpenProtectedRoute) {
+        return next();
+      } else {
+        // Handle protected routes that are not open protected in demo mode
+        return context.redirect("/");
+      }
     }
+
     if (context.url.pathname.startsWith("/api/turso/")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,

@@ -264,7 +264,7 @@ export const knownEnvSettings: EnvSetting[] = [
     name: "PUBLIC_HOME",
     defaultValue: "home",
     type: "string",
-    description: "Slug for the home page",
+    description: "Use this story fragment as home page",
     group: "Brand",
     priority: true,
     required: true,

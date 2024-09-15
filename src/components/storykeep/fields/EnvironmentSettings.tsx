@@ -25,11 +25,14 @@ interface SocialMediaInputProps {
 }
 
 const groupOrder = ["Brand", "Core", "Options", "Integrations"];
+const wordmarkModeOptions = ["default", "logo", "wordmark"];
 
 const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
@@ -52,7 +55,11 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   }, [initializeSettings]);
 
   const handleSettingChange = useCallback(
-    (index: number, field: keyof EnvSettingDatum, newValue: string | boolean) => {
+    (
+      index: number,
+      field: keyof EnvSettingDatum,
+      newValue: string | boolean
+    ) => {
       setLocalSettings(prev => {
         const newSettings = [...prev];
         newSettings[index] = { ...newSettings[index], [field]: newValue };
@@ -134,7 +141,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
               <Combobox.Input
                 className={`${commonInputClass} pr-10`}
                 displayValue={(platformValue: string) => platformValue}
-                onChange={(event) =>
+                onChange={event =>
                   onChange(`${event.target.value}|${url || "https://"}`)
                 }
               />
@@ -146,7 +153,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
               </Combobox.Button>
             </div>
             <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {availablePlatforms.map((key) => (
+              {availablePlatforms.map(key => (
                 <Combobox.Option
                   key={key}
                   className={({ active }) =>
@@ -184,7 +191,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
         <input
           type="text"
           value={url}
-          onChange={(e) => onChange(`${platform}|${e.target.value}`)}
+          onChange={e => onChange(`${platform}|${e.target.value}`)}
           placeholder="https://"
           className={commonInputClass}
         />
@@ -232,7 +239,84 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const renderSetting = (setting: EnvSettingDatum, index: number) => {
     const settingId = `env-setting-${setting.name}`;
 
-    if (setting.name === "PUBLIC_SOCIALS") {
+    if (setting.name === "PUBLIC_WORDMARK_MODE") {
+      return (
+        <div key={setting.name} className="space-y-2 mb-4 max-w-xs">
+          <label
+            id={`${settingId}-label`}
+            className="block text-md text-mydarkgrey"
+          >
+            {setting.description}
+            {setting.required && (
+              <span
+                className="text-myorange ml-1"
+                title={`Use format: ${setting.defaultValue}`}
+              >
+                *
+              </span>
+            )}
+          </label>
+          <Combobox
+            value={setting.value || "default"}
+            onChange={newValue => handleSettingChange(index, "value", newValue)}
+          >
+            <div className="relative mt-1">
+              <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
+                <Combobox.Input
+                  className={commonInputClass}
+                  displayValue={(value: string) => value}
+                  onChange={event =>
+                    handleSettingChange(index, "value", event.target.value)
+                  }
+                />
+                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
+                </Combobox.Button>
+              </div>
+              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {wordmarkModeOptions.map(option => (
+                  <Combobox.Option
+                    key={option}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active
+                          ? "bg-myorange/10 text-myblack"
+                          : "text-mydarkgrey"
+                      }`
+                    }
+                    value={option}
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-medium" : "font-normal"
+                          }`}
+                        >
+                          {option}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? "text-white" : "text-myorange"
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </div>
+          </Combobox>
+        </div>
+      );
+    } else if (setting.name === "PUBLIC_SOCIALS") {
       const values = setting.value.split(",");
       const usedPlatforms = values.map(value => value.split("|")[0]);
 

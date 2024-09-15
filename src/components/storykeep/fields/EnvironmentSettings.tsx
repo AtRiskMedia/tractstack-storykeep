@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 //import { useStore } from "@nanostores/react";
-import { Switch } from "@headlessui/react";
+import { Switch, Combobox } from "@headlessui/react";
 import {
+  CheckIcon,
   XMarkIcon,
   PlusIcon,
   ChevronUpDownIcon,
@@ -10,13 +11,20 @@ import {
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
 import { knownEnvSettings } from "../../../constants";
-import type { EnvSettingDatum } from "../../../types";
+import type { ContentMap, EnvSettingDatum } from "../../../types";
 
 const groupOrder = ["Brand", "Core", "Options", "Integrations"];
 
-const EnvironmentSettings = () => {
+const EnvironmentSettings = (props: { contentMap: ContentMap[] }) => {
+  const { contentMap } = props;
   //const $envSettings = useStore(envSettings);
+  //console.log($envSettings.current)
 
+  const usedSlugs = contentMap
+    .filter(item => item.type === `StoryFragment`)
+    .map(item => {
+      return { slug: item.slug, title: item.title };
+    });
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
@@ -134,7 +142,87 @@ const EnvironmentSettings = () => {
   const renderSetting = (setting: EnvSettingDatum, index: number) => {
     const settingId = `env-setting-${setting.name}`;
     const commonInputClass =
-      "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-md xs:leading-6";
+      "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
+
+    if (setting.name === "PUBLIC_HOME") {
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          <label
+            id={`${settingId}-label`}
+            className="block text-md text-mydarkgrey"
+          >
+            {setting.description}
+            {setting.required && (
+              <span
+                className="text-myorange ml-1"
+                title={`Use format: ${setting.defaultValue}`}
+              >
+                *
+              </span>
+            )}
+          </label>
+          <Combobox
+            value={setting.value}
+            onChange={newValue => handleSettingChange(index, "value", newValue)}
+          >
+            <div className="relative mt-1 z-10">
+              <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
+                <Combobox.Input
+                  className={commonInputClass}
+                  displayValue={(slug: string) => slug}
+                  onChange={event =>
+                    handleSettingChange(index, "value", event.target.value)
+                  }
+                  autoComplete="off"
+                />
+                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
+                </Combobox.Button>
+              </div>
+              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {usedSlugs.map(slug => (
+                  <Combobox.Option
+                    key={slug.slug}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active
+                          ? "bg-myorange/10 text-myblack"
+                          : "text-mydarkgrey"
+                      }`
+                    }
+                    value={slug.slug}
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-bold" : "font-normal"
+                          }`}
+                        >
+                          <strong>{slug.slug}</strong> | {slug.title}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? "text-white" : "text-myorange"
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </div>
+          </Combobox>
+        </div>
+      );
+    }
 
     return (
       <div key={setting.name} className="space-y-2 mb-4">
@@ -257,7 +345,7 @@ const EnvironmentSettings = () => {
           </p>
         </div>
       )}
-      {hasUnsavedChanges && (
+      {hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
           <p className="text-myblue font-bold">
             Be very careful adjusting any technical settings. When ready hit{" "}

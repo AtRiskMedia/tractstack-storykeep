@@ -254,7 +254,7 @@ export const knownEnvSettings: EnvSetting[] = [
   },
   {
     name: "PUBLIC_FOOTER",
-    defaultValue: "© 2024 My Awesome Company. All rights reserved.",
+    defaultValue: "Your slogan goes here",
     type: "string",
     description: "Footer text for the website",
     group: "Brand",

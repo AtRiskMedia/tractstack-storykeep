@@ -1,10 +1,11 @@
 ---
+import { getContentMap } from "../../api/turso";
 import StoryKeep from "@layouts/StoryKeep.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import EnvironmentSettings from "../../components/storykeep/fields/EnvironmentSettings";
-import type { AuthStatus, ImpressionDatum, MenuDatum } from "../../types";
+import type {ContentMap, AuthStatus, ImpressionDatum, MenuDatum } from "../../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
@@ -47,6 +48,8 @@ const impressions = user.isOpenDemo
       },
     ]
   : ([] as ImpressionDatum[]);
+
+const contentMap: ContentMap[] = await getContentMap();
 ---
 
 <StoryKeep title="Advanced Settings" canonicalURL={canonicalURL}>
@@ -62,7 +65,7 @@ const impressions = user.isOpenDemo
   <main id="main-content" class="min-h-screen">
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
       <div class="py-1.5 bg-white px-3.5">
-        <EnvironmentSettings client:load />
+        <EnvironmentSettings contentMap={contentMap} client:load />
       </div>
     </div>
   </main>

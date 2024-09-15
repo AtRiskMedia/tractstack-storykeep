@@ -367,7 +367,7 @@ export const StoryKeepHeader = memo(
                 <button
                   type="button"
                   title="Changes will not be saved! Have fun!"
-                  className="my-1 rounded px-2 py-1 text-lg shadow-sm bg-myorange/20 text-black"
+                  className="my-1 rounded px-2 py-1 text-lg shadow-sm bg-myoffwhite/50 text-black"
                   disabled={true}
                 >
                   Demo Mode

@@ -6,7 +6,7 @@ const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 export const POST: APIRoute = async ({ request }) => {
   const body = await request.json();
   const token = request.headers.get("Authorization");
-
+  const refreshToken = request.headers.get("X-Refresh-Token");
   try {
     const { response, newRefreshToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/auth/sync`,
@@ -18,16 +18,9 @@ export const POST: APIRoute = async ({ request }) => {
         },
         body: JSON.stringify(body),
       },
-      body.refreshToken // Pass the refresh token from the request body
+      refreshToken || undefined
     );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
     const data = await response.json();
-
-    // Include the new refresh token in the response to the client
     return new Response(
       JSON.stringify({
         ...data,

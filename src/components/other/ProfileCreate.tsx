@@ -19,7 +19,7 @@ import {
   success,
   loading,
 } from "../../store/auth";
-import { loadProfile, saveProfile } from "../../api/services";
+import { fetchWithAuth } from "../../api/fetchClient";
 import { contactPersona } from "../../assets/contactPersona";
 import { goUnlockProfile } from "./ProfileUnlock";
 
@@ -32,7 +32,14 @@ async function goSaveProfile(payload: {
   init: boolean;
 }) {
   try {
-    await saveProfile({ profile: payload });
+    const refreshToken = auth.get().refreshToken;
+    const response = await fetchWithAuth("/builder/profile", {
+      method: "POST",
+      body: JSON.stringify({ profile, refreshToken }),
+    });
+    if (response.newRefreshToken) {
+      auth.setKey("refreshToken", response.newRefreshToken);
+    }
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -70,7 +77,7 @@ async function goSaveProfile(payload: {
 
 async function goLoadProfile() {
   try {
-    const response = await loadProfile();
+    const response = await fetchWithAuth("/builder/profile");
     profile.set({
       firstname: response?.data?.firstname || undefined,
       contactPersona: response?.data?.contactPersona || undefined,

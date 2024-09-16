@@ -128,7 +128,8 @@ export const ProfileUnlock = () => {
               type="email"
               name="email"
               id="email"
-              autoComplete="email"
+              autoComplete="new-password"
+              aria-autocomplete="none"
               defaultValue={email}
               onChange={e => setEmail(e.target.value)}
               className={classNames(
@@ -151,7 +152,8 @@ export const ProfileUnlock = () => {
               type="password"
               name="codeword"
               id="codeword"
-              autoComplete="off"
+              autoComplete="new-password"
+              aria-autocomplete="none"
               defaultValue={codeword}
               onChange={e => setCodeword(e.target.value)}
               className={classNames(

@@ -15,7 +15,6 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
     headers.set("X-Refresh-Token", refreshToken); // Add refresh token to headers
   }
   const fullUrl = new URL(BASE_URL + url, window.location.origin);
-
   try {
     const response = await fetch(fullUrl.toString(), {
       ...options,
@@ -30,7 +29,8 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const res = await response.json();
+    return res;
   } catch (error) {
     console.error("Fetch error:", error);
     throw error;
@@ -52,9 +52,14 @@ export async function getTokens({
   encryptedEmail?: string;
   referrer: Referrer;
 }) {
+  const refreshToken = auth.get().refreshToken;
   try {
     const response = await fetchWithAuth("/auth/sync", {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Refresh-Token": refreshToken || "",
+      },
       body: JSON.stringify({
         fingerprint,
         codeword,
@@ -62,9 +67,9 @@ export async function getTokens({
         encryptedCode,
         encryptedEmail,
         referrer,
+        refreshToken,
       }),
     });
-
     setRefreshedTokens(response);
     return response;
   } catch (error) {

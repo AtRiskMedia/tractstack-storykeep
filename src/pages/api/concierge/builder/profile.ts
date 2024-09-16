@@ -19,7 +19,6 @@ export const GET: APIRoute = async ({ request }) => {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
     const data = await response.json();
     return new Response(
       JSON.stringify({
@@ -51,12 +50,11 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  let body;
-  try {
-    body = await request.json();
-    const { refreshToken, ...restBody } = body;
-    const token = request.headers.get("Authorization");
+  const body = await request.json();
+  const { refreshToken, ...profileData } = body;
+  const token = request.headers.get("Authorization");
 
+  try {
     const { response, newRefreshToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/users/profile`,
       {
@@ -65,40 +63,30 @@ export const POST: APIRoute = async ({ request }) => {
           "Content-Type": "application/json",
           Authorization: token || "",
         },
-        body: JSON.stringify(restBody),
+        body: JSON.stringify(profileData),
       },
       refreshToken
     );
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
+    const responseData = await response.json();
     return new Response(
       JSON.stringify({
-        ...data,
+        ...responseData,
         newRefreshToken,
       }),
       {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        status: response.status,
+        headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
-    console.error("Error in profile post route:", error);
     return new Response(
       JSON.stringify({
         error:
-          error instanceof Error ? error.message : "Failed to save profile",
+          error instanceof Error ? error.message : "Failed to update profile",
       }),
       {
         status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }

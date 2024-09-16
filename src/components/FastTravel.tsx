@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { sync } from "../store/auth";
 import { processGraphPayload } from "../utils/helpers";
-import { getGraph } from "../api/services";
+import { fetchWithAuth } from "../api/fetchClient";
 import VisNetwork from "./other/VisNetwork";
 import { classNames } from "../utils/helpers";
 import type {
@@ -13,7 +13,7 @@ import type {
 
 async function goGetGraph() {
   try {
-    const response = await getGraph();
+    const response = await fetchWithAuth("/builder/graph");
     const data =
       typeof response?.data !== `undefined` &&
       typeof response?.data?.at(0) !== `undefined`

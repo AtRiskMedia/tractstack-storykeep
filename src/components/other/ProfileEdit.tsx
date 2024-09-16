@@ -19,7 +19,7 @@ import {
   success,
   loading,
 } from "../../store/auth";
-import { loadProfile, saveProfile } from "../../api/services";
+import { fetchWithAuth } from "../../api/fetchClient";
 import { contactPersona } from "../../assets/contactPersona";
 import type { ContactPersona } from "../../types";
 
@@ -32,7 +32,14 @@ async function goSaveProfile(payload: {
   init: boolean;
 }) {
   try {
-    const response = await saveProfile({ profile: payload });
+    const refreshToken = auth.get().refreshToken;
+    const response = await fetchWithAuth("/builder/profile", {
+      method: "POST",
+      body: JSON.stringify({ ...payload, refreshToken }),
+    });
+    if (response.newRefreshToken) {
+      auth.setKey("refreshToken", response.newRefreshToken);
+    }
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -65,7 +72,7 @@ async function goSaveProfile(payload: {
 
 async function goLoadProfile() {
   try {
-    const response = await loadProfile();
+    const response = await fetchWithAuth("/builder/profile");
     profile.set({
       firstname: response?.firstname || undefined,
       contactPersona: response?.contactPersona || undefined,
@@ -260,7 +267,7 @@ export const ProfileEdit = () => {
                   type="text"
                   name="firstname"
                   id="firstname"
-                  autoComplete="given-name"
+                  autoComplete="off"
                   defaultValue={$profile.firstname || ``}
                   onChange={e => setFirstname(e.target.value)}
                   className={classNames(
@@ -288,7 +295,7 @@ export const ProfileEdit = () => {
                   type="email"
                   name="email"
                   id="email"
-                  autoComplete="email"
+                  autoComplete="off"
                   defaultValue={$profile.email || ``}
                   onChange={e => setEmail(e.target.value)}
                   className={classNames(

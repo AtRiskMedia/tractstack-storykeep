@@ -15,11 +15,9 @@ export const GET: APIRoute = async ({ request }) => {
       },
       undefined // No refresh token for GET request
     );
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-
     const data = await response.json();
     return new Response(
       JSON.stringify({

@@ -3,14 +3,14 @@ import { proxyRequestWithRefresh } from "../../../../api/authService";
 
 const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async context => {
+  const { request } = context;
   let body;
   try {
     body = await request.json();
-    const { refreshToken, ...restBody } = body;
-
+    const { ...restBody } = body;
     const token = request.headers.get("Authorization");
-    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+    const { response, newAccessToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/users/eventStream`,
       {
         method: "POST",
@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
         },
         body: JSON.stringify(restBody),
       },
-      refreshToken
+      context
     );
 
     let responseData;
@@ -30,11 +30,11 @@ export const POST: APIRoute = async ({ request }) => {
       responseData = { error: "Failed to parse response" };
     }
 
-    // Include the new refresh token in the response to the client
+    // Include the new access token in the response to the client
     return new Response(
       JSON.stringify({
         ...responseData,
-        newRefreshToken: newRefreshToken,
+        newAccessToken: newAccessToken,
       }),
       {
         status: response.status,

@@ -3,33 +3,35 @@ import type { Referrer, IAuthStoreLoginResponse } from "../types";
 
 const BASE_URL = `/api/concierge`;
 
+let accessToken: string | null = null;
+
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
-  const token = auth.get()?.token;
-  const refreshToken = auth.get()?.refreshToken;
   const headers = new Headers(options.headers || {});
   headers.set("Content-Type", "application/json");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  if (accessToken) {
+    headers.set("Authorization", `Bearer ${accessToken}`);
   }
-  if (refreshToken) {
-    headers.set("X-Refresh-Token", refreshToken); // Add refresh token to headers
-  }
+
   const fullUrl = new URL(BASE_URL + url, window.location.origin);
   try {
     const response = await fetch(fullUrl.toString(), {
       ...options,
       headers,
+      credentials: "include",
     });
+
     if (!response.ok) {
       if (response.status === 401) {
-        // The server has already attempted to refresh the token.
-        // If we're still getting a 401, it means we need to re-authenticate.
-        logout(true);
+        logout();
         throw new Error("Authentication failed. Please log in again.");
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     const res = await response.json();
+    if (res.newAccessToken) {
+      accessToken = res.newAccessToken;
+    }
     return res;
   } catch (error) {
     console.error("Fetch error:", error);
@@ -52,14 +54,9 @@ export async function getTokens({
   encryptedEmail?: string;
   referrer: Referrer;
 }) {
-  const refreshToken = auth.get().refreshToken;
   try {
     const response = await fetchWithAuth("/auth/sync", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Refresh-Token": refreshToken || "",
-      },
       body: JSON.stringify({
         fingerprint,
         codeword,
@@ -67,7 +64,6 @@ export async function getTokens({
         encryptedCode,
         encryptedEmail,
         referrer,
-        refreshToken,
       }),
     });
     setRefreshedTokens(response);
@@ -83,10 +79,7 @@ export async function getTokens({
 
 function setRefreshedTokens(response: IAuthStoreLoginResponse) {
   if (response.jwt) {
-    auth.setKey("token", response.jwt);
-  }
-  if (response.refreshToken) {
-    auth.setKey("refreshToken", response.refreshToken);
+    accessToken = response.jwt;
   }
   if (response.fingerprint) {
     auth.setKey("key", response.fingerprint);
@@ -107,14 +100,21 @@ function setRefreshedTokens(response: IAuthStoreLoginResponse) {
     auth.setKey("unlockedProfile", undefined);
   }
   auth.setKey("active", Date.now().toString());
+  if (response.encryptedEmail) {
+    auth.setKey("encryptedEmail", response.encryptedEmail);
+  }
+  if (response.encryptedCode) {
+    auth.setKey("encryptedCode", response.encryptedCode);
+  }
+  if (response.beliefs) {
+    auth.setKey("beliefs", JSON.stringify(response.beliefs));
+  }
+  auth.setKey("neo4jEnabled", response.neo4jEnabled ? "1" : "0");
 }
 
-function logout(full: boolean = false) {
+function logout() {
   sync.set(false);
   locked.set(false);
-  if (full) {
-    auth.setKey("token", undefined);
-  }
 }
 
 export { fetchWithAuth };

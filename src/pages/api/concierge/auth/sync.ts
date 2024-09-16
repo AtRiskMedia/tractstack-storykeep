@@ -3,12 +3,12 @@ import { proxyRequestWithRefresh } from "../../../../api/authService";
 
 const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async context => {
+  const { request } = context;
   const body = await request.json();
   const token = request.headers.get("Authorization");
-  const refreshToken = request.headers.get("X-Refresh-Token");
   try {
-    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+    const { response, newAccessToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/auth/sync`,
       {
         method: "POST",
@@ -18,13 +18,13 @@ export const POST: APIRoute = async ({ request }) => {
         },
         body: JSON.stringify(body),
       },
-      refreshToken || undefined
+      context
     );
     const data = await response.json();
     return new Response(
       JSON.stringify({
         ...data,
-        newRefreshToken: newRefreshToken,
+        newAccessToken: newAccessToken,
       }),
       {
         status: response.status,

@@ -44,12 +44,6 @@ export async function goUnlockProfile(payload: {
       auth.setKey(`encryptedCode`, conciergeSync.encryptedCode);
     }
     auth.setKey(`active`, Date.now().toString());
-    if (conciergeSync?.jwt) {
-      auth.setKey(`token`, conciergeSync.jwt);
-    }
-    if (conciergeSync?.refreshToken) {
-      auth.setKey(`refreshToken`, conciergeSync.refreshToken);
-    }
     if (conciergeSync?.fingerprint) {
       auth.setKey(`key`, conciergeSync.fingerprint);
     }

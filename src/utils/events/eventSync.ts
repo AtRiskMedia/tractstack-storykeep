@@ -1,6 +1,6 @@
 import type { ContentMap, Events, EventNodes, EventStream } from "../../types";
 import { contentMap } from "../../store/events";
-import { referrer, auth } from "../../store/auth";
+import { referrer } from "../../store/auth";
 import { fetchWithAuth } from "../../api/fetchClient";
 
 export async function eventSync(payload: EventStream[]) {
@@ -180,14 +180,10 @@ export async function eventSync(payload: EventStream[]) {
     return true;
   }
 
-  const refreshToken = auth.get().refreshToken;
   const response = await fetchWithAuth("/events/stream", {
     method: "POST",
-    body: JSON.stringify({ ...options, refreshToken }),
+    body: JSON.stringify({ ...options }),
   });
-  if (response.newRefreshToken) {
-    auth.setKey("refreshToken", response.newRefreshToken);
-  }
   if (response.message && !response.error) return true;
 
   return false;

@@ -4,8 +4,6 @@ import type { Referrer } from "../types";
 
 export type AuthSettings = {
   key: string | undefined;
-  token: string | undefined;
-  refreshToken: string | undefined;
   neo4jEnabled: string | undefined;
   beliefs: string | undefined;
   encryptedEmail: string | undefined;
@@ -25,8 +23,6 @@ export type AuthProfile = {
 
 export const auth = persistentMap<AuthSettings>("auth:", {
   key: undefined,
-  token: undefined,
-  refreshToken: undefined,
   neo4jEnabled: undefined,
   beliefs: undefined,
   encryptedEmail: undefined,

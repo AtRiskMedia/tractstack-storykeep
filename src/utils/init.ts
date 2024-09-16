@@ -21,8 +21,7 @@ export async function init() {
   let reset = false;
   const authPayload = auth.get();
   const lastActive = authPayload?.active ? parseInt(authPayload.active) : 0;
-  const mustSync =
-    !authPayload?.token || Date.now() > lastActive + JWT_LIFETIME;
+  const mustSync = Date.now() > lastActive + JWT_LIFETIME;
 
   // delete any session storage after > 1 hr if no consent provided
   if (
@@ -36,7 +35,6 @@ export async function init() {
     auth.setKey(`encryptedEmail`, undefined);
     auth.setKey(`hasProfile`, undefined);
     auth.setKey(`unlockedProfile`, undefined);
-    auth.setKey(`token`, undefined);
     auth.setKey(`key`, undefined);
     reset = true;
     //window.location.reload();
@@ -89,12 +87,6 @@ export async function init() {
         }
       : { referrer: ref };
   const conciergeSync = await getTokens(settings);
-  if (conciergeSync?.jwt) {
-    auth.setKey(`token`, conciergeSync.jwt);
-  }
-  if (conciergeSync?.refreshToken) {
-    auth.setKey(`refreshToken`, conciergeSync.refreshToken);
-  }
   if (conciergeSync?.fingerprint) {
     auth.setKey(`key`, conciergeSync.fingerprint);
   }

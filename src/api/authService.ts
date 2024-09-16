@@ -1,27 +1,40 @@
+import type { APIContext } from "astro";
+
 const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
 export async function proxyRequestWithRefresh(
   url: string,
   options: RequestInit,
-  refreshToken?: string
+  context: APIContext
 ) {
   let response = await fetch(url, options);
-  let newRefreshToken = null;
 
-  if (response.status === 401 && refreshToken) {
-    const { jwt: newToken, newRefreshToken: newRefresh } =
-      await refreshTokenRequest(refreshToken);
+  if (response.status === 401) {
+    const cookies = context.cookies;
+    const refreshToken = cookies.get("refreshToken")?.value;
 
-    if (newToken) {
-      const newHeaders = new Headers(options.headers);
-      newHeaders.set("Authorization", `Bearer ${newToken}`);
+    if (refreshToken) {
+      const { newAccessToken, newRefreshToken } =
+        await refreshTokenRequest(refreshToken);
+      if (newAccessToken) {
+        const newHeaders = new Headers(options.headers);
+        newHeaders.set("Authorization", `Bearer ${newAccessToken}`);
+        const newOptions: RequestInit = {
+          ...options,
+          headers: newHeaders,
+        };
+        response = await fetch(url, newOptions);
+        if (newRefreshToken) {
+          cookies.set("refreshToken", newRefreshToken, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            path: "/",
+          });
+        }
 
-      const newOptions: RequestInit = {
-        ...options,
-        headers: newHeaders,
-      };
-      response = await fetch(url, newOptions);
-      newRefreshToken = newRefresh;
+        return { response, newAccessToken };
+      }
     }
   }
 
@@ -33,7 +46,7 @@ export async function proxyRequestWithRefresh(
     );
   }
 
-  return { response, newRefreshToken };
+  return { response };
 }
 
 async function refreshTokenRequest(refreshToken: string) {
@@ -45,20 +58,15 @@ async function refreshTokenRequest(refreshToken: string) {
       },
       body: JSON.stringify({ refreshToken }),
     });
-    const responseText = await response.text();
-    if (response.ok && responseText) {
-      try {
-        const data = JSON.parse(responseText);
-        if (data.jwt && data.refreshToken) {
-          return { jwt: data.jwt, newRefreshToken: data.refreshToken };
-        }
-      } catch (error) {
-        console.error("Error parsing refresh token response:", error);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.jwt && data.refreshToken) {
+        return { newAccessToken: data.jwt, newRefreshToken: data.refreshToken };
       }
     }
   } catch (error) {
     console.error("Error refreshing token:", error);
   }
 
-  return { jwt: null, newRefreshToken: null };
+  return { newAccessToken: null, newRefreshToken: null };
 }

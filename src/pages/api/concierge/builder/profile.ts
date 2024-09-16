@@ -3,17 +3,18 @@ import { proxyRequestWithRefresh } from "../../../../api/authService";
 
 const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async context => {
+  const { request } = context;
   const token = request.headers.get("Authorization");
   try {
-    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+    const { response, newAccessToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/users/profile`,
       {
         headers: {
           Authorization: token || "",
         },
       },
-      undefined // No refresh token for GET request
+      context
     );
 
     if (!response.ok) {
@@ -23,7 +24,7 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         ...data,
-        newRefreshToken,
+        newAccessToken,
       }),
       {
         status: 200,
@@ -49,13 +50,14 @@ export const GET: APIRoute = async ({ request }) => {
   }
 };
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async context => {
+  const { request } = context;
   const body = await request.json();
-  const { refreshToken, ...profileData } = body;
+  const { ...profileData } = body;
   const token = request.headers.get("Authorization");
 
   try {
-    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+    const { response, newAccessToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/users/profile`,
       {
         method: "POST",
@@ -65,13 +67,13 @@ export const POST: APIRoute = async ({ request }) => {
         },
         body: JSON.stringify(profileData),
       },
-      refreshToken
+      context
     );
     const responseData = await response.json();
     return new Response(
       JSON.stringify({
         ...responseData,
-        newRefreshToken,
+        newAccessToken,
       }),
       {
         status: response.status,

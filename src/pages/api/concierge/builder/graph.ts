@@ -3,17 +3,18 @@ import { proxyRequestWithRefresh } from "../../../../api/authService";
 
 const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async context => {
+  const { request } = context;
   const token = request.headers.get("Authorization");
   try {
-    const { response, newRefreshToken } = await proxyRequestWithRefresh(
+    const { response, newAccessToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/users/graph`,
       {
         headers: {
           Authorization: token || "",
         },
       },
-      undefined // No refresh token for GET request
+      context
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -22,7 +23,7 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         data,
-        newRefreshToken,
+        newAccessToken,
       }),
       {
         status: 200,

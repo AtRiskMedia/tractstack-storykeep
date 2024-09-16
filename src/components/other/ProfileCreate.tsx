@@ -32,14 +32,10 @@ async function goSaveProfile(payload: {
   init: boolean;
 }) {
   try {
-    const refreshToken = auth.get().refreshToken;
-    const response = await fetchWithAuth("/builder/profile", {
+    await fetchWithAuth("/builder/profile", {
       method: "POST",
-      body: JSON.stringify({ profile, refreshToken }),
+      body: JSON.stringify({ profile }),
     });
-    if (response.newRefreshToken) {
-      auth.setKey("refreshToken", response.newRefreshToken);
-    }
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -117,7 +113,6 @@ export const ProfileCreate = () => {
   const [codeword, setCodeword] = useState(``);
   const [badSave, setBadSave] = useState(false);
   const [personaSelected, setPersonaSelected] = useState(contactPersona[0]);
-  const $authPayload = useStore(auth);
   const $profile = useStore(profile);
   const $error = useStore(error);
   const $loading = useStore(loading);
@@ -196,8 +191,7 @@ export const ProfileCreate = () => {
       typeof $error === `undefined` &&
       typeof $loading === `undefined` &&
       typeof submitted === `undefined` &&
-      import.meta.env.PROD &&
-      $authPayload?.token
+      import.meta.env.PROD
     ) {
       error.set(false);
       loading.set(true);
@@ -227,7 +221,7 @@ export const ProfileCreate = () => {
       success.set(undefined);
       if (!$sync) window.location.reload();
     }
-  }, [$sync, $success, $authPayload?.token, $error, submitted, $loading]);
+  }, [$sync, $success, $error, submitted, $loading]);
 
   if (typeof submitted === `undefined`) return <div />;
   return (

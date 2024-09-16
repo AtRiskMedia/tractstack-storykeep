@@ -7,6 +7,7 @@ export const POST: APIRoute = async context => {
   const { request } = context;
   const body = await request.json();
   const token = request.headers.get("Authorization");
+
   try {
     const { response, newAccessToken } = await proxyRequestWithRefresh(
       `${BACKEND_URL}/auth/sync`,
@@ -20,7 +21,20 @@ export const POST: APIRoute = async context => {
       },
       context
     );
+
     const data = await response.json();
+
+    if (data.refreshToken) {
+      context.cookies.set("refreshToken", data.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 14,
+      });
+      delete data.refreshToken;
+    }
+
     return new Response(
       JSON.stringify({
         ...data,

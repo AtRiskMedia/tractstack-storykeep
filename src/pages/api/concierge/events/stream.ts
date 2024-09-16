@@ -30,7 +30,17 @@ export const POST: APIRoute = async context => {
       responseData = { error: "Failed to parse response" };
     }
 
-    // Include the new access token in the response to the client
+    if (responseData.refreshToken) {
+      context.cookies.set("refreshToken", responseData.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 14,
+      });
+      delete responseData.refreshToken;
+    }
+
     return new Response(
       JSON.stringify({
         ...responseData,

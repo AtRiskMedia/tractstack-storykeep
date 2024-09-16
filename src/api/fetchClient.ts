@@ -22,8 +22,21 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
 
     if (!response.ok) {
       if (response.status === 401) {
-        logout();
-        throw new Error("Authentication failed. Please log in again.");
+        // Token expired, try to refresh
+        const refreshResponse = await fetch(`${BASE_URL}/auth/refreshToken`, {
+          method: "POST",
+          credentials: "include",
+        });
+
+        if (refreshResponse.ok) {
+          const refreshData = await refreshResponse.json();
+          accessToken = refreshData.jwt;
+          headers.set("Authorization", `Bearer ${accessToken}`);
+          return fetchWithAuth(url, { ...options, headers });
+        } else {
+          logout();
+          throw new Error("Authentication failed. Please log in again.");
+        }
       }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -115,6 +128,9 @@ function setRefreshedTokens(response: IAuthStoreLoginResponse) {
 function logout() {
   sync.set(false);
   locked.set(false);
+  accessToken = null;
+  document.cookie =
+    "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
 
 export { fetchWithAuth };

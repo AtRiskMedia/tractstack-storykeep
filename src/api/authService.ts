@@ -16,6 +16,7 @@ export async function proxyRequestWithRefresh(
     if (refreshToken) {
       const { newAccessToken, newRefreshToken } =
         await refreshTokenRequest(refreshToken);
+
       if (newAccessToken) {
         const newHeaders = new Headers(options.headers);
         newHeaders.set("Authorization", `Bearer ${newAccessToken}`);
@@ -24,12 +25,14 @@ export async function proxyRequestWithRefresh(
           headers: newHeaders,
         };
         response = await fetch(url, newOptions);
+
         if (newRefreshToken) {
           cookies.set("refreshToken", newRefreshToken, {
             httpOnly: true,
             secure: true,
             sameSite: "strict",
             path: "/",
+            maxAge: 60 * 60 * 24 * 30, // 30 days
           });
         }
 
@@ -58,6 +61,7 @@ async function refreshTokenRequest(refreshToken: string) {
       },
       body: JSON.stringify({ refreshToken }),
     });
+
     if (response.ok) {
       const data = await response.json();
       if (data.jwt && data.refreshToken) {

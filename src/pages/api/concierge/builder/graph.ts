@@ -16,10 +16,24 @@ export const GET: APIRoute = async context => {
       },
       context
     );
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
     const data = await response.json();
+
+    if (data.refreshToken) {
+      context.cookies.set("refreshToken", data.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 14,
+      });
+      delete data.refreshToken;
+    }
+
     return new Response(
       JSON.stringify({
         data,

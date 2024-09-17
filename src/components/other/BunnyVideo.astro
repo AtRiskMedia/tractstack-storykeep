@@ -61,7 +61,6 @@ const { videoUrl, title } = Astro.props;
       iframe.src = `${this.videoUrl}?autoplay=${typeof startTime === "number" ? 1 : 0}&loop=false&muted=false&preload=${typeof startTime === "number"}&responsive=true&t=${startTime || 0}`;
       iframe.width = "100%";
       iframe.style.aspectRatio = "16 / 9";
-      iframe.allowFullscreen = true;
       iframe.title = this.videoTitle || `Video Embed`;
       iframe.setAttribute("playsinline", "");
       iframe.setAttribute("allow", "autoplay; fullscreen");

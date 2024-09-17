@@ -1,6 +1,7 @@
 import type { APIContext } from "astro";
 
 const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
+const CONCIERGE_SECRET = import.meta.env.PRIVATE_CONCIERGE_SECRET;
 
 export async function proxyRequestWithRefresh(
   url: string,
@@ -73,4 +74,33 @@ async function refreshTokenRequest(refreshToken: string) {
   }
 
   return { newAccessToken: null, newRefreshToken: null };
+}
+
+export async function proxyRequestToConcierge(
+  url: string,
+  options: RequestInit
+) {
+  const headers = new Headers(options.headers || {});
+  headers.set("Content-Type", "application/json");
+  headers.set("X-Concierge-Secret", CONCIERGE_SECRET);
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`Error response from server:`, errorBody);
+      throw new Error(
+        `HTTP error! status: ${response.status}, body: ${errorBody}`
+      );
+    }
+
+    return { response };
+  } catch (error) {
+    console.error("Fetch error:", error);
+    throw error;
+  }
 }

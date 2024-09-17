@@ -2,6 +2,11 @@ import { defineMiddleware } from "astro:middleware";
 import { isAuthenticated, isOpenDemoMode } from "./utils/session";
 import type { AuthStatus } from "./types";
 
+/*
+ * Middleware is not for protecting frontend proxy to concierge
+ * it's meant for protecting the storykeep (and enabling the open demo)
+ */
+
 export const onRequest = defineMiddleware(async (context, next) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const auth = await isAuthenticated(context as any);
@@ -13,16 +18,28 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/*/edit",
     "/storykeep",
     "/storykeep/create",
+    "/storykeep/create/*",
     "/storykeep/settings",
     "/api/turso/paneDesigns",
+    "/api/storykeep/env",
+    "/api/storykeep/activity",
   ];
   const openProtectedRoutes = [
     "/*/edit",
     "/storykeep",
     "/storykeep/create",
+    "/storykeep/create/*",
     "/api/turso/paneDesigns",
+    "/api/storykeep/activity",
   ];
-  const publicRoutes = ["/storykeep/login", "/storykeep/logout"];
+  const publicRoutes = [
+    "/storykeep/login",
+    "/storykeep/logout",
+    "/api/concierge/auth/sync",
+    "/api/concierge/events/stream",
+    "/api/concierge/builder/profile",
+    "/api/concierge/builder/graph",
+  ];
 
   const isPublicRoute = publicRoutes.includes(context.url.pathname);
   const isProtectedRoute = protectedRoutes.some(route => {
@@ -52,12 +69,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
       if (isOpenProtectedRoute) {
         return next();
       } else {
-        // Handle protected routes that are not open protected in demo mode
+        if (context.url.pathname.startsWith("/api/storykeep/")) {
+          return new Response(JSON.stringify({ error: "Unauthorized" }), {
+            status: 401,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
         return context.redirect("/");
       }
     }
 
-    if (context.url.pathname.startsWith("/api/turso/")) {
+    if (
+      context.url.pathname.startsWith("/api/turso/") ||
+      context.url.pathname.startsWith("/api/storykeep/")
+    ) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },

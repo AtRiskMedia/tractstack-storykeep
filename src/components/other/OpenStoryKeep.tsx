@@ -4,10 +4,12 @@ export const OpenStoryKeep = ({
   slug,
   isContext,
   isStoryKeep = false,
+  isEditable = false,
 }: {
   slug: string;
   isContext: boolean;
   isStoryKeep?: boolean;
+  isEditable?: boolean;
 }) => {
   return (
     <>
@@ -37,7 +39,7 @@ export const OpenStoryKeep = ({
         >
           <BeakerIcon className="h-6 w-6 text-myblue/80" />
         </a>
-      ) : !isStoryKeep ? (
+      ) : isEditable ? (
         <a
           data-astro-reload
           href={!isContext ? `/${slug}/edit` : `/context/${slug}/edit`}

@@ -18,6 +18,7 @@ export interface Props {
   impressions?: ImpressionDatum[];
   isContext: boolean;
   isStoryKeep?: boolean;
+  isEditable?: boolean;
 }
 
 const {
@@ -28,6 +29,7 @@ const {
   menu,
   impressions,
   isStoryKeep = false,
+  isEditable = false,
 } = Astro.props;
 const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
@@ -107,6 +109,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
             slug={slug}
             isContext={isContext}
             isStoryKeep={isStoryKeep}
+            isEditable={isEditable}
             client:load
           />
         ) : slug === `storykeep` && user?.isAuthenticated ? (

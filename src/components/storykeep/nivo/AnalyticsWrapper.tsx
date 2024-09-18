@@ -45,7 +45,7 @@ const AnalyticsWrapper = (props: {
                 }
                 className={classNames(
                   duration === period ? "font-bold" : "underline",
-                  "hover:text-myorange"
+                  "text-mydarkgrey/80 hover:text-myorange"
                 )}
               >
                 {period === `daily`
@@ -55,7 +55,11 @@ const AnalyticsWrapper = (props: {
                     : `4 weeks`}
               </button>
             ))}
-            <button onClick={() => toggleAnalytics()} className="underline">
+            <button
+              onClick={() => toggleAnalytics()}
+              className="underline
+                  text-mydarkgrey/80 hover:text-myorange"
+            >
               hide
             </button>
           </div>
@@ -76,13 +80,7 @@ const AnalyticsWrapper = (props: {
         >
           <Line
             data={data.line}
-            legend={
-              duration === `daily`
-                ? `Last 24 hours`
-                : duration === `weekly`
-                  ? `Last 7 days`
-                  : `Last 28 days`
-            }
+            legend={duration === `daily` ? `Hours ago` : `Days ago`}
           />
         </div>
       )}

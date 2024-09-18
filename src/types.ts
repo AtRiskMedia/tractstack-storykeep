@@ -252,6 +252,19 @@ export type EditModeValue = {
   payload?: any;
 };
 
+type VerbCounts = {
+  [key: string]: number | undefined;
+};
+
+export type AnalyticsItem = {
+  id: number;
+  object_id: string;
+  object_name: string;
+  object_type: "StoryFragment" | "Pane";
+  total_actions: number;
+  verbs: VerbCounts;
+};
+
 export type StoreMapType = {
   [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<any>>>;
 };

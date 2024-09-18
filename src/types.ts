@@ -252,12 +252,19 @@ export type EditModeValue = {
   payload?: any;
 };
 
-export type VerbCounts = {
-  [key: string]: number;
+export type PieDataItem = {
+  id: string;
+  value: number;
 };
 
-export type Analytics = {
-  [key: string]: { id: string; value: number }[];
+export type LineDataPoint = {
+  x: string | number;
+  y: number;
+};
+
+export type LineDataSeries = {
+  id: string;
+  data: LineDataPoint[];
 };
 
 export type AnalyticsItem = {
@@ -266,7 +273,21 @@ export type AnalyticsItem = {
   object_name: string;
   object_type: "StoryFragment" | "Pane";
   total_actions: number;
-  verbs: VerbCounts;
+  verbs: PieDataItem[] | LineDataSeries[];
+};
+
+export type RawAnalytics = {
+  pie: AnalyticsItem[];
+  line: AnalyticsItem[];
+};
+
+export type ProcessedAnalytics = {
+  pie: PieDataItem[];
+  line: LineDataSeries[];
+};
+
+export type Analytics = {
+  [key: string]: ProcessedAnalytics;
 };
 
 export type StoreMapType = {

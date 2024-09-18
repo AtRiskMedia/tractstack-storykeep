@@ -233,9 +233,11 @@ const PaneWrapper = (props: {
         )}
       </div>
       {$showAnalytics && $storedAnalytics[id] && (
-        <AnalyticsWrapper data={$storedAnalytics[id]} title={
-$paneTitle[id].current
-        } isPane={true} />
+        <AnalyticsWrapper
+          data={$storedAnalytics[id]}
+          title={$paneTitle[id].current}
+          isPane={true}
+        />
       )}
     </div>
   );

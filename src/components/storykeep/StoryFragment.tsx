@@ -335,9 +335,11 @@ export const StoryFragment = (props: {
   return (
     <>
       {$showAnalytics && $storedAnalytics[id] && (
-        <AnalyticsWrapper data={$storedAnalytics[id]} title={
-$storyFragmentTitle[id].current
-        } isPane={false} />
+        <AnalyticsWrapper
+          data={$storedAnalytics[id]}
+          title={$storyFragmentTitle[id].current}
+          isPane={false}
+        />
       )}
       {$editMode?.mode === `settings` && (
         <div

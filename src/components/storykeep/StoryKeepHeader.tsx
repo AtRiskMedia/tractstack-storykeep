@@ -46,18 +46,32 @@ import type {
   ContentMap,
   ToolMode,
   ToolAddMode,
-  AnalyticsItem,
   Analytics,
+  RawAnalytics,
+  AnalyticsItem,
+  PieDataItem,
+  LineDataSeries,
 } from "../../types";
 
-const processedAnalytics = (data: AnalyticsItem[]): Analytics => {
-  return data.reduce((acc, i: AnalyticsItem) => {
-    acc[i.object_id] = Object.keys(i.verbs).map((a: string) => ({
-      id: a,
-      value: i.verbs[a],
-    }));
-    return acc;
-  }, {} as Analytics);
+const processedAnalytics = (data: RawAnalytics): Analytics => {
+  const result: Analytics = {};
+
+  // Process pie data
+  data.pie.forEach((item: AnalyticsItem) => {
+    result[item.object_id] = {
+      ...result[item.object_id],
+      pie: item.verbs as PieDataItem[],
+    };
+  });
+
+  // Process line data
+  data.line.forEach((item: AnalyticsItem) => {
+    result[item.object_id] = {
+      ...result[item.object_id],
+      line: item.verbs as LineDataSeries[],
+    };
+  });
+  return result;
 };
 
 export const StoryKeepHeader = memo(

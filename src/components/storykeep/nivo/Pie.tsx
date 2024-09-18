@@ -2,12 +2,11 @@ import { ResponsivePie } from "@nivo/pie";
 import { oneDarkTheme } from "../../../assets/nivo";
 
 const Pie = ({ data }: { data: { id: string; value: number }[] }) => (
-  <div style={{ height: "200px" }}>
+  <div style={{ width: "340px", height: "200px" }}>
     <ResponsivePie
       data={data}
       colors={oneDarkTheme}
       margin={{ top: 30, right: 10, bottom: 30, left: 10 }}
-      animate={true}
       innerRadius={0.5}
       padAngle={0.7}
       cornerRadius={3}

@@ -1,32 +1,36 @@
 import { useStore } from "@nanostores/react";
 import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import Pie from "./Pie";
-import {
-  analyticsDuration,
-} from "../../../store/storykeep";
+import Line from "./Line";
+import { analyticsDuration, showAnalytics } from "../../../store/storykeep";
 import { classNames } from "../../../utils/helpers";
+import type { ProcessedAnalytics } from "../../../types";
 
-const AnalyticsWrapper = (props: { title: string; 
-isPane:boolean
-  data: 
-{ id: string; value: number }[]
+const AnalyticsWrapper = (props: {
+  title: string;
+  isPane: boolean;
+  data: ProcessedAnalytics;
 }) => {
-  const { title, data,isPane } = props;
+  const { title, data, isPane } = props;
   const $analyticsDuration = useStore(analyticsDuration);
   const duration = $analyticsDuration;
 
   const updateDuration = (newValue: `daily` | `weekly` | `monthly`) => {
     analyticsDuration.set(newValue);
   };
+  const toggleAnalytics = () => {
+    showAnalytics.set(false);
+  };
 
   return (
     <div
-      className="bg-myblue px-3.5 py-1.5 flex flex-nowrap"
-      style={{ height: "220px",
-backgroundImage: "repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0, 0.1) 10px, rgba(0,0,0, 0.1) 20px )",
+      className="bg-myblue px-3.5 py-1.5 flex flex-wrap items-start"
+      style={{
+        backgroundImage:
+          "repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0, 0.1) 10px, rgba(0,0,0, 0.1) 20px )",
       }}
     >
-      <div className="rounded-xl max-w-64 text-pretty bg-mywhite h-fit mr-4 shadow">
+      <div className="rounded-xl w-64 flex-shrink-0 text-pretty bg-mywhite h-fit mr-4 mb-4 shadow">
         <div className="p-3.5 text-xl space-y-4">
           <p>
             {isPane && <ArrowUpIcon className="h-5 w-5 inline" />} {title}
@@ -51,15 +55,37 @@ backgroundImage: "repeating-linear-gradient( 45deg, transparent, transparent 10p
                     : `4 weeks`}
               </button>
             ))}
+            <button onClick={() => toggleAnalytics()} className="underline">
+              hide
+            </button>
           </div>
         </div>
       </div>
-      <div
-        className="rounded-xl max-w-xs bg-mywhite shadow-inner flex-grow"
-        style={{ minWidth: "200px" }}
-      >
-        {data.length > 0 ? <Pie data={data} /> : "No data"}
-      </div>
+      {data?.pie?.length > 0 && (
+        <div
+          className="rounded-xl bg-mywhite shadow-inner flex-shrink-0 mr-4 mb-4"
+          style={{ width: "340px", height: "200px" }}
+        >
+          <Pie data={data.pie} />
+        </div>
+      )}
+      {data?.line?.length > 0 && (
+        <div
+          className="rounded-xl bg-mywhite shadow-inner flex-grow mb-4"
+          style={{ minWidth: "400px", height: "256px" }}
+        >
+          <Line
+            data={data.line}
+            legend={
+              duration === `daily`
+                ? `Last 24 hours`
+                : duration === `weekly`
+                  ? `Last 7 days`
+                  : `Last 28 days`
+            }
+          />
+        </div>
+      )}
     </div>
   );
 };

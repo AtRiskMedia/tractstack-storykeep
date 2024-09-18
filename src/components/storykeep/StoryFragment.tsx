@@ -17,9 +17,8 @@ import {
   editModeStore,
   showAnalytics,
   storedAnalytics,
-  analyticsDuration,
 } from "../../store/storykeep";
-import Pie from "./nivo/Pie";
+import AnalyticsWrapper from "./nivo/AnalyticsWrapper";
 import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
 import PaneWrapper from "./PaneWrapper";
 import DesignNewPane from "./components/DesignNewPane";
@@ -36,8 +35,6 @@ export const StoryFragment = (props: {
   const { handleUndo } = useStoryKeepUtils(id, []);
   const $showAnalytics = useStore(showAnalytics);
   const $storedAnalytics = useStore(storedAnalytics);
-  const $analyticsDuration = useStore(analyticsDuration);
-  const duration = $analyticsDuration;
   const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
   const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
@@ -103,10 +100,6 @@ export const StoryFragment = (props: {
       setThisPaneIds(paneIds);
     }
   }, [isDesigningNew, paneIds]);
-
-  const updateDuration = (newValue: `daily` | `weekly` | `monthly`) => {
-    analyticsDuration.set(newValue);
-  };
 
   useEffect(() => {
     setThisPaneIds(paneIds);
@@ -342,45 +335,9 @@ export const StoryFragment = (props: {
   return (
     <>
       {$showAnalytics && $storedAnalytics[id] && (
-        <div
-          className="bg-white px-3.5 py-1.5 flex flex-nowrap"
-          style={{ height: "220px" }}
-        >
-          <div className="rounded-xl max-w-sm bg-mywhite h-fit mr-4 shadow">
-            <div className="p-3.5 text-xl space-y-4">
-              <p>Story Fragment: {$storyFragmentTitle[id].current}</p>
-              <div className="flex flex-nowrap gap-x-2">
-                Rolling stats:
-                {["daily", "weekly", "monthly"].map(period => (
-                  <button
-                    key={period}
-                    onClick={() =>
-                      updateDuration(period as "daily" | "weekly" | "monthly")
-                    }
-                    className={classNames(
-                      duration === period ? "" : "underline",
-                      "hover:text-myorange"
-                    )}
-                  >
-                    {period}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div
-            className="rounded-xl max-w-sm bg-mywhite shadow-inner flex-grow"
-            style={{ minWidth: "200px" }}
-          >
-            {$storedAnalytics[id] &&
-            Array.isArray($storedAnalytics[id]) &&
-            $storedAnalytics[id].length > 0 ? (
-              <Pie data={$storedAnalytics[id]} />
-            ) : (
-              "No data"
-            )}
-          </div>
-        </div>
+        <AnalyticsWrapper data={$storedAnalytics[id]} title={
+$storyFragmentTitle[id].current
+        } isPane={false} />
       )}
       {$editMode?.mode === `settings` && (
         <div

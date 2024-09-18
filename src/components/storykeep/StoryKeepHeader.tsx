@@ -30,6 +30,8 @@ import {
   toolModeStore,
   toolAddModeStore,
   showAnalytics,
+  storedAnalytics,
+  analyticsDuration,
 } from "../../store/storykeep";
 import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
 import {
@@ -45,7 +47,18 @@ import type {
   ToolMode,
   ToolAddMode,
   AnalyticsItem,
+  Analytics,
 } from "../../types";
+
+const processedAnalytics = (data: AnalyticsItem[]): Analytics => {
+  return data.reduce((acc, i: AnalyticsItem) => {
+    acc[i.object_id] = Object.keys(i.verbs).map((a: string) => ({
+      id: a,
+      value: i.verbs[a],
+    }));
+    return acc;
+  }, {} as Analytics);
+};
 
 export const StoryKeepHeader = memo(
   ({
@@ -62,6 +75,8 @@ export const StoryKeepHeader = memo(
     isContext: boolean;
   }) => {
     const $showAnalytics = useStore(showAnalytics);
+    const $analyticsDuration = useStore(analyticsDuration);
+    const duration = $analyticsDuration;
     const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
     const $paneTitle = useStore(paneTitle, { keys: [id] });
     const $paneSlug = useStore(paneSlug, { keys: [id] });
@@ -79,13 +94,7 @@ export const StoryKeepHeader = memo(
     const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
     const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
     const [isClient, setIsClient] = useState(false);
-    const [loadData, setLoadData] = useState(true);
-    const [analyticsData, setAnalyticsData] = useState<AnalyticsItem[]>([]);
-    console.log(analyticsData);
     const [hideElements, setHideElements] = useState(false);
-    const [duration /* setDuration */] = useState<
-      `daily` | `weekly` | `monthly`
-    >(`monthly`);
     const headerRef = useRef<HTMLDivElement>(null);
     let lastScrollTop = 0;
     const usedSlugs = [
@@ -125,11 +134,8 @@ export const StoryKeepHeader = memo(
     };
 
     useEffect(() => {
-      if (loadData) {
-        fetchAnalytics();
-        setLoadData(true);
-      }
-    }, [loadData]);
+      fetchAnalytics();
+    }, [duration]);
 
     async function fetchAnalytics() {
       try {
@@ -139,8 +145,7 @@ export const StoryKeepHeader = memo(
         );
         const data = await response.json();
         if (data.success) {
-          setAnalyticsData(data.data);
-          console.log("data fetched successfully:", data.data);
+          storedAnalytics.set(processedAnalytics(data.data));
         }
       } catch (error) {
         console.error("Error fetching analytics data:", error);

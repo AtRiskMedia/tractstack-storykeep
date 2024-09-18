@@ -252,8 +252,12 @@ export type EditModeValue = {
   payload?: any;
 };
 
-type VerbCounts = {
-  [key: string]: number | undefined;
+export type VerbCounts = {
+  [key: string]: number;
+};
+
+export type Analytics = {
+  [key: string]: { id: string; value: number }[];
 };
 
 export type AnalyticsItem = {

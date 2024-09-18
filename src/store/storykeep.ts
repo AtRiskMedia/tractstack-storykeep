@@ -19,6 +19,7 @@ import type {
   EditModeValue,
   StylesMemory,
   EnvSetting,
+  Analytics,
 } from "../types";
 import { knownEnvSettings, toolAddModes } from "../constants";
 
@@ -40,6 +41,8 @@ export const envSettings = map<{
 //
 
 export const showAnalytics = atom<boolean>(false);
+export const storedAnalytics = map<Analytics>();
+export const analyticsDuration = atom<`daily` | `weekly` | `monthly`>(`daily`);
 
 // storykeep state
 export const unsavedChangesStore = map<

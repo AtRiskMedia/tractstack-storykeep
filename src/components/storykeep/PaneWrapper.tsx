@@ -1,13 +1,18 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
+import { ArrowUpIcon } from "@heroicons/react/24/outline";
 import {
   paneInit,
+  paneTitle,
   paneCodeHook,
   lastInteractedPaneStore,
   visiblePanesStore,
   editModeStore,
   showAnalytics,
+  storedAnalytics,
+  analyticsDuration,
 } from "../../store/storykeep";
+import Pie from "./nivo/Pie";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
 import { SHORT_SCREEN_THRESHOLD } from "../../constants";
@@ -74,7 +79,11 @@ const PaneWrapper = (props: {
   } = props;
   const [isClient, setIsClient] = useState(false);
   const $showAnalytics = useStore(showAnalytics);
+  const $storedAnalytics = useStore(storedAnalytics);
+  const $analyticsDuration = useStore(analyticsDuration);
+  const duration = $analyticsDuration;
   const $paneInit = useStore(paneInit, { keys: [id] });
+  const $paneTitle = useStore(paneTitle, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const $editMode = useStore(editModeStore);
   const isCodeHook = $paneCodeHook[id].current;
@@ -88,6 +97,10 @@ const PaneWrapper = (props: {
     },
     [id]
   );
+
+  const updateDuration = (newValue: `daily` | `weekly` | `monthly`) => {
+    analyticsDuration.set(newValue);
+  };
 
   useEffect(() => {
     if ($paneInit[id]?.init) {
@@ -227,8 +240,49 @@ const PaneWrapper = (props: {
           </div>
         )}
       </div>
-      {$showAnalytics && (
-        <div className="bg-myorange">show pane analytics here!</div>
+      {$showAnalytics && $storedAnalytics[id] && (
+        <div
+          className="bg-mylightgrey px-3.5 py-1.5 flex flex-nowrap"
+          style={{ height: "220px" }}
+        >
+          <div className="rounded-xl max-w-sm bg-mywhite h-fit mr-4 shadow">
+            <div className="p-3.5 text-xl space-y-4">
+              <p>
+                <ArrowUpIcon className="h-5 w-5 inline" />{" "}
+                {$paneTitle[id].current}
+              </p>
+              <div className="flex flex-nowrap gap-x-2">
+                Rolling stats:
+                {["daily", "weekly", "monthly"].map(period => (
+                  <button
+                    key={period}
+                    onClick={() =>
+                      updateDuration(period as "daily" | "weekly" | "monthly")
+                    }
+                    className={classNames(
+                      duration === period ? "" : "underline",
+                      "hover:text-myorange"
+                    )}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div
+            className="rounded-xl max-w-sm bg-mywhite shadow-inner flex-grow"
+            style={{ minWidth: "200px" }}
+          >
+            {$storedAnalytics[id] &&
+            Array.isArray($storedAnalytics[id]) &&
+            $storedAnalytics[id].length > 0 ? (
+              <Pie data={$storedAnalytics[id]} />
+            ) : (
+              "No data"
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

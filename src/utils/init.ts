@@ -117,21 +117,31 @@ export async function init() {
   success.set(undefined);
   loading.set(undefined);
 
+  const cur = current.get();
+
+  // register page view
+  const pageViewEvent = {
+    id: cur.id,
+    parentId: cur.parentId,
+    type: `StoryFragment`,
+    verb: `PAGEVIEWED`,
+  };
+  events.set([...events.get(), pageViewEvent]);
+
   // flag on first visit from external
   if (!entered.get()) {
     entered.set(true);
     const ref = document.referrer;
     const internal =
       ref !== `` && ref.indexOf(location.protocol + "//" + location.host) === 0;
-    const cur = current.get();
     if (!internal && ref && cur?.id && cur?.parentId) {
-      const event = {
+      const enteredEvent = {
         id: cur.id,
         parentId: cur.parentId,
         type: `StoryFragment`,
         verb: `ENTERED`,
       };
-      events.set([...events.get(), event]);
+      events.set([...events.get(), enteredEvent]);
     } else if (!internal && ref && cur?.id) {
       const event = {
         id: cur.id,

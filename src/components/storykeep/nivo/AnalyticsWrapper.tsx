@@ -78,10 +78,7 @@ const AnalyticsWrapper = (props: {
           className="rounded-xl bg-mywhite shadow-inner flex-grow mb-4"
           style={{ minWidth: "400px", height: "256px" }}
         >
-          <Line
-            data={data.line}
-            legend={duration === `daily` ? `Hours ago` : `Days ago`}
-          />
+          <Line data={data.line} duration={duration} />
         </div>
       )}
     </div>

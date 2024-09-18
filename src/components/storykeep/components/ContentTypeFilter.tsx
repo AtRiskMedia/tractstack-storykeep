@@ -38,7 +38,7 @@ export function ContentTypeFilter({
             aria-pressed={selectedTypes.includes(type)}
             className={`flex items-center px-3 py-1.5 rounded-md text-sm ${
               selectedTypes.includes(type)
-                ? "bg-myorange/20 text-black"
+                ? "bg-myorange/20 text-black font-bold"
                 : "bg-white text-mydarkgrey border border-mydarkgrey"
             }`}
           >

@@ -3,7 +3,15 @@ import { ResponsiveLine } from "@nivo/line";
 import { theme, oneDarkTheme } from "../../../assets/nivo";
 import type { LineDataSeries } from "../../../types";
 
-const Line = ({ data, legend }: { data: LineDataSeries[]; legend: string }) => {
+type Duration = "daily" | "weekly" | "monthly";
+
+const Line = ({
+  data,
+  duration,
+}: {
+  data: LineDataSeries[];
+  duration: Duration;
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [key, setKey] = useState(0);
@@ -31,47 +39,38 @@ const Line = ({ data, legend }: { data: LineDataSeries[]; legend: string }) => {
     };
   }, []);
 
-  const reduceDataPoints = (
-    originalData: LineDataSeries[],
-    targetPoints: number
-  ) => {
-    return originalData.map(series => {
-      if (series.data.length <= targetPoints) {
-        return series;
+  const { xTickValues, xScaleMax, xAxisLegend, formatXAxisTick } =
+    useMemo(() => {
+      switch (duration) {
+        case "daily":
+          return {
+            xTickValues: [0, 6, 12, 18, 24],
+            xScaleMax: 24,
+            xAxisLegend: "Hours ago",
+            formatXAxisTick: (value: number) => `${value}h`,
+          };
+        case "weekly":
+          return {
+            xTickValues: [0, 1, 2, 3, 4, 5, 6, 7],
+            xScaleMax: 7,
+            xAxisLegend: "Days ago",
+            formatXAxisTick: (value: number) => `${value}d`,
+          };
+        case "monthly":
+          return {
+            xTickValues: [0, 7, 14, 21, 28],
+            xScaleMax: 28,
+            xAxisLegend: "Days ago",
+            formatXAxisTick: (value: number) => `${value}d`,
+          };
+        default:
+          throw new Error(`Unsupported duration: ${duration}`);
       }
-
-      const interval = Math.ceil(series.data.length / targetPoints);
-      const reducedData = series.data.filter(
-        (_, index) =>
-          index === 0 ||
-          index === series.data.length - 1 ||
-          index % interval === 0
-      );
-
-      return { ...series, data: reducedData };
-    });
-  };
-
-  const processedData = useMemo(() => {
-    const minWidth = 500; // Minimum width to show all 24 points
-    const maxPoints = 24; // Maximum number of points
-    const minPoints = 8; // Minimum number of points to show
-
-    if (dimensions.width >= minWidth) {
-      return data;
-    }
-
-    const targetPoints = Math.max(
-      minPoints,
-      Math.floor((dimensions.width / minWidth) * maxPoints)
-    );
-
-    return reduceDataPoints(data, targetPoints);
-  }, [data, dimensions.width]);
+    }, [duration]);
 
   // Calculate the maximum y value across all series
   const maxY = Math.max(
-    ...processedData.flatMap(series => series.data.map(point => point.y))
+    ...data.flatMap(series => series.data.map(point => point.y))
   );
 
   // Generate appropriate tick values based on the max value
@@ -96,11 +95,15 @@ const Line = ({ data, legend }: { data: LineDataSeries[]; legend: string }) => {
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
       <ResponsiveLine
         key={key}
-        data={processedData}
+        data={data}
         theme={theme}
         colors={oneDarkTheme}
-        margin={{ top: 50, right: 110, bottom: 50, left: 60 }}
-        xScale={{ type: "point" }}
+        margin={{ top: 50, right: 140, bottom: 50, left: 60 }}
+        xScale={{
+          type: "linear",
+          min: 0,
+          max: xScaleMax,
+        }}
         yScale={{
           type: "linear",
           min: 0,
@@ -115,9 +118,11 @@ const Line = ({ data, legend }: { data: LineDataSeries[]; legend: string }) => {
           tickSize: 5,
           tickPadding: 5,
           tickRotation: 0,
-          legend: legend || "Time",
+          legend: xAxisLegend,
           legendOffset: 36,
           legendPosition: "middle",
+          tickValues: xTickValues,
+          format: formatXAxisTick,
         }}
         axisLeft={{
           tickSize: 5,

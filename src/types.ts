@@ -290,6 +290,21 @@ export type Analytics = {
   [key: string]: ProcessedAnalytics;
 };
 
+export type DashboardAnalytics = {
+  stats: {
+    daily: number;
+    weekly: number;
+    monthly: number;
+  };
+  line: LineDataSeries[];
+  hot_story_fragments: HotItem[];
+};
+
+export type HotItem = {
+  id: string;
+  total_events: number;
+};
+
 export type StoreMapType = {
   [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<any>>>;
 };

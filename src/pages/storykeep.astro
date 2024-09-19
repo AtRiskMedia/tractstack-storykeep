@@ -5,6 +5,9 @@ import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import { ContentSearchWrapper } from "../components/storykeep/components/ContentSearchWrapper";
 import PageViewStats from "../components/storykeep/components/PageViewStats";
+import DashboardActivity from "../components/storykeep/nivo/DashboardActivity";
+import WhatsHot from "../components/storykeep/components/WhatsHot";
+import StoryKeepDashboardStore from "../components/storykeep/StoryKeepDashboardStore";
 import { getFullContentMap } from "../api/turso";
 import type { AuthStatus, ImpressionDatum, MenuDatum } from "../types";
 
@@ -43,6 +46,7 @@ const menuPayload = {
   theme: "default",
   optionsPayload: links,
 } as MenuDatum;
+
 // impression
 const impressions = user.isOpenDemo
   ? [
@@ -79,14 +83,15 @@ const impressions = user.isOpenDemo
     user={user}
     isStoryKeep={true}
   />
+  <StoryKeepDashboardStore client:load />
   <main id="main-content" class="min-h-screen">
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
       <div class="py-1.5 bg-white px-3.5 flex gap-y-12 flex-col">
         <PageViewStats client:load />
-        <div class="my-12">
-          THIS IS WHERE THE ENGAGEMENT ANALYTICS GRAPH GOES
-        </div>
         <ContentSearchWrapper contentMap={payload} client:load />
+        <div class="my-12">
+          <DashboardActivity client:only="react" />
+        </div>
         <div class="flex gap-6">
           <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
             <div class="px-3.5 py-1.5">
@@ -216,7 +221,9 @@ const impressions = user.isOpenDemo
             </div>
           </div>
         </div>
-        <div class="my-12">WHAT'S HOT CONTENT TABLE</div>
+        <div class="my-12">
+          <WhatsHot contentMap={payload} client:load />
+        </div>
       </div>
     </div>
   </main>

@@ -20,6 +20,7 @@ import type {
   StylesMemory,
   EnvSetting,
   Analytics,
+  DashboardAnalytics,
 } from "../types";
 import { knownEnvSettings, toolAddModes } from "../constants";
 
@@ -42,6 +43,7 @@ export const envSettings = map<{
 
 export const showAnalytics = atom<boolean>(false);
 export const storedAnalytics = map<Analytics>();
+export const storedDashboardAnalytics = map<DashboardAnalytics>();
 export const analyticsDuration = atom<`daily` | `weekly` | `monthly`>(`weekly`);
 
 // storykeep state

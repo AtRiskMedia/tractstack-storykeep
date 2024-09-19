@@ -112,6 +112,7 @@ const Line = ({
           reverse: false,
         }}
         yFormat=" >-.0f"
+        curve="monotoneX"
         axisTop={null}
         axisRight={null}
         axisBottom={{

@@ -29,19 +29,19 @@ export const theme: Theme = {
 };
 
 export const oneDarkTheme = [
-  "#ff6c6b",
+  "#46d9ff",
   "#98be65",
-  "#da8548",
-  "#51afef",
+  "#ff6c6b",
   "#c678dd",
+  "#51afef",
   "#5699af",
-  "#a7b1b7",
   "#5b6268",
   "#da8548",
   "#4db5bd",
   "#ecbe7b",
+  "#da8548",
   "#3071db",
-  "#a9a1e1",
-  "#46d9ff",
   "#dfdfdf",
+  "#a7b1b7",
+  "#a9a1e1",
 ];

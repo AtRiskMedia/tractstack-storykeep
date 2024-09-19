@@ -98,11 +98,13 @@ export function ContentSearchWrapper({
         </div>
       </div>
       {selectedItem && (
-        <div className="w-full mt-4 rounded-lg bg-slate-100 px-3.5 py-6">
-          <h3 className="text-lg">
+        <div className="w-fit mt-4 rounded-lg bg-slate-50 px-4 py-6 space-y-2">
+          <h3 className="text-lg mr-10">
             {selectedItem.type}: <strong>{selectedItem.title}</strong>
           </h3>
-          <div className="py-6">analytics will go here!</div>
+          <p className="pb-2 text-mydarkgrey">
+            <em>{selectedItem.slug}</em>
+          </p>
           <div className="flex flex-nowrap gap-x-3.5">
             <span className="text-mydarkgrey">ACTIONS:</span>
             <a

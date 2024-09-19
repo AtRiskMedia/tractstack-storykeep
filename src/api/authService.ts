@@ -37,14 +37,28 @@ export async function proxyRequestWithRefresh(
           });
         }
 
+        if (response.status === 401) {
+          // Log this as it's unexpected - refresh token didn't work
+          console.error("Authentication failed after token refresh");
+        }
+
         return { response, newAccessToken };
+      } else {
+        // Log this as the refresh token is invalid or expired
+        console.error("Failed to refresh authentication token");
       }
+    } else {
+      // Log this as there's no refresh token available
+      console.error("No refresh token available for authentication");
     }
   }
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error(`Error response from server:`, errorBody);
+    if (response.status !== 401) {
+      // Only log non-401 errors, as 401s have been handled above
+      console.error(`Error response from server:`, errorBody);
+    }
     throw new Error(
       `HTTP error! status: ${response.status}, body: ${errorBody}`
     );

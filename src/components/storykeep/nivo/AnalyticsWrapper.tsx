@@ -68,7 +68,7 @@ const AnalyticsWrapper = (props: {
       {data?.pie?.length > 0 && (
         <div
           className="rounded-xl bg-mywhite shadow-inner flex-shrink-0 mr-4 mb-4"
-          style={{ width: "340px", height: "200px" }}
+          style={{ width: "400px", height: "200px" }}
         >
           <Pie data={data.pie} />
         </div>

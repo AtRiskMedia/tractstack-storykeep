@@ -42,7 +42,7 @@ export const envSettings = map<{
 
 export const showAnalytics = atom<boolean>(false);
 export const storedAnalytics = map<Analytics>();
-export const analyticsDuration = atom<`daily` | `weekly` | `monthly`>(`daily`);
+export const analyticsDuration = atom<`daily` | `weekly` | `monthly`>(`weekly`);
 
 // storykeep state
 export const unsavedChangesStore = map<

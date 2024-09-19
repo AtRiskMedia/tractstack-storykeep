@@ -43,6 +43,46 @@ export async function init() {
     auth.setKey(`unlockedProfile`, undefined);
   }
 
+  // register page view
+  const cur = current.get();
+  const pageViewEvent = cur.parentId
+    ? {
+        id: cur.id,
+        parentId: cur.parentId,
+        type: `StoryFragment`,
+        verb: `PAGEVIEWED`,
+      }
+    : {
+        id: cur.id,
+        type: `Pane`,
+        verb: `PAGEVIEWED`,
+      };
+  events.set([...events.get(), pageViewEvent]);
+
+  // flag on first visit from external
+  if (!entered.get()) {
+    entered.set(true);
+    const ref = document.referrer;
+    const internal =
+      ref !== `` && ref.indexOf(location.protocol + "//" + location.host) === 0;
+    if (!internal && ref && cur?.id && cur?.parentId) {
+      const enteredEvent = {
+        id: cur.id,
+        parentId: cur.parentId,
+        type: `StoryFragment`,
+        verb: `ENTERED`,
+      };
+      events.set([...events.get(), enteredEvent]);
+    } else if (!internal && ref && cur?.id) {
+      const event = {
+        id: cur.id,
+        type: `Pane`,
+        verb: `ENTERED`,
+      };
+      events.set([...events.get(), event]);
+    }
+  }
+
   // sync once; unless soon inactive
   if (!mustSync && !reset) {
     sync.set(true);
@@ -116,39 +156,4 @@ export async function init() {
   error.set(undefined);
   success.set(undefined);
   loading.set(undefined);
-
-  const cur = current.get();
-
-  // register page view
-  const pageViewEvent = {
-    id: cur.id,
-    parentId: cur.parentId,
-    type: `StoryFragment`,
-    verb: `PAGEVIEWED`,
-  };
-  events.set([...events.get(), pageViewEvent]);
-
-  // flag on first visit from external
-  if (!entered.get()) {
-    entered.set(true);
-    const ref = document.referrer;
-    const internal =
-      ref !== `` && ref.indexOf(location.protocol + "//" + location.host) === 0;
-    if (!internal && ref && cur?.id && cur?.parentId) {
-      const enteredEvent = {
-        id: cur.id,
-        parentId: cur.parentId,
-        type: `StoryFragment`,
-        verb: `ENTERED`,
-      };
-      events.set([...events.get(), enteredEvent]);
-    } else if (!internal && ref && cur?.id) {
-      const event = {
-        id: cur.id,
-        type: `Pane`,
-        verb: `ENTERED`,
-      };
-      events.set([...events.get(), event]);
-    }
-  }
 }

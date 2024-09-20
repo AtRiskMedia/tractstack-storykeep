@@ -103,20 +103,19 @@ export function ContentSearchWrapper({
             {selectedItem.type}: <strong>{selectedItem.title}</strong>
           </h3>
           <p className="pb-2 text-mydarkgrey">
-            <em>{selectedItem.slug}</em>
+            slug: <em>{selectedItem.slug}</em>
           </p>
-          <div className="flex flex-nowrap gap-x-3.5">
-            <span className="text-mydarkgrey">ACTIONS:</span>
+          <div className="flex flex-nowrap gap-x-3.5 text-md">
             <a
               data-astro-reload
-              className="underline font-bold text-md hover:text-myorange"
+              className="underline font-bold hover:text-myorange"
               href={getUrl(`visit`, selectedItem)}
             >
               VISIT
             </a>
             <a
               href={getUrl(`edit`, selectedItem)}
-              className="underline font-bold text-md hover:text-myorange"
+              className="underline font-bold hover:text-myorange"
             >
               EDIT
             </a>

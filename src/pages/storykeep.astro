@@ -9,7 +9,12 @@ import DashboardActivity from "../components/storykeep/nivo/DashboardActivity";
 import WhatsHot from "../components/storykeep/components/WhatsHot";
 import StoryKeepDashboardStore from "../components/storykeep/StoryKeepDashboardStore";
 import { getFullContentMap } from "../api/turso";
-import type { FullContentMap,AuthStatus, ImpressionDatum, MenuDatum } from "../types";
+import type {
+  FullContentMap,
+  AuthStatus,
+  ImpressionDatum,
+  MenuDatum,
+} from "../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
@@ -20,7 +25,10 @@ const canonicalURL = new URL(`/storykeep`, baseUrl).href;
 
 // get storykeep datum
 const payload = await getFullContentMap();
-const filterPayload = payload.filter((e:FullContentMap)=>e.type ===`StoryFragment` || e.isContext)
+const filterPayload = payload.filter(
+  (e: FullContentMap) =>
+    e.type === `StoryFragment` || (e.type === `Pane` && e.isContext)
+);
 if (!payload) {
   return Astro.redirect("/404");
 }
@@ -173,7 +181,7 @@ const impressions = user.isOpenDemo
                 >
                   Images
                 </a>
-               <a
+                <a
                   href="/storykeep/manage/resources"
                   class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
                   role="button"
@@ -191,8 +199,8 @@ const impressions = user.isOpenDemo
             </div>
           </div>
         </div>
-          <DashboardActivity client:only="react" />
-          <WhatsHot contentMap={payload} client:load />
+        <DashboardActivity client:only="react" />
+        <WhatsHot contentMap={payload} client:load />
       </div>
     </div>
   </main>

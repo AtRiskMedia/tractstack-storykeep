@@ -1,6 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useStore } from "@nanostores/react";
-import { storedDashboardAnalytics, analyticsDuration } from "../../../store/storykeep";
+import {
+  storedDashboardAnalytics,
+  analyticsDuration,
+} from "../../../store/storykeep";
 import { CursorArrowRippleIcon, BeakerIcon } from "@heroicons/react/24/outline";
 import { classNames } from "../../../utils/helpers";
 import type { FullContentMap, HotItem } from "../../../types";
@@ -42,10 +45,8 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
   return (
     <div>
       <div className="flex justify-between items-center px-3.5 mt-12">
-        <h3 className="text-black font-action font-bold my-4">
-          What's Hot
-        </h3>
-        <div className="flex flex-wrap gap-x-2 text-sm">
+        <h3 className="text-black font-action font-bold my-4">What's Hot</h3>
+        <div className="flex flex-wrap gap-x-2 text-md">
           <span className="font-action">Stats for past:</span>
           {["daily", "weekly", "monthly"].map(period => (
             <button

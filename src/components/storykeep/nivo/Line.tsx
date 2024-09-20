@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { theme, oneDarkTheme } from "../../../assets/nivo";
 import type { LineDataSeries } from "../../../types";
@@ -73,16 +73,9 @@ const Line = ({
   );
 
   const yTickValues = useMemo(() => {
-    if (maxY <= 5) {
-      return Array.from({ length: maxY + 1 }, (_, i) => i);
-    } else if (maxY <= 10) {
-      return [0, 2, 4, 6, 8, 10].filter(v => v <= maxY);
-    } else {
-      const step = Math.ceil(maxY / 5);
-      return Array.from({ length: 6 }, (_, i) => i * step).filter(
-        v => v <= maxY
-      );
-    }
+    const tickCount = 5; // Number of ticks including 0 and maxY
+    const step = Math.ceil(maxY / (tickCount - 1));
+    return Array.from({ length: tickCount }, (_, i) => i * step);
   }, [maxY]);
 
   if (dimensions.width === 0 || dimensions.height === 0) {
@@ -105,7 +98,7 @@ const Line = ({
         yScale={{
           type: "linear",
           min: 0,
-          max: Math.max(...yTickValues) * 1.1,
+          max: maxY,
           stacked: false,
           reverse: false,
         }}

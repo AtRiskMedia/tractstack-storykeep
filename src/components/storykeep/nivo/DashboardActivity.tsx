@@ -41,37 +41,35 @@ const DashboardActivity = () => {
   }
 
   return (
-      <div>
-        <h3 className="text-black font-action font-bold my-4">
-          Recent Activity
-        </h3>
-    <div
-      className="bg-mywhite rounded-lg shadow p-4"
-      style={{ height: "400px" }}
-    >
-      <Line data={processedData} duration={duration} />
-      <div className="flex flex-wrap gap-x-2 text-md my-8">
-        <span className="font-action">Stats for past:</span>
-        {["daily", "weekly", "monthly"].map(period => (
-          <button
-            key={period}
-            onClick={() =>
-              updateDuration(period as "daily" | "weekly" | "monthly")
-            }
-            className={classNames(
-              duration === period ? "font-bold" : "underline",
-              "text-mydarkgrey/80 hover:text-myorange"
-            )}
-          >
-            {period === "daily"
-              ? "24 hours"
-              : period === "weekly"
-                ? "7 days"
-                : "4 weeks"}
-          </button>
-        ))}
+    <div>
+      <h3 className="text-black font-action font-bold my-4">Recent Activity</h3>
+      <div
+        className="bg-mywhite rounded-lg shadow p-4"
+        style={{ height: "400px" }}
+      >
+        <Line data={processedData} duration={duration} />
+        <div className="flex flex-wrap gap-x-2 text-md my-8">
+          <span className="font-action">Stats for past:</span>
+          {["daily", "weekly", "monthly"].map(period => (
+            <button
+              key={period}
+              onClick={() =>
+                updateDuration(period as "daily" | "weekly" | "monthly")
+              }
+              className={classNames(
+                duration === period ? "font-bold" : "underline",
+                "text-mydarkgrey/80 hover:text-myorange"
+              )}
+            >
+              {period === "daily"
+                ? "24 hours"
+                : period === "weekly"
+                  ? "7 days"
+                  : "4 weeks"}
+            </button>
+          ))}
+        </div>
       </div>
-    </div>
     </div>
   );
 };

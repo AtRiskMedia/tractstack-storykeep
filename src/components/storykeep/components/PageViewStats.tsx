@@ -23,11 +23,11 @@ export default function PageViewStats() {
     },
     {
       name: "Weekly Page Views",
-      value: $storedDashboardAnalytics?.stats?.daily ?? 0,
+      value: $storedDashboardAnalytics?.stats?.weekly ?? 0,
     },
     {
       name: "Monthly Page Views",
-      value: $storedDashboardAnalytics?.stats?.daily ?? 0,
+      value: $storedDashboardAnalytics?.stats?.monthly ?? 0,
     },
   ];
 

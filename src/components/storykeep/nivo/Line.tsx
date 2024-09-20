@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ResponsiveLine } from "@nivo/line";
 import { theme, oneDarkTheme } from "../../../assets/nivo";
 import type { LineDataSeries } from "../../../types";
@@ -22,7 +22,7 @@ const Line = ({
         const { width, height } = containerRef.current.getBoundingClientRect();
         if (width !== dimensions.width || height !== dimensions.height) {
           setDimensions({ width, height });
-          setKey(prevKey => prevKey + 1); // Force re-render of the chart
+          setKey(prevKey => prevKey + 1);
         }
       }
     };
@@ -32,7 +32,7 @@ const Line = ({
       resizeObserver.observe(containerRef.current);
     }
 
-    updateDimensions(); // Initial dimensions
+    updateDimensions();
 
     return () => {
       resizeObserver.disconnect();
@@ -68,12 +68,10 @@ const Line = ({
       }
     }, [duration]);
 
-  // Calculate the maximum y value across all series
   const maxY = Math.max(
     ...data.flatMap(series => series.data.map(point => point.y))
   );
 
-  // Generate appropriate tick values based on the max value
   const yTickValues = useMemo(() => {
     if (maxY <= 5) {
       return Array.from({ length: maxY + 1 }, (_, i) => i);
@@ -107,7 +105,7 @@ const Line = ({
         yScale={{
           type: "linear",
           min: 0,
-          max: Math.max(...yTickValues),
+          max: Math.max(...yTickValues) * 1.1,
           stacked: false,
           reverse: false,
         }}
@@ -135,7 +133,7 @@ const Line = ({
           tickValues: yTickValues,
           format: value => Math.round(value).toString(),
         }}
-        pointSize={10}
+        pointSize={8}
         pointColor={{ theme: "background" }}
         pointBorderWidth={2}
         pointBorderColor={{ from: "serieColor" }}

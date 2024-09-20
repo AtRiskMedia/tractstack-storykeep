@@ -9,7 +9,7 @@ import DashboardActivity from "../components/storykeep/nivo/DashboardActivity";
 import WhatsHot from "../components/storykeep/components/WhatsHot";
 import StoryKeepDashboardStore from "../components/storykeep/StoryKeepDashboardStore";
 import { getFullContentMap } from "../api/turso";
-import type { AuthStatus, ImpressionDatum, MenuDatum } from "../types";
+import type { FullContentMap,AuthStatus, ImpressionDatum, MenuDatum } from "../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
@@ -20,6 +20,7 @@ const canonicalURL = new URL(`/storykeep`, baseUrl).href;
 
 // get storykeep datum
 const payload = await getFullContentMap();
+const filterPayload = payload.filter((e:FullContentMap)=>e.type ===`StoryFragment` || e.isContext)
 if (!payload) {
   return Astro.redirect("/404");
 }
@@ -88,10 +89,7 @@ const impressions = user.isOpenDemo
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
       <div class="py-1.5 bg-white px-3.5 flex gap-y-12 flex-col">
         <PageViewStats client:load />
-        <ContentSearchWrapper contentMap={payload} client:load />
-        <div class="my-12">
-          <DashboardActivity client:only="react" />
-        </div>
+        <ContentSearchWrapper contentMap={filterPayload} client:load />
         <div class="flex gap-6">
           <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
             <div class="px-3.5 py-1.5">
@@ -145,13 +143,6 @@ const impressions = user.isOpenDemo
                   Resource
                 </a>
                 <a
-                  href="/storykeep/create/pane"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Pane
-                </a>
-                <a
                   href="/storykeep/create/menu"
                   class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
                   role="button"
@@ -182,28 +173,7 @@ const impressions = user.isOpenDemo
                 >
                   Images
                 </a>
-                <a
-                  href="/storykeep/manage/storyfragment"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  StoryFragments
-                </a>
-                <a
-                  href="/storykeep/manage/context"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Context Pages
-                </a>
-                <a
-                  href="/storykeep/manage/pane"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Panes
-                </a>
-                <a
+               <a
                   href="/storykeep/manage/resources"
                   class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
                   role="button"
@@ -221,9 +191,8 @@ const impressions = user.isOpenDemo
             </div>
           </div>
         </div>
-        <div class="my-12">
+          <DashboardActivity client:only="react" />
           <WhatsHot contentMap={payload} client:load />
-        </div>
       </div>
     </div>
   </main>

@@ -40,9 +40,9 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
   if (!isClient) return null;
 
   return (
-    <>
-      <div className="flex justify-between items-center px-3.5 my-4">
-        <h3 className="text-black font-action font-bold">
+    <div>
+      <div className="flex justify-between items-center px-3.5 mt-12">
+        <h3 className="text-black font-action font-bold my-4">
           What's Hot
         </h3>
         <div className="flex flex-wrap gap-x-2 text-sm">
@@ -73,13 +73,13 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
             <tr>
               <th
                 scope="col"
-                className="px-6 py-3 text-left text-xs text-mydarkgrey uppercase tracking-wider"
+                className="hidden md:table-cell px-6 py-3 text-left text-xs text-mydarkgrey uppercase tracking-wider"
               >
                 Title
               </th>
               <th
                 scope="col"
-                className="hidden md:table-cell px-6 py-3 text-left text-xs text-mydarkgrey uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs text-mydarkgrey uppercase tracking-wider"
               >
                 Slug
               </th>
@@ -100,12 +100,12 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
           <tbody className="bg-mywhite divide-y divide-mylightgrey/10">
             {hotStoryFragments.map(item => (
               <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-myblack truncate max-w-xs">
                     {item.title}
                   </div>
                 </td>
-                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-mydarkgrey truncate max-w-xs">
                     {item.slug}
                   </div>
@@ -136,7 +136,7 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 };
 

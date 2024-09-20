@@ -41,6 +41,10 @@ const DashboardActivity = () => {
   }
 
   return (
+      <div>
+        <h3 className="text-black font-action font-bold my-4">
+          Recent Activity
+        </h3>
     <div
       className="bg-mywhite rounded-lg shadow p-4"
       style={{ height: "400px" }}
@@ -67,6 +71,7 @@ const DashboardActivity = () => {
           </button>
         ))}
       </div>
+    </div>
     </div>
   );
 };

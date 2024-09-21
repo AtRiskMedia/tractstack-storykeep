@@ -4,7 +4,7 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ResourceEditor from "@components/storykeep/components/ResourceEditor";
 import { getResourcesBySlug } from "../../../../api/turso";
-import type { AuthStatus, MenuDatum, ResourceDatum } from "../../../../types";
+import type { AuthStatus, MenuDatum } from "../../../../types";
 
 const { slug } = Astro.params;
 if (!slug) return Astro.redirect("/404");

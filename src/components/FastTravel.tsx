@@ -13,7 +13,7 @@ import type {
 
 async function goGetGraph() {
   try {
-    const response = await fetchWithAuth("/builder/graph");
+    const response = await fetchWithAuth("/auth/graph");
     const data =
       typeof response?.data !== `undefined` &&
       typeof response?.data?.at(0) !== `undefined`

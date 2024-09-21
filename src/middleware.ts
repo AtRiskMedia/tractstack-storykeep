@@ -42,8 +42,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/storykeep/logout",
     "/api/concierge/auth/sync",
     "/api/concierge/events/stream",
-    "/api/concierge/builder/profile",
-    "/api/concierge/builder/graph",
+    "/api/concierge/auth/profile",
+    "/api/concierge/auth/graph",
   ];
 
   const isPublicRoute = publicRoutes.includes(context.url.pathname);

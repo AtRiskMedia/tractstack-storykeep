@@ -45,19 +45,21 @@ export async function init() {
 
   // register page view
   const cur = current.get();
-  const pageViewEvent = cur.parentId
-    ? {
-        id: cur.id,
-        parentId: cur.parentId,
-        type: `StoryFragment`,
-        verb: `PAGEVIEWED`,
-      }
-    : {
-        id: cur.id,
-        type: `Pane`,
-        verb: `PAGEVIEWED`,
-      };
-  events.set([...events.get(), pageViewEvent]);
+  if (cur.id && cur.slug && cur.title) {
+    const pageViewEvent = cur.parentId
+      ? {
+          id: cur.id,
+          parentId: cur.parentId,
+          type: `StoryFragment`,
+          verb: `PAGEVIEWED`,
+        }
+      : {
+          id: cur.id,
+          type: `Pane`,
+          verb: `PAGEVIEWED`,
+        };
+    events.set([...events.get(), pageViewEvent]);
+  }
 
   // flag on first visit from external
   if (!entered.get()) {

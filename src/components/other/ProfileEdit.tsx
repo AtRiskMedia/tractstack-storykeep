@@ -32,7 +32,7 @@ async function goSaveProfile(payload: {
   init: boolean;
 }) {
   try {
-    const response = await fetchWithAuth("/builder/profile", {
+    const response = await fetchWithAuth("/auth/profile", {
       method: "POST",
       body: JSON.stringify({ ...payload }),
     });
@@ -68,7 +68,7 @@ async function goSaveProfile(payload: {
 
 async function goLoadProfile() {
   try {
-    const response = await fetchWithAuth("/builder/profile");
+    const response = await fetchWithAuth("/auth/profile");
     profile.set({
       firstname: response?.firstname || undefined,
       contactPersona: response?.contactPersona || undefined,

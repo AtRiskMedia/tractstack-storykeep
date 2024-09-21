@@ -5,6 +5,7 @@ import { cleanTursoContentMap } from "../utils/compositor/tursoContentMap";
 import { cleanTursoStoryFragment } from "../utils/compositor/tursoStoryFragment";
 import { cleanTursoContextPane } from "../utils/compositor/tursoContextPane";
 import { cleanTursoFile } from "../utils/compositor/tursoFile";
+import { cleanTursoMenu } from "../utils/compositor/tursoMenu";
 import { cleanPaneDesigns } from "../utils/compositor/paneDesigns";
 import type {
   ResourceDatum,
@@ -15,12 +16,57 @@ import type {
   PaneDesign,
   TursoFileNode,
   FullContentMap,
+  MenuDatum,
+  FileDatum,
 } from "../types.ts";
 
 export const turso = createClient({
   url: import.meta.env.TURSO_DATABASE_URL,
   authToken: import.meta.env.TURSO_AUTH_TOKEN,
 });
+
+export async function getAllResources(): Promise<ResourceDatum[]> {
+  try {
+    const { rows } = await turso.execute(`
+      SELECT * FROM resource
+      ORDER BY title ASC
+    `);
+    return cleanTursoResource(rows);
+  } catch (error) {
+    console.error("Error fetching all resources:", error);
+    throw error;
+  }
+}
+
+export async function getAllMenus(): Promise<MenuDatum[]> {
+  try {
+    const { rows } = await turso.execute(`
+      SELECT id, title, theme, options_payload
+      FROM menu
+      ORDER BY title
+    `);
+    return cleanTursoMenu(rows);
+  } catch (error) {
+    console.error("Error fetching all menus:", error);
+    throw error;
+  }
+}
+
+export async function getMenuById(id: string): Promise<MenuDatum | null> {
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id, title, theme, options_payload
+            FROM menu
+            WHERE id = ?`,
+      args: [id],
+    });
+    const menus = cleanTursoMenu(rows);
+    return menus[0] || null;
+  } catch (error) {
+    console.error("Error fetching menu by ID:", error);
+    throw error;
+  }
+}
 
 export async function getDatumPayload(): Promise<DatumPayload> {
   try {
@@ -341,6 +387,29 @@ export async function getPaneDesigns(): Promise<PaneDesign[]> {
     return cleanPaneDesigns(rows);
   } catch (error) {
     console.error("Error fetching pane designs:", error);
+    throw error;
+  }
+}
+
+export async function getFileById(id: string): Promise<FileDatum | null> {
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id, filename, alt_description, url
+            FROM file
+            WHERE id = ?`,
+      args: [id],
+    });
+    const files = cleanTursoFile(rows);
+    if (files.length > 0) {
+      const file = files[0];
+      return {
+        ...file,
+        src: `${import.meta.env.PUBLIC_IMAGE_URL}${file.url}`,
+      };
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching file by ID:", error);
     throw error;
   }
 }

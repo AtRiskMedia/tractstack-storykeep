@@ -21,6 +21,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/storykeep/create/*",
     "/storykeep/settings",
     "/api/turso/paneDesigns",
+    "/api/storykeep/manage",
+    "/api/storykeep/manage/*",
     "/api/storykeep/env",
     "/api/storykeep/analytics",
     "/api/storykeep/dashboardAnalytics",
@@ -32,6 +34,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/storykeep/create/*",
     "/api/turso/paneDesigns",
     "/api/storykeep/analtics",
+    "/api/storykeep/manage",
+    "/api/storykeep/manage/*",
   ];
   const publicRoutes = [
     "/storykeep/login",

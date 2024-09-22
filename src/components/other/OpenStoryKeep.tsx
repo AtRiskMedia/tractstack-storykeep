@@ -11,6 +11,7 @@ export const OpenStoryKeep = ({
   isStoryKeep?: boolean;
   isEditable?: boolean;
 }) => {
+  console.log(isEditable)
   return (
     <>
       {isStoryKeep ? (
@@ -31,15 +32,7 @@ export const OpenStoryKeep = ({
           <RectangleGroupIcon className="h-6 w-6 text-myblue/80" />
         </a>
       )}
-      {isStoryKeep && slug !== `storykeep-settings` ? (
-        <a
-          href={!isContext ? `/${slug}/edit` : `/context/${slug}/edit`}
-          className="hover:text-myblue hover:rotate-6"
-          title="Modify this page"
-        >
-          <BeakerIcon className="h-6 w-6 text-myblue/80" />
-        </a>
-      ) : isEditable ? (
+      {isEditable ? (
         <a
           data-astro-reload
           href={!isContext ? `/${slug}/edit` : `/context/${slug}/edit`}

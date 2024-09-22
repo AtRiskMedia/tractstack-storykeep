@@ -6,6 +6,7 @@ import {
   PlusIcon,
   ChevronUpDownIcon,
   ExclamationTriangleIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
@@ -24,10 +25,11 @@ interface SocialMediaInputProps {
   availablePlatforms: string[];
 }
 
-const groupOrder = ["Brand", "Core", "Options", "Integrations"];
+const groupOrder = ["Brand", "Core", "Options", "Integrations", "Backend"];
 const wordmarkModeOptions = ["default", "logo", "wordmark"];
 
 const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
@@ -41,18 +43,33 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     .filter(item => item.type === "StoryFragment")
     .map(item => ({ slug: item.slug, title: item.title }));
 
-  const initializeSettings = useCallback(() => {
-    const initialSettings = knownEnvSettings.map(setting => ({
-      ...setting,
-      value: "",
-    }));
-    setLocalSettings(initialSettings);
-    setHasUnsavedChanges(false);
+  useEffect(() => {
+    fetchEnv();
   }, []);
 
-  useEffect(() => {
-    initializeSettings();
-  }, [initializeSettings]);
+  async function fetchEnv() {
+    try {
+      const response = await fetch(`/api/concierge/storykeep/env`);
+      const data = await response.json();
+      if (data.success) {
+        const newData = JSON.parse(data.data);
+        const initialSettings = knownEnvSettings.map(setting => {
+          return {
+            ...setting,
+            value:
+              newData[setting.name] && setting.type === `boolean`
+                ? `false`
+                : (newData[setting.name] ?? ""),
+          };
+        });
+        setLocalSettings(initialSettings);
+        setHasUnsavedChanges(false);
+        setIsLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error fetching env:", error);
+    }
+  }
 
   const handleSettingChange = useCallback(
     (
@@ -127,6 +144,8 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     availablePlatforms,
   }: SocialMediaInputProps) => {
     const [platform, url] = value.split("|");
+
+    if (!isLoaded) return <div>Loading...</div>;
 
     return (
       <div className="flex items-center space-x-2">
@@ -234,28 +253,39 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     uncleanGroups.forEach(group => {
       setExpandedGroups(prev => ({ ...prev, [group]: true }));
     });
+    if (uncleanGroups.length === 0) setExpandedGroups({ Brand: true });
   }, [uncleanGroups]);
 
   const renderSetting = (setting: EnvSettingDatum, index: number) => {
     const settingId = `env-setting-${setting.name}`;
 
+    const renderLabel = () => (
+      <label
+        id={`${settingId}-label`}
+        className="block text-md text-mydarkgrey flex items-center"
+      >
+        {setting.description}
+        <div className="relative ml-1 group">
+          <InformationCircleIcon className="h-5 w-5 text-myblue cursor-help" />
+          <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-white border border-mylightgrey rounded p-2 shadow-lg z-10 w-64">
+            <p className="text-sm text-mydarkgrey">
+              {setting.required ? "Required field. " : ""}
+              Use format: {setting.defaultValue}
+            </p>
+          </div>
+        </div>
+        {setting.required && (
+          <span className="text-myorange ml-1" title="This field is required">
+            *
+          </span>
+        )}
+      </label>
+    );
+
     if (setting.name === "PUBLIC_WORDMARK_MODE") {
       return (
         <div key={setting.name} className="space-y-2 mb-4 max-w-xs">
-          <label
-            id={`${settingId}-label`}
-            className="block text-md text-mydarkgrey"
-          >
-            {setting.description}
-            {setting.required && (
-              <span
-                className="text-myorange ml-1"
-                title={`Use format: ${setting.defaultValue}`}
-              >
-                *
-              </span>
-            )}
-          </label>
+          {renderLabel()}
           <Combobox
             value={setting.value || "default"}
             onChange={newValue => handleSettingChange(index, "value", newValue)}
@@ -322,20 +352,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
 
       return (
         <div key={setting.name} className="space-y-2 mb-4">
-          <label
-            id={`${settingId}-label`}
-            className="block text-md text-mydarkgrey"
-          >
-            {setting.description}
-            {setting.required && (
-              <span
-                className="text-myorange ml-1"
-                title="This field is required"
-              >
-                *
-              </span>
-            )}
-          </label>
+          {renderLabel()}
           <div className="space-y-2">
             {values.map((value, valueIndex) => {
               const availablePlatforms = socialIconKeys.filter(
@@ -370,20 +387,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     } else if (setting.name === "PUBLIC_HOME") {
       return (
         <div key={setting.name} className="space-y-2 mb-4">
-          <label
-            id={`${settingId}-label`}
-            className="block text-md text-mydarkgrey"
-          >
-            {setting.description}
-            {setting.required && (
-              <span
-                className="text-myorange ml-1"
-                title={`Use format: ${setting.defaultValue}`}
-              >
-                *
-              </span>
-            )}
-          </label>
+          {renderLabel()}
           <Combobox
             value={setting.value}
             onChange={newValue => handleSettingChange(index, "value", newValue)}
@@ -420,11 +424,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
                   >
                     {({ selected, active }) => (
                       <>
-                        <span
-                          className={`block truncate ${
-                            selected ? "font-bold" : "font-normal"
-                          }`}
-                        >
+                        <span className={`block truncate`}>
                           <strong>{slug.slug}</strong> | {slug.title}
                         </span>
                         {selected ? (
@@ -449,20 +449,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
 
     return (
       <div key={setting.name} className="space-y-2 mb-4">
-        <label
-          id={`${settingId}-label`}
-          className="block text-md text-mydarkgrey"
-        >
-          {setting.description}
-          {setting.required && (
-            <span
-              className="text-myorange ml-1"
-              title={`Use format: ${setting.defaultValue}`}
-            >
-              *
-            </span>
-          )}
-        </label>
+        {renderLabel()}
         {setting.type === "boolean" ? (
           <Switch
             checked={setting.value === "true"}

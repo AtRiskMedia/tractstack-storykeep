@@ -11,7 +11,7 @@ export const OpenStoryKeep = ({
   isStoryKeep?: boolean;
   isEditable?: boolean;
 }) => {
-  console.log(isEditable)
+  console.log(isEditable);
   return (
     <>
       {isStoryKeep ? (

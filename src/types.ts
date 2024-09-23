@@ -535,6 +535,11 @@ export interface PaneDesignOptionsPayload extends PaneOptionsPayload {
   bgColour: string | null;
 }
 
+export interface PaneOptionsDatum {
+  id: string;
+  classes: string[];
+}
+
 export interface PaneDatum {
   id: string;
   title: string;

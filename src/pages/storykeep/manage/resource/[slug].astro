@@ -4,19 +4,34 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ResourceEditor from "@components/storykeep/components/ResourceEditor";
 import { getResourcesBySlug } from "../../../../api/turso";
-import type { AuthStatus, MenuDatum } from "../../../../types";
+import { ulid } from "ulid";
+import type { AuthStatus, MenuDatum, ResourceDatum } from "../../../../types";
 
 const { slug } = Astro.params;
-if (!slug) return Astro.redirect("/404");
+const create = slug === "create";
 
 const user = Astro.locals.user as AuthStatus;
 const canonicalURL = new URL(`/storykeep/manage/resource/${slug}`, Astro.site)
   .href;
 
-const resources = await getResourcesBySlug([slug]);
-const resource = resources[0];
+let resource: ResourceDatum;
 
-if (!resource) return Astro.redirect("/404");
+if (create) {
+  resource = {
+    id: ulid(),
+    title: "",
+    slug: "",
+    category: null,
+    actionLisp: "",
+    oneliner: "",
+    optionsPayload: {},
+  };
+} else {
+  if (!slug) return Astro.redirect("/404");
+  const resources = await getResourcesBySlug([slug]);
+  resource = resources[0];
+  if (!resource) return Astro.redirect("/404");
+}
 
 const menuPayload: MenuDatum = {
   id: `storykeep`,
@@ -44,11 +59,11 @@ const menuPayload: MenuDatum = {
 ---
 
 <StoryKeep
-  title={`Edit Resource: ${resource.title}`}
+  title={create ? "Create New Resource" : `Edit Resource: ${resource.title}`}
   canonicalURL={canonicalURL}
 >
   <Header
-    title={`Edit Resource: ${resource.title}`}
+    title={create ? "Create New Resource" : `Edit Resource: ${resource.title}`}
     menu={menuPayload}
     slug={`storykeep-manage-resource-${slug}`}
     isContext={false}

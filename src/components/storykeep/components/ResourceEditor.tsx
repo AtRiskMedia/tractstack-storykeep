@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Switch } from "@headlessui/react";
 import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
-import type { ResourceDatum } from "../../../types";
+import { getResourceSetting, processResourceValue } from "../../../constants";
+import type { ResourceDatum, ResourceSetting } from "../../../types";
 
 interface ResourceEditorProps {
   resource: ResourceDatum;
@@ -16,24 +17,51 @@ export default function ResourceEditor({
 }: ResourceEditorProps) {
   const [localResource, setLocalResource] = useState<ResourceDatum>(resource);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [resourceSetting, setResourceSetting] = useState<
+    ResourceSetting | undefined
+  >(undefined);
+
+  useEffect(() => {
+    const setting = getResourceSetting(resource.category || "");
+    setResourceSetting(setting);
+  }, [resource.category]);
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const handleChange = useCallback((field: keyof ResourceDatum, value: any) => {
-    setLocalResource(prev => ({ ...prev, [field]: value }));
+    setLocalResource(prev => {
+      const newResource = { ...prev, [field]: value };
+      if (field === "category") {
+        const newSetting = getResourceSetting(value);
+        setResourceSetting(newSetting);
+        if (newSetting) {
+          Object.keys(newSetting).forEach(key => {
+            if (!(key in newResource.optionsPayload)) {
+              newResource.optionsPayload[key] = newSetting[key].defaultValue;
+            }
+          });
+        }
+      }
+      return newResource;
+    });
     setUnsavedChanges(true);
   }, []);
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const handleOptionsPayloadChange = useCallback((key: string, value: any) => {
-    setLocalResource(prev => ({
-      ...prev,
-      optionsPayload: {
-        ...prev.optionsPayload,
-        [key]: value,
-      },
-    }));
-    setUnsavedChanges(true);
-  }, []);
+  const handleOptionsPayloadChange = useCallback(
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    (key: string, value: any) => {
+      setLocalResource(prev => ({
+        ...prev,
+        optionsPayload: {
+          ...prev.optionsPayload,
+          [key]: resourceSetting
+            ? processResourceValue(key, value, resourceSetting)
+            : value,
+        },
+      }));
+      setUnsavedChanges(true);
+    },
+    [resourceSetting]
+  );
 
   const handleAddOptionPayloadField = useCallback(() => {
     const newKey = `newField${Object.keys(localResource.optionsPayload || {}).length}`;
@@ -86,6 +114,57 @@ export default function ResourceEditor({
     );
   };
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const renderOptionField = (key: string, value: any) => {
+    const setting = resourceSetting && resourceSetting[key];
+    const type = setting ? setting.type : typeof value;
+
+    switch (type) {
+      case "boolean":
+        return (
+          <Switch
+            checked={value}
+            onChange={newValue => handleOptionsPayloadChange(key, newValue)}
+            className={`${
+              value ? "bg-myorange" : "bg-mydarkgrey"
+            } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+          >
+            <span
+              className={`${
+                value ? "translate-x-6" : "translate-x-1"
+              } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+            />
+          </Switch>
+        );
+      case "date":
+        return (
+          <input
+            type="datetime-local"
+            value={
+              value ? new Date(value * 1000).toISOString().slice(0, -8) : ""
+            }
+            onChange={e => {
+              const date = new Date(e.target.value);
+              handleOptionsPayloadChange(
+                key,
+                Math.floor(date.getTime() / 1000)
+              );
+            }}
+            className="w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          />
+        );
+      default:
+        return (
+          <input
+            type="text"
+            value={value === null || value === undefined ? "" : String(value)}
+            onChange={e => handleOptionsPayloadChange(key, e.target.value)}
+            className="w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          />
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
       {renderField("title", "Title")}
@@ -112,34 +191,7 @@ export default function ResourceEditor({
                 }}
                 className="w-1/3 rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
               />
-              {typeof value === "boolean" ? (
-                <Switch
-                  checked={value}
-                  onChange={newValue =>
-                    handleOptionsPayloadChange(key, newValue)
-                  }
-                  className={`${
-                    value ? "bg-myorange" : "bg-mydarkgrey"
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                >
-                  <span
-                    className={`${
-                      value ? "translate-x-6" : "translate-x-1"
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />
-                </Switch>
-              ) : (
-                <input
-                  type="text"
-                  value={
-                    value === null || value === undefined ? "" : String(value)
-                  }
-                  onChange={e =>
-                    handleOptionsPayloadChange(key, e.target.value)
-                  }
-                  className="w-2/3 rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-                />
-              )}
+              {renderOptionField(key, value)}
               <button
                 onClick={() => handleRemoveOptionPayloadField(key)}
                 className="text-myorange hover:text-black"

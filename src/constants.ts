@@ -6,7 +6,13 @@ import {
   PlusCircleIcon,
   Square3Stack3DIcon,
 } from "@heroicons/react/24/outline";
-import type { EnvSetting, Tag, ToolMode, ToolAddMode } from "./types";
+import type {
+  ResourceSetting,
+  EnvSetting,
+  Tag,
+  ToolMode,
+  ToolAddMode,
+} from "./types";
 
 export const CONCIERGE_SYNC_INTERVAL = 4000;
 export const THRESHOLD_READ = import.meta.env.PUBLIC_THRESHOLD_READ || 42000;
@@ -482,6 +488,8 @@ export const knownEnvSettings: EnvSetting[] = [
 
 export const reservedSlugs = [
   `api`,
+  `create`,
+  `edit`,
   `concierge`,
   `context`,
   `products`,
@@ -489,3 +497,60 @@ export const reservedSlugs = [
   `cart`,
   `404`,
 ];
+
+// Define known resource settings based on categorySlug
+export const knownResourceSettings: {
+  [categorySlug: string]: ResourceSetting;
+} = {
+  crusade: {
+    location: { type: "string" },
+    details: { type: "string" },
+    ytembed: { type: "string" },
+    date: { type: "date" },
+    cancelled: { type: "boolean", defaultValue: false },
+    live: { type: "boolean", defaultValue: false },
+  },
+  // Add more category slugs and their corresponding settings as needed
+};
+
+export function isKnownResourceSetting(
+  categorySlug: string | number
+): categorySlug is keyof typeof knownResourceSettings {
+  return (
+    typeof categorySlug === "string" && categorySlug in knownResourceSettings
+  );
+}
+export function getResourceSetting(
+  categorySlug: string | number
+): ResourceSetting | undefined {
+  return isKnownResourceSetting(categorySlug)
+    ? knownResourceSettings[categorySlug]
+    : undefined;
+}
+
+// Helper function to validate and process a resource value based on its type
+export function processResourceValue(
+  key: string,
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  value: any,
+  setting: ResourceSetting
+): any {
+  if (key in setting) {
+    const { type, defaultValue } = setting[key];
+    switch (type) {
+      case "string":
+        return typeof value === "string" ? value : (defaultValue ?? "");
+      case "boolean":
+        return typeof value === "boolean" ? value : (defaultValue ?? false);
+      case "number":
+        return typeof value === "number" ? value : (defaultValue ?? 0);
+      case "date":
+        return typeof value === "number"
+          ? new Date(value * 1000).toISOString()
+          : (defaultValue ?? "");
+      default:
+        return value;
+    }
+  }
+  return value;
+}

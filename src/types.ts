@@ -644,6 +644,7 @@ export interface TursoPaneMap {
 }
 
 export interface ResourceDatum {
+  id: string;
   title: string;
   slug: string;
   category: string | null;
@@ -981,4 +982,12 @@ export interface ResourceDatumEventProps {
   timeString: string;
   dateString: string;
   venue: string;
+}
+
+export interface ResourceSetting {
+  [key: string]: {
+    type: "string" | "boolean" | "number" | "date";
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    defaultValue?: any;
+  };
 }

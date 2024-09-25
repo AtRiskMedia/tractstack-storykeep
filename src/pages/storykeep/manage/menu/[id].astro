@@ -4,17 +4,29 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import MenuEditor from "@components/storykeep/components/MenuEditor";
 import { getMenuById } from "../../../../api/turso";
+import { ulid } from "ulid";
 import type { AuthStatus, MenuDatum } from "../../../../types";
 
 const { id } = Astro.params;
-if (!id) return Astro.redirect("/404");
+const create = id === "create";
 
 const user = Astro.locals.user as AuthStatus;
 const canonicalURL = new URL(`/storykeep/manage/menu/${id}`, Astro.site).href;
 
-const menu = await getMenuById(id);
+let menu: MenuDatum;
 
-if (!menu) return Astro.redirect("/404");
+if (create) {
+  menu = {
+    id: ulid(),
+    title: "",
+    theme: "default",
+    optionsPayload: [],
+  };
+} else {
+  if (!id) return Astro.redirect("/404");
+  menu = await getMenuById(id) as MenuDatum;
+  if (!menu) return Astro.redirect("/404");
+}
 
 const menuPayload: MenuDatum = {
   id: `storykeep`,
@@ -41,9 +53,12 @@ const menuPayload: MenuDatum = {
 };
 ---
 
-<StoryKeep title={`Edit Menu: ${menu.title}`} canonicalURL={canonicalURL}>
+<StoryKeep
+  title={create ? "Create New Menu" : `Edit Menu: ${menu.title}`}
+  canonicalURL={canonicalURL}
+>
   <Header
-    title={`Edit Menu: ${menu.title}`}
+    title={create ? "Create New Menu" : `Edit Menu: ${menu.title}`}
     menu={menuPayload}
     slug={`storykeep-manage-menu-${id}`}
     isContext={false}

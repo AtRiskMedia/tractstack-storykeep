@@ -1203,7 +1203,7 @@ export function convertMarkdownToHtml(markdown: string): string {
     .replace(/\[\[(.*?)(?:\]\(([^)]+)\))?\]\]/g, (_, linkText, url) => {
       const href =
         url ||
-        `generated-link-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        `generated-link-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
       return `<a data-href="${href}" class="pointer-events-none">${linkText}</a>`;
     })
     .replace(
@@ -1219,8 +1219,8 @@ export const htmlToMarkdown = (html: string): string => {
   // Handle space spans
   const spaceSpans = tempDiv.querySelectorAll("span[data-space]");
   spaceSpans.forEach(span => {
-    const needNbspLeft = span.textContent !== span.textContent?.trimLeft();
-    const needNbspRight = span.textContent !== span.textContent?.trimRight();
+    const needNbspLeft = span.textContent !== span.textContent?.trimStart();
+    const needNbspRight = span.textContent !== span.textContent?.trimEnd();
     const spanContent = span.innerHTML;
     const wrappedContent = `${needNbspLeft ? `<span style="white-space:pre"> </span>` : ``}${spanContent}${needNbspRight ? `<span style="white-space:pre"> </span>` : ``}`;
     span.outerHTML = wrappedContent;

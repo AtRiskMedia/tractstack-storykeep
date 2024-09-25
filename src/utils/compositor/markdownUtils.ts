@@ -1,6 +1,8 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
+import { fromHtml } from "hast-util-from-html";
+import { toMdast } from "hast-util-to-mdast";
+import { toMarkdown } from "mdast-util-to-markdown";
 import { MS_BETWEEN_UNDO, MAX_HISTORY_LENGTH } from "../../constants";
 import { cloneDeep } from "../../utils/helpers";
 import { tailwindClasses } from "../../assets/tailwindClasses";
@@ -1193,3 +1195,58 @@ export function updateViewportTuple(
   }
   return result as Tuple;
 }
+
+export function convertMarkdownToHtml(markdown: string): string {
+  return markdown
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/\[\[(.*?)(?:\]\(([^)]+)\))?\]\]/g, (_, linkText, url) => {
+      const href =
+        url ||
+        `generated-link-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      return `<a data-href="${href}" class="pointer-events-none">${linkText}</a>`;
+    })
+    .replace(
+      /\[(.*?)\]\((.*?)\)/g,
+      '<a data-href="$2" class="pointer-events-none">$1</a>'
+    );
+}
+
+export const htmlToMarkdown = (html: string): string => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = html;
+
+  // Handle space spans
+  const spaceSpans = tempDiv.querySelectorAll("span[data-space]");
+  spaceSpans.forEach(span => {
+    const needNbspLeft = span.textContent !== span.textContent?.trimLeft();
+    const needNbspRight = span.textContent !== span.textContent?.trimRight();
+    const spanContent = span.innerHTML;
+    const wrappedContent = `${needNbspLeft ? `<span style="white-space:pre"> </span>` : ``}${spanContent}${needNbspRight ? `<span style="white-space:pre"> </span>` : ``}`;
+    span.outerHTML = wrappedContent;
+  });
+
+  // Restore href attributes from data-href before conversion
+  const links = tempDiv.getElementsByTagName("a");
+  for (let i = 0; i < links.length; i++) {
+    const link = links[i];
+    const dataHref = link.getAttribute("data-href");
+    if (dataHref) {
+      link.setAttribute("href", dataHref);
+      link.removeAttribute("data-href");
+    }
+  }
+
+  const hast = fromHtml(tempDiv.innerHTML, { fragment: true });
+  const mdast = toMdast(hast);
+  let markdown = toMarkdown(mdast);
+
+  // Additional post-processing to clean up the markdown
+  markdown = markdown
+    .replace(/^#{1,6}\s/gm, "") // Remove heading hashes
+    .replace(/^([*-])\s/gm, "") // Remove unordered list markers
+    .replace(/^\d+\.\s/gm, "") // Remove ordered list markers
+    .trim(); // Trim leading/trailing whitespace
+
+  return markdown;
+};

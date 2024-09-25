@@ -8,10 +8,8 @@ import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
 import { AstToButton } from "../../../components/panes/AstToButton";
 import EditableContent from "./EditableContent";
-import {
-  getGlobalNth,
-  extractMarkdownElement,
-} from "../../../utils/compositor/markdownUtils";
+import { toHtml } from "hast-util-to-html";
+import { getGlobalNth } from "../../../utils/compositor/markdownUtils";
 import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
 import { wrapWithStylesIndicator } from "./StylesWrapper";
@@ -29,6 +27,7 @@ import type {
   ToolAddMode,
   ToolMode,
 } from "../../../types";
+import type { Element as HastElement } from "hast";
 
 interface PaneFromAstProps {
   readonly: boolean;
@@ -48,9 +47,9 @@ interface PaneFromAstProps {
   idx: number | null;
   outerIdx: number;
   markdownLookup: MarkdownLookup;
+  queueUpdate: (id: string, updateFn: () => void) => void;
   toolMode: ToolMode;
   toolAddMode: ToolAddMode;
-  queueUpdate: (id: string, updateFn: () => void) => void;
 }
 
 const EditableOuterWrapper = ({
@@ -324,6 +323,29 @@ const PaneFromAst = ({
       : "";
 
   // if editable as text
+  const renderContent = useCallback(() => {
+    const processNode = (node: HastElement): HastElement => {
+      if (node.tagName === "a") {
+        const href = node.properties?.href as string;
+        const buttonStyle = payload.buttonData[href]?.className || "";
+        node.properties = {
+          ...node.properties,
+          class: buttonStyle,
+          "data-href": href,
+        };
+      }
+      if (node.children) {
+        node.children = node.children.map(child =>
+          "tagName" in child ? processNode(child as HastElement) : child
+        );
+      }
+      return node;
+    };
+
+    const processedAst = processNode(thisAst as HastElement);
+    return toHtml(processedAst);
+  }, [thisAst, payload.buttonData]);
+
   if (
     !readonly &&
     markdown &&
@@ -331,20 +353,19 @@ const PaneFromAst = ({
     ([`p`, `h1`, `h2`, `h3`, `h4`, `h5`, `h6`].includes(Tag) ||
       isTextContainerItem)
   ) {
-    const content = extractMarkdownElement(markdown.body, Tag, outerIdx, idx);
+    const content = renderContent();
+
     return (
-      <div className="hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-mylightgrey/20 outline outline-2 outline-dotted outline-mylightgrey/20 outline-offset-[-2px]">
-        <EditableContent
-          content={content}
-          tag={Tag}
-          paneId={paneId}
-          markdownFragmentId={markdownFragmentId}
-          classes={injectClassNames}
-          outerIdx={outerIdx}
-          idx={idx}
-          queueUpdate={queueUpdate}
-        />
-      </div>
+      <EditableContent
+        content={content}
+        tag={Tag}
+        paneId={paneId}
+        markdownFragmentId={markdownFragmentId}
+        classes={injectClassNames}
+        outerIdx={outerIdx}
+        idx={idx}
+        queueUpdate={queueUpdate}
+      />
     );
   }
 

@@ -156,7 +156,7 @@ export const PaneAstStyles = (props: {
           markdownDatum?.payload?.optionsPayload?.buttons
         ? markdownDatum.payload.optionsPayload.buttons[linkTargetLookup]
             .classNamesPayload.hover
-        : null;
+        : { classes: {} };
   const buttonClassNamesPayloadArray = useMemo(() => {
     if (
       isLink &&
@@ -167,13 +167,12 @@ export const PaneAstStyles = (props: {
       const buttonData =
         markdownDatum.payload.optionsPayload.buttons[linkTargetLookup];
       return [
-        buttonData.classNamesPayload.button.classes,
-        buttonData.classNamesPayload.hover.classes,
+        buttonData.classNamesPayload.button.classes || {},
+        buttonData.classNamesPayload.hover.classes || {},
       ] as ClassNamesPayloadDatumValue[];
     }
     return [] as ClassNamesPayloadDatumValue[];
   }, [isLink, linkTargetLookup, markdownDatum]);
-
   const classNamesPayload =
     isLink && buttonClassNamesPayload
       ? buttonClassNamesPayload
@@ -184,7 +183,6 @@ export const PaneAstStyles = (props: {
           : activeTag === `li`
             ? listItemClassNamesPayload
             : outerTagClassNamesPayload;
-
   const handleButtonStyleChange = (option: string) => {
     if (linkMode && linkTargetKey) {
       const index = parseInt(option);
@@ -279,7 +277,7 @@ export const PaneAstStyles = (props: {
         className,
         markdownLookup,
         targetId,
-        classNamesPayload || null,
+        classNamesPayload || { classes: {} as ClassNamesPayloadDatumValue },
         modalClassNamesPayload,
         parentClassNamesPayload,
         parentLayer

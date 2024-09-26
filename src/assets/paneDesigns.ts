@@ -1360,7 +1360,7 @@ export const pageDesigns: Record<string, PageDesign> = {
     paneDesigns: [
       paneDesigns.find(p => p.id === "hero-1") as PaneDesign,
       paneDesigns.find(p => p.id === "titleText") as PaneDesign,
-    ]
+    ],
   },
   // ... other page designs
 };

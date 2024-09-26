@@ -50,8 +50,7 @@ const CreateNewPage = ({
   useEffect(() => {
     if (title) {
       const newSlug = cleanString(title);
-      if(!usedSlugs.includes(newSlug))
-      setSlug(cleanString(title));
+      if (!usedSlugs.includes(newSlug)) setSlug(cleanString(title));
       setSlugError(false);
     }
     setTitleError(!title);

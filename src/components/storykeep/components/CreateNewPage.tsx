@@ -1,35 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Combobox } from "@headlessui/react";
 import {
-  CheckIcon,
   ChevronUpDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CheckIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import PreviewPage from "./PreviewPage";
-import { cleanString } from "../../../utils/helpers";
-import type { ChangeEvent } from "react";
 import type { PageDesign } from "../../../types";
 
 interface CreateNewPageProps {
   mode: `storyfragment` | `context`;
-  usedSlugs: string[];
   pageDesigns: Record<string, PageDesign>;
 }
 
 const CreateNewPage = ({
   mode,
-  usedSlugs,
   pageDesigns,
 }: CreateNewPageProps) => {
-  const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
   const [selectedDesign, setSelectedDesign] = useState<PageDesign | null>(null);
   const [query, setQuery] = useState("");
   const [, setCurrentIndex] = useState(0);
-  const [titleError, setTitleError] = useState(false);
-  const [slugError, setSlugError] = useState(false);
 
   const pageDesignList = Object.values(pageDesigns);
 
@@ -47,33 +39,10 @@ const CreateNewPage = ({
             design.name.toLowerCase().includes(query.toLowerCase())
         );
 
-  useEffect(() => {
-    if (title) {
-      const newSlug = cleanString(title);
-      if (!usedSlugs.includes(newSlug)) setSlug(cleanString(title));
-      setSlugError(false);
-    }
-    setTitleError(!title);
-  }, [title]);
-
-  useEffect(() => {
-    setSlugError(!slug);
-  }, [slug]);
-
-  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-  };
-
-  const handleSlugChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSlug(cleanString(e.target.value));
-  };
-
   const handleSave = () => {
-    if (!title) setTitleError(true);
-    if (!slug) setSlugError(true);
-    if (title && slug && selectedDesign) {
+    if (selectedDesign) {
       // Implement save logic here
-      console.log("Saving new page:", { mode, title, slug, selectedDesign });
+      console.log("Saving new page:", { mode, selectedDesign });
     }
   };
 
@@ -96,42 +65,6 @@ const CreateNewPage = ({
 
   return (
     <div className="space-y-6">
-      <div>
-        <label htmlFor="title" className="block text-sm text-mydarkgrey">
-          Title <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="title"
-          value={title}
-          onChange={handleTitleChange}
-          className={`mt-1 block w-full rounded-md border ${
-            titleError ? "border-red-500" : "border-mylightgrey"
-          } shadow-sm focus:border-blue-500 focus:ring-blue-500`}
-        />
-        {titleError && (
-          <p className="mt-1 text-sm text-red-500">Title is required</p>
-        )}
-      </div>
-
-      <div>
-        <label htmlFor="slug" className="block text-sm text-mydarkgrey">
-          Slug <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          id="slug"
-          value={slug}
-          onChange={handleSlugChange}
-          className={`mt-1 block w-full rounded-md border ${
-            slugError ? "border-red-500" : "border-mylightgrey"
-          } shadow-sm focus:border-blue-500 focus:ring-blue-500`}
-        />
-        {slugError && (
-          <p className="mt-1 text-sm text-red-500">Slug is required</p>
-        )}
-      </div>
-
       <div className="flex items-center space-x-4">
         <div className="flex-grow">
           <Combobox value={selectedDesign} onChange={setSelectedDesign}>
@@ -140,7 +73,7 @@ const CreateNewPage = ({
             </Combobox.Label>
             <div className="relative mt-1">
               <Combobox.Input
-                className="w-full rounded-md border border-mylightgrey bg-white py-2 pl-3 pr-10 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-md border border-mylightgrey bg-white py-2 pl-3 pr-10 shadow-sm focus:border-mydarkgrey focus:outline-none focus:ring-1 focus:ring-myblue"
                 onChange={event => setQuery(event.target.value)}
                 displayValue={(design: PageDesign) => design?.name}
               />
@@ -211,13 +144,13 @@ const CreateNewPage = ({
             <XMarkIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center disabled:bg-black disabled:opacity-10 disabled:cursor-not-allowed"
+            className="font-bold bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center disabled:bg-black disabled:opacity-10 disabled:cursor-not-allowed"
             onClick={handleSave}
-            disabled={!title || !slug || !selectedDesign}
+            disabled={!selectedDesign}
             aria-label="Create Page"
             title="Create Page"
           >
-            <CheckIcon className="h-5 w-5" />
+            EDIT THIS PAGE
           </button>
         </div>
       </div>
@@ -231,11 +164,11 @@ const CreateNewPage = ({
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
           }}
         >
-          <div className="bg-white">
+          <div className={selectedDesign.tailwindBgColour ?? `bg-white`}>
             <PreviewPage
               design={selectedDesign}
               viewportKey="desktop"
-              slug={slug}
+              slug="create"
               isContext={mode === "context"}
             />
           </div>

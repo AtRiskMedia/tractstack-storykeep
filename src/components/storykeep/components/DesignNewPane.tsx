@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Combobox } from "@headlessui/react";
 import {
-  CheckIcon,
   ChevronUpDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  CheckIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
 import PreviewPane from "./PreviewPane";
@@ -304,13 +304,13 @@ const DesignNewPane = ({
           </button>
           {selectedDesign ? (
             <button
-              className="bg-myorange disabled:hover:bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
+              className="font-bold bg-myorange disabled:hover:bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
               onClick={() => handleInsert()}
               disabled={saving}
               aria-label="Use this Design"
               title="Use this Design"
             >
-              <CheckIcon className="h-5 w-5" />
+              INSERT
             </button>
           ) : null}
         </div>

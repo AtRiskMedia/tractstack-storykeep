@@ -215,6 +215,7 @@ export interface PaneDesign {
 export interface PageDesign {
   name: string;
   isContext: boolean;
+  tailwindBgColour: string | null;
   paneDesigns: PaneDesign[];
 }
 

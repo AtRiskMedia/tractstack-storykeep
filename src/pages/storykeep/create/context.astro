@@ -3,16 +3,12 @@ import StoryKeep from "@layouts/StoryKeep.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import CreateNewPage from "@components/storykeep/components/CreateNewPage";
-import { getContentMap } from "../../../api/turso";
 import { pageDesigns } from "../../../assets/paneDesigns";
 import { reservedSlugs } from "../../../constants";
 import type { AuthStatus, MenuDatum, ContentMap } from "../../../types";
 
 const user = Astro.locals.user as AuthStatus;
 const canonicalURL = new URL(`/storykeep/create`, Astro.site).href;
-
-const contentMap: ContentMap[] = await getContentMap();
-const usedSlugs = [...contentMap.map(item => item.slug), ...reservedSlugs];
 
 const menuPayload: MenuDatum = {
   id: `storykeep`,
@@ -55,7 +51,6 @@ const menuPayload: MenuDatum = {
         <CreateNewPage
           mode="context"
           pageDesigns={pageDesigns}
-          usedSlugs={usedSlugs}
           client:load
         />
       </div>

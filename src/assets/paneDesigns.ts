@@ -1352,11 +1352,19 @@ export const pageDesigns: Record<string, PageDesign> = {
   default: {
     name: "Basic Page",
     isContext: true,
+    tailwindBgColour: null,
+    paneDesigns: [paneDesigns.find(p => p.id === "titleText") as PaneDesign],
+  },
+  dark: {
+    name: "Basic Page - Dark mode",
+    isContext: false,
+    tailwindBgColour: `bg-myblack`,
     paneDesigns: [paneDesigns.find(p => p.id === "titleText") as PaneDesign],
   },
   landing: {
     name: "Landing Page",
     isContext: false,
+    tailwindBgColour: null,
     paneDesigns: [
       paneDesigns.find(p => p.id === "hero-1") as PaneDesign,
       paneDesigns.find(p => p.id === "titleText") as PaneDesign,

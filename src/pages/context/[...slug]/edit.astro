@@ -5,82 +5,81 @@ import {
   getContextPaneBySlug,
 } from "../../../api/turso";
 import { cleanTursoFileDatum } from "../../../utils/compositor/tursoFileDatum";
-import Layout from "@layouts/StoryKeep.astro";
+import StoryKeep from "@layouts/StoryKeep.astro";
 import { EditModal } from "@components/storykeep/EditModal";
 import { ContextPane } from "@components/storykeep/ContextPane";
 import { StoryKeepContextStore } from "@components/storykeep/StoryKeepContextStore";
 import { StoryKeepHeader } from "@components/storykeep/StoryKeepHeader";
+import CreateNewPage from "@components/storykeep/components/CreateNewPage";
+import { pageDesigns } from "../../../assets/paneDesigns";
 import type { AuthStatus, ContentMap } from "../../../types";
 
-// user authenticated?
 const user = Astro.locals.user as AuthStatus;
-
-// which storyfragment?
 const { slug } = Astro.params;
+const isCreateNew = slug === "create";
+
 if (!slug) return Astro.redirect("/404");
 
-// set the canonicalUrl to the actual storyfragment
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
 const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
 
-// get files
 const filesRaw = await getAllFileDatum();
 const files = cleanTursoFileDatum(filesRaw);
 
-// get contextPane datum
-const pane = await getContextPaneBySlug(slug);
-if (!pane || !pane.panePayload) return Astro.redirect("/404");
+let contextPane;
+if (!isCreateNew) {
+  contextPane = await getContextPaneBySlug(slug);
+  if (!contextPane || !contextPane.panePayload) return Astro.redirect("/404");
+}
 
 const contentMap: ContentMap[] = await getContentMap();
 ---
 
-<Layout
-  title={pane.title}
-  pubDatetime={pane.created}
-  modDatetime={pane.changed}
+<StoryKeep
+  title={isCreateNew ? "Create New Context Page" : contextPane.title}
+  pubDatetime={isCreateNew ? new Date() : contextPane.created}
+  modDatetime={isCreateNew ? null : contextPane.changed}
   canonicalURL={canonicalURL}
 >
-  <div class="my-1 pt-2 shadow-inner px-1">
-    <span
-      class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black font-action w-full justify-center"
-    >
-      <span class="font-bold">BETA PRE-RELEASE:</span> &nbsp; Stay tuned for a major
-      version release this Fall! Get in touch to be a part of the launch.</span
-    >
-  </div>
+  {
+    isCreateNew ? (
+      <CreateNewPage mode="context" pageDesigns={pageDesigns} client:load />
+    ) : (
+      <>
+        <StoryKeepContextStore client:only="react" pane={contextPane} />
+        <header
+          class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
+          id="main-header"
+        >
+          <StoryKeepHeader
+            client:only="react"
+            id={contextPane.id}
+            slug={contextPane.slug}
+            isContext={true}
+            contentMap={contentMap}
+            user={user}
+          />
+        </header>
 
-  <div
-    class="m-0 p-0 flex flex-col bg-mylightgrey/10 w-full"
-    style="background-image: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(255,255,255, 0.5) 10px, rgba(255,255,255, 0.5) 20px );"
-  >
-    <StoryKeepContextStore client:only="react" pane={pane} />
-    <header
-      class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
-      id="main-header"
-    >
-      <StoryKeepHeader
-        client:only="react"
-        id={pane.id}
-        slug={pane.slug}
-        isContext={true}
-        contentMap={contentMap}
-        user={user}
-      />
-    </header>
+        <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
+          <main id="website-content" class="overflow-auto w-full">
+            <ContextPane
+              id={contextPane.id}
+              slug={contextPane.slug}
+              client:only="react"
+            />
+          </main>
+        </div>
 
-    <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
-      <main id="website-content" class="overflow-auto w-full">
-        <ContextPane id={pane.id} slug={pane.slug} client:only="react" />
-      </main>
-    </div>
-
-    <EditModal
-      client:only="react"
-      id={pane.id}
-      files={files}
-      contentMap={contentMap}
-    />
-  </div>
+        <EditModal
+          client:only="react"
+          id={contextPane.id}
+          files={files}
+          contentMap={contentMap}
+        />
+      </>
+    )
+  }
 
   <script>
     import { initStoryKeep } from "../../../utils/storykeep";
@@ -89,4 +88,4 @@ const contentMap: ContentMap[] = await getContentMap();
       initStoryKeep();
     });
   </script>
-</Layout>
+</StoryKeep>

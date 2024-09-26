@@ -16,27 +16,21 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const protectedRoutes = [
     "/*/edit",
+    "/context/*/edit",
     "/storykeep",
-    "/storykeep/create",
-    "/storykeep/create/*",
     "/storykeep/settings",
     "/api/turso/paneDesigns",
-    "/api/storykeep/create/*",
-    "/api/storykeep/manage",
-    "/api/storykeep/manage/*",
-    "/api/storykeep/env",
-    "/api/storykeep/analytics",
-    "/api/storykeep/dashboardAnalytics",
+    "/api/concierge/storykeep/analytics",
+    "/api/concierge/storykeep/dashboardAnalytics",
+    "/api/concierge/storykeep/env",
   ];
   const openProtectedRoutes = [
     "/*/edit",
+    "/context/*/edit",
     "/storykeep",
-    "/storykeep/create",
-    "/storykeep/create/*",
     "/api/turso/paneDesigns",
-    "/api/storykeep/analtics",
-    "/api/storykeep/manage",
-    "/api/storykeep/manage/*",
+    "/api/concierge/storykeep/analytics",
+    "/api/concierge/storykeep/dashboardAnalytics",
   ];
   const publicRoutes = [
     "/storykeep/login",

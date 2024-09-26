@@ -172,7 +172,7 @@ export interface ToggleEditModalEvent extends Event {
 }
 
 export interface PaneDesignMarkdown {
-  type: string;
+  type: "markdown";
   markdownBody: string;
   textShapeOutsideDesktop: string;
   textShapeOutsideTablet: string;
@@ -185,7 +185,7 @@ export interface PaneDesignMarkdown {
   optionsPayload: OptionsPayloadDatum;
 }
 export interface PaneDesignBgPane {
-  type: string;
+  type: "bgPane";
   shape?: string;
   shapeMobile: string;
   shapeTablet: string;

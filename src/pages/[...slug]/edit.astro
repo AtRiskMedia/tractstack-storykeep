@@ -10,93 +10,84 @@ import { EditModal } from "@components/storykeep/EditModal";
 import { StoryFragment } from "@components/storykeep/StoryFragment";
 import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
 import { StoryKeepHeader } from "@components/storykeep/StoryKeepHeader";
+import CreateNewPage from "@components/storykeep/components/CreateNewPage";
+import { pageDesigns } from "../../assets/paneDesigns";
 import type { AuthStatus, ContentMap } from "../../types";
 
-// user authenticated?
 const user = Astro.locals.user as AuthStatus;
-
-// which storyfragment?
 const { slug } = Astro.params;
-const lookup = slug || import.meta.env.PUBLIC_HOME;
+const isCreateNew = slug === "create";
+
 if (!slug) return Astro.redirect("/404");
 
-// set the canonicalUrl to the actual storyfragment
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
-const canonicalURL = new URL(`/${lookup !== slug ? slug : ``}`, baseUrl).href;
+const canonicalURL = new URL(`/${slug}`, baseUrl).href;
 
-// get files
 const filesRaw = await getAllFileDatum();
 const files = cleanTursoFileDatum(filesRaw);
 
-// get storyfragment datum
-const storyfragment = await getStoryFragmentBySlug(slug);
-if (!storyfragment) {
-  return Astro.redirect("/404");
+let storyfragment;
+if (!isCreateNew) {
+  storyfragment = await getStoryFragmentBySlug(slug);
+  if (!storyfragment) {
+    return Astro.redirect("/404");
+  }
 }
 
 const contentMap: ContentMap[] = await getContentMap();
-
-// get full datum payload (resources, files, tractstacks, menus)
-//const payload = await getDatumPayload();
 ---
 
 <StoryKeep
-  title={storyfragment.title}
-  pubDatetime={storyfragment.created}
-  modDatetime={storyfragment.changed}
-  ogImage={storyfragment.socialImagePath}
+  title={isCreateNew ? "Create New Page" : storyfragment.title}
+  pubDatetime={isCreateNew ? new Date() : storyfragment.created}
+  modDatetime={isCreateNew ? null : storyfragment.changed}
+  ogImage={isCreateNew ? null : storyfragment.socialImagePath}
   canonicalURL={canonicalURL}
 >
-  <div class="my-1 pt-2 shadow-inner px-1">
-    <span
-      class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black font-action w-full justify-center"
-    >
-      <span class="font-bold">BETA PRE-RELEASE:</span> &nbsp; Stay tuned for a major
-      version release this Fall! Get <a
-        data-astro-reload
-        href="/concierge/profile/"
-        class="px-2 underline hover:text-myorange font-bold">in touch</a
-      > to be a part of the launch.</span
-    >
-  </div>
-
-  <div
-    class="m-0 p-0 flex flex-col bg-mylightgrey/10 w-full"
-    style="background-image: repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(255,255,255, 0.5) 10px, rgba(255,255,255, 0.5) 20px );"
-  >
-    <StoryKeepStore client:only="react" storyfragment={storyfragment} />
-    <header
-      class="z-10 bg-mywhite shadow-inner flex justify-between items-center w-full"
-      id="main-header"
-    >
-      <StoryKeepHeader
-        client:only="react"
-        id={storyfragment.id}
-        slug={storyfragment.slug}
-        isContext={false}
-        contentMap={contentMap}
-        user={user}
+  {
+    isCreateNew ? (
+      <CreateNewPage
+        mode="storyfragment"
+        pageDesigns={pageDesigns}
+        client:load
       />
-    </header>
+    ) : (
+      <>
+        <StoryKeepStore client:only="react" storyfragment={storyfragment} />
+        <header
+          class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
+          id="main-header"
+        >
+          <StoryKeepHeader
+            client:only="react"
+            id={storyfragment.id}
+            slug={storyfragment.slug}
+            isContext={false}
+            contentMap={contentMap}
+            user={user}
+          />
+        </header>
 
-    <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
-      <main id="website-content" class="overflow-auto w-full">
-        <StoryFragment
-          id={storyfragment.id}
-          slug={storyfragment.slug}
-          isContext={false}
+        <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
+          <main id="website-content" class="overflow-auto w-full">
+            <StoryFragment
+              id={storyfragment.id}
+              slug={storyfragment.slug}
+              isContext={false}
+              client:only="react"
+            />
+          </main>
+        </div>
+
+        <EditModal
           client:only="react"
+          id={storyfragment.id}
+          files={files}
+          contentMap={contentMap}
         />
-      </main>
-    </div>
-
-    <EditModal
-      client:only="react"
-      id={storyfragment.id}
-      files={files}
-      contentMap={contentMap}
-    />
-  </div>
+      </>
+    )
+  }
 
   <script>
     import { initStoryKeep } from "../../utils/storykeep";

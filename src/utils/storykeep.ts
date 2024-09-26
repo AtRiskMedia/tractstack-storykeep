@@ -317,9 +317,11 @@ export function initStoryKeep() {
 
   function handleHeaderBehavior(): void {
     const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-    header.classList.toggle("sticky", scrollPosition > MIN_SCROLL_THRESHOLD);
-    header.classList.toggle("top-0", scrollPosition > MIN_SCROLL_THRESHOLD);
-    header.style.zIndex = "9000";
+    if (header) {
+      header.classList.toggle("sticky", scrollPosition > MIN_SCROLL_THRESHOLD);
+      header.classList.toggle("top-0", scrollPosition > MIN_SCROLL_THRESHOLD);
+      header.style.zIndex = "9000";
+    }
   }
 
   function handleResize(): void {

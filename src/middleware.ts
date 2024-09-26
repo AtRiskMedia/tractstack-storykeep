@@ -21,6 +21,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/storykeep/create/*",
     "/storykeep/settings",
     "/api/turso/paneDesigns",
+    "/api/storykeep/create/*",
     "/api/storykeep/manage",
     "/api/storykeep/manage/*",
     "/api/storykeep/env",

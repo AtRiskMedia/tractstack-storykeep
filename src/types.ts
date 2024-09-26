@@ -212,6 +212,11 @@ export interface PaneDesign {
   fragments: (PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum)[];
   orientation?: `above` | `below`;
 }
+export interface PageDesign {
+  name: string;
+  isContext: boolean;
+  paneDesigns: PaneDesign[];
+}
 
 export type PaneAstTargetId = {
   outerIdx: number;

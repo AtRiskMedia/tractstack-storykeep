@@ -24,7 +24,7 @@ if (create) {
   };
 } else {
   if (!id) return Astro.redirect("/404");
-  menu = await getMenuById(id) as MenuDatum;
+  menu = (await getMenuById(id)) as MenuDatum;
   if (!menu) return Astro.redirect("/404");
 }
 

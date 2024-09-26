@@ -1,6 +1,6 @@
 //import { ulid } from "ulid";
 //import type { Root } from "hast";
-import type { PaneDesign, OptionsPayloadDatum } from "../types";
+import type { PageDesign, PaneDesign, OptionsPayloadDatum } from "../types";
 
 export const buttonStyleOptions = [
   "Plain text inline",
@@ -1347,3 +1347,20 @@ export const paneDesigns: PaneDesign[] = [
     ],
   },
 ];
+
+export const pageDesigns: Record<string, PageDesign> = {
+  default: {
+    name: "Basic Page",
+    isContext: true,
+    paneDesigns: [paneDesigns.find(p => p.id === "titleText") as PaneDesign],
+  },
+  landing: {
+    name: "Landing Page",
+    isContext: false,
+    paneDesigns: [
+      paneDesigns.find(p => p.id === "hero-1") as PaneDesign,
+      paneDesigns.find(p => p.id === "titleText") as PaneDesign,
+    ]
+  },
+  // ... other page designs
+};

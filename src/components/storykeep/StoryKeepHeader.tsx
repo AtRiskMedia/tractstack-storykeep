@@ -329,7 +329,7 @@ export const StoryKeepHeader = memo(
 
     return (
       <div className="w-full shadow-md" ref={headerRef}>
-        <div className="w-full my-2">
+        <div className="w-full my-2 px-4">
           <div
             className={`flex flex-wrap items-center gap-y-2 gap-x-2.5 justify-around`}
           >

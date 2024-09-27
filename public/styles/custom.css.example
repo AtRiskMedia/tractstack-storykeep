@@ -3,6 +3,14 @@
   --font-action: "Font-Action";
   --scale: 1;
   --use-custom-fonts: 0; /* 1 for custom fonts, 0 for Inter */
+  --brand-1:#10120d; /* black */
+  --brand-2:#fcfcfc; /* white */
+  --brand-3:#f58333; /* bright orange */
+  --brand-4:#c8df8c; /* bright green */
+  --brand-5:#293f58; /* dark blue */
+  --brand-6:#a7b1b7; /* bright grey */
+  --brand-7:#393d34; /* dark grey */
+  --brand-8:#e3e3e3; /* off white */
 }
 
 /*

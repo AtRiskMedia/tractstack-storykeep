@@ -126,8 +126,8 @@ module.exports = {
       fontFamily: {
         action: ['Font-Action','Inter','Georgia', 'Times New Roman', 'Times', 'serif'],
         main: [
-          'Inter',
           'Font-Main',
+          'Inter',
           'Arial',
           'Helvetica Neue',
           'Helvetica',

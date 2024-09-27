@@ -819,6 +819,14 @@ export const tailwindClasses: TailwindClasses = {
     prefix: "flex-",
     priority: 1,
   },
+  justifyITEMS: {
+    values: ["start", "end", "center", "stretch"],
+    group: "Flexbox",
+    title: "Justify Items",
+    className: "justify-items",
+    prefix: "justify-items-",
+    priority: 1,
+  },
   justifyCONTENT: {
     values: ["start", "end", "center", "between", "around", "evenly"],
     group: "Flexbox",

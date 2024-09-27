@@ -17,10 +17,11 @@ import { SvgBreaks } from "../../../assets/shapes";
 import {
   tailwindToHex,
   getTailwindColorOptions,
+  hexToTailwind,
 } from "../../../assets/tailwindColors";
 import PaneBgColour from "../fields/PaneBgColour";
 import TailwindColorCombobox from "../fields/TailwindColorCombobox";
-import { isDeepEqual } from "../../../utils/helpers";
+import { getComputedColor, isDeepEqual } from "../../../utils/helpers";
 
 const availableCollections = ["kCz"] as const;
 const availableImagesWithPrefix = ["none", ...Object.keys(SvgBreaks)] as const;
@@ -179,22 +180,18 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
     }
   }, [localSettings, updateStore, isInitialized]);
 
-  const handleHexColorChange = useCallback(
-    (newHexColor: string) => {
-      setLocalSettings(prev => ({
-        ...prev,
-        colour: newHexColor,
-      }));
-      const matchingTailwindColor = tailwindColorOptions.find(
-        color => tailwindToHex(`bg-${color}`) === newHexColor
-      );
-      setSelectedTailwindColor(matchingTailwindColor || "");
-    },
-    [tailwindColorOptions]
-  );
+  const handleHexColorChange = useCallback((newHexColor: string) => {
+    const computedColor = getComputedColor(newHexColor);
+    setLocalSettings(prev => ({
+      ...prev,
+      colour: computedColor,
+    }));
+    const matchingTailwindColor = hexToTailwind(computedColor);
+    setSelectedTailwindColor(matchingTailwindColor || "");
+  }, []);
 
   const handleTailwindColorChange = useCallback((newTailwindColor: string) => {
-    const hexColor = tailwindToHex(`bg-${newTailwindColor}`);
+    const hexColor = getComputedColor(tailwindToHex(`bg-${newTailwindColor}`));
     setLocalSettings(prev => ({
       ...prev,
       colour: hexColor,
@@ -216,7 +213,7 @@ export const PaneBreakSettings = ({ id }: PaneBreakSettingsProps) => {
       const hiddenViewports = currentSettings.hiddenViewports.split(",");
       const currentColor = artpack?.desktop?.svgFill || "#10120d";
       const matchingTailwindColor = tailwindColorOptions.find(
-        color => tailwindToHex(`bg-${color}`) === currentColor
+        color => getComputedColor(tailwindToHex(`bg-${color}`)) === currentColor
       );
 
       setLocalSettings({

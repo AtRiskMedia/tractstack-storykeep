@@ -3,7 +3,7 @@ import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
 import { useStore } from "@nanostores/react";
 import { storyFragmentTailwindBgColour } from "../../../store/storykeep";
 import ColorPickerWrapper from "../components/ColorPickerWrapper";
-import { debounce } from "../../../utils/helpers";
+import { getComputedColor, debounce } from "../../../utils/helpers";
 import {
   hexToTailwind,
   tailwindToHex,
@@ -33,7 +33,10 @@ const StoryFragmentTailwindBgColour = ({
   );
   const [selectedTailwindColor, setSelectedTailwindColor] = useState("");
 
-  const hexColor = useMemo(() => tailwindToHex(localValue), [localValue]);
+  const hexColor = useMemo(() => {
+    const computedColor = getComputedColor(tailwindToHex(localValue));
+    return computedColor;
+  }, [localValue]);
   const tailwindColorOptions = useMemo(() => getTailwindColorOptions(), []);
 
   const debouncedUpdateField = useRef(
@@ -51,9 +54,10 @@ const StoryFragmentTailwindBgColour = ({
 
   const handleHexColorChange = useCallback(
     (newHexColor: string) => {
-      setLocalValue(newHexColor.replace("#", ""));
-      debouncedUpdateField(`bg-${newHexColor.replace("#", "")}`);
-      const matchingTailwindColor = hexToTailwind(newHexColor);
+      const computedColor = getComputedColor(newHexColor);
+      setLocalValue(computedColor.replace("#", ""));
+      debouncedUpdateField(`bg-${computedColor.replace("#", "")}`);
+      const matchingTailwindColor = hexToTailwind(computedColor);
       setSelectedTailwindColor(matchingTailwindColor || "");
     },
     [debouncedUpdateField]

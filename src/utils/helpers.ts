@@ -8,6 +8,18 @@ import type {
   ClassNamesPayloadValue,
 } from "../types";
 
+export const getComputedColor = (color: string): string => {
+  if (color.startsWith("#var(--")) {
+    color = color.slice(1);
+  }
+  if (color.startsWith("var(--")) {
+    const varName = color.slice(4, -1);
+    const computedStyle = getComputedStyle(document.documentElement);
+    return computedStyle.getPropertyValue(varName).trim() || color;
+  }
+  return color;
+};
+
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(` `);
 }

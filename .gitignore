@@ -56,7 +56,7 @@ public/custom
 public/fonts
 
 # custom css
-public/styles
+public/styles/custom.css
 
 # custom Dockerfile
 Dockerfile

@@ -45,6 +45,14 @@ module.exports = {
         myorange: '#f58333',
         mydarkgrey: '#393d34',
         myblack: '#10120d',
+        'brand-1': 'var(--brand-1)',
+        'brand-2': 'var(--brand-2)',
+        'brand-3': 'var(--brand-3)',
+        'brand-4': 'var(--brand-4)',
+        'brand-5': 'var(--brand-5)',
+        'brand-6': 'var(--brand-6)',
+        'brand-7': 'var(--brand-7)',
+        'brand-8': 'var(--brand-8)',
       },
       fontSize: {
         rxs: 'calc(var(--scale) * 0.75rem)',
@@ -124,15 +132,22 @@ module.exports = {
         r20: 'calc(var(--scale) * 5rem)',
       },
       fontFamily: {
-        action: ['Font-Action','Inter','Georgia', 'Times New Roman', 'Times', 'serif'],
+        action: [
+          'var(--font-action)',
+          'Inter',
+          'Georgia',
+          'Times New Roman',
+          'Times',
+          'serif'
+        ],
         main: [
-          'Font-Main',
+          'var(--font-main)',
           'Inter',
           'Arial',
           'Helvetica Neue',
           'Helvetica',
-          'sans-serif',
-        ],
+          'sans-serif'
+        ], 
       },
     },
   },

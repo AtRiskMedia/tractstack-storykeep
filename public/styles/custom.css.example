@@ -1,0 +1,45 @@
+:root {
+  --font-main: "Font-Main";
+  --font-action: "Font-Action";
+  --scale: 1;
+  --use-custom-fonts: 0; /* 1 for custom fonts, 0 for Inter */
+}
+
+/*
+@font-face {
+  font-family: "Font-Main";
+  src: url("../fonts/Futura-Boo.woff");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Font-Main";
+  src: url("../fonts/Futura-Bol.woff");
+  font-weight: bold;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Font-Action";
+  src: url("../fonts/Bison-Bold.woff");
+  font-display: swap;
+}
+*/
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--use-custom-fonts) ? var(--font-main) : Inter, Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+@media (prefers-reduced-motion) {
+  scroll-behavior: auto;
+}
+
+[contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: #888;
+  font-style: italic;
+}

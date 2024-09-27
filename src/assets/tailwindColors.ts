@@ -13,6 +13,14 @@ export const customColors = {
   myblack: "#10120d",
   black: "#000000",
   white: "#ffffff",
+  "brand-1": "var(--brand-1)",
+  "brand-2": "var(--brand-2)",
+  "brand-3": "var(--brand-3)",
+  "brand-4": "var(--brand-4)",
+  "brand-5": "var(--brand-5)",
+  "brand-6": "var(--brand-6)",
+  "brand-7": "var(--brand-7)",
+  "brand-8": "var(--brand-8)",
 };
 
 export const getTailwindColorOptions = () => {

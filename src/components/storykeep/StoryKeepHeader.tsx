@@ -15,6 +15,7 @@ import StoryFragmentSlug from "./fields/StoryFragmentSlug";
 import {
   editModeStore,
   unsavedChangesStore,
+  temporaryErrorsStore,
   uncleanDataStore,
   paneInit,
   paneSlug,
@@ -32,6 +33,7 @@ import {
   showAnalytics,
   storedAnalytics,
   analyticsDuration,
+  creationStateStore,
 } from "../../store/storykeep";
 import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
 import {
@@ -88,12 +90,17 @@ export const StoryKeepHeader = memo(
     user: AuthStatus;
     isContext: boolean;
   }) => {
+    const $creationState = useStore(creationStateStore);
+    const thisId =
+      slug !== `create` ? id : $creationState.id ? $creationState.id : `error`;
     const $showAnalytics = useStore(showAnalytics);
     const $analyticsDuration = useStore(analyticsDuration);
     const duration = $analyticsDuration;
-    const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
-    const $paneTitle = useStore(paneTitle, { keys: [id] });
-    const $paneSlug = useStore(paneSlug, { keys: [id] });
+    const $storyFragmentTitle = useStore(storyFragmentTitle, {
+      keys: [thisId],
+    });
+    const $paneTitle = useStore(paneTitle, { keys: [thisId] });
+    const $paneSlug = useStore(paneSlug, { keys: [thisId] });
     const $editMode = useStore(editModeStore);
     const $viewportSet = useStore(viewportSetStore);
     const $viewport = useStore(viewportStore);
@@ -103,10 +110,10 @@ export const StoryKeepHeader = memo(
     const { value: toolMode } = useStore(toolModeStore);
     const { value: toolAddMode } = useStore(toolAddModeStore);
     const toolAddModeRef = useRef<HTMLSelectElement>(null);
-    const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
-    const $paneInit = useStore(paneInit, { keys: [id] });
-    const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
-    const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
+    const $uncleanData = useStore(uncleanDataStore, { keys: [thisId] });
+    const $paneInit = useStore(paneInit, { keys: [thisId] });
+    const $storyFragmentInit = useStore(storyFragmentInit, { keys: [thisId] });
+    const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [thisId] });
     const [isClient, setIsClient] = useState(false);
     const [hideElements, setHideElements] = useState(false);
     const headerRef = useRef<HTMLDivElement>(null);
@@ -119,7 +126,7 @@ export const StoryKeepHeader = memo(
       ),
     ];
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
-      useStoryKeepUtils(id, usedSlugs);
+      useStoryKeepUtils(thisId, usedSlugs);
 
     const setViewport = (
       newViewport: "auto" | "mobile" | "tablet" | "desktop"
@@ -174,20 +181,20 @@ export const StoryKeepHeader = memo(
 
     const $unsavedChanges = useStore(unsavedChangesStore);
     const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
-      keys: [id],
+      keys: [thisId],
     });
-    const $paneFragmentIds = useStore(paneFragmentIds, { keys: [id] });
+    const $paneFragmentIds = useStore(paneFragmentIds, { keys: [thisId] });
 
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
       const storyFragmentChanges = Object.values(
-        $unsavedChanges[id] || {}
+        $unsavedChanges[thisId] || {}
       ).some(Boolean);
       const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
         Object.values($unsavedChanges[paneId] || {}).some(Boolean)
       );
-      const paneFragmentChanges = $storyFragmentPaneIds[id]?.current.some(
+      const paneFragmentChanges = $storyFragmentPaneIds[thisId]?.current.some(
         paneId => {
           const fragmentIds = $paneFragmentIds[paneId]?.current || [];
           return fragmentIds.some(fragmentId =>
@@ -198,19 +205,19 @@ export const StoryKeepHeader = memo(
       setHasUnsavedChanges(
         storyFragmentChanges || paneChanges || paneFragmentChanges
       );
-    }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
+    }, [$unsavedChanges, thisId, $storyFragmentPaneIds, $paneFragmentIds]);
 
     const handleEditModeToggle = () => {
       if (
         $editMode?.mode === `settings` &&
         $editMode?.type === `storyfragment` &&
-        $editMode?.id === id
+        $editMode?.id === thisId
       ) {
         editModeStore.set(null);
         handleToggleOff();
       } else {
         editModeStore.set({
-          id,
+          id: thisId,
           mode: `settings`,
           type: `storyfragment`,
         });
@@ -221,33 +228,44 @@ export const StoryKeepHeader = memo(
     const handleInterceptEdit = (storeKey: StoreKey, editing: boolean) => {
       if (
         [`storyFragmentTitle`, `storyFragmentSlug`].includes(storeKey) &&
-        $storyFragmentSlug[id].current === ``
+        [``, `create`].includes($storyFragmentSlug[thisId].current)
       ) {
-        const clean = cleanString($storyFragmentTitle[id].current).substring(
-          0,
-          50
-        );
+        const clean = cleanString(
+          $storyFragmentTitle[thisId].current
+        ).substring(0, 50);
         const newVal = !usedSlugs.includes(clean) ? clean : ``;
-        uncleanDataStore.setKey(id, {
-          ...(uncleanDataStore.get()[id] || {}),
+        temporaryErrorsStore.setKey(thisId, {
+          ...(temporaryErrorsStore.get()[thisId] || {}),
+          [`storyFragmentTitle`]: newVal.length === 0,
           [`storyFragmentSlug`]: newVal.length === 0,
         });
-        storyFragmentSlug.setKey(id, {
+        uncleanDataStore.setKey(thisId, {
+          ...(uncleanDataStore.get()[thisId] || {}),
+          [`storyFragmentTitle`]: newVal.length === 0,
+          [`storyFragmentSlug`]: newVal.length === 0,
+        });
+        storyFragmentSlug.setKey(thisId, {
           current: newVal,
           original: newVal,
           history: [],
         });
       } else if (
         [`paneTitle`, `paneSlug`].includes(storeKey) &&
-        $paneSlug[id].current === ``
+        $paneSlug[thisId].current === ``
       ) {
-        const clean = cleanString($paneTitle[id].current).substring(0, 50);
+        const clean = cleanString($paneTitle[thisId].current).substring(0, 50);
         const newVal = !usedSlugs.includes(clean) ? clean : ``;
-        uncleanDataStore.setKey(id, {
-          ...(uncleanDataStore.get()[id] || {}),
+        temporaryErrorsStore.setKey(thisId, {
+          ...(temporaryErrorsStore.get()[thisId] || {}),
+          [`paneTitle`]: newVal.length === 0,
           [`paneSlug`]: newVal.length === 0,
         });
-        paneSlug.setKey(id, {
+        uncleanDataStore.setKey(thisId, {
+          ...(uncleanDataStore.get()[thisId] || {}),
+          [`paneTitle`]: newVal.length === 0,
+          [`paneSlug`]: newVal.length === 0,
+        });
+        paneSlug.setKey(thisId, {
           current: newVal,
           original: newVal,
           history: [],
@@ -258,12 +276,13 @@ export const StoryKeepHeader = memo(
 
     useEffect(() => {
       if (
-        (!isContext && $storyFragmentInit[id]?.init) ||
-        (isContext && $paneInit[id]?.init)
+        (!isContext && $storyFragmentInit[thisId]?.init) ||
+        (isContext && $paneInit[thisId]?.init) ||
+        (slug === `create` && $creationState.isInitialized)
       ) {
         setIsClient(true);
       }
-    }, [id, $storyFragmentInit, $paneInit]);
+    }, [thisId, $storyFragmentInit, $paneInit]);
 
     const handleScroll = useCallback(() => {
       if (headerRef.current) {
@@ -303,12 +322,12 @@ export const StoryKeepHeader = memo(
 
     useEffect(() => {
       const storyFragmentChanges = Object.values(
-        $unsavedChanges[id] || {}
+        $unsavedChanges[thisId] || {}
       ).some(Boolean);
       const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
         Object.values($unsavedChanges[paneId] || {}).some(Boolean)
       );
-      const paneFragmentChanges = $storyFragmentPaneIds[id]?.current.some(
+      const paneFragmentChanges = $storyFragmentPaneIds[thisId]?.current.some(
         paneId => {
           const fragmentIds = $paneFragmentIds[paneId]?.current || [];
           return fragmentIds.some(fragmentId =>
@@ -319,7 +338,7 @@ export const StoryKeepHeader = memo(
       const newHasUnsavedChanges =
         storyFragmentChanges || paneChanges || paneFragmentChanges;
       setHasUnsavedChanges(newHasUnsavedChanges);
-    }, [$unsavedChanges, id, $storyFragmentPaneIds, $paneFragmentIds]);
+    }, [$unsavedChanges, thisId, $storyFragmentPaneIds, $paneFragmentIds]);
 
     const toggleAnalytics = () => {
       showAnalytics.set(!$showAnalytics);
@@ -374,7 +393,13 @@ export const StoryKeepHeader = memo(
               {hasUnsavedChanges ? (
                 <a
                   data-astro-reload
-                  href={!isContext ? `/${slug}/edit` : `/context/${slug}/edit`}
+                  href={
+                    slug === `create`
+                      ? `/storykeep`
+                      : !isContext
+                        ? `/${slug}/edit`
+                        : `/context/${slug}/edit`
+                  }
                   className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                 >
                   Cancel
@@ -425,7 +450,9 @@ export const StoryKeepHeader = memo(
                 <button
                   type="button"
                   className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack disabled:hidden"
-                  disabled={Object.values($uncleanData[id] || {}).some(Boolean)}
+                  disabled={Object.values($uncleanData[thisId] || {}).some(
+                    Boolean
+                  )}
                 >
                   Save
                 </button>
@@ -436,34 +463,40 @@ export const StoryKeepHeader = memo(
             {!isContext ? (
               <>
                 <StoryFragmentTitle
-                  id={id}
+                  id={thisId}
                   isEditing={isEditing}
                   handleEditingChange={handleInterceptEdit}
                   updateStoreField={updateStoreField}
                   handleUndo={handleUndo}
                 />
-                <StoryFragmentSlug
-                  id={id}
-                  isEditing={isEditing}
-                  handleEditingChange={handleInterceptEdit}
-                  updateStoreField={updateStoreField}
-                  handleUndo={handleUndo}
-                />
+                {![`create`, ``].includes(
+                  $storyFragmentSlug[thisId]?.current
+                ) && (
+                  <StoryFragmentSlug
+                    id={thisId}
+                    isEditing={isEditing}
+                    handleEditingChange={handleInterceptEdit}
+                    updateStoreField={updateStoreField}
+                    handleUndo={handleUndo}
+                  />
+                )}
               </>
             ) : (
               <>
                 <PaneTitle
-                  id={id}
+                  id={thisId}
                   handleEditingChange={handleInterceptEdit}
                   updateStoreField={updateStoreField}
                   handleUndo={handleUndo}
                 />
-                <PaneSlug
-                  id={id}
-                  handleEditingChange={handleInterceptEdit}
-                  updateStoreField={updateStoreField}
-                  handleUndo={handleUndo}
-                />
+                {![`create`, ``].includes($paneSlug[thisId]?.current) && (
+                  <PaneSlug
+                    id={thisId}
+                    handleEditingChange={handleInterceptEdit}
+                    updateStoreField={updateStoreField}
+                    handleUndo={handleUndo}
+                  />
+                )}
               </>
             )}
           </div>

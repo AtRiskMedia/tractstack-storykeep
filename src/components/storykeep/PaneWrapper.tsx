@@ -82,9 +82,8 @@ const PaneWrapper = (props: {
   const $paneTitle = useStore(paneTitle, { keys: [id] });
   const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const $editMode = useStore(editModeStore);
-  const isCodeHook = $paneCodeHook[id].current;
+  const isCodeHook = $paneCodeHook?.[id]?.current;
   const [paneElement, setPaneElement] = useState<HTMLDivElement | null>(null);
-
   const paneRef = useCallback(
     (node: HTMLDivElement) => {
       if (node !== null) {

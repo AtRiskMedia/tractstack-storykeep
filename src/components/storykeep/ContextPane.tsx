@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
+import { navigate } from "astro:transitions/client";
 import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
 import {
   paneInit,
@@ -11,16 +12,19 @@ import {
   toolAddModeStore,
   lastInteractedTypeStore,
   paneMarkdownFragmentId,
+  creationStateStore,
 } from "../../store/storykeep";
 import PaneWrapper from "./PaneWrapper";
 import { classNames, handleEditorResize, debounce } from "../../utils/helpers";
 import type { ViewportKey } from "../../types";
 
-export const ContextPane = (props: { id: string; slug: string }) => {
+export const ContextPane = (props: { id: string | null; slug: string }) => {
   const { id, slug } = props;
   const [isClient, setIsClient] = useState(false);
-  const { handleUndo } = useStoryKeepUtils(id, []);
-  const $paneInit = useStore(paneInit, { keys: [id] });
+  const $creationState = useStore(creationStateStore);
+  const thisId = id ?? $creationState.id ?? `error`;
+  const { handleUndo } = useStoryKeepUtils(thisId, []);
+  const $paneInit = useStore(paneInit, { keys: [thisId] });
   const $lastInteractedType = useStore(lastInteractedTypeStore);
   const $viewport = useStore(viewportStore);
   const $viewportKey = useStore(viewportKeyStore);
@@ -74,7 +78,7 @@ export const ContextPane = (props: { id: string; slug: string }) => {
       if (event.ctrlKey && event.key === "z") {
         event.preventDefault();
 
-        const targetPaneId = id;
+        const targetPaneId = thisId;
         const interactedType = $lastInteractedType;
         if (interactedType === "markdown") {
           if (targetPaneId) {
@@ -98,8 +102,13 @@ export const ContextPane = (props: { id: string; slug: string }) => {
   }, [$lastInteractedType]);
 
   useEffect(() => {
-    if ($paneInit[id]?.init) setIsClient(true);
-  }, [id, $paneInit]);
+    if (
+      $paneInit[thisId]?.init ||
+      (slug === `create` && $creationState.isInitialized)
+    ) {
+      setIsClient(true);
+    } else if (slug === `create`) navigate(`/storykeep`);
+  }, [slug, thisId, $paneInit, $creationState.isInitialized]);
 
   useEffect(() => {
     // ensure correct viewport based on window width
@@ -184,7 +193,7 @@ export const ContextPane = (props: { id: string; slug: string }) => {
         )}
       >
         <PaneWrapper
-          id={id}
+          id={thisId}
           slug={slug}
           isContext={true}
           viewportKey={viewportKey}

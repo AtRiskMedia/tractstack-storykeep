@@ -2,6 +2,11 @@ import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+export interface CreationState {
+  id: string | null;
+  isInitialized: boolean;
+}
+
 export type EnvSettingType = "string" | "boolean" | "number" | "string[]";
 
 export interface EnvSetting {
@@ -172,6 +177,7 @@ export interface ToggleEditModalEvent extends Event {
 }
 
 export interface PaneDesignMarkdown {
+  id?: string;
   type: "markdown";
   markdownBody: string;
   textShapeOutsideDesktop: string;

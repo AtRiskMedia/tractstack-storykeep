@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useStore } from "@nanostores/react";
+import { navigate } from "astro:transitions/client";
 import {
   storyFragmentInit,
   storyFragmentTitle,
@@ -17,6 +18,7 @@ import {
   editModeStore,
   showAnalytics,
   storedAnalytics,
+  creationStateStore,
 } from "../../store/storykeep";
 import AnalyticsWrapper from "./nivo/AnalyticsWrapper";
 import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
@@ -26,26 +28,30 @@ import { classNames, handleEditorResize, debounce } from "../../utils/helpers";
 import type { ViewportKey } from "../../types";
 
 export const StoryFragment = (props: {
-  id: string;
+  id: string | null;
   slug: string;
   isContext: boolean;
 }) => {
   const { id, slug, isContext } = props;
   const [isClient, setIsClient] = useState(false);
-  const { handleUndo } = useStoryKeepUtils(id, []);
+  const $creationState = useStore(creationStateStore);
+  const thisId = id ?? $creationState.id ?? `error`;
+  const { handleUndo } = useStoryKeepUtils(thisId, []);
   const $showAnalytics = useStore(showAnalytics);
   const $storedAnalytics = useStore(storedAnalytics);
-  const $storyFragmentInit = useStore(storyFragmentInit, { keys: [id] });
-  const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
-  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, { keys: [id] });
+  const $storyFragmentInit = useStore(storyFragmentInit, { keys: [thisId] });
+  const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [thisId] });
+  const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
+    keys: [thisId],
+  });
   const $storyFragmentTailwindBgColour = useStore(
     storyFragmentTailwindBgColour,
-    { keys: [id] }
+    { keys: [thisId] }
   );
-  const paneIds = $storyFragmentPaneIds[id]?.current;
+  const paneIds = $storyFragmentPaneIds[thisId]?.current;
   const [thisPaneIds, setThisPaneIds] = useState<string[] | null>(null);
   const [shouldScroll, setShouldScroll] = useState<number | null>(null);
-  const tailwindBgColour = $storyFragmentTailwindBgColour[id]?.current;
+  const tailwindBgColour = $storyFragmentTailwindBgColour[thisId]?.current;
   const $lastInteractedPane = useStore(lastInteractedPaneStore);
   const $lastInteractedType = useStore(lastInteractedTypeStore);
   const $visiblePanes = useStore(visiblePanesStore);
@@ -209,8 +215,13 @@ export const StoryFragment = (props: {
   }, [$lastInteractedPane, $lastInteractedType, $visiblePanes]);
 
   useEffect(() => {
-    if ($storyFragmentInit[id]?.init) setIsClient(true);
-  }, [id, $storyFragmentInit]);
+    if (
+      $storyFragmentInit[thisId]?.init ||
+      (slug === `create` && $creationState.isInitialized)
+    ) {
+      setIsClient(true);
+    } else if (slug === `create`) navigate(`/storykeep`);
+  }, [slug, thisId, $storyFragmentInit, $creationState.isInitialized]);
 
   useEffect(() => {
     // ensure correct viewport based on window width
@@ -274,7 +285,7 @@ export const StoryFragment = (props: {
           {paneId === `insert` ? (
             <div id={`design-new-pane-${idx}`}>
               <DesignNewPane
-                id={id}
+                id={thisId}
                 index={idx}
                 cancelInsert={cancelInsert}
                 doInsert={doInsert}
@@ -317,7 +328,7 @@ export const StoryFragment = (props: {
       )),
     [
       thisPaneIds,
-      id,
+      thisId,
       cancelInsert,
       doInsert,
       tailwindBgColour,
@@ -334,10 +345,10 @@ export const StoryFragment = (props: {
 
   return (
     <>
-      {$showAnalytics && $storedAnalytics[id] && (
+      {$showAnalytics && $storedAnalytics[thisId] && (
         <AnalyticsWrapper
-          data={$storedAnalytics[id]}
-          title={$storyFragmentTitle[id].current}
+          data={$storedAnalytics[thisId]}
+          title={$storyFragmentTitle[thisId].current}
           isPane={false}
         />
       )}

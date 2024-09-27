@@ -39,7 +39,11 @@ const PaneSlug = ({
       <div className="flex-grow relative">
         <ContentEditableField
           id="paneSlug"
-          value={$paneSlug[id]?.current || ""}
+          value={
+            $paneSlug[id]?.current === `create`
+              ? ``
+              : $paneSlug[id]?.current || ""
+          }
           onChange={newValue => updateStoreField("paneSlug", newValue)}
           onEditingChange={editing => handleEditingChange("paneSlug", editing)}
           placeholder="Enter pane slug"

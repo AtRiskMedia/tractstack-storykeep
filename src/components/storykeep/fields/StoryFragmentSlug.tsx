@@ -29,7 +29,6 @@ const StoryFragmentSlug = ({
   const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
   const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
   const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
-
   return (
     <>
       <div className="flex items-center space-x-4 py-1.5">
@@ -42,7 +41,11 @@ const StoryFragmentSlug = ({
         <div className="flex-grow relative">
           <ContentEditableField
             id="storyFragmentSlug"
-            value={$storyFragmentSlug[id]?.current || ""}
+            value={
+              $storyFragmentSlug[id]?.current === `create`
+                ? ``
+                : $storyFragmentSlug[id]?.current || ""
+            }
             onChange={newValue =>
               updateStoreField("storyFragmentSlug", newValue)
             }

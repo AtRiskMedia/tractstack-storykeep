@@ -10,13 +10,11 @@ import { EditModal } from "@components/storykeep/EditModal";
 import { ContextPane } from "@components/storykeep/ContextPane";
 import { StoryKeepContextStore } from "@components/storykeep/StoryKeepContextStore";
 import { StoryKeepHeader } from "@components/storykeep/StoryKeepHeader";
-import CreateNewPage from "@components/storykeep/components/CreateNewPage";
-import { pageDesigns } from "../../../assets/paneDesigns";
 import type { AuthStatus, ContentMap } from "../../../types";
 
 const user = Astro.locals.user as AuthStatus;
+
 const { slug } = Astro.params;
-const isCreateNew = slug === "create";
 
 if (!slug) return Astro.redirect("/404");
 
@@ -26,66 +24,62 @@ const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
 const filesRaw = await getAllFileDatum();
 const files = cleanTursoFileDatum(filesRaw);
 
-let contextPane;
-if (!isCreateNew) {
-  contextPane = await getContextPaneBySlug(slug);
-  if (!contextPane || !contextPane.panePayload) return Astro.redirect("/404");
-}
+const contextPane = await getContextPaneBySlug(slug);
+if ((!contextPane || !contextPane.panePayload) && slug !== `create`)
+  return Astro.redirect("/404");
 
 const contentMap: ContentMap[] = await getContentMap();
 ---
 
 <StoryKeep
-  title={isCreateNew ? "Create New Context Page" : contextPane.title}
-  pubDatetime={isCreateNew ? new Date() : contextPane.created}
-  modDatetime={isCreateNew ? null : contextPane.changed}
+  title={contextPane?.title}
+  pubDatetime={contextPane?.created}
+  modDatetime={contextPane?.changed}
   canonicalURL={canonicalURL}
 >
-  {
-    isCreateNew ? (
-      <CreateNewPage mode="context" pageDesigns={pageDesigns} client:load />
-    ) : (
-      <>
+  <div id="storykeep-content">
+    {
+      contextPane && (
         <StoryKeepContextStore client:only="react" pane={contextPane} />
-        <header
-          class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
-          id="main-header"
-        >
-          <StoryKeepHeader
-            client:only="react"
-            id={contextPane.id}
-            slug={contextPane.slug}
-            isContext={true}
-            contentMap={contentMap}
-            user={user}
-          />
-        </header>
+      )
+    }
+    <header
+      class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
+      id="main-header"
+    >
+      <StoryKeepHeader
+        client:only="react"
+        id={slug === "create"
+          ? `create`
+          : contextPane?.id
+            ? contextPane.id
+            : `error`}
+        slug={slug}
+        isContext={true}
+        contentMap={contentMap}
+        user={user}
+      />
+    </header>
 
-        <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
-          <main id="website-content" class="overflow-auto w-full">
-            <ContextPane
-              id={contextPane.id}
-              slug={contextPane.slug}
-              client:only="react"
-            />
-          </main>
-        </div>
-
-        <EditModal
+    <div id="storykeep" class="bg-white overflow-auto mx-auto w-full">
+      <main id="website-content" class="overflow-auto w-full">
+        <ContextPane
+          id={slug === "create"
+            ? null
+            : contextPane?.id
+              ? contextPane.id
+              : `error`}
+          slug={slug}
           client:only="react"
-          id={contextPane.id}
-          files={files}
-          contentMap={contentMap}
         />
-      </>
-    )
-  }
+      </main>
+    </div>
 
-  <script>
-    import { initStoryKeep } from "../../../utils/storykeep";
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initStoryKeep();
-    });
-  </script>
+    <EditModal
+      client:only="react"
+      id={contextPane?.id ?? `error`}
+      files={files}
+      contentMap={contentMap}
+    />
+  </div>
 </StoryKeep>

@@ -21,6 +21,7 @@ import type {
   EnvSetting,
   Analytics,
   DashboardAnalytics,
+  CreationState,
 } from "../types";
 import { knownEnvSettings, toolAddModes } from "../constants";
 
@@ -36,6 +37,11 @@ export const envSettings = map<{
   current: knownEnvSettings,
   original: knownEnvSettings,
   history: [],
+});
+
+export const creationStateStore = atom<CreationState>({
+  id: null,
+  isInitialized: false,
 });
 
 // all look-ups by ulid

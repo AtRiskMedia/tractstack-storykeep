@@ -1,0 +1,28 @@
+---
+import { ulid } from "ulid";
+import StoryKeep from "@layouts/StoryKeep.astro";
+import CreateNewPage from "@components/storykeep/components/CreateNewPage";
+import { pageDesigns } from "../../../assets/paneDesigns";
+
+const slug = `create`;
+const newId = ulid();
+
+const baseUrl = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(`/${slug}`, baseUrl).href;
+---
+
+<StoryKeep
+  title="Create New Page"
+  pubDatetime={new Date()}
+  modDatetime={null}
+  canonicalURL={canonicalURL}
+>
+  <div id="storykeep-content">
+    <CreateNewPage
+      mode="storyfragment"
+      pageDesigns={pageDesigns}
+      newId={newId}
+      client:load
+    />
+  </div>
+</StoryKeep>

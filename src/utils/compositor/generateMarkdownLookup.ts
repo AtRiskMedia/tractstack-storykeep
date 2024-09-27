@@ -111,7 +111,7 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
     return "tagName" in node || "value" in node;
   }
 
-  htmlAst.children.forEach((node, parentNth) => {
+  htmlAst?.children?.forEach((node, parentNth) => {
     if (isProcessableNode(node)) {
       processRootNode(node, parentNth);
     }

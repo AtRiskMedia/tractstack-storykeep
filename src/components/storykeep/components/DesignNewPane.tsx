@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useStore } from "@nanostores/react";
 import { Combobox } from "@headlessui/react";
 import {
   ChevronUpDownIcon,
@@ -9,10 +10,11 @@ import {
 } from "@heroicons/react/20/solid";
 import PreviewPane from "./PreviewPane";
 import { paneDesigns } from "../../../assets/paneDesigns";
-import { editModeStore } from "../../../store/storykeep";
+import { editModeStore, themeStore } from "../../../store/storykeep";
 import { handleToggleOn } from "../../../utils/storykeep";
 import { tursoClient } from "../../../api/tursoClient";
-import type { PaneDesign, ViewportAuto } from "../../../types";
+import { PUBLIC_THEME } from "../../../constants";
+import type { Theme, PaneDesign, ViewportAuto } from "../../../types";
 
 const DesignNewPane = ({
   id,
@@ -38,8 +40,11 @@ const DesignNewPane = ({
   const [mode, setMode] = useState<`design` | `reuse` | `break`>(`design`);
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);
+  const $theme = useStore(themeStore);
   const [activePaneDesigns, setActivePaneDesigns] = useState(
-    paneDesigns.filter((p: PaneDesign) => p.type === `starter`)
+    paneDesigns($theme ?? PUBLIC_THEME).filter(
+      (p: PaneDesign) => p.type === `starter`
+    )
   );
   const [reusePaneDesigns, setReuseActivePaneDesigns] = useState<PaneDesign[]>(
     []
@@ -91,17 +96,17 @@ const DesignNewPane = ({
     setMode(newMode);
     if (newMode === `design`) {
       setActivePaneDesigns(
-        paneDesigns.filter((p: PaneDesign) => p.type === `starter`)
+        paneDesigns($theme).filter((p: PaneDesign) => p.type === `starter`)
       );
       setSelectedDesign(
-        paneDesigns.filter((p: PaneDesign) => p.type === `starter`)[0]
+        paneDesigns($theme).filter((p: PaneDesign) => p.type === `starter`)[0]
       );
     } else if (newMode === `break`) {
       setActivePaneDesigns(
-        paneDesigns.filter((p: PaneDesign) => p.type === `break`)
+        paneDesigns($theme).filter((p: PaneDesign) => p.type === `break`)
       );
       setSelectedDesign(
-        paneDesigns.filter((p: PaneDesign) => p.type === `break`)[0]
+        paneDesigns($theme).filter((p: PaneDesign) => p.type === `break`)[0]
       );
     } else {
       setActivePaneDesigns(reusePaneDesigns);
@@ -110,6 +115,21 @@ const DesignNewPane = ({
     setCurrentIndex(0);
     setQuery(``);
   };
+
+  useEffect(() => {
+    if (mode === "design" || mode === "break") {
+      const newDesigns = paneDesigns($theme).filter((p: PaneDesign) =>
+        mode === "design" ? p.type === "starter" : p.type === "break"
+      );
+      setActivePaneDesigns(newDesigns);
+      if (selectedDesign) {
+        const updatedDesign = newDesigns.find(d => d.id === selectedDesign.id);
+        setSelectedDesign(updatedDesign || newDesigns[0]);
+      } else if (newDesigns.length > 0) {
+        setSelectedDesign(newDesigns[0]);
+      }
+    }
+  }, [$theme, mode]);
 
   useEffect(() => {
     async function runFetch() {
@@ -140,6 +160,10 @@ const DesignNewPane = ({
   if (error) {
     return <div>Error: {error}</div>;
   }
+
+  const handleThemeChange = (newTheme: Theme) => {
+    themeStore.set(newTheme);
+  };
 
   return (
     <div id="pane-insert" className="py-6 bg-mywhite shadow-inner">
@@ -302,6 +326,19 @@ const DesignNewPane = ({
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
+          <select
+            value={$theme}
+            disabled={mode === `reuse`}
+            onChange={e => handleThemeChange(e.target.value as Theme)}
+            className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full"
+          >
+            <option value="light">Light</option>
+            <option value="light-bw">Light B&W</option>
+            <option value="light-bold">Light Bold</option>
+            <option value="dark">Dark</option>
+            <option value="dark-bw">Dark B&W</option>
+            <option value="dark-bold">Dark Bold</option>
+          </select>
           {selectedDesign ? (
             <button
               className="font-bold bg-myorange disabled:hover:bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"

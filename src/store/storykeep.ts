@@ -22,8 +22,11 @@ import type {
   Analytics,
   DashboardAnalytics,
   CreationState,
+  Theme,
 } from "../types";
-import { knownEnvSettings, toolAddModes } from "../constants";
+import { knownEnvSettings, toolAddModes, PUBLIC_THEME } from "../constants";
+
+export const themeStore = atom<Theme>(PUBLIC_THEME as Theme);
 
 export const lastInteractedPaneStore = atom<string | null>(null);
 export const visiblePanesStore = map<Record<string, boolean>>({});

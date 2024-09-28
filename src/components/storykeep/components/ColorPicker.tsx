@@ -15,7 +15,15 @@ interface ClosestColor {
   shade: number;
 }
 
-type CustomColorKey = "brand-1" | "brand-2" | "brand-3" | "brand-4" | "brand-5" | "brand-6" | "brand-7" | "brand-8";
+type CustomColorKey =
+  | "brand-1"
+  | "brand-2"
+  | "brand-3"
+  | "brand-4"
+  | "brand-5"
+  | "brand-6"
+  | "brand-7"
+  | "brand-8";
 
 const customColors: Record<CustomColorKey, string> = {
   "brand-1": "var(--brand-1)",
@@ -77,7 +85,7 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
     setDisplayColorPicker(prev => !prev);
   }, []);
 
- const handleClose = useCallback(() => {
+  const handleClose = useCallback(() => {
     setDisplayColorPicker(false);
     if (color !== lastSelectedColor.current) {
       setColor(lastSelectedColor.current);
@@ -86,9 +94,12 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
         onColorChange(`${closestColor.name}-${closestColor.shade}`);
       } else {
         const customColorEntry = Object.entries(customColors).find(
+          /* eslint-disable @typescript-eslint/no-unused-vars */
           ([_, value]) => getComputedColor(value) === lastSelectedColor.current
         );
-        onColorChange(customColorEntry ? customColorEntry[0] : lastSelectedColor.current);
+        onColorChange(
+          customColorEntry ? customColorEntry[0] : lastSelectedColor.current
+        );
       }
     }
   }, [color, onColorChange]);
@@ -97,8 +108,9 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
     (newColor: string) => {
       setColor(newColor);
       lastSelectedColor.current = newColor;
-      
+
       const customColorEntry = Object.entries(customColors).find(
+        /* eslint-disable @typescript-eslint/no-unused-vars */
         ([_, value]) => getComputedColor(value) === newColor
       );
 
@@ -114,7 +126,7 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
       }
     },
     [onColorChange]
-  ); 
+  );
 
   const debouncedHandleColorChange = useCallback(
     debounce((newColor: string) => {

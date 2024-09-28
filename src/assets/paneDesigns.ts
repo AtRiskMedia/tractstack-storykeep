@@ -1,6 +1,23 @@
-//import { ulid } from "ulid";
-//import type { Root } from "hast";
-import type { PageDesign, PaneDesign, OptionsPayloadDatum } from "../types";
+import { colorValues } from "./tailwindColors";
+import { PUBLIC_THEME } from "../constants";
+import { tailwindToHex } from "../assets/tailwindColors";
+
+import type {
+  Theme,
+  PageDesign,
+  PaneDesign,
+  OptionsPayloadDatum,
+} from "../types";
+
+type TailwindColor = (typeof colorValues)[number];
+type ThemeColorMap = { [key in Theme]: TailwindColor };
+
+const getComputedColor = (
+  colorMap: ThemeColorMap,
+  theme: Theme = PUBLIC_THEME
+): TailwindColor => {
+  return colorMap[theme] || "brand-1";
+};
 
 export const buttonStyleOptions = [
   "Plain text inline",
@@ -51,7 +68,7 @@ export const buttonStyleClasses = [
   ],
 ];
 
-export const paneDesigns: PaneDesign[] = [
+export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
   {
     id: "titleText",
     slug: "titleText",
@@ -64,7 +81,19 @@ export const paneDesigns: PaneDesign[] = [
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "mywhite",
+            "light-bw": "mywhite",
+            "light-bold": "myoffwhite",
+            dark: "myblack",
+            "dark-bw": "myblack",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -91,7 +120,19 @@ export const paneDesigns: PaneDesign[] = [
             h2: {
               classes: {
                 fontSTYLE: ["bold"],
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "myblue",
+                      "light-bw": "myblack",
+                      "light-bold": "myorange",
+                      dark: "mygreen",
+                      "dark-bw": "myoffwhite",
+                      "dark-bold": "myorange",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["3xl", "4xl"],
                 my: [8, 12],
                 fontFACE: ["action"],
@@ -258,6 +299,7 @@ export const paneDesigns: PaneDesign[] = [
             li: {
               classes: {
                 fontFACE: ["action"],
+                fontWEIGHT: ["normal"],
                 textCOLOR: ["mydarkgrey"],
                 textSIZE: ["xl", "2xl"],
                 my: [6, 8],
@@ -328,6 +370,7 @@ export const paneDesigns: PaneDesign[] = [
             li: {
               classes: {
                 fontFACE: ["action"],
+                fontWEIGHT: ["normal"],
                 textCOLOR: ["mydarkgrey"],
                 textSIZE: ["xl", "2xl"],
                 my: [6, 8],
@@ -398,6 +441,7 @@ export const paneDesigns: PaneDesign[] = [
             li: {
               classes: {
                 fontFACE: ["action"],
+                fontWEIGHT: ["normal"],
                 textCOLOR: ["mydarkgrey"],
                 textSIZE: ["xl", "2xl"],
                 my: [6, 8],
@@ -1348,27 +1392,45 @@ export const paneDesigns: PaneDesign[] = [
   },
 ];
 
-export const pageDesigns: Record<string, PageDesign> = {
-  default: {
+export const pageDesigns = (
+  theme: Theme = PUBLIC_THEME
+): Record<string, PageDesign> => ({
+  basic: {
     name: "Basic Page",
     isContext: true,
-    tailwindBgColour: null,
-    paneDesigns: [paneDesigns.find(p => p.id === "titleText") as PaneDesign],
-  },
-  dark: {
-    name: "Basic Page - Dark mode",
-    isContext: false,
-    tailwindBgColour: `bg-myblack`,
-    paneDesigns: [paneDesigns.find(p => p.id === "titleText") as PaneDesign],
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme).find(p => p.id === "titleText") as PaneDesign,
+    ],
   },
   landing: {
     name: "Landing Page",
     isContext: false,
-    tailwindBgColour: null,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
     paneDesigns: [
-      paneDesigns.find(p => p.id === "hero-1") as PaneDesign,
-      paneDesigns.find(p => p.id === "titleText") as PaneDesign,
+      paneDesigns(theme).find(p => p.id === "hero-1") as PaneDesign,
+      paneDesigns(theme).find(p => p.id === "titleText") as PaneDesign,
     ],
   },
   // ... other page designs
-};
+});

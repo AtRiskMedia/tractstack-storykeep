@@ -14,6 +14,7 @@ import type {
   ToolAddMode,
 } from "./types";
 
+export const PUBLIC_THEME = import.meta.env.PUBLIC_THEME || `light`;
 export const CONCIERGE_SYNC_INTERVAL = 4000;
 export const THRESHOLD_READ = import.meta.env.PUBLIC_THRESHOLD_READ || 42000;
 export const THRESHOLD_GLOSSED =

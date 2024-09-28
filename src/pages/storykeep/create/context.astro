@@ -2,7 +2,6 @@
 import { ulid } from "ulid";
 import StoryKeep from "@layouts/StoryKeep.astro";
 import CreateNewPage from "@components/storykeep/components/CreateNewPage";
-import { pageDesigns } from "../../../assets/paneDesigns";
 
 const slug = `create`;
 const newId = ulid();
@@ -18,11 +17,6 @@ const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
   canonicalURL={canonicalURL}
 >
   <div id="storykeep-content">
-    <CreateNewPage
-      mode="context"
-      pageDesigns={pageDesigns}
-      newId={newId}
-      client:load
-    />
+    <CreateNewPage mode="context" newId={newId} client:load />
   </div>
 </StoryKeep>

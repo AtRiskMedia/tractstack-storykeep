@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { navigate } from "astro:transitions/client";
+import { useStore } from "@nanostores/react";
 import { Combobox } from "@headlessui/react";
 import {
   ChevronUpDownIcon,
@@ -9,22 +10,30 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import PreviewPage from "./PreviewPage";
-import { creationStateStore } from "../../../store/storykeep";
+import { creationStateStore, themeStore } from "../../../store/storykeep";
 import { initializeStores } from "../../../utils/compositor/initStore";
-import type { PageDesign } from "../../../types";
+import { pageDesigns } from "../../../assets/paneDesigns";
+import type { PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
-  pageDesigns: Record<string, PageDesign>;
   newId: string;
 }
 
-const CreateNewPage = ({ newId, mode, pageDesigns }: CreateNewPageProps) => {
+const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   const [selectedDesign, setSelectedDesign] = useState<PageDesign | null>(null);
   const [query, setQuery] = useState("");
   const [, setCurrentIndex] = useState(0);
+  const $theme = useStore(themeStore);
+  const [pageDesignList, setPageDesignList] = useState<PageDesign[]>([]);
 
-  const pageDesignList = Object.values(pageDesigns);
+  useEffect(() => {
+    const designs = Object.values(pageDesigns($theme));
+    setPageDesignList(designs);
+    if (designs.length > 0 && !selectedDesign) {
+      setSelectedDesign(designs[0]);
+    }
+  }, [$theme, pageDesigns]);
 
   const filteredDesigns =
     query === ""
@@ -63,6 +72,10 @@ const CreateNewPage = ({ newId, mode, pageDesigns }: CreateNewPageProps) => {
         }
       }
     }
+  };
+
+  const handleThemeChange = (newTheme: Theme) => {
+    themeStore.set(newTheme);
   };
 
   return (
@@ -151,6 +164,18 @@ const CreateNewPage = ({ newId, mode, pageDesigns }: CreateNewPageProps) => {
               >
                 <XMarkIcon className="h-5 w-5" />
               </a>
+              <select
+                value={$theme}
+                onChange={e => handleThemeChange(e.target.value as Theme)}
+                className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full"
+              >
+                <option value="light">Light</option>
+                <option value="light-bw">Light B&W</option>
+                <option value="light-bold">Light Bold</option>
+                <option value="dark">Dark</option>
+                <option value="dark-bw">Dark B&W</option>
+                <option value="dark-bold">Dark Bold</option>
+              </select>
               <button
                 disabled={!selectedDesign}
                 aria-label="Create Page"
@@ -178,7 +203,13 @@ const CreateNewPage = ({ newId, mode, pageDesigns }: CreateNewPageProps) => {
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
           }}
         >
-          <div className={selectedDesign.tailwindBgColour ?? `bg-white`}>
+          <div
+            className={
+              selectedDesign.tailwindBgColour
+                ? `bg-${selectedDesign.tailwindBgColour}`
+                : `bg-white`
+            }
+          >
             <PreviewPage
               design={selectedDesign}
               viewportKey="desktop"

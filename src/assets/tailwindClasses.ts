@@ -579,6 +579,30 @@ export const tailwindClasses: TailwindClasses = {
     prefix: "aspect-",
     priority: 0,
   },
+  textWRAP: {
+    values: ["wrap", "nowrap", "balance", "pretty"],
+    group: "Typography",
+    title: "Text Wrap",
+    className: "text",
+    prefix: "text-",
+    priority: 0,
+  },
+  accentCOLOR: {
+    values: ["inherit", "current", "transparent", ...colorValues],
+    group: "Colors",
+    title: "Accent Color",
+    className: "accent",
+    prefix: "accent-",
+    priority: 2,
+  },
+  breakUTILITIES: {
+    values: ["normal", "words", "all", "keep"],
+    group: "Typography",
+    title: "Break",
+    className: "break",
+    prefix: "break-",
+    priority: 0,
+  },
   gridCOLSPAN: {
     values: [
       "auto",

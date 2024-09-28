@@ -70,6 +70,112 @@ export const buttonStyleClasses = [
 
 export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
   {
+    id: "introCentered",
+    slug: "introCentered",
+    name: "Intro section - centered",
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "mywhite",
+            "light-bw": "mywhite",
+            "light-bold": "myoffwhite",
+            dark: "myblack",
+            "dark-bw": "myblack",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\nbuttons here\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                {
+                  mx: ["5", "10"],
+                  my: ["20", "32"],
+                },
+                {
+                  maxW: ["none", "screen-lg", "screen-xl"],
+                  mx: ["auto"],
+                  borderWIDTH: ["2"],
+                  rounded: ["md", "lg"],
+                  bgCOLOR: ["mywhite"],
+                  borderCOLOR: ["slate-200"],
+                },
+                {
+                  px: ["9", "14", "32"],
+                  py: ["20", "32"],
+                  textALIGN: ["center"],
+                  textWRAP: ["balance"],
+                },
+              ],
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: ["myblue"],
+                textSIZE: ["4xl", "5xl", "6xl"],
+                fontFACE: ["action"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: ["myblue"],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: ["myblue"],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: ["mydarkgrey"],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                mt: ["4", "5"],
+              },
+              count: 2,
+              override: {
+                mt: [null, ["8", "10"]],
+              },
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
     id: "titleText",
     slug: "titleText",
     name: "Page section with title",
@@ -1410,7 +1516,7 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme).find(p => p.id === "titleText") as PaneDesign,
+      paneDesigns(theme).find(p => p.id === "introCentered") as PaneDesign,
     ],
   },
   landing: {

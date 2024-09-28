@@ -56,12 +56,11 @@ export const useEditModalDimensions = (
       newDimensions = {
         height: "auto",
         width: "33%",
-        position: { top: `${headerBottom + 8}px`, right: "0" },
+        position: { top: `${headerBottom}px`, right: "0" },
         isVisible: isEditModeActive,
         isFullScreen: false,
       };
     }
-
     setDimensions(newDimensions);
   }, [isEditModeActive]);
 

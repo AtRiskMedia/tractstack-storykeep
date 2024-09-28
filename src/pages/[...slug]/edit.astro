@@ -100,3 +100,11 @@ const contentMap: ContentMap[] = await getContentMap();
     />
   </div>
 </StoryKeep>
+
+<script>
+  import { initStoryKeep } from "../../utils/storykeep";
+
+  document.addEventListener("DOMContentLoaded", () => {
+    initStoryKeep();
+  });
+</script>

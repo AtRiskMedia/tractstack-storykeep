@@ -91,7 +91,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           isFullScreen
             ? "overflow-y-auto"
             : type === `desktop`
-              ? "rounded-l-lg"
+              ? "rounded-bl-lg"
               : "rounded-t-lg"
         )}
         style={{
@@ -134,7 +134,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             isFullScreen
               ? "px-1.5 pt-1.5 pb-0"
               : type === `desktop`
-                ? "pr-0 pl-1.5 py-1.5"
+                ? "pr-0 pl-1.5 pb-1.5"
                 : "px-1.5 pt-1.5 pb-0",
             "h-full flex flex-col"
           )}
@@ -144,7 +144,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
               isFullScreen
                 ? "rounded-t-lg"
                 : type === `desktop`
-                  ? "rounded-l-lg py-1.5"
+                  ? "rounded-bl-lg py-1.5"
                   : "rounded-t-lg pt-1.5 pb-2.5",
               "bg-white px-3.5 relative flex-grow overflow-y-auto"
             )}

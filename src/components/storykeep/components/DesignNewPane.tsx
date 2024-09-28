@@ -14,6 +14,7 @@ import { editModeStore, themeStore } from "../../../store/storykeep";
 import { handleToggleOn } from "../../../utils/storykeep";
 import { tursoClient } from "../../../api/tursoClient";
 import { PUBLIC_THEME } from "../../../constants";
+import ThemeSelector from "./ThemeSelector";
 import type { Theme, PaneDesign, ViewportAuto } from "../../../types";
 
 const DesignNewPane = ({
@@ -166,8 +167,8 @@ const DesignNewPane = ({
   };
 
   return (
-    <div id="pane-insert" className="py-6 bg-mywhite shadow-inner">
-      <div className="px-6 flex justify-center space-x-4 mb-4">
+    <div id="pane-insert" className="pt-6 bg-mywhite shadow-inner rounded-lg">
+      <div className="px-6 flex justify-center space-x-4">
         <div className="flex-grow max-w-sm">
           <Combobox
             as="div"
@@ -250,18 +251,18 @@ const DesignNewPane = ({
             )}
             <div className="relative">
               <Combobox.Input
-                className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg xs:text-md xs:leading-6"
+                className="w-full rounded-lg border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg xs:text-md xs:leading-6"
                 onChange={event => setQuery(event.target.value)}
                 displayValue={(design: PaneDesign | null) => design?.name ?? ""}
               />
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-2 focus:outline-none">
                 <ChevronUpDownIcon
                   className="h-5 w-5 text-myblue"
                   aria-hidden="true"
                 />
               </Combobox.Button>
               {filteredDesigns.length > 0 && (
-                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
                   {filteredDesigns.map(design => (
                     <Combobox.Option
                       key={design.id}
@@ -302,7 +303,7 @@ const DesignNewPane = ({
         </div>
         <div className="flex items-stretch h-[50px] space-x-2">
           <button
-            className="bg-mylightgrey disabled:hover:bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
+            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-myblack transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("prev")}
             disabled={saving}
             title="Previous design"
@@ -310,7 +311,7 @@ const DesignNewPane = ({
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-mylightgrey disabled:hover:bg-mylightgrey text-black rounded-lg p-2 py-1 hover:bg-myorange/20 transition-colors h-full flex flex-col justify-center"
+            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-myblack transition-colors h-full flex flex-col justify-center"
             onClick={() => cycleDesign("next")}
             disabled={saving}
             title="Next design"
@@ -318,7 +319,7 @@ const DesignNewPane = ({
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-myblue disabled:hover:bg-myblue disabled:hover:text-white text-white rounded-lg p-2 py-1 hover:bg-myorange/20 hover:text-black transition-colors h-full flex flex-col justify-center"
+            className="bg-myorange/20 text-black rounded-lg p-2 py-1 hover:bg-myblack hover:text-white transition-colors h-full flex flex-col justify-center"
             onClick={() => cancelInsert()}
             disabled={saving}
             aria-label="Cancel"
@@ -326,28 +327,16 @@ const DesignNewPane = ({
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
-          <select
-            value={$theme}
-            disabled={mode === `reuse`}
-            onChange={e => handleThemeChange(e.target.value as Theme)}
-            className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full"
-          >
-            <option value="light">Light</option>
-            <option value="light-bw">Light B&W</option>
-            <option value="light-bold">Light Bold</option>
-            <option value="dark">Dark</option>
-            <option value="dark-bw">Dark B&W</option>
-            <option value="dark-bold">Dark Bold</option>
-          </select>
+          <ThemeSelector value={$theme} onChange={handleThemeChange} />
           {selectedDesign ? (
             <button
-              className="font-bold bg-myorange disabled:hover:bg-myorange text-white rounded-lg p-2 py-1 hover:bg-black transition-colors h-full flex flex-col justify-center"
+              className="font-bold bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full flex flex-col justify-center"
               onClick={() => handleInsert()}
               disabled={saving}
               aria-label="Use this Design"
               title="Use this Design"
             >
-              INSERT
+              ADD TO PAGE
             </button>
           ) : null}
         </div>
@@ -355,7 +344,7 @@ const DesignNewPane = ({
       {selectedDesign && (
         <div
           className="outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
-          my-4 bg-myblue/20 py-4 rounded-lg"
+          mt-4 bg-myblue/20 py-4"
           style={{
             backgroundImage:
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",

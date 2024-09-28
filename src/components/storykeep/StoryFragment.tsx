@@ -283,7 +283,7 @@ export const StoryFragment = (props: {
       thisPaneIds?.map((paneId: string, idx: number) => (
         <div key={paneId}>
           {paneId === `insert` ? (
-            <div id={`design-new-pane-${idx}`}>
+            <div className="bg-myblack" id={`design-new-pane-${idx}`}>
               <DesignNewPane
                 id={thisId}
                 index={idx}

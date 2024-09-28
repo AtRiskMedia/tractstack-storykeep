@@ -13,6 +13,7 @@ import PreviewPage from "./PreviewPage";
 import { creationStateStore, themeStore } from "../../../store/storykeep";
 import { initializeStores } from "../../../utils/compositor/initStore";
 import { pageDesigns } from "../../../assets/paneDesigns";
+import ThemeSelector from "./ThemeSelector";
 import type { PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
@@ -79,8 +80,8 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   };
 
   return (
-    <div className="w-full h-screen overflow-y bg-myoffwhite px-2">
-      <div className="rounded-bl-xl rounded-br-xl px-3.5 py-6 shadow-inner bg-white">
+    <div className="w-full h-screen overflow-y bg-myoffwhite">
+      <div className="rounded-bl-lg rounded-br-lg px-3.5 py-6 shadow-inner bg-white mx-2">
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
             <div className="flex-grow">
@@ -90,7 +91,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                 </Combobox.Label>
                 <div className="relative mt-2.5">
                   <Combobox.Input
-                    className="w-full rounded-md border border-mylightgrey bg-white py-2 pl-3 pr-10 shadow-sm focus:border-mydarkgrey focus:outline-none focus:ring-1 focus:ring-myblue text-2xl"
+                    className="w-full rounded-lg border border-mylightgrey bg-white py-2 pl-3 pr-10 shadow-sm focus:border-mydarkgrey focus:outline-none focus:ring-1 focus:ring-myblue text-2xl"
                     onChange={event => setQuery(event.target.value)}
                     displayValue={(design: PageDesign) => design?.name}
                   />
@@ -101,7 +102,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                     />
                   </Combobox.Button>
 
-                  <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     {filteredDesigns.map(design => (
                       <Combobox.Option
                         key={design.name}
@@ -164,18 +165,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
               >
                 <XMarkIcon className="h-5 w-5" />
               </a>
-              <select
-                value={$theme}
-                onChange={e => handleThemeChange(e.target.value as Theme)}
-                className="bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full"
-              >
-                <option value="light">Light</option>
-                <option value="light-bw">Light B&W</option>
-                <option value="light-bold">Light Bold</option>
-                <option value="dark">Dark</option>
-                <option value="dark-bw">Dark B&W</option>
-                <option value="dark-bold">Dark Bold</option>
-              </select>
+              <ThemeSelector value={$theme} onChange={handleThemeChange} />
               <button
                 disabled={!selectedDesign}
                 aria-label="Create Page"
@@ -197,7 +187,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
       {selectedDesign && (
         <div
           className="outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
-          my-4 bg-myblue/20 py-4 rounded-lg"
+          my-4 bg-myblue/20 py-4"
           style={{
             backgroundImage:
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",

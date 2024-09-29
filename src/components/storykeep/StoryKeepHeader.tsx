@@ -90,6 +90,7 @@ export const StoryKeepHeader = memo(
     user: AuthStatus;
     isContext: boolean;
   }) => {
+    const [hasAnalytics,setHasAnalytics] = useState(false)
     const $creationState = useStore(creationStateStore);
     const thisId =
       slug !== `create` ? id : $creationState.id ? $creationState.id : `error`;
@@ -167,6 +168,10 @@ export const StoryKeepHeader = memo(
         const data = await response.json();
         if (data.success) {
           storedAnalytics.set(processedAnalytics(data.data));
+          if(
+            Object.keys(data.data?.pie || {}).length
+             || Object.keys(data.data?.line || {}).length
+          ) setHasAnalytics(true)
         }
       } catch (error) {
         console.error("Error fetching analytics data:", error);
@@ -427,8 +432,10 @@ export const StoryKeepHeader = memo(
                 type="button"
                 title="Toggle analytics"
                 onClick={toggleAnalytics}
+                disabled={!hasAnalytics}
+                title={hasAnalytics ? `See Engagement Analytics` : `No Analytics yet...`}
                 className={classNames(
-                  "my-1 rounded px-2 py-1 text-lg shadow-sm",
+                  "my-1 rounded px-2 py-1 text-lg shadow-sm disabled:opacity-50",
                   $showAnalytics
                     ? `bg-myorange text-white`
                     : `bg-myorange/20 text-black`

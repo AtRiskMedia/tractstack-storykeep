@@ -24,7 +24,7 @@ const AnalyticsWrapper = (props: {
 
   return (
     <div
-      className="bg-myblue px-3.5 py-1.5 flex flex-wrap items-start"
+      className="bg-myblack/90 px-3.5 py-1.5 flex flex-wrap items-start"
       style={{
         backgroundImage:
           "repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0, 0.1) 10px, rgba(0,0,0, 0.1) 20px )",

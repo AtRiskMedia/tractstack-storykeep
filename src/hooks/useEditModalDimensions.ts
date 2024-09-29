@@ -13,7 +13,8 @@ interface Dimensions {
   isFullScreen: boolean;
 }
 
-const SHORT_SCREEN_THRESHOLD = 600; // Adjust this value as needed
+const SHORT_SCREEN_THRESHOLD = 600;
+const SMALL_SCREEN_WIDTH = 640;
 
 export const useEditModalDimensions = (
   isEditModeActive: boolean
@@ -33,17 +34,15 @@ export const useEditModalDimensions = (
     const isShortScreen = innerHeight <= SHORT_SCREEN_THRESHOLD;
     let newDimensions: Dimensions;
 
-    if (innerWidth < 640 || isShortScreen) {
-      // Full screen for very small screens or short screens
+    if (innerWidth < SMALL_SCREEN_WIDTH || isShortScreen) {
       newDimensions = {
-        height: `calc(100vh - ${headerBottom}px)`,
+        height: "auto",
         width: "100%",
-        position: { top: `${headerBottom}px`, right: "0", left: "0" },
+        position: { bottom: "0", left: "0", right: "0" },
         isVisible: isEditModeActive,
-        isFullScreen: true,
+        isFullScreen: false,
       };
     } else if (innerWidth < 1368) {
-      // Bottom right corner for medium screens
       newDimensions = {
         height: "auto",
         width: `${Math.min(innerWidth * 0.8, 500)}px`,
@@ -52,7 +51,6 @@ export const useEditModalDimensions = (
         isFullScreen: false,
       };
     } else {
-      // Right side for larger screens
       newDimensions = {
         height: "auto",
         width: "33%",

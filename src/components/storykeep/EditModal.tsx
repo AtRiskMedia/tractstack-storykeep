@@ -28,7 +28,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const contentId = `${$editMode?.targetId?.tag}-${$editMode?.targetId?.outerIdx}${typeof $editMode?.targetId?.idx === "number" ? `-${$editMode.targetId.idx}` : ""}-${$editMode?.id}`;
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $paneInit = useStore(paneInit);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const [type, setType] = useState<"desktop" | "mobile">(
     typeof window !== "undefined" && window.innerWidth >= 1368
       ? "desktop"
@@ -80,10 +80,10 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   };
 
   if (!isClient || !isVisible) return null;
+
   return (
     <div className="relative">
       <div
-        ref={modalRef}
         className={classNames(
           `fixed z-[9000]`,
           `backdrop-blur-sm bg-mylightgrey/20 dark:bg-black/85`,
@@ -92,14 +92,15 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             ? "overflow-y-auto"
             : type === `desktop`
               ? "rounded-bl-lg"
-              : "rounded-t-lg"
+              : "rounded-t-lg",
+          !isFullScreen ? "overflow-y-auto" : ""
         )}
         style={{
           height: isFullScreen ? "100%" : height,
           width,
           ...position,
           display: isVisible ? "block" : "none",
-          maxHeight: isFullScreen ? "100vh" : "80vh",
+          maxHeight: "80vh",
         }}
       >
         {isFullScreen ? (
@@ -130,6 +131,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           </button>
         )}
         <div
+          ref={contentRef}
           className={classNames(
             isFullScreen
               ? "px-1.5 pt-1.5 pb-0"

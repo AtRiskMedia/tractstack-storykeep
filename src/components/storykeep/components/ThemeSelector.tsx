@@ -28,6 +28,7 @@ const ThemeSelector = ({
       <div className="relative w-48">
         <Listbox.Button className="bg-myorange/20 text-black rounded-lg p-2 py-1 hover:bg-myorange/50 transition-colors h-full flex items-center justify-between">
           <span className="block truncate mr-2">
+            Theme:{" "}
             {themes.find(theme => theme.value === value)?.label ||
               "Select theme"}
           </span>

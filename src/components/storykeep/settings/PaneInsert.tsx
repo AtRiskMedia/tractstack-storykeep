@@ -429,7 +429,8 @@ export const PaneInsert = (props: {
           >
             Cancel
           </button>
-          {!$uncleanData[paneId].paneSlug && !$uncleanData[paneId].paneTitle ? (
+          {!$uncleanData[paneId]?.paneSlug &&
+          !$uncleanData[paneId]?.paneTitle ? (
             <button
               type="button"
               onClick={handleSave}

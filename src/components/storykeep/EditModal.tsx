@@ -89,11 +89,11 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           `backdrop-blur-sm bg-mylightgrey/20 dark:bg-black/85`,
           `shadow-lg transition-all duration-300 ease-in-out`,
           isFullScreen
-            ? "overflow-y-auto"
+            ? "overflow-auto"
             : type === `desktop`
               ? "rounded-bl-lg"
               : "rounded-t-lg",
-          !isFullScreen ? "overflow-y-auto" : ""
+          !isFullScreen ? "overflow-auto" : ""
         )}
         style={{
           height: isFullScreen ? "100%" : height,
@@ -116,6 +116,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             </button>
           </div>
         ) : (
+            <div className="relative">
           <button
             onClick={toggleOffEditModal}
             className={classNames(
@@ -129,6 +130,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           >
             <XMarkIcon className="w-6 h-6" />
           </button>
+            </div>
         )}
         <div
           ref={contentRef}
@@ -148,7 +150,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
                 : type === `desktop`
                   ? "rounded-bl-lg py-1.5"
                   : "rounded-t-lg pt-1.5 pb-2.5",
-              "bg-white px-3.5 relative flex-grow overflow-y-auto"
+              "bg-white px-3.5 relative flex-grow overflow-auto"
             )}
           >
             {$editMode?.type === `storyfragment` &&

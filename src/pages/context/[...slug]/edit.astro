@@ -37,7 +37,12 @@ const contentMap: ContentMap[] = await getContentMap();
   modDatetime={contextPane?.changed}
   canonicalURL={canonicalURL}
 >
-  <div id="storykeep-content">
+  <div
+    id="storykeep-content"
+    class="m-0 p-0 flex flex-col bg-myblue w-full"
+    style="background-image:repeating-linear-gradient( 45deg, transparent, transparent 10px, rgba(0,0,0, 0.1) 10px, rgba(0,0,0, 0.1) 20px )"
+    ,
+  >
     {
       contextPane && (
         <StoryKeepContextStore client:only="react" pane={contextPane} />

@@ -171,11 +171,10 @@ const Pane = (props: {
       if (!fragment?.type) return null;
       switch (fragment.type) {
         case "markdown":
-          if ($paneSlug[id].current === `introCentered`)
-            console.log(
-              $paneSlug[id].current,
-              JSON.stringify(fragment.payload.optionsPayload.classNamesPayload)
-            );
+          //console.log(
+          //  $paneSlug[id].current,
+          //  JSON.stringify(fragment.payload.optionsPayload.classNamesPayload)
+          //);
           return (
             <div
               key={`markdown-${index}`}

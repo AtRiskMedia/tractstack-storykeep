@@ -41,8 +41,8 @@ export const buttonStyleClasses = [
     {
       bgCOLOR: ["mygreen"],
       fontWEIGHT: ["bold"],
-      px: ["2"],
-      py: ["2.5"],
+      px: ["3.5"],
+      py: ["1.5"],
       rounded: ["lg"],
       textCOLOR: ["black"],
     },
@@ -55,10 +55,9 @@ export const buttonStyleClasses = [
       bgCOLOR: ["mygreen"],
       display: ["inline-block"],
       fontWEIGHT: ["bold"],
-      px: ["2"],
+      px: ["3.5"],
       py: ["2.5"],
-      rotate: ["!1"],
-      rounded: ["lg"],
+      rounded: ["md"],
       textCOLOR: ["black"],
     },
     {

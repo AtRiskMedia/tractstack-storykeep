@@ -54,13 +54,15 @@ const contentMap: ContentMap[] = await getContentMap();
       <span
         class="py-2.5 px-4 m-0.5 inline-flex items-center rounded-xl bg-mygreen/20 text-xl text-black w-full justify-center"
       >
+      <div class="text-balance text-center">
         <span class="font-bold">BETA PRE-RELEASE:</span> &nbsp; Stay tuned for a
-        major version release this Fall! Get <a
+        major version release this Fall!  <a
           data-astro-reload
           href="/concierge/profile/"
-          class="px-2 underline hover:text-myorange font-bold">in touch</a
-        > to be a part of the launch.</span
+          class="px-2 underline hover:text-myorange font-bold">Get involved</a
+        > and be a part of the launch.</span
       >
+      </div>
     </div>
 
     <header
@@ -89,6 +91,7 @@ const contentMap: ContentMap[] = await getContentMap();
           isContext={false}
           client:only="react"
         />
+        <div class="h-screen" />
       </main>
     </div>
 
@@ -103,8 +106,9 @@ const contentMap: ContentMap[] = await getContentMap();
 
 <script>
   import { initStoryKeep } from "../../utils/storykeep";
-
-  document.addEventListener("DOMContentLoaded", () => {
+  function setupStoryKeep() {
     initStoryKeep();
-  });
+  }
+  setupStoryKeep();
+  document.addEventListener("astro:page-load", setupStoryKeep);
 </script>

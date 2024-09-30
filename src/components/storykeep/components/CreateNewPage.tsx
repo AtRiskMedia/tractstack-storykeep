@@ -14,7 +14,7 @@ import { creationStateStore, themeStore } from "../../../store/storykeep";
 import { initializeStores } from "../../../utils/compositor/initStore";
 import { pageDesigns } from "../../../assets/paneDesigns";
 import ThemeSelector from "./ThemeSelector";
-import type { ViewportAuto,PageDesign, Theme } from "../../../types";
+import type { ViewportAuto, PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
@@ -100,7 +100,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
     <div className="w-full h-screen overflow-y bg-myoffwhite">
       <div className="rounded-bl-lg rounded-br-lg px-3.5 py-6 shadow-inner bg-white mx-2">
         <div className="space-y-6">
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 max-w-screen-md">
             <Combobox value={selectedDesign} onChange={setSelectedDesign}>
               <Combobox.Label className="block text-lg text-mydarkgrey mb-2">
                 Page Design Starter (you'll get to customize from here...)
@@ -193,7 +193,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                       : "bg-black opacity-10 cursor-not-allowed"
                   } text-white rounded-lg p-2`}
                 >
-                  EDIT THIS PAGE
+                  MAKE THIS PAGE
                 </button>
               </div>
             </div>

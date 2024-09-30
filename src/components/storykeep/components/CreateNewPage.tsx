@@ -10,11 +10,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import PreviewPage from "./PreviewPage";
-import { creationStateStore, themeStore } from "../../../store/storykeep";
+import { creationStateStore, themeStore,viewportKeyStore } from "../../../store/storykeep";
 import { initializeStores } from "../../../utils/compositor/initStore";
 import { pageDesigns } from "../../../assets/paneDesigns";
 import ThemeSelector from "./ThemeSelector";
-import type { PageDesign, Theme } from "../../../types";
+import type {ViewportKey, PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
@@ -27,6 +27,8 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   const [, setCurrentIndex] = useState(0);
   const $theme = useStore(themeStore);
   const [pageDesignList, setPageDesignList] = useState<PageDesign[]>([]);
+  const $viewportKey = useStore(viewportKeyStore);
+  const viewportKey = $viewportKey.value;
 
   useEffect(() => {
     const designs = Object.values(pageDesigns($theme));
@@ -202,7 +204,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
           >
             <PreviewPage
               design={selectedDesign}
-              viewportKey="desktop"
+              viewportKey={viewportKey}
               slug="create"
               isContext={mode === "context"}
             />

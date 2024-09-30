@@ -10,11 +10,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import PreviewPage from "./PreviewPage";
-import { creationStateStore, themeStore,viewportKeyStore } from "../../../store/storykeep";
+import { creationStateStore, themeStore } from "../../../store/storykeep";
 import { initializeStores } from "../../../utils/compositor/initStore";
 import { pageDesigns } from "../../../assets/paneDesigns";
 import ThemeSelector from "./ThemeSelector";
-import type {ViewportKey, PageDesign, Theme } from "../../../types";
+import type { ViewportAuto,PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
@@ -27,13 +27,28 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   const [, setCurrentIndex] = useState(0);
   const $theme = useStore(themeStore);
   const [pageDesignList, setPageDesignList] = useState<PageDesign[]>([]);
-  const $viewportKey = useStore(viewportKeyStore);
-  const viewportKey = $viewportKey.value;
+  const [viewportKey, setViewportKey] = useState<ViewportAuto>("desktop");
+
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width <= 800) {
+        setViewportKey("mobile");
+      } else if (width >= 1368) {
+        setViewportKey("desktop");
+      } else {
+        setViewportKey("tablet");
+      }
+    };
+    handleResize();
+    window.addEventListener("create-resize", handleResize);
+    return () => window.removeEventListener("create-resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const designs = Object.values(pageDesigns($theme));
     setPageDesignList(designs);
-    if (designs.length > 0 && !selectedDesign) {
+    if (designs.length > 0) {
       setSelectedDesign(designs[0]);
     }
   }, [$theme, pageDesigns]);

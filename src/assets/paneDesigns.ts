@@ -83,11 +83,11 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
       bgColour: tailwindToHex(
         getComputedColor(
           {
-            light: "mywhite",
-            "light-bw": "mywhite",
-            "light-bold": "myoffwhite",
-            dark: "myblack",
-            "dark-bw": "myblack",
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
             "dark-bold": "black",
           },
           theme
@@ -121,8 +121,32 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
                   mx: ["auto"],
                   borderWIDTH: ["2"],
                   rounded: ["md", "lg"],
-                  bgCOLOR: ["mywhite"],
-                  borderCOLOR: ["slate-200"],
+                  bgCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "brand-2",
+                        "light-bw": "white",
+                        "light-bold": "brand-2",
+                        dark: "brand-1",
+                        "dark-bw": "black",
+                        "dark-bold": "brand-1",
+                      },
+                      theme
+                    ),
+                  ],
+                  borderCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "neutral-200",
+                        "light-bw": "gray-200",
+                        "light-bold": "brand-6",
+                        dark: "neutral-800",
+                        "dark-bw": "gray-800",
+                        "dark-bold": "neutral-800",
+                      },
+                      theme
+                    ),
+                  ],
                 },
                 {
                   px: ["9", "14", "32"],
@@ -135,15 +159,39 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
             h2: {
               classes: {
                 fontSTYLE: ["bold"],
-                textCOLOR: ["myblue"],
-                textSIZE: ["4xl", "5xl", "6xl"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["5xl", "6xl", "7xl"],
                 fontFACE: ["action"],
               },
             },
             h3: {
               classes: {
                 fontSTYLE: ["bold"],
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "black",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["xl", "3xl"],
                 my: [8, 12],
                 fontFACE: ["action"],
@@ -151,7 +199,19 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
             },
             h4: {
               classes: {
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["xl", "2xl"],
                 my: [8, 12],
                 fontFACE: ["action"],
@@ -159,7 +219,19 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
             },
             p: {
               classes: {
-                textCOLOR: ["mydarkgrey"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["lg", "xl"],
                 lineHEIGHT: ["loose"],
                 mt: ["4", "5"],
@@ -173,21 +245,58 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
           buttons: {
             try: {
               callbackPayload: "(goto (home))",
+              urlTarget: "#",
               classNamesPayload: {
                 button: {
                   classes: {
-                    bgCOLOR: ["mydarkgrey"],
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-7",
+                          "light-bw": "black",
+                          "light-bold": "brand-3",
+                          dark: "slate-200",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-3",
+                        },
+                        theme
+                      ),
+                    ],
                     display: ["inline-block"],
                     fontWEIGHT: ["bold"],
                     px: ["3.5"],
                     py: ["2.5"],
                     rounded: ["md"],
-                    textCOLOR: ["mywhite"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-2",
+                          "light-bw": "white",
+                          "light-bold": "brand-2",
+                          dark: "black",
+                          "dark-bw": "black",
+                          "dark-bold": "brand-1",
+                        },
+                        theme
+                      ),
+                    ],
                   },
                 },
                 hover: {
                   classes: {
-                    bgCOLOR: ["myorange"],
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
                     rotate: ["2"],
                   },
                 },
@@ -203,20 +312,57 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
             },
             learn: {
               callbackPayload: "(goto (home))",
+              urlTarget: "#",
               classNamesPayload: {
                 button: {
                   classes: {
-                    bgCOLOR: ["slate-200"],
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "neutral-200",
+                          "light-bw": "brand-8",
+                          "light-bold": "neutral-200",
+                          dark: "neutral-800",
+                          "dark-bw": "gray-800",
+                          "dark-bold": "neutral-800",
+                        },
+                        theme
+                      ),
+                    ],
                     display: ["inline-block"],
                     px: ["3.5"],
                     py: ["2.5"],
                     rounded: ["md"],
-                    textCOLOR: ["black"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
                   },
                 },
                 hover: {
                   classes: {
-                    bgCOLOR: ["myorange"],
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
                     rotate: ["2"],
                   },
                 },

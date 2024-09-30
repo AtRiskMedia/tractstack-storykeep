@@ -182,7 +182,7 @@ const DesignNewPane = ({
               );
             }}
           >
-            <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 gap-y-2 text-xs lg:text-sm xl:text-md mb-1">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 gap-y-2 text-sm lg:text-md xl:text-lg mb-1">
               <Combobox.Label className="block text-mydarkgrey">
                 {mode === "design"
                   ? "Starter designs"

@@ -167,9 +167,9 @@ const DesignNewPane = ({
   };
 
   return (
-    <div id="pane-insert" className="pt-6 bg-mywhite shadow-inner rounded-lg">
-      <div className="px-6 flex justify-center space-x-4">
-        <div className="flex-grow max-w-sm">
+    <div id="pane-insert" className="pt-4 bg-mywhite shadow-inner rounded-lg">
+      <div className="px-2 lg:px-4 xl:px-6 flex flex-col lg:flex-row items-center lg:items-start lg:justify-start space-y-4 lg:space-y-0 lg:space-x-4">
+        <div className="w-full lg:w-auto lg:flex-grow max-w-96">
           <Combobox
             as="div"
             value={selectedDesign}
@@ -182,70 +182,44 @@ const DesignNewPane = ({
               );
             }}
           >
-            {mode === `design` ? (
-              <div className="flex flex-nowrap gap-x-3 text-md mb-1">
-                <Combobox.Label className="block text-mydarkgrey">
-                  Starter designs
-                </Combobox.Label>
-                <span className="text-mydarkgrey/85">
+            <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 gap-y-2 text-xs lg:text-sm xl:text-md mb-1">
+              <Combobox.Label className="block text-mydarkgrey">
+                {mode === "design"
+                  ? "Starter designs"
+                  : mode === "break"
+                    ? "Transition shapes"
+                    : "Re-use existing pane"}
+              </Combobox.Label>
+              <span className="text-mydarkgrey/85 flex flex-wrap justify-center lg:justify-start gap-x-2">
+                {mode !== "design" && (
                   <button
-                    onClick={() => changeMode(`break`)}
-                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
-                  >
-                    Transition shapes
-                  </button>
-                  <button
-                    onClick={() => changeMode(`reuse`)}
-                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
-                  >
-                    Re-use existing pane
-                  </button>
-                </span>
-              </div>
-            ) : mode === `break` ? (
-              <div className="flex flex-nowrap gap-x-3 text-md mb-1">
-                <Combobox.Label className="block text-mydarkgrey">
-                  Transition shapes
-                </Combobox.Label>
-                <span className="text-mydarkgrey/85">
-                  <button
-                    onClick={() => changeMode(`design`)}
+                    onClick={() => changeMode("design")}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
                     Starter designs
                   </button>
+                )}
+                {mode !== "break" && (
                   <button
-                    onClick={() => changeMode(`reuse`)}
-                    className="text-black underline hover:underline-offset-2 hover:text-myorange"
-                  >
-                    Re-use existing pane
-                  </button>
-                </span>
-              </div>
-            ) : (
-              <div className="flex flex-nowrap gap-x-3 text-md mb-1">
-                <Combobox.Label className="block text-mydarkgrey">
-                  Re-use existing pane
-                </Combobox.Label>
-                <span className="text-mydarkgrey/85">
-                  <button
-                    onClick={() => changeMode(`break`)}
+                    onClick={() => changeMode("break")}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
                     Transition shapes
                   </button>
+                )}
+                {mode !== "reuse" && (
                   <button
-                    onClick={() => changeMode(`design`)}
+                    onClick={() => changeMode("reuse")}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
-                    Starter designs
+                    Re-use existing pane
                   </button>
-                </span>
-              </div>
-            )}
+                )}
+              </span>
+            </div>
             <div className="relative">
               <Combobox.Input
-                className="w-full rounded-lg border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg xs:text-md xs:leading-6"
+                className="w-full rounded-lg border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg lg:text-xl xl:leading-6"
                 onChange={event => setQuery(event.target.value)}
                 displayValue={(design: PaneDesign | null) => design?.name ?? ""}
               />
@@ -256,7 +230,7 @@ const DesignNewPane = ({
                 />
               </Combobox.Button>
               {filteredDesigns.length > 0 && (
-                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   {filteredDesigns.map(design => (
                     <Combobox.Option
                       key={design.id}
@@ -295,9 +269,9 @@ const DesignNewPane = ({
             </div>
           </Combobox>
         </div>
-        <div className="flex items-stretch h-[50px] space-x-2">
+        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 lg:flex-shrink-0">
           <button
-            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-myblack transition-colors h-full flex flex-col justify-center"
+            className="bg-myorange text-white rounded-lg p-2 hover:bg-myblack transition-colors flex items-center justify-center"
             onClick={() => cycleDesign("prev")}
             disabled={saving}
             title="Previous design"
@@ -305,7 +279,7 @@ const DesignNewPane = ({
             <ChevronLeftIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-myorange text-white rounded-lg p-2 py-1 hover:bg-myblack transition-colors h-full flex flex-col justify-center"
+            className="bg-myorange text-white rounded-lg p-2 hover:bg-myblack transition-colors flex items-center justify-center"
             onClick={() => cycleDesign("next")}
             disabled={saving}
             title="Next design"
@@ -313,7 +287,7 @@ const DesignNewPane = ({
             <ChevronRightIcon className="h-5 w-5" />
           </button>
           <button
-            className="bg-myorange/20 text-black rounded-lg p-2 py-1 hover:bg-myblack hover:text-white transition-colors h-full flex flex-col justify-center"
+            className="bg-myorange/20 text-black rounded-lg p-2 hover:bg-myblack hover:text-white transition-colors flex items-center justify-center"
             onClick={() => cancelInsert()}
             disabled={saving}
             aria-label="Cancel"
@@ -322,23 +296,24 @@ const DesignNewPane = ({
             <XMarkIcon className="h-5 w-5" />
           </button>
           <ThemeSelector value={$theme} onChange={handleThemeChange} />
-          {selectedDesign ? (
+          {selectedDesign && (
             <button
-              className="font-bold bg-myblue text-white rounded-lg p-2 py-1 hover:bg-myorange transition-colors h-full flex flex-col justify-center"
+              className="font-bold bg-myblue text-white rounded-lg p-2 hover:bg-myorange transition-colors flex items-center justify-center"
               onClick={() => handleInsert()}
               disabled={saving}
               aria-label="Use this Design"
               title="Use this Design"
             >
-              ADD TO PAGE
+              <span className="hidden lg:inline">ADD TO PAGE</span>
+              <span className="lg:hidden">ADD</span>
             </button>
-          ) : null}
+          )}
         </div>
       </div>
       {selectedDesign && (
         <div
           className="outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
-          mt-4 bg-myblue/20 py-4"
+        mt-4 bg-myblue/20 py-4"
           style={{
             backgroundImage:
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",

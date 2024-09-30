@@ -171,14 +171,12 @@ const Pane = (props: {
       if (!fragment?.type) return null;
       switch (fragment.type) {
         case "markdown":
-          //console.log(
-          //  $paneSlug[id].current,
-          //  JSON.stringify(fragment.payload.optionsPayload.classNamesPayload)
-          //);
-          //console.log(``)
-          //console.log(
-          //  JSON.stringify(fragment.payload.optionsPayload.buttons),
-          //);
+          console.log(
+            $paneSlug[id].current,
+            JSON.stringify(fragment.payload.optionsPayload.classNamesPayload)
+          );
+          console.log(``);
+          console.log(JSON.stringify(fragment.payload.optionsPayload.buttons));
           return (
             <div
               key={`markdown-${index}`}

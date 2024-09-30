@@ -7,6 +7,7 @@ import {
   DeviceTabletIcon,
   ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 
 interface ViewportComboBoxProps {
   value: string;
@@ -36,6 +37,8 @@ const ViewportComboBox = ({
   const [internalValue, setInternalValue] = useState(value ?? "");
   const [isNowNegative, setIsNowNegative] = useState(isNegative);
   const inputRef = useRef<HTMLInputElement>(null);
+  const comboboxButtonRef = useRef<HTMLButtonElement>(null);
+  const { openAbove, maxHeight } = useDropdownDirection(comboboxButtonRef);
 
   const Icon =
     viewport === "mobile"
@@ -95,7 +98,10 @@ const ViewportComboBox = ({
                 displayValue={v => (typeof v === `string` ? v : "")}
                 autoComplete="off"
               />
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+              <Combobox.Button
+                ref={comboboxButtonRef}
+                className="absolute inset-y-0 right-0 flex items-center pr-2"
+              >
                 <ChevronUpDownIcon
                   className="h-5 w-5 text-mydarkgrey"
                   aria-hidden="true"
@@ -120,7 +126,12 @@ const ViewportComboBox = ({
               </div>
             )}
           </div>
-          <Combobox.Options className="absolute z-10 left-0 right-0 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+          <Combobox.Options
+            className={`absolute z-10 left-0 right-0 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
+              openAbove ? "bottom-full mb-1" : "top-full mt-1"
+            }`}
+            style={{ maxHeight: `${maxHeight}px` }}
+          >
             {values
               .filter(item =>
                 item.toLowerCase().includes((value || "").toLowerCase())

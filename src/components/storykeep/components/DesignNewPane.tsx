@@ -188,14 +188,12 @@ const DesignNewPane = ({
                   Starter designs
                 </Combobox.Label>
                 <span className="text-mydarkgrey/85">
-                  {` | `}
                   <button
                     onClick={() => changeMode(`break`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
                     Transition shapes
                   </button>
-                  {` | `}
                   <button
                     onClick={() => changeMode(`reuse`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
@@ -210,14 +208,12 @@ const DesignNewPane = ({
                   Transition shapes
                 </Combobox.Label>
                 <span className="text-mydarkgrey/85">
-                  {` | `}
                   <button
                     onClick={() => changeMode(`design`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
                     Starter designs
                   </button>
-                  {` | `}
                   <button
                     onClick={() => changeMode(`reuse`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
@@ -232,14 +228,12 @@ const DesignNewPane = ({
                   Re-use existing pane
                 </Combobox.Label>
                 <span className="text-mydarkgrey/85">
-                  {` | `}
                   <button
                     onClick={() => changeMode(`break`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"
                   >
                     Transition shapes
                   </button>
-                  {` | `}
                   <button
                     onClick={() => changeMode(`design`)}
                     className="text-black underline hover:underline-offset-2 hover:text-myorange"

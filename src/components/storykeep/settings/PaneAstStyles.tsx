@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { Switch, Combobox, Listbox } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import {
@@ -13,6 +13,7 @@ import {
   findCodeNode,
   cleanHtmlAst,
 } from "../../../utils/compositor/markdownUtils";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import ViewportComboBox from "../fields/ViewportComboBox";
 import {
@@ -56,6 +57,12 @@ export const PaneAstStyles = (props: {
   files: FileDatum[];
 }) => {
   const { id, targetId, files } = props;
+  const buttonStyleListboxRef = useRef<HTMLButtonElement>(null);
+  const addStyleListboxRef = useRef<HTMLButtonElement>(null);
+  const { openAbove: buttonStyleOpenAbove, maxHeight: buttonStyleMaxHeight } =
+    useDropdownDirection(buttonStyleListboxRef);
+  const { openAbove: addStyleOpenAbove, maxHeight: addStyleMaxHeight } =
+    useDropdownDirection(addStyleListboxRef);
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
@@ -1240,7 +1247,10 @@ export const PaneAstStyles = (props: {
                         onChange={handleButtonStyleChange}
                       >
                         <div className="relative mt-1">
-                          <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-myorange focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 xs:text-sm">
+                          <Listbox.Button
+                            ref={buttonStyleListboxRef}
+                            className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-myorange focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 xs:text-sm"
+                          >
                             <span className="block truncate">
                               {buttonStyleOptions.at(0)}
                             </span>
@@ -1251,7 +1261,14 @@ export const PaneAstStyles = (props: {
                               />
                             </span>
                           </Listbox.Button>
-                          <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+                          <Listbox.Options
+                            className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+                              buttonStyleOpenAbove
+                                ? "bottom-full mb-1"
+                                : "top-full mt-1"
+                            }`}
+                            style={{ maxHeight: `${buttonStyleMaxHeight}px` }}
+                          >
                             {buttonStyleOptions.map((option, idx) => (
                               <Listbox.Option
                                 key={option}
@@ -1607,7 +1624,10 @@ export const PaneAstStyles = (props: {
               <div className="my-4">
                 <Listbox value={styleFilter} onChange={setStyleFilter}>
                   <div className="relative mt-1">
-                    <Listbox.Button className="relative w-full cursor-default rounded-md border border-mydarkgrey bg-white py-2 pl-3 pr-10 text-left text-black shadow-sm focus:outline-none focus:ring-1 focus:ring-myorange focus:border-myorange xs:text-sm">
+                    <Listbox.Button
+                      ref={addStyleListboxRef}
+                      className="relative w-full cursor-default rounded-md border border-mydarkgrey bg-white py-2 pl-3 pr-10 text-left text-black shadow-sm focus:outline-none focus:ring-1 focus:ring-myorange focus:border-myorange xs:text-sm"
+                    >
                       <span className="block truncate">
                         {
                           styleFilterOptions.find(
@@ -1622,7 +1642,12 @@ export const PaneAstStyles = (props: {
                         />
                       </span>
                     </Listbox.Button>
-                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+                    <Listbox.Options
+                      className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+                        addStyleOpenAbove ? "bottom-full mb-1" : "top-full mt-1"
+                      }`}
+                      style={{ maxHeight: `${addStyleMaxHeight}px` }}
+                    >
                       {styleFilterOptions.map(option => (
                         <Listbox.Option
                           key={option.value}

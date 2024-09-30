@@ -88,12 +88,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           `fixed z-[9000]`,
           `backdrop-blur-sm bg-mylightgrey/20 dark:bg-black/85`,
           `shadow-lg transition-all duration-300 ease-in-out`,
-          isFullScreen
-            ? "overflow-auto"
-            : type === `desktop`
-              ? "rounded-bl-lg"
-              : "rounded-t-lg",
-          !isFullScreen ? "overflow-auto" : ""
+          type === `desktop` ? "rounded-bl-lg" : "rounded-t-lg"
         )}
         style={{
           height: isFullScreen ? "100%" : height,
@@ -116,21 +111,21 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             </button>
           </div>
         ) : (
-            <div className="relative">
-          <button
-            onClick={toggleOffEditModal}
-            className={classNames(
-              "absolute z-[9001] bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg",
-              "transition-all duration-300 ease-in-out",
-              type === "desktop" ? "-left-12 top-2" : "-top-12 right-2"
-            )}
-            title={
-              $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`
-            }
-          >
-            <XMarkIcon className="w-6 h-6" />
-          </button>
-            </div>
+          <div className="relative">
+            <button
+              onClick={toggleOffEditModal}
+              className={classNames(
+                "absolute z-[9001] bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg",
+                "transition-all duration-300 ease-in-out",
+                type === "desktop" ? "-left-12 top-2" : "-top-12 right-2"
+              )}
+              title={
+                $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`
+              }
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+          </div>
         )}
         <div
           ref={contentRef}
@@ -150,7 +145,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
                 : type === `desktop`
                   ? "rounded-bl-lg py-1.5"
                   : "rounded-t-lg pt-1.5 pb-2.5",
-              "bg-white px-3.5 relative flex-grow overflow-auto"
+              "bg-white px-3.5 relative flex-grow"
             )}
           >
             {$editMode?.type === `storyfragment` &&

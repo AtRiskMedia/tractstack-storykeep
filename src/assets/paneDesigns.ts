@@ -99,7 +99,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     fragments: [
       {
         type: "markdown",
-        markdownBody: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\nbuttons here\n`,
+        markdownBody: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n[Try it now!](try) &nbsp; [Learn more](learn)\n`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -168,6 +168,67 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
               override: {
                 mt: [null, ["8", "10"]],
               },
+            },
+          },
+          buttons: {
+            try: {
+              callbackPayload: "(goto (home))",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: ["mydarkgrey"],
+                    display: ["inline-block"],
+                    fontWEIGHT: ["bold"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: ["mywhite"],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: ["myorange"],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+            },
+            learn: {
+              callbackPayload: "(goto (home))",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: ["slate-200"],
+                    display: ["inline-block"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: ["black"],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: ["myorange"],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
             },
           },
         } as OptionsPayloadDatum,

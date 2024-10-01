@@ -24,7 +24,7 @@ interface CreateNewPageProps {
 const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   const [selectedDesign, setSelectedDesign] = useState<PageDesign | null>(null);
   const [query, setQuery] = useState("");
-  const [, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const $theme = useStore(themeStore);
   const [pageDesignList, setPageDesignList] = useState<PageDesign[]>([]);
   const [viewportKey, setViewportKey] = useState<ViewportAuto>("desktop");
@@ -48,7 +48,16 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   useEffect(() => {
     const designs = Object.values(pageDesigns($theme));
     setPageDesignList(designs);
-    if (designs.length > 0) {
+    if (selectedDesign) {
+      const newSelectedDesign = designs.find(
+        d => d.name === selectedDesign.name
+      );
+      if (newSelectedDesign) {
+        setSelectedDesign(newSelectedDesign);
+      } else {
+        setSelectedDesign(designs[currentIndex] || designs[0]);
+      }
+    } else if (designs.length > 0) {
       setSelectedDesign(designs[0]);
     }
   }, [$theme, pageDesigns]);
@@ -109,6 +118,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                 <Combobox.Input
                   className="w-full rounded-lg border border-mylightgrey bg-white py-2 pl-3 pr-10 shadow-sm focus:border-mydarkgrey focus:outline-none focus:ring-1 focus:ring-myblue text-xl"
                   onChange={event => setQuery(event.target.value)}
+                  autoComplete="off"
                   displayValue={(design: PageDesign) => design?.name}
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">

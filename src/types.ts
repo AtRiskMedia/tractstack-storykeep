@@ -211,6 +211,7 @@ export interface PaneDesign {
   id: string;
   slug: string;
   name: string;
+  priority: number;
   type: `starter` | `break` | `reuse`;
   panePayload: {
     heightOffsetDesktop: number;
@@ -232,6 +233,14 @@ export interface PageDesign {
   tailwindBgColour: string | null;
   paneDesigns: PaneDesign[];
 }
+
+export type Variant =
+  | `default`
+  | `center`
+  | `onecolumn`
+//  | `slim`
+//  | `slimCenter`
+//  | `slimOneColumn`;
 
 export type PaneAstTargetId = {
   outerIdx: number;

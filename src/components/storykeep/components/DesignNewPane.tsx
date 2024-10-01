@@ -42,17 +42,11 @@ const DesignNewPane = ({
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);
   const $theme = useStore(themeStore);
-  const [activePaneDesigns, setActivePaneDesigns] = useState(
-    paneDesigns($theme ?? PUBLIC_THEME).filter(
-      (p: PaneDesign) => p.type === `starter`
-    )
-  );
+  const [activePaneDesigns, setActivePaneDesigns] = useState<PaneDesign[]>([]);
   const [reusePaneDesigns, setReuseActivePaneDesigns] = useState<PaneDesign[]>(
     []
   );
-  const [selectedDesign, setSelectedDesign] = useState<PaneDesign>(
-    activePaneDesigns[0]
-  );
+  const [selectedDesign, setSelectedDesign] = useState<PaneDesign|null>(null);
   const [, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -97,17 +91,25 @@ const DesignNewPane = ({
     setMode(newMode);
     if (newMode === `design`) {
       setActivePaneDesigns(
-        paneDesigns($theme).filter((p: PaneDesign) => p.type === `starter`)
+        paneDesigns($theme, `default`).filter(
+          (p: PaneDesign) => p.type === `starter`
+        )
       );
       setSelectedDesign(
-        paneDesigns($theme).filter((p: PaneDesign) => p.type === `starter`)[0]
+        paneDesigns($theme, `default`).filter(
+          (p: PaneDesign) => p.type === `starter`
+        )[0]
       );
     } else if (newMode === `break`) {
       setActivePaneDesigns(
-        paneDesigns($theme).filter((p: PaneDesign) => p.type === `break`)
+        paneDesigns($theme, `default`).filter(
+          (p: PaneDesign) => p.type === `break`
+        )
       );
       setSelectedDesign(
-        paneDesigns($theme).filter((p: PaneDesign) => p.type === `break`)[0]
+        paneDesigns($theme, `default`).filter(
+          (p: PaneDesign) => p.type === `break`
+        )[0]
       );
     } else {
       setActivePaneDesigns(reusePaneDesigns);
@@ -119,10 +121,34 @@ const DesignNewPane = ({
 
   useEffect(() => {
     if (mode === "design" || mode === "break") {
-      const newDesigns = paneDesigns($theme).filter((p: PaneDesign) =>
-        mode === "design" ? p.type === "starter" : p.type === "break"
-      );
+      let newDesigns: PaneDesign[];
+
+      if (mode === "design") {
+        const allStarterDesigns = [
+          ...paneDesigns($theme ?? PUBLIC_THEME, "default").filter(
+            p => p.type === "starter"
+          ),
+          ...paneDesigns($theme ?? PUBLIC_THEME, "center").filter(
+            p => p.type === "starter"
+          ),
+          ...paneDesigns($theme ?? PUBLIC_THEME, "onecolumn").filter(
+            p => p.type === "starter"
+          ),
+        ];
+        newDesigns = Array.from(
+          new Map(allStarterDesigns.map(design => [design.id, design])).values()
+        ).sort((a, b) => {
+          // Convert priority to number and sort in ascending order
+          return (Number(a.priority) || 0) - (Number(b.priority) || 0);
+        });
+      } else {
+        newDesigns = paneDesigns($theme ?? PUBLIC_THEME, `default`).filter(
+          (p: PaneDesign) => p.type === "break"
+        );
+      }
+
       setActivePaneDesigns(newDesigns);
+
       if (selectedDesign) {
         const updatedDesign = newDesigns.find(d => d.id === selectedDesign.id);
         setSelectedDesign(updatedDesign || newDesigns[0]);
@@ -165,6 +191,8 @@ const DesignNewPane = ({
   const handleThemeChange = (newTheme: Theme) => {
     themeStore.set(newTheme);
   };
+
+  if (!selectedDesign) return null;
 
   return (
     <div id="pane-insert" className="pt-4 bg-mywhite shadow-inner rounded-lg">
@@ -221,6 +249,7 @@ const DesignNewPane = ({
               <Combobox.Input
                 className="w-full rounded-lg border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg lg:text-xl xl:leading-6"
                 onChange={event => setQuery(event.target.value)}
+                autoComplete="off"
                 displayValue={(design: PaneDesign | null) => design?.name ?? ""}
               />
               <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-2 focus:outline-none">
@@ -295,7 +324,9 @@ const DesignNewPane = ({
           >
             <XMarkIcon className="h-5 w-5" />
           </button>
-          <ThemeSelector value={$theme} onChange={handleThemeChange} />
+          {mode === `design` && (
+            <ThemeSelector value={$theme} onChange={handleThemeChange} />
+          )}
           {selectedDesign && (
             <button
               className="font-bold bg-myblue text-white rounded-lg p-2 hover:bg-myorange transition-colors flex items-center justify-center"

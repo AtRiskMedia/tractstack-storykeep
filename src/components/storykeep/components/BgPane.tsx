@@ -16,11 +16,9 @@ import type {
 const BgPane = ({
   payload,
   viewportKey,
-  //toolMode,
 }: {
   payload: BgPaneDatum;
   viewportKey: ViewportAuto;
-  //toolMode: ToolMode;
 }) => {
   const optionsPayload = payload.optionsPayload;
   const optionsPayloadDatum: OptionsPayloadDatum | undefined =

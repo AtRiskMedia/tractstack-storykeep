@@ -4,6 +4,7 @@ import { tailwindToHex } from "../assets/tailwindColors";
 
 import type {
   Theme,
+  Variant,
   PageDesign,
   PaneDesign,
   OptionsPayloadDatum,
@@ -11,12 +12,27 @@ import type {
 
 type TailwindColor = (typeof colorValues)[number];
 type ThemeColorMap = { [key in Theme]: TailwindColor };
+type ComputedValueMap = { [key in Variant]: string };
+type ComputedValueNumericMap = { [key in Variant]: number };
 
 const getComputedColor = (
   colorMap: ThemeColorMap,
   theme: Theme = PUBLIC_THEME
 ): TailwindColor => {
   return colorMap[theme] || "brand-1";
+};
+
+export const getComputedValue = (
+  valueMap: ComputedValueMap,
+  variant: Variant = "default"
+): string => {
+  return valueMap[variant] ?? valueMap["default"] ?? "";
+};
+export const getComputedNumber = (
+  valueMap: ComputedValueNumericMap,
+  variant: Variant = "default"
+): number => {
+  return valueMap[variant] ?? valueMap["default"] ?? 0;
 };
 
 export const buttonStyleOptions = [
@@ -67,11 +83,29 @@ export const buttonStyleClasses = [
   ],
 ];
 
-export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
+export const paneDesigns = (
+  theme: Theme = PUBLIC_THEME,
+  variant: Variant = `default`
+): PaneDesign[] => [
   {
-    id: "introCentered",
-    slug: "introCentered",
-    name: "Intro section - centered",
+    id: `intro-${variant}`,
+    slug: `intro-${variant}`,
+    name: getComputedValue(
+      {
+        default: "Intro section",
+        center: "Intro section - centered",
+        onecolumn: "Intro section - one column",
+      },
+      variant
+    ),
+    priority: getComputedNumber(
+      {
+        default: 0,
+        center: 1,
+        onecolumn: 2,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -151,8 +185,32 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
                 {
                   px: ["9", "14", "32"],
                   py: ["20", "32"],
-                  textALIGN: ["center"],
-                  textWRAP: ["balance"],
+                  textALIGN: [
+                    getComputedValue(
+                      { default: "left", center: "center", onecolumn: "left" },
+                      variant
+                    ),
+                  ],
+                  textWRAP: [
+                    getComputedValue(
+                      {
+                        default: "pretty",
+                        center: "balance",
+                        onecolumn: "pretty",
+                      },
+                      variant
+                    ),
+                  ],
+                  maxW: [
+                    getComputedValue(
+                      {
+                        default: "none",
+                        center: "none",
+                        onecolumn: "3xl",
+                      },
+                      variant
+                    ),
+                  ],
                 },
               ],
             },
@@ -385,6 +443,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "titleText",
     slug: "titleText",
     name: "Page section with title",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -484,6 +550,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "farzaTitleText",
     slug: "farzaTitleText",
     name: "Page section with title (readable width)",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -566,6 +640,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "hero-1",
     slug: "hero-1",
     name: "Hero section",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -632,6 +714,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "aside-with-image",
     slug: "aside-with-image",
     name: "Hero with image",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -703,6 +793,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "aside-with-image-before",
     slug: "aside-with-image-before",
     name: "Hero with image before",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -774,6 +872,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "aside-with-image-primary",
     slug: "aside-with-image-primary",
     name: "Hero image with key points",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -840,6 +946,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "aside-with-large-text",
     slug: "aside-with-large-text",
     name: "Large text with aside points",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -904,6 +1018,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "text",
     slug: "text",
     name: "Quick text",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -1123,6 +1245,14 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "borderedText",
     slug: "borderedText",
     name: "Bordered paragraphs",
+    priority: getComputedNumber(
+      {
+        default: 10,
+        center: 11,
+        onecolumn: 12,
+      },
+      variant
+    ),
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -1202,6 +1332,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks1",
     slug: "breaks1",
     name: "Stepped from above",
+    priority: 100,
     orientation: `above`,
     type: `break`,
     panePayload: {
@@ -1258,6 +1389,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks2",
     slug: "breaks2",
     name: "Cut 1 into below",
+    priority: 100,
     orientation: `below`,
     type: `break`,
     panePayload: {
@@ -1283,7 +1415,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
           artpack: {
             desktop: {
               collection: "kCz",
-              image: "cut1wide",
+              image: "cutwide1",
               mode: "break",
               svgFill: "#10120d",
               filetype: "svg",
@@ -1314,6 +1446,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks3",
     slug: "breaks3",
     name: "Cut 2 into below",
+    priority: 100,
     orientation: `below`,
     type: `break`,
     panePayload: {
@@ -1339,7 +1472,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
           artpack: {
             desktop: {
               collection: "kCz",
-              image: "cut2wide",
+              image: "cutwide2",
               mode: "break",
               svgFill: "#10120d",
               filetype: "svg",
@@ -1370,6 +1503,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks4",
     slug: "breaks4",
     name: "Low Cut 1 into below",
+    priority: 100,
     orientation: `below`,
     type: `break`,
     panePayload: {
@@ -1395,7 +1529,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
           artpack: {
             desktop: {
               collection: "kCz",
-              image: "lowcut1wide",
+              image: "lowcutwide1",
               mode: "break",
               svgFill: "#10120d",
               filetype: "svg",
@@ -1426,6 +1560,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks5",
     slug: "breaks5",
     name: "Low Cut 2 into below",
+    priority: 100,
     orientation: `below`,
     type: `break`,
     panePayload: {
@@ -1451,7 +1586,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
           artpack: {
             desktop: {
               collection: "kCz",
-              image: "lowcut2wide",
+              image: "lowcutwide2",
               mode: "break",
               svgFill: "#10120d",
               filetype: "svg",
@@ -1482,6 +1617,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks6",
     slug: "breaks6",
     name: "Jag from above",
+    priority: 100,
     orientation: `above`,
     type: `break`,
     panePayload: {
@@ -1538,6 +1674,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks7",
     slug: "breaks7",
     name: "Burst 1 from above",
+    priority: 100,
     orientation: `above`,
     type: `break`,
     panePayload: {
@@ -1594,6 +1731,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks8",
     slug: "breaks8",
     name: "Burst 2 from above",
+    priority: 100,
     orientation: `above`,
     type: `break`,
     panePayload: {
@@ -1650,6 +1788,7 @@ export const paneDesigns = (theme: Theme = PUBLIC_THEME): PaneDesign[] => [
     id: "breaks9",
     slug: "breaks9",
     name: "Crooked from above",
+    priority: 100,
     orientation: `above`,
     type: `break`,
     panePayload: {
@@ -1722,12 +1861,14 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme).find(p => p.id === "introCentered") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "intro-default"
+      ) as PaneDesign,
     ],
   },
-  landing: {
-    name: "Landing Page",
-    isContext: false,
+  basicCentered: {
+    name: "Basic Page - Centered",
+    isContext: true,
     tailwindBgColour: getComputedColor(
       {
         light: "mywhite",
@@ -1740,9 +1881,29 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme).find(p => p.id === "hero-1") as PaneDesign,
-      paneDesigns(theme).find(p => p.id === "titleText") as PaneDesign,
+      paneDesigns(theme, `center`).find(
+        p => p.id === "intro-center"
+      ) as PaneDesign,
     ],
   },
-  // ... other page designs
+  basicOneColumn: {
+    name: "Basic Page - One Column",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "intro-onecolumn"
+      ) as PaneDesign,
+    ],
+  },
 });

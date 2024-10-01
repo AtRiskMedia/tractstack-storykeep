@@ -101,8 +101,8 @@ export const paneDesigns = (
     priority: getComputedNumber(
       {
         default: 0,
-        center: 1,
-        onecolumn: 2,
+        onecolumn: 1,
+        center: 2,
       },
       variant
     ),
@@ -243,7 +243,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "black",
+                      dark: "brand-8",
                       "dark-bw": "brand-2",
                       "dark-bold": "brand-3",
                     },
@@ -452,9 +452,9 @@ export const paneDesigns = (
     ),
     priority: getComputedNumber(
       {
-        default: 0,
-        center: 1,
-        onecolumn: 2,
+        default: 3,
+        onecolumn: 4,
+        center: 5,
       },
       variant
     ),
@@ -500,7 +500,6 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
-                  my: ["20", "32"],
                 },
                 {
                   maxW: ["none", "screen-lg", "screen-xl"],
@@ -521,7 +520,7 @@ export const paneDesigns = (
                 },
                 {
                   px: ["9", "14", "32"],
-                  py: ["20", "32"],
+                  py: ["10"],
                   textALIGN: [
                     getComputedValue(
                       { default: "left", center: "center", onecolumn: "left" },
@@ -567,7 +566,7 @@ export const paneDesigns = (
                     theme
                   ),
                 ],
-                textSIZE: ["5xl", "6xl", "7xl"],
+                textSIZE: ["4xl", "5xl", "6xl"],
                 fontFACE: ["action"],
               },
             },
@@ -580,15 +579,14 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "black",
-                      "dark-bw": "brand-2",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
                     theme
                   ),
                 ],
                 textSIZE: ["xl", "3xl"],
-                my: [8, 12],
                 fontFACE: ["action"],
               },
             },
@@ -608,7 +606,6 @@ export const paneDesigns = (
                   ),
                 ],
                 textSIZE: ["xl", "2xl"],
-                my: [8, 12],
                 fontFACE: ["action"],
               },
             },
@@ -628,12 +625,12 @@ export const paneDesigns = (
                   ),
                 ],
                 textSIZE: ["lg", "xl"],
-                lineHEIGHT: ["loose"],
-                mt: ["4", "5"],
+                lineHEIGHT: ["snug"],
+                mt: ["2.5", "3.5"],
               },
               count: 2,
               override: {
-                mt: [null, ["8", "10"]],
+                mt: [null, ["4", "6"]],
               },
             },
           },
@@ -777,14 +774,21 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "titleText",
-    slug: "titleText",
-    name: "Page section with title",
+    id: `intro-slim-bordered-${variant}`,
+    slug: `intro-slim-bordered-${variant}`,
+    name: getComputedValue(
+      {
+        default: "Intro section - slim with border",
+        center: "Intro section - slim with border, centered",
+        onecolumn: "Intro section - slim with border, one column",
+      },
+      variant
+    ),
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 6,
+        onecolumn: 7,
+        center: 8,
       },
       variant
     ),
@@ -799,11 +803,11 @@ export const paneDesigns = (
       bgColour: tailwindToHex(
         getComputedColor(
           {
-            light: "mywhite",
-            "light-bw": "mywhite",
-            "light-bold": "myoffwhite",
-            dark: "myblack",
-            "dark-bw": "myblack",
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
             "dark-bold": "black",
           },
           theme
@@ -815,7 +819,7 @@ export const paneDesigns = (
     fragments: [
       {
         type: "markdown",
-        markdownBody: `## add a section title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n`,
+        markdownBody: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n[Try it now!](try) &nbsp; [Learn more](learn)\n`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -828,8 +832,71 @@ export const paneDesigns = (
           classNamesPayload: {
             parent: {
               classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
+                {
+                  m: ["5", "10"],
+                },
+                {
+                  maxW: ["none", "screen-lg", "screen-xl"],
+                  mx: ["auto"],
+                  borderWIDTH: ["2"],
+                  rounded: ["md", "lg"],
+                  bgCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "brand-2",
+                        "light-bw": "white",
+                        "light-bold": "brand-2",
+                        dark: "brand-1",
+                        "dark-bw": "black",
+                        "dark-bold": "brand-1",
+                      },
+                      theme
+                    ),
+                  ],
+                  borderCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "neutral-200",
+                        "light-bw": "gray-200",
+                        "light-bold": "brand-6",
+                        dark: "neutral-800",
+                        "dark-bw": "gray-800",
+                        "dark-bold": "neutral-800",
+                      },
+                      theme
+                    ),
+                  ],
+                },
+                {
+                  px: ["9", "14", "32"],
+                  py: ["10"],
+                  textALIGN: [
+                    getComputedValue(
+                      { default: "left", center: "center", onecolumn: "left" },
+                      variant
+                    ),
+                  ],
+                  textWRAP: [
+                    getComputedValue(
+                      {
+                        default: "pretty",
+                        center: "balance",
+                        onecolumn: "pretty",
+                      },
+                      variant
+                    ),
+                  ],
+                  maxW: [
+                    getComputedValue(
+                      {
+                        default: "none",
+                        center: "none",
+                        onecolumn: "3xl",
+                      },
+                      variant
+                    ),
+                  ],
+                },
               ],
             },
             h2: {
@@ -838,45 +905,217 @@ export const paneDesigns = (
                 textCOLOR: [
                   getComputedColor(
                     {
-                      light: "myblue",
-                      "light-bw": "myblack",
-                      "light-bold": "myorange",
-                      dark: "mygreen",
-                      "dark-bw": "myoffwhite",
-                      "dark-bold": "myorange",
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
                     },
                     theme
                   ),
                 ],
-                textSIZE: ["3xl", "4xl"],
-                my: [8, 12],
+                textSIZE: ["4xl", "5xl", "6xl"],
                 fontFACE: ["action"],
               },
             },
             h3: {
               classes: {
                 fontSTYLE: ["bold"],
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["xl", "3xl"],
-                my: [8, 12],
                 fontFACE: ["action"],
               },
             },
             h4: {
               classes: {
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["xl", "2xl"],
-                my: [8, 12],
                 fontFACE: ["action"],
               },
             },
             p: {
               classes: {
-                textCOLOR: ["mydarkgrey"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["lg", "xl"],
-                my: [3, 4],
-                lineHEIGHT: ["loose"],
+                lineHEIGHT: ["snug"],
+                mt: ["2.5", "3.5"],
               },
+              count: 2,
+              override: {
+                mt: [null, ["4", "6"]],
+              },
+            },
+          },
+          buttons: {
+            try: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-7",
+                          "light-bw": "black",
+                          "light-bold": "brand-3",
+                          dark: "slate-200",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-3",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    fontWEIGHT: ["bold"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-2",
+                          "light-bw": "white",
+                          "light-bold": "brand-2",
+                          dark: "black",
+                          "dark-bw": "black",
+                          "dark-bold": "brand-1",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+            },
+            learn: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "neutral-200",
+                          "light-bw": "brand-8",
+                          "light-bold": "neutral-200",
+                          dark: "neutral-800",
+                          "dark-bw": "gray-800",
+                          "dark-bold": "neutral-800",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
             },
           },
         } as OptionsPayloadDatum,
@@ -884,14 +1123,21 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "farzaTitleText",
-    slug: "farzaTitleText",
-    name: "Page section with title (readable width)",
+    id: `paragraph-${variant}`,
+    slug: `paragraph-${variant}`,
+    name: getComputedValue(
+      {
+        default: "Paragraph section",
+        center: "Paragraph section - centered",
+        onecolumn: "Paragraph section - one column",
+      },
+      variant
+    ),
     priority: getComputedNumber(
       {
         default: 10,
-        center: 11,
-        onecolumn: 12,
+        onecolumn: 11,
+        center: 12,
       },
       variant
     ),
@@ -910,7 +1156,7 @@ export const paneDesigns = (
     fragments: [
       {
         type: "markdown",
-        markdownBody: `## add a section title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n`,
+        markdownBody: `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -923,126 +1169,130 @@ export const paneDesigns = (
           classNamesPayload: {
             parent: {
               classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
                 {
-                  maxW: ["sm", "lg"],
+                  mx: ["5", "10"],
+                  mb: ["5", "10"],
+                },
+                {
+                  maxW: ["none", "screen-lg", "screen-xl"],
+                  mx: ["auto"],
+                },
+                {
+                  px: ["9", "14", "32"],
+                  py: ["10"],
+                  textALIGN: [
+                    getComputedValue(
+                      { default: "left", center: "center", onecolumn: "left" },
+                      variant
+                    ),
+                  ],
+                  textWRAP: [
+                    getComputedValue(
+                      {
+                        default: "pretty",
+                        center: "balance",
+                        onecolumn: "pretty",
+                      },
+                      variant
+                    ),
+                  ],
+                  maxW: [
+                    getComputedValue(
+                      {
+                        default: "none",
+                        center: "none",
+                        onecolumn: "3xl",
+                      },
+                      variant
+                    ),
+                  ],
                 },
               ],
             },
             h2: {
               classes: {
                 fontSTYLE: ["bold"],
-                textCOLOR: ["myblue"],
-                textSIZE: ["3xl", "4xl"],
-                my: [8, 12],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["4xl", "5xl", "6xl"],
                 fontFACE: ["action"],
-                maxW: ["md", "lg"],
+                pt: ["9", "14", "32"],
               },
             },
             h3: {
               classes: {
                 fontSTYLE: ["bold"],
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["xl", "3xl"],
-                my: [8, 12],
                 fontFACE: ["action"],
-                maxW: ["md", "lg"],
+                pt: ["9", "14", "32"],
               },
             },
             h4: {
               classes: {
-                textCOLOR: ["myblue"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["xl", "2xl"],
-                my: [8, 12],
                 fontFACE: ["action"],
-                maxW: ["md", "lg"],
+                pt: ["9", "14", "32"],
               },
             },
             p: {
               classes: {
-                textCOLOR: ["mydarkgrey"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["lg", "xl"],
-                my: [3, 4],
-                maxW: ["md", "lg"],
                 lineHEIGHT: ["loose"],
+                mt: ["2.5", "3.5"],
               },
             },
           },
-        } as OptionsPayloadDatum,
-      },
-    ],
-  },
-  {
-    id: "hero-1",
-    slug: "hero-1",
-    name: "Hero section",
-    priority: getComputedNumber(
-      {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
-      },
-      variant
-    ),
-    type: `starter`,
-    panePayload: {
-      heightOffsetDesktop: 0,
-      heightOffsetTablet: 0,
-      heightOffsetMobile: 0,
-      heightRatioDesktop: `0.00`,
-      heightRatioTablet: `0.00`,
-      heightRatioMobile: `0.00`,
-      bgColour: false,
-      codeHook: null,
-    },
-    files: [],
-    fragments: [
-      {
-        type: "markdown",
-        markdownBody: `1. Catchy and impactful title\n2. sub heading\n`,
-        imageMaskShapeDesktop: "none",
-        imageMaskShapeTablet: "none",
-        imageMaskShapeMobile: "none",
-        textShapeOutsideDesktop: "none",
-        textShapeOutsideTablet: "none",
-        textShapeOutsideMobile: "none",
-        isModal: false,
-        hiddenViewports: "none",
-        optionsPayload: {
-          classNamesPayload: {
-            parent: {
-              classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
-                {
-                  alignITEMS: ["center"],
-                  justifyITEMS: ["start"],
-                  display: ["flex"],
-                },
-              ],
-            },
-            ol: {
-              classes: {
-                maxW: ["md", "lg"],
-              },
-            },
-            li: {
-              classes: {
-                fontFACE: ["action"],
-                fontWEIGHT: ["normal"],
-                textCOLOR: ["mydarkgrey"],
-                textSIZE: ["xl", "2xl"],
-                my: [6, 8],
-              },
-              count: 3,
-              override: {
-                fontWEIGHT: [["bold"]],
-                textCOLOR: [["myblue"]],
-                textSIZE: [["7xl", "6xl"]],
-              },
-            },
-          },
+          buttons: {},
         } as OptionsPayloadDatum,
       },
     ],
@@ -1053,9 +1303,9 @@ export const paneDesigns = (
     name: "Hero with image",
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 210,
+        onecolumn: 211,
+        center: 212,
       },
       variant
     ),
@@ -1132,9 +1382,9 @@ export const paneDesigns = (
     name: "Hero with image before",
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 210,
+        onecolumn: 211,
+        center: 212,
       },
       variant
     ),
@@ -1211,9 +1461,9 @@ export const paneDesigns = (
     name: "Hero image with key points",
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 210,
+        onecolumn: 211,
+        center: 212,
       },
       variant
     ),
@@ -1285,9 +1535,9 @@ export const paneDesigns = (
     name: "Large text with aside points",
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 210,
+        onecolumn: 211,
+        center: 212,
       },
       variant
     ),
@@ -1357,9 +1607,9 @@ export const paneDesigns = (
     name: "Quick text",
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 50,
+        onecolumn: 51,
+        center: 52,
       },
       variant
     ),
@@ -1584,9 +1834,9 @@ export const paneDesigns = (
     name: "Bordered paragraphs",
     priority: getComputedNumber(
       {
-        default: 10,
-        center: 11,
-        onecolumn: 12,
+        default: 53,
+        onecolumn: 54,
+        center: 55,
       },
       variant
     ),
@@ -1658,6 +1908,113 @@ export const paneDesigns = (
                 textCOLOR: ["myblue"],
                 textSIZE: ["xl", "2xl"],
                 my: [8, 12],
+              },
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
+    id: "titleText",
+    slug: "titleText",
+    name: "Quick section",
+    priority: getComputedNumber(
+      {
+        default: 55,
+        onecolumn: 56,
+        center: 57,
+      },
+      variant
+    ),
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "mywhite",
+            "light-bw": "mywhite",
+            "light-bold": "myoffwhite",
+            dark: "myblack",
+            "dark-bw": "myblack",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `## add a section title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                { my: [12, 16] },
+                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
+              ],
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "myblue",
+                      "light-bw": "myblack",
+                      "light-bold": "myorange",
+                      dark: "mygreen",
+                      "dark-bw": "myoffwhite",
+                      "dark-bold": "myorange",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["3xl", "4xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: ["myblue"],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: ["myblue"],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: ["mydarkgrey"],
+                textSIZE: ["lg", "xl"],
+                my: [3, 4],
+                lineHEIGHT: ["loose"],
               },
             },
           },
@@ -2185,7 +2542,30 @@ export const pageDesigns = (
 ): Record<string, PageDesign> => ({
   basic: {
     name: "Basic Page",
-    isContext: true,
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "brand-3",
+        "light-bw": "brand-2",
+        "light-bold": "white",
+        dark: "brand-1",
+        "dark-bw": "brand-1",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(
+        p => p.id === "intro-default"
+      ) as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    ],
+  },
+  basicOneColumn: {
+    name: "Basic Page - One Column",
+    isContext: false,
     tailwindBgColour: getComputedColor(
       {
         light: "mywhite",
@@ -2198,14 +2578,17 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(
-        p => p.id === "intro-default"
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "intro-onecolumn"
+      ) as PaneDesign,
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "paragraph-onecolumn"
       ) as PaneDesign,
     ],
   },
   basicCentered: {
     name: "Basic Page - Centered",
-    isContext: true,
+    isContext: false,
     tailwindBgColour: getComputedColor(
       {
         light: "mywhite",
@@ -2221,11 +2604,37 @@ export const pageDesigns = (
       paneDesigns(theme, `center`).find(
         p => p.id === "intro-center"
       ) as PaneDesign,
+      paneDesigns(theme, `center`).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
     ],
   },
-  basicOneColumn: {
-    name: "Basic Page - One Column",
-    isContext: true,
+  basicSlim: {
+    name: "Basic Page - Slim",
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(
+        p => p.id === "intro-slim-default"
+      ) as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    ],
+  },
+  basicSlimOneColumn: {
+    name: "Basic Page - Slim, One Column",
+    isContext: false,
     tailwindBgColour: getComputedColor(
       {
         light: "mywhite",
@@ -2239,7 +2648,53 @@ export const pageDesigns = (
     ),
     paneDesigns: [
       paneDesigns(theme, `onecolumn`).find(
-        p => p.id === "intro-onecolumn"
+        p => p.id === "intro-slim-onecolumn"
+      ) as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    ],
+  },
+  basicSlimCentered: {
+    name: "Basic Page - Slim, Centered",
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `center`).find(
+        p => p.id === "intro-slim-center"
+      ) as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    ],
+  },
+  basicContext: {
+    name: "Basic Context Page - One section",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
   },

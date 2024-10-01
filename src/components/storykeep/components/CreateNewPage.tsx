@@ -113,9 +113,10 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
         <div className="space-y-6">
           <div className="flex flex-col space-y-4 max-w-screen-md">
             <Combobox value={selectedDesign} onChange={setSelectedDesign}>
-              <Combobox.Label 
- htmlFor="page-design-input" 
-                className="block text-lg text-mydarkgrey mb-2">
+              <Combobox.Label
+                htmlFor="page-design-input"
+                className="block text-lg text-mydarkgrey mb-2"
+              >
                 Page Design Starter (you'll get to customize from here...)
               </Combobox.Label>
               <div className="relative">
@@ -179,6 +180,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                   className="bg-myorange text-white rounded-lg p-2 hover:bg-myblack transition-colors flex items-center justify-center"
                   onClick={() => cycleDesign("prev")}
                   title="Previous design"
+                  aria-label="Previous design"
                 >
                   <ChevronLeftIcon className="h-5 w-5" />
                 </button>
@@ -186,6 +188,7 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                   className="bg-myorange text-white rounded-lg p-2 hover:bg-myblack transition-colors flex items-center justify-center"
                   onClick={() => cycleDesign("next")}
                   title="Next design"
+                  aria-label="Next design"
                 >
                   <ChevronRightIcon className="h-5 w-5" />
                 </button>

@@ -195,9 +195,9 @@ const DesignNewPane = ({
   if (!selectedDesign) return null;
 
   return (
-    <div id="pane-insert" className="pt-4 bg-mywhite shadow-inner rounded-lg">
-      <div className="px-2 lg:px-4 xl:px-6 flex flex-col lg:flex-row items-center lg:items-start lg:justify-start space-y-4 lg:space-y-0 lg:space-x-4">
-        <div className="w-full lg:w-auto lg:flex-grow max-w-96">
+    <div id="pane-insert" className="bg-mywhite shadow-inner rounded-lg">
+      <div className="pt-12 pb-6 px-2 md:px-4 xl:px-6 flex flex-col md:flex-row items-center md:items-start md:justify-start space-y-4 md:space-y-0 md:space-x-4">
+        <div className="w-full md:w-auto md:flex-grow max-w-96">
           <Combobox
             as="div"
             value={selectedDesign}
@@ -210,7 +210,7 @@ const DesignNewPane = ({
               );
             }}
           >
-            <div className="flex flex-wrap justify-center lg:justify-start gap-x-3 gap-y-2 text-sm lg:text-md xl:text-lg mb-1">
+            <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-2 text-sm md:text-md xl:text-lg mb-1">
               <Combobox.Label className="block text-mydarkgrey">
                 {mode === "design"
                   ? "Starter designs"
@@ -218,7 +218,7 @@ const DesignNewPane = ({
                     ? "Transition shapes"
                     : "Re-use existing pane"}
               </Combobox.Label>
-              <span className="text-mydarkgrey/85 flex flex-wrap justify-center lg:justify-start gap-x-2">
+              <span className="text-mydarkgrey/85 flex flex-wrap justify-center md:justify-start gap-x-2">
                 {mode !== "design" && (
                   <button
                     onClick={() => changeMode("design")}
@@ -247,7 +247,7 @@ const DesignNewPane = ({
             </div>
             <div className="relative">
               <Combobox.Input
-                className="w-full rounded-lg border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg lg:text-xl xl:leading-6"
+                className="w-full rounded-lg border-0 bg-white py-1.5 pl-3 pr-10 text-mydarkgrey shadow-sm ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-inset focus:ring-myorange text-lg md:text-xl xl:leading-6"
                 onChange={event => setQuery(event.target.value)}
                 autoComplete="off"
                 displayValue={(design: PaneDesign | null) => design?.name ?? ""}
@@ -259,7 +259,7 @@ const DesignNewPane = ({
                 />
               </Combobox.Button>
               {filteredDesigns.length > 0 && (
-                <Combobox.Options className="z-[999] absolute mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <Combobox.Options className="z-[9999] absolute mt-1 max-h-60 w-full overflow-auto rounded-lg bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   {filteredDesigns.map(design => (
                     <Combobox.Option
                       key={design.id}
@@ -298,7 +298,7 @@ const DesignNewPane = ({
             </div>
           </Combobox>
         </div>
-        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 lg:flex-shrink-0">
+        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:flex-shrink-0">
           <button
             className="bg-myorange text-white rounded-lg p-2 hover:bg-myblack transition-colors flex items-center justify-center"
             onClick={() => cycleDesign("prev")}
@@ -335,22 +335,23 @@ const DesignNewPane = ({
               aria-label="Use this Design"
               title="Use this Design"
             >
-              <span className="hidden lg:inline">ADD TO PAGE</span>
-              <span className="lg:hidden">ADD</span>
+              <span>ADD TO PAGE</span>
             </button>
           )}
         </div>
       </div>
       {selectedDesign && (
         <div
-          className="outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
+          className="mt-12 outline-2 outline-dashed outline-myblue/10 outline-offset-[-2px]
         mt-4 bg-myblue/20 py-4"
           style={{
             backgroundImage:
               "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
           }}
         >
-          <div className={`${tailwindBgColour}`}>
+          <div
+            className={tailwindBgColour ? `bg-${tailwindBgColour}` : `bg-white`}
+          >
             <PreviewPane
               slug={slug}
               isContext={isContext}

@@ -47,7 +47,7 @@ import type {
   MarkdownPaneDatum,
   PaneDesignMarkdown,
   BeliefDatum,
-  BgColourDatum
+  BgColourDatum,
 } from "../../types";
 
 export function initializeStores(

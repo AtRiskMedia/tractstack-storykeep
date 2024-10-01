@@ -113,7 +113,9 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
         <div className="space-y-6">
           <div className="flex flex-col space-y-4 max-w-screen-md">
             <Combobox value={selectedDesign} onChange={setSelectedDesign}>
-              <Combobox.Label className="block text-lg text-mydarkgrey mb-2">
+              <Combobox.Label 
+ htmlFor="page-design-input" 
+                className="block text-lg text-mydarkgrey mb-2">
                 Page Design Starter (you'll get to customize from here...)
               </Combobox.Label>
               <div className="relative">
@@ -122,6 +124,8 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
                   onChange={event => setQuery(event.target.value)}
                   autoComplete="off"
                   displayValue={(design: PageDesign) => design?.name}
+                  id="page-design-input"
+                  name="page-design"
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon

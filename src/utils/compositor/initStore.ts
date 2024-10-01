@@ -47,6 +47,7 @@ import type {
   MarkdownPaneDatum,
   PaneDesignMarkdown,
   BeliefDatum,
+  BgColourDatum
 } from "../../types";
 
 export function initializeStores(
@@ -181,6 +182,31 @@ function initializePaneStores(
 }
 
 function initializePaneFragments(paneId: string, paneDesign: PaneDesign) {
+  let bgColourFragmentId: string | false = false;
+  if (paneDesign.panePayload.bgColour) {
+    let bgColour: string | undefined;
+    if (typeof paneDesign.panePayload.bgColour === "string") {
+      if (/^var\(--[^)]+\)$/.test(paneDesign.panePayload.bgColour)) {
+        bgColour =
+          paneDesign.panePayload.bgColour.match(/var\(--([^)]+)\)/)?.[1];
+      } else {
+        bgColour = paneDesign.panePayload.bgColour;
+      }
+    }
+    if (bgColour) {
+      bgColourFragmentId = ulid();
+      const bgColourFragment: BgColourDatum = {
+        id: bgColourFragmentId,
+        type: "bgColour",
+        bgColour: bgColour,
+        hiddenViewports: "",
+      };
+      paneFragmentBgColour.setKey(
+        bgColourFragmentId,
+        createFieldWithHistory(bgColourFragment)
+      );
+    }
+  }
   const fragmentIds = paneDesign.fragments.map(fragment => {
     const fragmentId = ulid();
 
@@ -226,7 +252,13 @@ function initializePaneFragments(paneId: string, paneDesign: PaneDesign) {
     return fragmentId;
   });
 
-  paneFragmentIds.setKey(paneId, createFieldWithHistory(fragmentIds));
+  paneFragmentIds.setKey(
+    paneId,
+    createFieldWithHistory([
+      ...(bgColourFragmentId ? [bgColourFragmentId] : []),
+      ...fragmentIds,
+    ])
+  );
 }
 
 function initializeStoreErrors(id: string, type: "storyFragment" | "pane") {

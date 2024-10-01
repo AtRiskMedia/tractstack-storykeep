@@ -1,3 +1,5 @@
+import { getBrandColor } from "../custom/brandColours";
+
 type TailwindColorPalette = {
   [colorName: string]: string[];
 };
@@ -39,6 +41,23 @@ export const getTailwindColorOptions = () => {
 };
 
 export const tailwindToHex = (tailwindColor: string): string => {
+  if (tailwindColor.startsWith("brand-")) {
+    const brandColor = getBrandColor(`var(--${tailwindColor})`);
+    if (brandColor) {
+      return brandColor;
+    }
+  }
+  if (tailwindColor in customColors) {
+    const color = customColors[tailwindColor as keyof typeof customColors];
+    if (color.startsWith("var(--")) {
+      const brandColor = getBrandColor(color);
+      if (brandColor) {
+        return brandColor;
+      }
+    }
+    return color;
+  }
+
   if (tailwindColor.startsWith("bg-")) {
     tailwindColor = tailwindColor.slice(3);
   }

@@ -46,7 +46,7 @@ const DesignNewPane = ({
   const [reusePaneDesigns, setReuseActivePaneDesigns] = useState<PaneDesign[]>(
     []
   );
-  const [selectedDesign, setSelectedDesign] = useState<PaneDesign|null>(null);
+  const [selectedDesign, setSelectedDesign] = useState<PaneDesign | null>(null);
   const [, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -105,6 +105,8 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
     themeStore.set(newTheme);
   };
 
+  if (!selectedDesign) return null;
+
   return (
     <div className="w-full h-screen overflow-y bg-myoffwhite">
       <div className="rounded-bl-lg rounded-br-lg px-3.5 py-6 shadow-inner bg-white mx-2">

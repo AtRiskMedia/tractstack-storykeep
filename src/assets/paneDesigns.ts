@@ -440,6 +440,343 @@ export const paneDesigns = (
     ],
   },
   {
+    id: `intro-slim-${variant}`,
+    slug: `intro-slim-${variant}`,
+    name: getComputedValue(
+      {
+        default: "Intro section - slim",
+        center: "Intro section - slim, centered",
+        onecolumn: "Intro section - slim, one column",
+      },
+      variant
+    ),
+    priority: getComputedNumber(
+      {
+        default: 0,
+        center: 1,
+        onecolumn: 2,
+      },
+      variant
+    ),
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n[Try it now!](try) &nbsp; [Learn more](learn)\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                {
+                  mx: ["5", "10"],
+                  my: ["20", "32"],
+                },
+                {
+                  maxW: ["none", "screen-lg", "screen-xl"],
+                  mx: ["auto"],
+                  bgCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "brand-2",
+                        "light-bw": "white",
+                        "light-bold": "brand-2",
+                        dark: "brand-1",
+                        "dark-bw": "black",
+                        "dark-bold": "brand-1",
+                      },
+                      theme
+                    ),
+                  ],
+                },
+                {
+                  px: ["9", "14", "32"],
+                  py: ["20", "32"],
+                  textALIGN: [
+                    getComputedValue(
+                      { default: "left", center: "center", onecolumn: "left" },
+                      variant
+                    ),
+                  ],
+                  textWRAP: [
+                    getComputedValue(
+                      {
+                        default: "pretty",
+                        center: "balance",
+                        onecolumn: "pretty",
+                      },
+                      variant
+                    ),
+                  ],
+                  maxW: [
+                    getComputedValue(
+                      {
+                        default: "none",
+                        center: "none",
+                        onecolumn: "3xl",
+                      },
+                      variant
+                    ),
+                  ],
+                },
+              ],
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["5xl", "6xl", "7xl"],
+                fontFACE: ["action"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "black",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                mt: ["4", "5"],
+              },
+              count: 2,
+              override: {
+                mt: [null, ["8", "10"]],
+              },
+            },
+          },
+          buttons: {
+            try: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-7",
+                          "light-bw": "black",
+                          "light-bold": "brand-3",
+                          dark: "slate-200",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-3",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    fontWEIGHT: ["bold"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-2",
+                          "light-bw": "white",
+                          "light-bold": "brand-2",
+                          dark: "black",
+                          "dark-bw": "black",
+                          "dark-bold": "brand-1",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+            },
+            learn: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "neutral-200",
+                          "light-bw": "brand-8",
+                          "light-bold": "neutral-200",
+                          dark: "neutral-800",
+                          "dark-bw": "gray-800",
+                          "dark-bold": "neutral-800",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
     id: "titleText",
     slug: "titleText",
     name: "Page section with title",

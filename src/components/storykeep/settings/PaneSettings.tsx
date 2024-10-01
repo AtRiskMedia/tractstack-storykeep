@@ -243,7 +243,7 @@ export const PaneSettings = (props: {
           <div className="flex-grow">
             <PaneHeightRatio id={id} />
           </div>
-          <div className="w-fit-contents flex gap-x-16 gap-y-6">
+          <div className="w-fit-contents flex flex-col gap-y-6">
             <div className="flex items-center">
               <Switch
                 checked={$paneHasOverflowHidden[id].current}
@@ -302,38 +302,36 @@ export const PaneSettings = (props: {
               </div>
             </div>
 
-            <div className="flex-grow">
-              <div className="flex items-center">
-                <Switch
-                  checked={$paneIsHiddenPane[id].current}
-                  onChange={newValue =>
-                    updateStoreField("paneIsHiddenPane", newValue)
-                  }
+            <div className="flex items-center">
+              <Switch
+                checked={$paneIsHiddenPane[id].current}
+                onChange={newValue =>
+                  updateStoreField("paneIsHiddenPane", newValue)
+                }
+                className={`${
+                  $paneIsHiddenPane[id].current
+                    ? "bg-myorange"
+                    : "bg-mydarkgrey"
+                } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+              >
+                <span
                   className={`${
                     $paneIsHiddenPane[id].current
-                      ? "bg-myorange"
-                      : "bg-mydarkgrey"
-                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                >
-                  <span
-                    className={`${
-                      $paneIsHiddenPane[id].current
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                  />
-                </Switch>
-                <div className="ml-3">
-                  <div className="text-md text-black font-bold">
-                    {$paneIsHiddenPane[id].current
-                      ? `Hidden or decorative pane`
-                      : `Monitor engagement`}
-                  </div>
-                  <div className="text-md text-mydarkgrey">
-                    {$paneIsHiddenPane[id].current
-                      ? `No pane analytics will be collected`
-                      : `Pane analytics will be collected`}
-                  </div>
+                      ? "translate-x-6"
+                      : "translate-x-1"
+                  } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                />
+              </Switch>
+              <div className="ml-3">
+                <div className="text-md text-black font-bold">
+                  {$paneIsHiddenPane[id].current
+                    ? `Hidden or decorative pane`
+                    : `Monitor engagement`}
+                </div>
+                <div className="text-md text-mydarkgrey">
+                  {$paneIsHiddenPane[id].current
+                    ? `No pane analytics will be collected`
+                    : `Pane analytics will be collected`}
                 </div>
               </div>
             </div>

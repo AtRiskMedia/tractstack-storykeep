@@ -234,10 +234,7 @@ export interface PageDesign {
   paneDesigns: PaneDesign[];
 }
 
-export type Variant =
-  | `default`
-  | `center`
-  | `onecolumn`
+export type Variant = `default` | `center` | `onecolumn`;
 //  | `slim`
 //  | `slimCenter`
 //  | `slimOneColumn`;

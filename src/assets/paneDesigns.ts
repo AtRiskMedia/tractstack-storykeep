@@ -501,7 +501,7 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
-                  mb: ["3.5", "8"],
+                  my: ["3.5", "8"],
                 },
                 {
                   maxW: ["none", "screen-lg", "screen-xl"],
@@ -858,7 +858,8 @@ export const paneDesigns = (
                 },
                 {
                   px: ["9", "14", "32"],
-                  py: ["10"],
+                  pt: ["12"],
+                  pb: ["10"],
                   textALIGN: [
                     getComputedValue(
                       { default: "left", center: "center", onecolumn: "left" },
@@ -1138,7 +1139,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "brand-2",
+            "light-bw": "white",
+            "light-bold": "brand-2",
+            dark: "black",
+            "dark-bw": "black",
+            "dark-bold": "brand-1",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],

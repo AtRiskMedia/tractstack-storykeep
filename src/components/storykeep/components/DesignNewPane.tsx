@@ -38,6 +38,7 @@ const DesignNewPane = ({
   slug: string;
   isContext: boolean;
 }) => {
+  console.log(tailwindBgColour);
   const [mode, setMode] = useState<`design` | `reuse` | `break`>(`design`);
   const [query, setQuery] = useState("");
   const [saving, setSaving] = useState(false);

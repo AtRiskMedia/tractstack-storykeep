@@ -290,7 +290,7 @@ export const StoryFragment = (props: {
                 cancelInsert={cancelInsert}
                 doInsert={doInsert}
                 tailwindBgColour={
-                  tailwindBgColour ? tailwindBgColour : `bg-white`
+                  tailwindBgColour ? `bg-${tailwindBgColour}` : `white`
                 }
                 viewportKey={viewportKey}
                 paneIds={paneIds}
@@ -368,7 +368,7 @@ export const StoryFragment = (props: {
       <div
         id="storykeep-preview"
         className={classNames(
-          tailwindBgColour ? `bg-${tailwindBgColour}` : `bg-white`,
+          tailwindBgColour ? `bg-${tailwindBgColour}` : `white`,
           `overflow-hidden`,
           $viewport.value === `mobile`
             ? `min-w-[500px] max-w-[780px]`

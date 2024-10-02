@@ -46,7 +46,10 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   }, []);
 
   useEffect(() => {
-    const designs = Object.values(pageDesigns($theme));
+    const designs = Object.values(pageDesigns($theme)).filter(
+      design =>
+        (mode === `context` && design.isContext === true) || mode !== `context`
+    );
     setPageDesignList(designs);
     if (selectedDesign) {
       const newSelectedDesign = designs.find(

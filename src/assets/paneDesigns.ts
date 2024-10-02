@@ -1248,7 +1248,7 @@ export const paneDesigns = (
                     theme
                   ),
                 ],
-                textSIZE: ["xl", "3xl"],
+                textSIZE: ["2xl", "3xl"],
                 fontFACE: ["action"],
                 pt: ["9", "14", "32"],
               },

@@ -2025,8 +2025,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks1",
-    slug: "breaks1",
+    id: "breaks-1",
+    slug: "breaks-1",
     name: "Stepped from above",
     priority: 100,
     orientation: `above`,
@@ -2130,8 +2130,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks2",
-    slug: "breaks2",
+    id: "breaks-2",
+    slug: "breaks-2",
     name: "Cut 1 into below",
     priority: 100,
     orientation: `below`,
@@ -2235,8 +2235,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks3",
-    slug: "breaks3",
+    id: "breaks-3",
+    slug: "breaks-3",
     name: "Cut 2 into below",
     priority: 100,
     orientation: `below`,
@@ -2340,8 +2340,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks4",
-    slug: "breaks4",
+    id: "breaks-4",
+    slug: "breaks-4",
     name: "Low Cut 1 into below",
     priority: 100,
     orientation: `below`,
@@ -2445,8 +2445,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks5",
-    slug: "breaks5",
+    id: "breaks-5",
+    slug: "breaks-5",
     name: "Low Cut 2 into below",
     priority: 100,
     orientation: `below`,
@@ -2550,8 +2550,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks6",
-    slug: "breaks6",
+    id: "breaks-6",
+    slug: "breaks-6",
     name: "Jag from above",
     priority: 100,
     orientation: `above`,
@@ -2655,8 +2655,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks7",
-    slug: "breaks7",
+    id: "breaks-7",
+    slug: "breaks-7",
     name: "Burst 1 from above",
     priority: 100,
     orientation: `above`,
@@ -2760,8 +2760,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks8",
-    slug: "breaks8",
+    id: "breaks-8",
+    slug: "breaks-8",
     name: "Burst 2 from above",
     priority: 100,
     orientation: `above`,
@@ -2865,8 +2865,8 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "breaks9",
-    slug: "breaks9",
+    id: "breaks-9",
+    slug: "breaks-9",
     name: "Crooked from above",
     priority: 100,
     orientation: `above`,
@@ -2989,7 +2989,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `default`).find(
         p => p.id === "intro-default"
       ) as PaneDesign,
@@ -3013,7 +3015,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `onecolumn`).find(
         p => p.id === "intro-onecolumn"
       ) as PaneDesign,
@@ -3037,7 +3041,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `center`).find(
         p => p.id === "intro-center"
       ) as PaneDesign,
@@ -3061,7 +3067,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `default`).find(
         p => p.id === "intro-slim-default"
       ) as PaneDesign,
@@ -3085,7 +3093,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `onecolumn`).find(
         p => p.id === "intro-slim-onecolumn"
       ) as PaneDesign,
@@ -3109,7 +3119,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `center`).find(
         p => p.id === "intro-slim-center"
       ) as PaneDesign,
@@ -3133,7 +3145,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `default`).find(
         p => p.id === "intro-slim-bordered-default"
       ) as PaneDesign,
@@ -3157,7 +3171,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `onecolumn`).find(
         p => p.id === "intro-slim-bordered-onecolumn"
       ) as PaneDesign,
@@ -3181,7 +3197,9 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
       paneDesigns(theme, `center`).find(
         p => p.id === "intro-slim-bordered-center"
       ) as PaneDesign,

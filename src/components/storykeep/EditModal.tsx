@@ -6,6 +6,7 @@ import {
   editModeStore,
   paneInit,
   storyFragmentInit,
+  creationStateStore,
 } from "../../store/storykeep";
 import { StoryFragmentSettings } from "./settings/StoryFragmentSettings";
 import { PaneSettings } from "./settings/PaneSettings";
@@ -23,6 +24,8 @@ interface EditModalProps {
 }
 
 export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
+  const $creationState = useStore(creationStateStore);
+  const thisId = id !== `create` ? id : ($creationState.id ?? `error`);
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
   const contentId = `${$editMode?.targetId?.tag}-${$editMode?.targetId?.outerIdx}${typeof $editMode?.targetId?.idx === "number" ? `-${$editMode.targetId.idx}` : ""}-${$editMode?.id}`;
@@ -174,7 +177,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             ) : $editMode?.type === `pane` && $editMode?.mode === `settings` ? (
               <PaneSettings
                 id={$editMode.id}
-                storyFragmentId={id}
+                storyFragmentId={thisId}
                 contentMap={contentMap}
               />
             ) : $editMode?.type === `pane` &&
@@ -182,7 +185,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
               typeof $editMode.targetId !== `undefined` ? (
               <PaneAstStyles
                 key={contentId}
-                id={id}
+                id={thisId}
                 files={files}
                 targetId={$editMode.targetId}
               />

@@ -85,7 +85,11 @@ const contentMap: ContentMap[] = await getContentMap();
 
       <EditModal
         client:only="react"
-        id={storyfragment?.id ?? `error`}
+        id={slug === "create"
+          ? `create`
+          : storyfragment?.id
+            ? storyfragment.id
+            : `error`}
         files={files}
         contentMap={contentMap}
       />

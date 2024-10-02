@@ -501,6 +501,7 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
+                  mb: ["3.5", "8"],
                 },
                 {
                   maxW: ["none", "screen-lg", "screen-xl"],
@@ -1167,7 +1168,6 @@ export const paneDesigns = (
                 },
                 {
                   px: ["9", "14", "32"],
-                  pt: ["6"],
                   pb: ["10"],
                   textALIGN: [
                     getComputedValue(
@@ -3237,5 +3237,4 @@ export const pageDesigns = (
       ) as PaneDesign,
     ],
   },
-
 });

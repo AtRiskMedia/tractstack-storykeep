@@ -196,8 +196,8 @@ const DesignNewPane = ({
 
   return (
     <div id="pane-insert" className="bg-mywhite shadow-inner rounded-lg">
-      <div className="pt-12 pb-6 px-2 md:px-4 xl:px-6 flex flex-col md:flex-row items-center md:items-start md:justify-start space-y-4 md:space-y-0 md:space-x-4">
-        <div className="w-full md:w-auto md:flex-grow max-w-96">
+      <div className="p-2 md:px-4 xl:px-6 flex flex-col items-center space-y-4">
+        <div className="w-full md:w-auto md:flex-grow max-w-screen-3xl">
           <Combobox
             as="div"
             value={selectedDesign}
@@ -210,7 +210,7 @@ const DesignNewPane = ({
               );
             }}
           >
-            <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-2 text-sm md:text-md xl:text-lg mb-1">
+            <div className="flex flex-wrap justify-center md:justify-start gap-x-3 gap-y-0.5 text-sm md:text-md xl:text-lg mb-1">
               <Combobox.Label className="block text-mydarkgrey">
                 {mode === "design"
                   ? "Starter designs"

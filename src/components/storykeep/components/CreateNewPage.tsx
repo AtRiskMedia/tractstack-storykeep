@@ -48,7 +48,8 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   useEffect(() => {
     const designs = Object.values(pageDesigns($theme)).filter(
       design =>
-        (mode === `context` && design.isContext === true) || mode !== `context`
+        (mode === `context` && design.isContext === true) ||
+        (mode !== `context` && design.isContext === false)
     );
     setPageDesignList(designs);
     if (selectedDesign) {
@@ -70,12 +71,12 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
       ? pageDesignList.filter(
           design =>
             (mode === `context` && design.isContext === true) ||
-            mode !== `context`
+            (mode !== `context` && design.isContext === false)
         )
       : pageDesignList.filter(
           design =>
             ((mode === `context` && design.isContext === true) ||
-              mode !== `context`) &&
+              (mode !== `context` && design.isContext === false)) &&
             design.name.toLowerCase().includes(query.toLowerCase())
         );
 

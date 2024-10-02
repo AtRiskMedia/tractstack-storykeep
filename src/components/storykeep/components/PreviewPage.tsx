@@ -22,20 +22,16 @@ const PreviewPage = ({
     return <div>Error: Invalid or empty page design</div>;
   }
 
-  return (
-    <div className="space-y-4">
-      {design.paneDesigns.map((paneDesign, index) => (
-        <div key={paneDesign.id || index} className="overflow-hidden">
-          <PreviewPane
-            design={paneDesign}
-            viewportKey={viewportKey}
-            slug={slug}
-            isContext={isContext}
-          />
-        </div>
-      ))}
+  return design.paneDesigns.map((paneDesign, index) => (
+    <div key={paneDesign.id || index} className="overflow-hidden">
+      <PreviewPane
+        design={paneDesign}
+        viewportKey={viewportKey}
+        slug={slug}
+        isContext={isContext}
+      />
     </div>
-  );
+  ));
 };
 
 export default PreviewPage;

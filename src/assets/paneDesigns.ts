@@ -148,7 +148,8 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
-                  my: ["20", "32"],
+                  mt: ["20", "32"],
+                  mb: ["16", "20"],
                 },
                 {
                   maxW: ["none", "screen-lg", "screen-xl"],
@@ -504,19 +505,6 @@ export const paneDesigns = (
                 {
                   maxW: ["none", "screen-lg", "screen-xl"],
                   mx: ["auto"],
-                  bgCOLOR: [
-                    getComputedColor(
-                      {
-                        light: "brand-2",
-                        "light-bw": "white",
-                        "light-bold": "brand-2",
-                        dark: "brand-1",
-                        "dark-bw": "black",
-                        "dark-bold": "brand-1",
-                      },
-                      theme
-                    ),
-                  ],
                 },
                 {
                   px: ["9", "14", "32"],
@@ -1179,7 +1167,8 @@ export const paneDesigns = (
                 },
                 {
                   px: ["9", "14", "32"],
-                  py: ["10"],
+                  pt: ["6"],
+                  pb: ["10"],
                   textALIGN: [
                     getComputedValue(
                       { default: "left", center: "center", onecolumn: "left" },
@@ -2036,7 +2025,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2054,7 +2055,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "steppedwide",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2062,7 +2075,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "stepped",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2070,7 +2095,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "stepped",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2093,7 +2130,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2111,7 +2160,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "cutwide1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2119,7 +2180,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "cut1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2127,7 +2200,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "cut1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2150,7 +2235,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2168,7 +2265,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "cutwide2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2176,7 +2285,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "cut2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2184,7 +2305,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "cut2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2207,7 +2340,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2225,7 +2370,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "lowcutwide1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2233,7 +2390,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "lowcut1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2241,7 +2410,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "lowcut1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2264,7 +2445,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2282,7 +2475,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "lowcutwide2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2290,7 +2495,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "lowcut2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2298,7 +2515,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "lowcut2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2321,7 +2550,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2339,7 +2580,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "jagwide",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2347,7 +2600,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "jag",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2355,7 +2620,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "jag",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2378,7 +2655,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2396,7 +2685,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "burstwide1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2404,7 +2705,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "burst1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2412,7 +2725,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "burst1",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2435,7 +2760,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2453,7 +2790,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "burstwide2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2461,7 +2810,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "burst2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2469,7 +2830,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "burst2",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2492,7 +2865,19 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
@@ -2510,7 +2895,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "crookedwide",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2518,7 +2915,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "crooked",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2526,7 +2935,19 @@ export const paneDesigns = (
               collection: "kCz",
               image: "crooked",
               mode: "break",
-              svgFill: "#10120d",
+              svgFill: tailwindToHex(
+                getComputedColor(
+                  {
+                    light: "neutral-200",
+                    "light-bw": "gray-200",
+                    "light-bold": "neutral-200",
+                    dark: "neutral-800",
+                    "dark-bw": "gray-800",
+                    "dark-bold": "neutral-800",
+                  },
+                  theme
+                )
+              ),
               filetype: "svg",
               objectFit: "cover",
             },
@@ -2545,7 +2966,7 @@ export const pageDesigns = (
     isContext: false,
     tailwindBgColour: getComputedColor(
       {
-        light: "brand-3",
+        light: "brand-2",
         "light-bw": "brand-2",
         "light-bold": "white",
         dark: "brand-1",
@@ -2555,6 +2976,7 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
       paneDesigns(theme, `default`).find(
         p => p.id === "intro-default"
       ) as PaneDesign,
@@ -2578,6 +3000,7 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
       paneDesigns(theme, `onecolumn`).find(
         p => p.id === "intro-onecolumn"
       ) as PaneDesign,
@@ -2601,6 +3024,7 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
       paneDesigns(theme, `center`).find(
         p => p.id === "intro-center"
       ) as PaneDesign,
@@ -2624,6 +3048,7 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
       paneDesigns(theme, `default`).find(
         p => p.id === "intro-slim-default"
       ) as PaneDesign,
@@ -2647,11 +3072,12 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
       paneDesigns(theme, `onecolumn`).find(
         p => p.id === "intro-slim-onecolumn"
       ) as PaneDesign,
-      paneDesigns(theme, `default`).find(
-        p => p.id === "paragraph-default"
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "paragraph-onecolumn"
       ) as PaneDesign,
     ],
   },
@@ -2670,11 +3096,84 @@ export const pageDesigns = (
       theme
     ),
     paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
       paneDesigns(theme, `center`).find(
         p => p.id === "intro-slim-center"
       ) as PaneDesign,
+      paneDesigns(theme, `center`).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    ],
+  },
+  basicSlimBordered: {
+    name: "Basic Page - Slim, Bordered",
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "intro-slim-bordered-default"
+      ) as PaneDesign,
       paneDesigns(theme, `default`).find(
         p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    ],
+  },
+  basicSlimOneColumnBordered: {
+    name: "Basic Page - Slim, One Column, Bordered",
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "intro-slim-bordered-onecolumn"
+      ) as PaneDesign,
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "paragraph-onecolumn"
+      ) as PaneDesign,
+    ],
+  },
+  basicSlimCenteredBordered: {
+    name: "Basic Page - Slim, Centered, Bordered",
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(p => p.id === "breaks7") as PaneDesign,
+      paneDesigns(theme, `center`).find(
+        p => p.id === "intro-slim-bordered-center"
+      ) as PaneDesign,
+      paneDesigns(theme, `center`).find(
+        p => p.id === "paragraph-center"
       ) as PaneDesign,
     ],
   },

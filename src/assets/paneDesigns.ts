@@ -1159,7 +1159,7 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
-                  mb: ["5", "10"],
+                  mb: ["16", "20"],
                 },
                 {
                   maxW: ["none", "screen-lg", "screen-xl"],
@@ -3197,4 +3197,45 @@ export const pageDesigns = (
       ) as PaneDesign,
     ],
   },
+  basicContextOneColumn: {
+    name: "Basic Context Page - Single column",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `onecolumn`).find(
+        p => p.id === "paragraph-onecolumn"
+      ) as PaneDesign,
+    ],
+  },
+  basicContextCentered: {
+    name: "Basic Context Page - Centered",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `center`).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    ],
+  },
+
 });

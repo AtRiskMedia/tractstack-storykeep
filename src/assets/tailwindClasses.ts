@@ -537,6 +537,22 @@ export const tailwindClasses: TailwindClasses = {
     prefix: "leading-",
     priority: 0,
   },
+  minW: {
+    values: ["0", "full", "min", "max", "fit", "[50%]"],
+    group: "Layout",
+    title: "Min Width",
+    className: "min-w",
+    prefix: "min-w-",
+    priority: 0,
+  },
+  minH: {
+    values: ["0", "full", "screen", "min", "max", "fit"],
+    group: "Layout",
+    title: "Min Height",
+    className: "min-h",
+    prefix: "min-h-",
+    priority: 0,
+  },
   letterSPACING: {
     values: ["tighter", "tight", "normal", "wide", "wider", "widest"],
     group: "Typography",

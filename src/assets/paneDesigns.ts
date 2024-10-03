@@ -12,8 +12,8 @@ import type {
 
 type TailwindColor = (typeof colorValues)[number];
 type ThemeColorMap = { [key in Theme]: TailwindColor };
-type ComputedValueMap = { [key in Variant]: string };
-type ComputedValueNumericMap = { [key in Variant]: number };
+type ComputedValueMap = { [key: string]: string };
+type ComputedValueNumericMap = { [key: string]: number };
 
 const getComputedColor = (
   colorMap: ThemeColorMap,
@@ -21,6 +21,7 @@ const getComputedColor = (
 ): TailwindColor => {
   return colorMap[theme] || "brand-1";
 };
+// whitelist tailwind min-w-[50%]
 
 export const getComputedValue = (
   valueMap: ComputedValueMap,
@@ -1173,6 +1174,7 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
+                  mt: ["8", "10"],
                   mb: ["16", "20"],
                 },
                 {
@@ -1300,17 +1302,16 @@ export const paneDesigns = (
     ],
   },
   {
-    id: "aside-with-image",
-    slug: "aside-with-image",
-    name: "Hero with image",
-    priority: getComputedNumber(
+    id: `intro-image-bordered-${variant}`,
+    slug: `intro-image-bordered-${variant}`,
+    name: getComputedValue(
       {
-        default: 210,
-        onecolumn: 211,
-        center: 212,
+        square: "Intro section, square image on right, bordered",
+        "16x9": "Intro section, 16x9 image on right, bordered",
       },
       variant
     ),
+    priority: 20,
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -1319,93 +1320,26 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: false,
-      codeHook: null,
-    },
-    files: [],
-    fragments: [
-      {
-        type: "markdown",
-        markdownBody: `1. Catchy and impactful title\n2. sub heading\n\n* ![Descriptive title](filename)\n`,
-        imageMaskShapeDesktop: "none",
-        imageMaskShapeTablet: "none",
-        imageMaskShapeMobile: "none",
-        textShapeOutsideDesktop: "none",
-        textShapeOutsideTablet: "none",
-        textShapeOutsideMobile: "none",
-        isModal: false,
-        hiddenViewports: "none",
-        optionsPayload: {
-          classNamesPayload: {
-            parent: {
-              classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
-                {
-                  alignITEMS: ["center"],
-                  display: ["flex"],
-                  flexWRAP: ["wrap", "nowrap"],
-                  gapX: ["12"],
-                  gapY: ["4"],
-                },
-              ],
-            },
-            img: {
-              classes: {
-                aspectRATIO: ["square"],
-                bgSIZE: ["cover"],
-                rounded: ["lg", "xl"],
-                my: [3, 4],
-              },
-            },
-            li: {
-              classes: {
-                fontFACE: ["action"],
-                fontWEIGHT: ["normal"],
-                textCOLOR: ["mydarkgrey"],
-                textSIZE: ["xl", "2xl"],
-                my: [6, 8],
-              },
-              count: 3,
-              override: {
-                fontWEIGHT: [["bold"]],
-                textCOLOR: [["myblue"]],
-                textSIZE: [["7xl", "6xl"]],
-              },
-            },
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
           },
-        } as OptionsPayloadDatum,
-      },
-    ],
-  },
-  {
-    id: "aside-with-image-before",
-    slug: "aside-with-image-before",
-    name: "Hero with image before",
-    priority: getComputedNumber(
-      {
-        default: 210,
-        onecolumn: 211,
-        center: 212,
-      },
-      variant
-    ),
-    type: `starter`,
-    panePayload: {
-      heightOffsetDesktop: 0,
-      heightOffsetTablet: 0,
-      heightOffsetMobile: 0,
-      heightRatioDesktop: `0.00`,
-      heightRatioTablet: `0.00`,
-      heightRatioMobile: `0.00`,
-      bgColour: false,
+          theme
+        )
+      ),
       codeHook: null,
     },
     files: [],
     fragments: [
       {
         type: "markdown",
-        markdownBody: `* ![Descriptive title](filename)\n\n1. Catchy and impactful title\n2. sub heading\n`,
+        markdownBody: `1. add a catchy title here\n2. your story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n3. [Try it now!](try) &nbsp; [Learn more](learn)\n\n* ![Descriptive title](filename)\n`,
         imageMaskShapeDesktop: "none",
         imageMaskShapeTablet: "none",
         imageMaskShapeMobile: "none",
@@ -1418,185 +1352,348 @@ export const paneDesigns = (
           classNamesPayload: {
             parent: {
               classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
                 {
-                  alignITEMS: ["center"],
-                  display: ["flex"],
-                  flexWRAP: ["wrap", "nowrap"],
-                  gapX: ["12"],
-                  gapY: ["4"],
+                  mx: ["5", "10"],
+                  mt: ["16"],
+                  mb: ["16", "20"],
                 },
-              ],
-            },
-            img: {
-              classes: {
-                aspectRATIO: ["square"],
-                bgSIZE: ["cover"],
-                rounded: ["lg", "xl"],
-                my: [3, 4],
-              },
-            },
-            li: {
-              classes: {
-                fontFACE: ["action"],
-                fontWEIGHT: ["normal"],
-                textCOLOR: ["mydarkgrey"],
-                textSIZE: ["xl", "2xl"],
-                my: [6, 8],
-              },
-              count: 3,
-              override: {
-                fontWEIGHT: [undefined, ["bold"]],
-                textCOLOR: [undefined, ["myblue"]],
-                textSIZE: [undefined, ["7xl", "6xl"]],
-              },
-            },
-          },
-        } as OptionsPayloadDatum,
-      },
-    ],
-  },
-  {
-    id: "aside-with-image-primary",
-    slug: "aside-with-image-primary",
-    name: "Hero image with key points",
-    priority: getComputedNumber(
-      {
-        default: 210,
-        onecolumn: 211,
-        center: 212,
-      },
-      variant
-    ),
-    type: `starter`,
-    panePayload: {
-      heightOffsetDesktop: 0,
-      heightOffsetTablet: 0,
-      heightOffsetMobile: 0,
-      heightRatioDesktop: `0.00`,
-      heightRatioTablet: `0.00`,
-      heightRatioMobile: `0.00`,
-      bgColour: false,
-      codeHook: null,
-    },
-    files: [],
-    fragments: [
-      {
-        type: "markdown",
-        markdownBody: `* ![Descriptive title](filename)\n\n1. this is a key point, number one\n2. this is a key point, number two\n3. this is a key point, number three\n`,
-        imageMaskShapeDesktop: "none",
-        imageMaskShapeTablet: "none",
-        imageMaskShapeMobile: "none",
-        textShapeOutsideDesktop: "none",
-        textShapeOutsideTablet: "none",
-        textShapeOutsideMobile: "none",
-        isModal: false,
-        hiddenViewports: "none",
-        optionsPayload: {
-          classNamesPayload: {
-            parent: {
-              classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
                 {
-                  alignITEMS: ["center"],
-                  justifyITEMS: ["center"],
-                  display: ["flex"],
-                  flexWRAP: ["wrap", "nowrap"],
-                  gapX: ["12"],
-                  gapY: ["4"],
+                  mx: ["auto"],
+                  borderWIDTH: ["2"],
+                  rounded: ["md", "lg"],
+                  bgCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "brand-2",
+                        "light-bw": "white",
+                        "light-bold": "brand-2",
+                        dark: "brand-1",
+                        "dark-bw": "black",
+                        "dark-bold": "brand-1",
+                      },
+                      theme
+                    ),
+                  ],
+                  borderCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "neutral-200",
+                        "light-bw": "gray-200",
+                        "light-bold": "brand-6",
+                        dark: "neutral-800",
+                        "dark-bw": "gray-800",
+                        "dark-bold": "neutral-800",
+                      },
+                      theme
+                    ),
+                  ],
                 },
-              ],
-            },
-            img: {
-              classes: {
-                aspectRATIO: ["square"],
-                bgSIZE: ["cover"],
-                rounded: ["lg", "xl"],
-                maxW: ["xs", "sm", "md"],
-                my: [3, 4],
-              },
-            },
-            li: {
-              classes: {
-                fontFACE: ["action"],
-                textCOLOR: ["mydarkgrey"],
-                textSIZE: ["xl", "2xl"],
-                my: [6, 8],
-              },
-            },
-          },
-        } as OptionsPayloadDatum,
-      },
-    ],
-  },
-  {
-    id: "aside-with-large-text",
-    slug: "aside-with-large-text",
-    name: "Large text with aside points",
-    priority: getComputedNumber(
-      {
-        default: 210,
-        onecolumn: 211,
-        center: 212,
-      },
-      variant
-    ),
-    type: `starter`,
-    panePayload: {
-      heightOffsetDesktop: 0,
-      heightOffsetTablet: 0,
-      heightOffsetMobile: 0,
-      heightRatioDesktop: `0.00`,
-      heightRatioTablet: `0.00`,
-      heightRatioMobile: `0.00`,
-      bgColour: false,
-      codeHook: null,
-    },
-    files: [],
-    fragments: [
-      {
-        type: "markdown",
-        markdownBody: `## Catchy and impactful title goes here\n\n1. this is a key point, number one\n2. this is a key point, number two\n3. this is a key point, number three\n`,
-        imageMaskShapeDesktop: "none",
-        imageMaskShapeTablet: "none",
-        imageMaskShapeMobile: "none",
-        textShapeOutsideDesktop: "none",
-        textShapeOutsideTablet: "none",
-        textShapeOutsideMobile: "none",
-        isModal: false,
-        hiddenViewports: "none",
-        optionsPayload: {
-          classNamesPayload: {
-            parent: {
-              classes: [
-                { my: [12, 16] },
-                { maxW: ["2xl", "3xl"], mx: ["auto"], px: [8] },
                 {
-                  alignITEMS: ["center"],
-                  justifyITEMS: ["center"],
+                  px: ["9", "14", "32"],
+                  py: ["20", "32"],
+                  textALIGN: ["left"],
+                  textWRAP: ["pretty"],
                   display: ["flex"],
-                  flexWRAP: ["wrap", "nowrap"],
-                  gapX: ["12"],
+                  flexWRAP: ["wrap", "wrap", "nowrap"],
+                  gapX: ["20"],
                   gapY: ["4"],
+                  alignITEMS: ["center"],
+                  justifyCONTENT: ["between"],
                 },
               ],
             },
             h2: {
               classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["5xl", "6xl", "7xl"],
                 fontFACE: ["action"],
-                textCOLOR: ["myblue"],
-                textSIZE: ["7xl", "6xl"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                mt: ["4", "5"],
+              },
+            },
+            img: {
+              classes: {
+                w: ["auto"],
+                h: ["auto"],
+                objectFIT: ["cover"],
+                rounded: ["lg", "xl"],
+                minW: ["[50%]"],
+                aspect: [
+                  getComputedValue(
+                    {
+                      square: "square",
+                      "16x9": "16x9",
+                    },
+                    variant
+                  ),
+                ],
+                mt: ["6", "6", "0"],
+              },
+            },
+            ol: {
+              classes: {
+                maxW: ["screen-md"],
+                minW: ["96"],
               },
             },
             li: {
               classes: {
-                fontFACE: ["action"],
-                textCOLOR: ["mydarkgrey"],
-                textSIZE: ["xl", "2xl"],
-                my: [6, 8],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                fontWEIGHT: ["normal"],
+                mt: ["0"],
+                maxW: ["96"],
+                flex: ["none"],
+                w: ["fit-contents"],
               },
+              count: 4,
+              override: {
+                mt: [["4", "5"], ["4", "5"], ["8", "10"], null],
+                maxW: [null, null, null, ["none"]],
+                flex: [null, null, null, ["1"]],
+                w: [null, null, null, ["full"]],
+                textSIZE: [["5xl", "6xl", "7xl"], null, null, null],
+                lineHEIGHT: [["tight"], null, null, null],
+                fontWEIGHT: [["bold"], null, null, null],
+                textCOLOR: [
+                  [
+                    getComputedColor(
+                      {
+                        light: "brand-5",
+                        "light-bw": "brand-1",
+                        "light-bold": "brand-5",
+                        dark: "brand-3",
+                        "dark-bw": "brand-8",
+                        "dark-bold": "brand-3",
+                      },
+                      theme
+                    ),
+                  ],
+                  null,
+                  null,
+                  null,
+                ],
+              },
+            },
+          },
+          buttons: {
+            try: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-7",
+                          "light-bw": "black",
+                          "light-bold": "brand-3",
+                          dark: "slate-200",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-3",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    fontWEIGHT: ["bold"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-2",
+                          "light-bw": "white",
+                          "light-bold": "brand-2",
+                          dark: "black",
+                          "dark-bw": "black",
+                          "dark-bold": "brand-1",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+            },
+            learn: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "neutral-200",
+                          "light-bw": "brand-8",
+                          "light-bold": "neutral-200",
+                          dark: "neutral-800",
+                          "dark-bw": "gray-800",
+                          "dark-bold": "neutral-800",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
             },
           },
         } as OptionsPayloadDatum,
@@ -3265,6 +3362,46 @@ export const pageDesigns = (
     paneDesigns: [
       paneDesigns(theme, `center`).find(
         p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    ],
+  },
+  image16x9: {
+    name: "image16x9 test",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `16x9`).find(
+        p => p.id === "intro-image-bordered-16x9"
+      ) as PaneDesign,
+    ],
+  },
+  imageSquare: {
+    name: "imageSquare test",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `square`).find(
+        p => p.id === "intro-image-bordered-square"
       ) as PaneDesign,
     ],
   },

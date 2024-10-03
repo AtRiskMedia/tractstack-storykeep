@@ -391,7 +391,8 @@ export const StoryFragment = (props: {
   );
 
   if (!isClient || !thisPaneIds) return <div>Loading...</div>;
-  else if (untitled) return null;
+  else if (untitled)
+    return <div className="p-6">Please enter a title to get started...</div>;
 
   return (
     <>

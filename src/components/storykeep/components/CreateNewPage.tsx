@@ -10,11 +10,16 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import PreviewPage from "./PreviewPage";
-import { creationStateStore, themeStore } from "../../../store/storykeep";
+import {
+  viewportKeyStore,
+  creationStateStore,
+  themeStore,
+} from "../../../store/storykeep";
+import { debounce } from "../../../utils/helpers";
 import { initializeStores } from "../../../utils/compositor/initStore";
 import { pageDesigns } from "../../../assets/paneDesigns";
 import ThemeSelector from "./ThemeSelector";
-import type { ViewportAuto, PageDesign, Theme } from "../../../types";
+import type { ViewportKey, PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
@@ -26,23 +31,35 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
   const [query, setQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const $theme = useStore(themeStore);
+  const $viewportKey = useStore(viewportKeyStore);
+  const viewportKey = $viewportKey.value;
   const [pageDesignList, setPageDesignList] = useState<PageDesign[]>([]);
-  const [viewportKey, setViewportKey] = useState<ViewportAuto>("desktop");
 
   useEffect(() => {
     const handleResize = () => {
-      const width = window.innerWidth;
-      if (width <= 800) {
-        setViewportKey("mobile");
-      } else if (width >= 1368) {
-        setViewportKey("desktop");
+      const scrollBarOffset =
+        window.innerWidth - document.documentElement.clientWidth;
+      const previewWidth = window.innerWidth;
+      const adjustedWidth =
+        previewWidth +
+        scrollBarOffset *
+          (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
+      let newViewportKey: ViewportKey;
+      if (adjustedWidth <= 800) {
+        newViewportKey = `mobile`;
+      } else if (adjustedWidth <= 1367) {
+        newViewportKey = `tablet`;
       } else {
-        setViewportKey("tablet");
+        newViewportKey = `desktop`;
       }
+      viewportKeyStore.set({ value: newViewportKey });
     };
+    const debouncedHandleResize = debounce(handleResize, 250);
     handleResize();
-    window.addEventListener("create-resize", handleResize);
-    return () => window.removeEventListener("create-resize", handleResize);
+    window.addEventListener("resize", debouncedHandleResize);
+    return () => {
+      window.removeEventListener("resize", debouncedHandleResize);
+    };
   }, []);
 
   useEffect(() => {

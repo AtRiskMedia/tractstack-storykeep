@@ -98,109 +98,111 @@ const impressions = user.isOpenDemo
       <div class="py-1.5 bg-white px-3.5 flex gap-y-12 flex-col">
         <PageViewStats client:load />
         <ContentSearchWrapper contentMap={filterPayload} client:load />
-        <div class="flex gap-6">
-          <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
-            <div class="px-3.5 py-1.5">
-              <h2
-                id="create-new-page-heading"
-                class="block text-lg leading-6 text-black mb-2"
-              >
-                Create new page
-              </h2>
-              <div
-                class="mt-1 flex flex-wrap gap-2"
-                role="group"
-                aria-labelledby="create-new-page-heading"
-              >
-                <a
-                  href="/storykeep/create/storyfragment"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                  title="Add an interactive page to your website"
-                >
-                  StoryFragment
-                </a>
-                <a
-                  href="/storykeep/create/context"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                  title="Add a short 'for-further-reading' page"
-                >
-                  Context Page
-                </a>
-              </div>
-            </div>
-          </div>
+        <div class="flex flex-col xs:flex-row gap-6">
+  <div class="rounded-md bg-mywhite shadow-inner w-full xs:w-1/2 py-7">
+    <div class="px-3.5 py-1.5">
+      <h2
+        id="create-new-page-heading"
+        class="block text-xl leading-6 text-black mb-4"
+      >
+        Create new page
+      </h2>
+      <div
+        class="mt-1 flex flex-col gap-4"
+        role="group"
+        aria-labelledby="create-new-page-heading"
+      >
+        <a
+          href="/storykeep/create/storyfragment"
+          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+          role="button"
+          title="Add an interactive page to your website"
+        >
+          StoryFragment
+        </a>
+        <a
+          href="/storykeep/create/context"
+          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+          role="button"
+          title="Add a short 'for-further-reading' page"
+        >
+          Context Page
+        </a>
+      </div>
+    </div>
+  </div>
 
-          <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
-            <div class="px-3.5 py-1.5">
-              <h2
-                id="create-new-page-heading-2"
-                class="block text-lg leading-6 text-black mb-2"
-              >
-                Create...
-              </h2>
-              <div
-                class="mt-1 flex flex-wrap gap-2"
-                role="group"
-                aria-labelledby="create-new-page-heading-2"
-              >
-                <a
-                  href="/storykeep/manage/resource/create"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Resource
-                </a>
-                <a
-                  href="/storykeep/manage/menu/create"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Menu
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-md bg-mywhite shadow-inner w-fit py-3.5">
-            <div class="px-3.5 py-1.5">
-              <h2
-                id="create-new-page-heading-3"
-                class="block text-lg leading-6 text-black mb-2"
-              >
-                Manage / Browse
-              </h2>
-              <div
-                class="mt-1 flex flex-wrap gap-2"
-                role="group"
-                aria-labelledby="create-new-page-heading-3"
-              >
-                <a
-                  href="/storykeep/manage/image"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Images
-                </a>
-                <a
-                  href="/storykeep/manage/resources"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Resources
-                </a>
-                <a
-                  href="/storykeep/manage/menu"
-                  class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                >
-                  Menus
-                </a>
-              </div>
-            </div>
-          </div>
+  <div class="flex flex-col gap-6 w-full xs:w-1/2">
+    <div class="rounded-md bg-mywhite shadow-inner w-full py-3.5">
+      <div class="px-3.5 py-1.5">
+        <h2
+          id="create-new-page-heading-2"
+          class="block text-lg leading-6 text-black mb-2"
+        >
+          Create...
+        </h2>
+        <div
+          class="mt-1 flex flex-wrap gap-2"
+          role="group"
+          aria-labelledby="create-new-page-heading-2"
+        >
+          <a
+            href="/storykeep/manage/resource/create"
+            class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+            role="button"
+          >
+            Resource
+          </a>
+          <a
+            href="/storykeep/manage/menu/create"
+            class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+            role="button"
+          >
+            Menu
+          </a>
         </div>
+      </div>
+    </div>
+
+    <div class="rounded-md bg-mywhite shadow-inner w-full py-3.5">
+      <div class="px-3.5 py-1.5">
+        <h2
+          id="create-new-page-heading-3"
+          class="block text-lg leading-6 text-black mb-2"
+        >
+          Manage / Browse
+        </h2>
+        <div
+          class="mt-1 flex flex-wrap gap-2"
+          role="group"
+          aria-labelledby="create-new-page-heading-3"
+        >
+          <a
+            href="/storykeep/manage/image"
+            class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+            role="button"
+          >
+            Images
+          </a>
+          <a
+            href="/storykeep/manage/resources"
+            class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+            role="button"
+          >
+            Resources
+          </a>
+          <a
+            href="/storykeep/manage/menu"
+            class="flex items-center px-3 py-1.5 rounded-md text-sm bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+            role="button"
+          >
+            Menus
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
         <DashboardActivity client:only="react" />
         <WhatsHot contentMap={payload} client:load />
       </div>

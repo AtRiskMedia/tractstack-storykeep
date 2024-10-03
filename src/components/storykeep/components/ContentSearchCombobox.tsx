@@ -49,7 +49,7 @@ export function ContentSearchCombobox({
         htmlFor="quick-find-input"
         className="block text-lg leading-6 text-black"
       >
-        Quick find
+        Site webpages look-up
       </Combobox.Label>
       <div className="relative mt-1">
         <Combobox.Input

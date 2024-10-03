@@ -98,9 +98,10 @@ export function ContentSearchWrapper({
         </div>
       </div>
       {selectedItem && (
-        <div className="w-fit mt-4 rounded-lg bg-slate-50 px-4 py-6 space-y-2">
+        <div className="mt-6 max-w-xl rounded-md bg-myoffwhite/20 shadow-inner w-full py-3.5 px-4">
           <h3 className="text-lg mr-10">
-            {selectedItem.type}: <strong>{selectedItem.title}</strong>
+            {selectedItem.type}:{" "}
+            <strong className="truncate">{selectedItem.title}</strong>
           </h3>
           <p className="pb-2 text-mydarkgrey">
             slug: <em>{selectedItem.slug}</em>

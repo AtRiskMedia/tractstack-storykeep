@@ -148,7 +148,7 @@ export const paneDesigns = (
               classes: [
                 {
                   mx: ["5", "10"],
-                  mt: ["20", "32"],
+                  mt: ["16"],
                   mb: ["16", "20"],
                 },
                 {
@@ -1229,7 +1229,7 @@ export const paneDesigns = (
                 ],
                 textSIZE: ["4xl", "5xl", "6xl"],
                 fontFACE: ["action"],
-                pt: ["9", "14", "32"],
+                pt: ["9", "14", "20"],
               },
             },
             h3: {
@@ -1250,7 +1250,7 @@ export const paneDesigns = (
                 ],
                 textSIZE: ["2xl", "3xl"],
                 fontFACE: ["action"],
-                pt: ["9", "14", "32"],
+                pt: ["9", "14", "20"],
               },
             },
             h4: {
@@ -1270,7 +1270,7 @@ export const paneDesigns = (
                 ],
                 textSIZE: ["xl", "2xl"],
                 fontFACE: ["action"],
-                pt: ["9", "14", "32"],
+                pt: ["9", "14", "20"],
               },
             },
             p: {

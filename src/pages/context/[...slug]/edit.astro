@@ -88,8 +88,8 @@ const contentMap: ContentMap[] = await getContentMap();
         client:only="react"
         id={slug === "create"
           ? `create`
-          : storyfragment?.id
-            ? storyfragment.id
+          : contextPane?.id
+            ? contextPane.id
             : `error`}
         files={files}
         contentMap={contentMap}

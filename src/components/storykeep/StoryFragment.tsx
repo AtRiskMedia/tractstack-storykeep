@@ -4,9 +4,11 @@ import { navigate } from "astro:transitions/client";
 import {
   storyFragmentInit,
   storyFragmentTitle,
+  storyFragmentSlug,
   storyFragmentPaneIds,
   storyFragmentTailwindBgColour,
   paneMarkdownFragmentId,
+  paneSlug,
   lastInteractedPaneStore,
   lastInteractedTypeStore,
   visiblePanesStore,
@@ -25,22 +27,44 @@ import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
 import PaneWrapper from "./PaneWrapper";
 import DesignNewPane from "./components/DesignNewPane";
 import { classNames, handleEditorResize, debounce } from "../../utils/helpers";
-import type { ViewportKey } from "../../types";
+import type { ViewportKey, ContentMap } from "../../types";
+
+function getSubstring(str: string) {
+  const dashIndex = str.indexOf("-");
+  return dashIndex !== -1 ? str.substring(0, dashIndex) : null;
+}
+
+function findUniqueSuffix(str: string, arr: string[]): string {
+  if (!arr.includes(str)) {
+    return str;
+  }
+  let suffix = 1;
+  while (arr.includes(`${str}-${suffix}`)) {
+    suffix++;
+  }
+  return `${str}-${suffix}`;
+}
 
 export const StoryFragment = (props: {
   id: string | null;
   slug: string;
   isContext: boolean;
+  contentMap: ContentMap[];
 }) => {
-  const { id, slug, isContext } = props;
+  const { id, slug, isContext, contentMap } = props;
   const [isClient, setIsClient] = useState(false);
   const $creationState = useStore(creationStateStore);
   const thisId = id ?? $creationState.id ?? `error`;
-  const { handleUndo } = useStoryKeepUtils(thisId, []);
+  const { handleUndo, updateStoreField } = useStoryKeepUtils(thisId, []);
   const $showAnalytics = useStore(showAnalytics);
   const $storedAnalytics = useStore(storedAnalytics);
   const $storyFragmentInit = useStore(storyFragmentInit, { keys: [thisId] });
   const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [thisId] });
+  const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [thisId] });
+  const [untitled, setUntitled] = useState<boolean>(
+    $storyFragmentTitle[thisId]?.current === `` ||
+      [`create`, ``].includes($storyFragmentSlug[thisId]?.current ?? ``)
+  );
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
     keys: [thisId],
   });
@@ -49,6 +73,7 @@ export const StoryFragment = (props: {
     { keys: [thisId] }
   );
   const paneIds = $storyFragmentPaneIds[thisId]?.current;
+  const $paneSlug = useStore(paneSlug, { keys: paneIds });
   const [thisPaneIds, setThisPaneIds] = useState<string[] | null>(null);
   const [shouldScroll, setShouldScroll] = useState<number | null>(null);
   const tailwindBgColour = $storyFragmentTailwindBgColour[thisId]?.current;
@@ -64,6 +89,11 @@ export const StoryFragment = (props: {
   const toolMode = $toolMode.value || ``;
   const $toolAddMode = useStore(toolAddModeStore);
   const toolAddMode = $toolAddMode.value || ``;
+  const usedSlugs = [
+    ...contentMap.filter(item => item.slug !== slug).map(item => item.slug),
+    ...Object.keys($paneSlug).map(s => $paneSlug[s].current),
+    ...Object.keys($storyFragmentSlug).map(s => $storyFragmentSlug[s].current),
+  ];
 
   const cancelInsert = useCallback(() => {
     setShouldScroll(null);
@@ -106,6 +136,25 @@ export const StoryFragment = (props: {
       setThisPaneIds(paneIds);
     }
   }, [isDesigningNew, paneIds]);
+
+  useEffect(() => {
+    if (
+      untitled &&
+      $storyFragmentTitle[thisId]?.current !== `` &&
+      ![`create`, ``].includes($storyFragmentSlug[thisId]?.current ?? ``)
+    ) {
+      paneIds.forEach((paneId: string) => {
+        const newTitle = `${$storyFragmentTitle[thisId].current.substring(0.2)} - ${getSubstring($paneSlug[paneId].current)}`;
+        const newSlug = findUniqueSuffix(
+          `${$storyFragmentSlug[thisId].current.substring(0, 20)}-${getSubstring($paneSlug[paneId].current)}`,
+          usedSlugs
+        );
+        updateStoreField(`paneTitle`, newTitle, paneId);
+        updateStoreField(`paneSlug`, newSlug, paneId);
+      });
+      setUntitled(false);
+    }
+  }, [isContext, $storyFragmentTitle, $storyFragmentSlug, untitled]);
 
   useEffect(() => {
     setThisPaneIds(paneIds);
@@ -342,6 +391,7 @@ export const StoryFragment = (props: {
   );
 
   if (!isClient || !thisPaneIds) return <div>Loading...</div>;
+  else if (untitled) return null;
 
   return (
     <>

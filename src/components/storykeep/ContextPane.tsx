@@ -4,6 +4,8 @@ import { navigate } from "astro:transitions/client";
 import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
 import {
   paneInit,
+  paneSlug,
+  paneTitle,
   viewportStore,
   viewportSetStore,
   viewportKeyStore,
@@ -25,6 +27,8 @@ export const ContextPane = (props: { id: string | null; slug: string }) => {
   const thisId = id ?? $creationState.id ?? `error`;
   const { handleUndo } = useStoryKeepUtils(thisId, []);
   const $paneInit = useStore(paneInit, { keys: [thisId] });
+  const $paneTitle = useStore(paneTitle, { keys: [thisId] });
+  const $paneSlug = useStore(paneSlug, { keys: [thisId] });
   const $lastInteractedType = useStore(lastInteractedTypeStore);
   const $viewport = useStore(viewportStore);
   const $viewportKey = useStore(viewportKeyStore);
@@ -35,6 +39,9 @@ export const ContextPane = (props: { id: string | null; slug: string }) => {
   const toolMode = $toolMode.value || ``;
   const $toolAddMode = useStore(toolAddModeStore);
   const toolAddMode = $toolAddMode.value || ``;
+  const untitled =
+    $paneTitle[thisId]?.current === `` ||
+    [`create`, ``].includes($paneSlug[thisId]?.current ?? ``);
 
   useEffect(() => {
     const handleResize = debounce(() => {
@@ -166,6 +173,7 @@ export const ContextPane = (props: { id: string | null; slug: string }) => {
   }, [$viewport]);
 
   if (!isClient) return <div>Loading...</div>;
+  else if (untitled) return null;
 
   return (
     <>

@@ -233,12 +233,13 @@ export const StoryKeepHeader = memo(
 
     const handleInterceptEdit = (storeKey: StoreKey, editing: boolean) => {
       if (
+        !isContext &&
         [`storyFragmentTitle`, `storyFragmentSlug`].includes(storeKey) &&
         [``, `create`].includes($storyFragmentSlug[thisId].current)
       ) {
         const clean = cleanString(
           $storyFragmentTitle[thisId].current
-        ).substring(0, 50);
+        ).substring(0, 20);
         const newVal = !usedSlugs.includes(clean) ? clean : ``;
         temporaryErrorsStore.setKey(thisId, {
           ...(temporaryErrorsStore.get()[thisId] || {}),
@@ -256,10 +257,11 @@ export const StoryKeepHeader = memo(
           history: [],
         });
       } else if (
+        isContext &&
         [`paneTitle`, `paneSlug`].includes(storeKey) &&
-        $paneSlug[thisId].current === ``
+        [``, `create`].includes($paneSlug[thisId].current)
       ) {
-        const clean = cleanString($paneTitle[thisId].current).substring(0, 50);
+        const clean = cleanString($paneTitle[thisId].current).substring(0, 20);
         const newVal = !usedSlugs.includes(clean) ? clean : ``;
         temporaryErrorsStore.setKey(thisId, {
           ...(temporaryErrorsStore.get()[thisId] || {}),
@@ -499,6 +501,8 @@ export const StoryKeepHeader = memo(
                   handleEditingChange={handleInterceptEdit}
                   updateStoreField={updateStoreField}
                   handleUndo={handleUndo}
+                  isEditing={isEditing}
+                  isContext={isContext}
                 />
                 {![`create`, ``].includes($paneSlug[thisId]?.current) && (
                   <PaneSlug
@@ -506,6 +510,8 @@ export const StoryKeepHeader = memo(
                     handleEditingChange={handleInterceptEdit}
                     updateStoreField={updateStoreField}
                     handleUndo={handleUndo}
+                    isEditing={isEditing}
+                    isContext={isContext}
                   />
                 )}
               </>

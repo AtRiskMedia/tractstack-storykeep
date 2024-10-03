@@ -74,6 +74,7 @@ const contentMap: ContentMap[] = await getContentMap();
           id={slug === "create" ? null : (storyfragment?.id ?? `error`)}
           slug={slug}
           isContext={false}
+          contentMap={contentMap}
           client:only="react"
         />
         <div

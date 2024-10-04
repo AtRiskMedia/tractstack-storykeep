@@ -3,6 +3,7 @@ import { HexColorPicker } from "react-colorful";
 import tinycolor from "tinycolor2";
 import { tailwindColors } from "../../../assets/tailwindColors";
 import { getComputedColor, debounce } from "../../../utils/helpers";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import type { CSSProperties } from "react";
 
 export interface ColorPickerProps {
@@ -74,6 +75,8 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [color, setColor] = useState(getComputedColor(defaultColor));
   const lastSelectedColor = useRef(getComputedColor(defaultColor));
+  const colorPickerRef = useRef<HTMLDivElement>(null);
+  const { openAbove } = useDropdownDirection(colorPickerRef);
 
   useEffect(() => {
     const computedColor = getComputedColor(defaultColor);
@@ -139,6 +142,10 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
   const popover: CSSProperties = {
     position: "absolute",
     zIndex: 2,
+    ...(openAbove
+      ? { bottom: "calc(100% + 10px)" }
+      : { top: "calc(100% + 10px)" }),
+    left: 0,
   };
   const cover: CSSProperties = {
     position: "fixed",
@@ -149,9 +156,10 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
   };
 
   return (
-    <div>
+    <div className="relative">
       <div
         id={id}
+        ref={colorPickerRef}
         style={{ backgroundColor: color }}
         className="border border-dotted border-1 border-black h-10 w-24 cursor-pointer"
         onClick={handleClick}

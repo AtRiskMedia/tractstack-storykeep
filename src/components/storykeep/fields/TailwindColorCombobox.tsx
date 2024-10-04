@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { getTailwindColorOptions } from "../../../assets/tailwindColors";
@@ -24,6 +25,8 @@ const TailwindColorCombobox = ({
           ),
     [tailwindColorOptions, query]
   );
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
 
   return (
     <Combobox
@@ -31,6 +34,7 @@ const TailwindColorCombobox = ({
       value={selectedColor}
       onChange={onColorChange}
       className="relative mt-1 max-w-64"
+      ref={comboboxRef}
     >
       <div className="relative">
         <Combobox.Input
@@ -47,7 +51,12 @@ const TailwindColorCombobox = ({
           />
         </Combobox.Button>
       </div>
-      <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+      <Combobox.Options
+        className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+          openAbove ? "bottom-full mb-1" : "top-full mt-1"
+        }`}
+        style={{ maxHeight: `${maxHeight}px` }}
+      >
         {filteredColors.map(color => (
           <Combobox.Option
             key={color}

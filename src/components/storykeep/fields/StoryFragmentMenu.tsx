@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import { Combobox } from "@headlessui/react";
 import {
   CheckIcon,
@@ -27,6 +28,8 @@ const StoryFragmentMenuId = ({
 }: StoryFragmentMenuIdProps) => {
   const menus = payload;
   const $storyFragmentMenuId = useStore(storyFragmentMenuId, { keys: [id] });
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
 
   const [query, setQuery] = useState("");
 
@@ -62,7 +65,7 @@ const StoryFragmentMenuId = ({
       >
         Use menu?
       </span>
-      <div className="flex-grow relative">
+      <div className="flex-grow relative" ref={comboboxRef}>
         <Combobox value={selectedMenu} onChange={handleMenuChange}>
           <div className="relative">
             <Combobox.Input
@@ -80,7 +83,12 @@ const StoryFragmentMenuId = ({
             </Combobox.Button>
           </div>
 
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+          <Combobox.Options
+            className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+              openAbove ? "bottom-full mb-1" : "top-full mt-1"
+            }`}
+            style={{ maxHeight: `${maxHeight}px` }}
+          >
             <Combobox.Option
               value={null}
               className={({ active }) =>

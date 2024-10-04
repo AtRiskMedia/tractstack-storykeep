@@ -18,6 +18,7 @@ import {
 } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import {
   markdownToHtmlAst,
   updateMarkdownElement,
@@ -56,6 +57,8 @@ const ImageMeta = (props: {
   const [selectedFile, setSelectedFile] = useState<FileDatum | null>(null);
   const [isSelectingFile, setIsSelectingFile] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
 
   useEffect(() => {
     if (markdownFragment?.markdown) {
@@ -330,7 +333,10 @@ const ImageMeta = (props: {
 
       {isSelectingFile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+          <div
+            ref={comboboxRef}
+            className="bg-white p-4 rounded-lg max-w-md w-full"
+          >
             <h3 className="text-lg font-semibold mb-2">Select a file</h3>
             <Combobox
               value={selectedFile}
@@ -366,7 +372,12 @@ const ImageMeta = (props: {
                     />
                   </Combobox.Button>
                 </div>
-                <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Combobox.Options
+                  className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm ${
+                    openAbove ? "bottom-full mb-1" : "top-full mt-1"
+                  }`}
+                  style={{ maxHeight: `${maxHeight}px` }}
+                >
                   {filteredFiles.map(file => (
                     <Combobox.Option
                       key={file.id}

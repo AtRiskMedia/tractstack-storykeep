@@ -101,9 +101,9 @@ export const paneDesigns = (
     ),
     priority: getComputedNumber(
       {
-        default: 0,
-        onecolumn: 1,
-        center: 2,
+        default: 3,
+        onecolumn: 4,
+        center: 5,
       },
       variant
     ),
@@ -454,9 +454,9 @@ export const paneDesigns = (
     ),
     priority: getComputedNumber(
       {
-        default: 3,
-        onecolumn: 4,
-        center: 5,
+        default: 6,
+        onecolumn: 7,
+        center: 8,
       },
       variant
     ),
@@ -776,9 +776,9 @@ export const paneDesigns = (
     ),
     priority: getComputedNumber(
       {
-        default: 6,
-        onecolumn: 7,
-        center: 8,
+        default: 9,
+        onecolumn: 10,
+        center: 11,
       },
       variant
     ),
@@ -1126,9 +1126,9 @@ export const paneDesigns = (
     ),
     priority: getComputedNumber(
       {
-        default: 10,
-        onecolumn: 11,
-        center: 12,
+        default: 0,
+        onecolumn: 1,
+        center: 2,
       },
       variant
     ),
@@ -1302,6 +1302,377 @@ export const paneDesigns = (
     ],
   },
   {
+    id: `intro-image-${variant}`,
+    slug: `intro-image-${variant}`,
+    name: getComputedValue(
+      {
+        square: "Intro section, square image on right",
+        "16x9": "Intro section, 16x9 image on right",
+      },
+      variant
+    ),
+    priority: 20,
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "white",
+            dark: "brand-1",
+            "dark-bw": "black",
+            "dark-bold": "brand-1",
+          },
+          theme
+        )
+      ),
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `1. add a catchy title here\n2. your story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n3. [Try it now!](try) &nbsp; [Learn more](learn)\n\n* ![Descriptive title](filename)\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                {
+                  mx: ["5", "10"],
+                  mt: ["16"],
+                  mb: ["16", "20"],
+                },
+                {
+                  mx: ["auto"],
+                },
+                {
+                  px: ["9", "14", "32"],
+                  py: ["20", "32"],
+                  textALIGN: ["left"],
+                  textWRAP: ["pretty"],
+                  display: ["flex"],
+                  flexWRAP: ["wrap", "wrap", "nowrap"],
+                  gapX: ["20"],
+                  gapY: ["4"],
+                  alignITEMS: ["center"],
+                  justifyCONTENT: ["between"],
+                },
+              ],
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["5xl", "6xl", "7xl"],
+                fontFACE: ["action"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                mt: ["4", "5"],
+              },
+            },
+            img: {
+              classes: {
+                w: ["auto"],
+                h: ["auto"],
+                objectFIT: ["cover"],
+                rounded: ["lg", "xl"],
+                minW: ["[50%]"],
+                aspect: [
+                  getComputedValue(
+                    {
+                      square: "square",
+                      "16x9": "16x9",
+                    },
+                    variant
+                  ),
+                ],
+                mt: ["6", "6", "0"],
+              },
+            },
+            ol: {
+              classes: {
+                maxW: ["screen-md"],
+                minW: ["96"],
+              },
+            },
+            li: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                fontWEIGHT: ["normal"],
+                mt: ["0"],
+                maxW: ["96"],
+                flex: ["none"],
+                w: ["fit-contents"],
+              },
+              count: 4,
+              override: {
+                mt: [["4", "5"], ["4", "5"], ["8", "10"], null],
+                maxW: [null, null, null, ["none"]],
+                flex: [null, null, null, ["1"]],
+                w: [null, null, null, ["full"]],
+                textSIZE: [["5xl", "6xl", "7xl"], null, null, null],
+                lineHEIGHT: [["tight"], null, null, null],
+                fontWEIGHT: [["bold"], null, null, null],
+                textCOLOR: [
+                  [
+                    getComputedColor(
+                      {
+                        light: "brand-5",
+                        "light-bw": "brand-1",
+                        "light-bold": "brand-5",
+                        dark: "brand-3",
+                        "dark-bw": "brand-8",
+                        "dark-bold": "brand-3",
+                      },
+                      theme
+                    ),
+                  ],
+                  null,
+                  null,
+                  null,
+                ],
+              },
+            },
+          },
+          buttons: {
+            try: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-7",
+                          "light-bw": "black",
+                          "light-bold": "brand-3",
+                          dark: "slate-200",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-3",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    fontWEIGHT: ["bold"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-2",
+                          "light-bw": "white",
+                          "light-bold": "brand-2",
+                          dark: "black",
+                          "dark-bw": "black",
+                          "dark-bold": "brand-1",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+            },
+            learn: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "neutral-200",
+                          "light-bw": "brand-8",
+                          "light-bold": "neutral-200",
+                          dark: "neutral-800",
+                          "dark-bw": "gray-800",
+                          "dark-bold": "neutral-800",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
     id: `intro-image-bordered-${variant}`,
     slug: `intro-image-bordered-${variant}`,
     name: getComputedValue(
@@ -1311,7 +1682,7 @@ export const paneDesigns = (
       },
       variant
     ),
-    priority: 20,
+    priority: 21,
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -1391,6 +1762,376 @@ export const paneDesigns = (
                 {
                   px: ["9", "14", "32"],
                   py: ["20", "32"],
+                  textALIGN: ["left"],
+                  textWRAP: ["pretty"],
+                  display: ["flex"],
+                  flexWRAP: ["wrap", "wrap", "nowrap"],
+                  gapX: ["20"],
+                  gapY: ["4"],
+                  alignITEMS: ["center"],
+                  justifyCONTENT: ["between"],
+                },
+              ],
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-3",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["5xl", "6xl", "7xl"],
+                fontFACE: ["action"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "3xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "2xl"],
+                my: [8, 12],
+                fontFACE: ["action"],
+              },
+            },
+            p: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                mt: ["4", "5"],
+              },
+            },
+            img: {
+              classes: {
+                w: ["auto"],
+                h: ["auto"],
+                objectFIT: ["cover"],
+                rounded: ["lg", "xl"],
+                minW: ["[50%]"],
+                aspect: [
+                  getComputedValue(
+                    {
+                      square: "square",
+                      "16x9": "16x9",
+                    },
+                    variant
+                  ),
+                ],
+                mt: ["6", "6", "0"],
+              },
+            },
+            ol: {
+              classes: {
+                maxW: ["screen-md"],
+                minW: ["96"],
+              },
+            },
+            li: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-8",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["lg", "xl"],
+                lineHEIGHT: ["loose"],
+                fontWEIGHT: ["normal"],
+                mt: ["0"],
+                maxW: ["96"],
+                flex: ["none"],
+                w: ["fit-contents"],
+              },
+              count: 4,
+              override: {
+                mt: [["4", "5"], ["4", "5"], ["8", "10"], null],
+                maxW: [null, null, null, ["none"]],
+                flex: [null, null, null, ["1"]],
+                w: [null, null, null, ["full"]],
+                textSIZE: [["5xl", "6xl", "7xl"], null, null, null],
+                lineHEIGHT: [["tight"], null, null, null],
+                fontWEIGHT: [["bold"], null, null, null],
+                textCOLOR: [
+                  [
+                    getComputedColor(
+                      {
+                        light: "brand-5",
+                        "light-bw": "brand-1",
+                        "light-bold": "brand-5",
+                        dark: "brand-3",
+                        "dark-bw": "brand-8",
+                        "dark-bold": "brand-3",
+                      },
+                      theme
+                    ),
+                  ],
+                  null,
+                  null,
+                  null,
+                ],
+              },
+            },
+          },
+          buttons: {
+            try: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-7",
+                          "light-bw": "black",
+                          "light-bold": "brand-3",
+                          dark: "slate-200",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-3",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    fontWEIGHT: ["bold"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-2",
+                          "light-bw": "white",
+                          "light-bold": "brand-2",
+                          dark: "black",
+                          "dark-bw": "black",
+                          "dark-bold": "brand-1",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-mydarkgrey inline-block font-bold px-3.5 py-2.5 rounded-md text-mywhite hover:bg-myorange hover:rotate-2",
+            },
+            learn: {
+              callbackPayload: "(goto (home))",
+              urlTarget: "#",
+              classNamesPayload: {
+                button: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "neutral-200",
+                          "light-bw": "brand-8",
+                          "light-bold": "neutral-200",
+                          dark: "neutral-800",
+                          "dark-bw": "gray-800",
+                          "dark-bold": "neutral-800",
+                        },
+                        theme
+                      ),
+                    ],
+                    display: ["inline-block"],
+                    px: ["3.5"],
+                    py: ["2.5"],
+                    rounded: ["md"],
+                    textCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                  },
+                },
+                hover: {
+                  classes: {
+                    bgCOLOR: [
+                      getComputedColor(
+                        {
+                          light: "brand-1",
+                          "light-bw": "black",
+                          "light-bold": "brand-1",
+                          dark: "brand-2",
+                          "dark-bw": "white",
+                          "dark-bold": "brand-2",
+                        },
+                        theme
+                      ),
+                    ],
+                    rotate: ["2"],
+                  },
+                },
+              },
+              className:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              mobileClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              tabletClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+              desktopClassName:
+                "bg-slate-200 inline-block px-3.5 py-2.5 rounded-md text-black hover:bg-myorange hover:rotate-2",
+            },
+          },
+        } as OptionsPayloadDatum,
+      },
+    ],
+  },
+  {
+    id: `intro-image-slim-${variant}`,
+    slug: `intro-image-slim-${variant}`,
+    name: getComputedValue(
+      {
+        square: "Intro section, slim, square image on right, bordered",
+        "16x9": "Intro section, slim, 16x9 image on right, bordered",
+      },
+      variant
+    ),
+    priority: 22,
+    type: `starter`,
+    panePayload: {
+      heightOffsetDesktop: 0,
+      heightOffsetTablet: 0,
+      heightOffsetMobile: 0,
+      heightRatioDesktop: `0.00`,
+      heightRatioTablet: `0.00`,
+      heightRatioMobile: `0.00`,
+      bgColour: tailwindToHex(
+        getComputedColor(
+          {
+            light: "white",
+            "light-bw": "brand-2",
+            "light-bold": "brand-8",
+            dark: "brand-1",
+            "dark-bw": "brand-1",
+            "dark-bold": "black",
+          },
+          theme
+        )
+      ),
+      codeHook: null,
+    },
+    files: [],
+    fragments: [
+      {
+        type: "markdown",
+        markdownBody: `1. add a catchy title here\n2. your story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n3. [Try it now!](try) &nbsp; [Learn more](learn)\n\n* ![Descriptive title](filename)\n`,
+        imageMaskShapeDesktop: "none",
+        imageMaskShapeTablet: "none",
+        imageMaskShapeMobile: "none",
+        textShapeOutsideDesktop: "none",
+        textShapeOutsideTablet: "none",
+        textShapeOutsideMobile: "none",
+        isModal: false,
+        hiddenViewports: "none",
+        optionsPayload: {
+          classNamesPayload: {
+            parent: {
+              classes: [
+                {
+                  mx: ["5", "10"],
+                  my: ["3.5", "8"],
+                },
+                {
+                  mx: ["auto"],
+                },
+                {
+                  px: ["9", "14", "32"],
+                  py: ["10"],
                   textALIGN: ["left"],
                   textWRAP: ["pretty"],
                   display: ["flex"],
@@ -3365,43 +4106,29 @@ export const pageDesigns = (
       ) as PaneDesign,
     ],
   },
-  image16x9: {
-    name: "image16x9 test",
-    isContext: true,
+  basicImage16x9: {
+    name: "Basic Page - with 16x9 hero image",
+    isContext: false,
     tailwindBgColour: getComputedColor(
       {
-        light: "mywhite",
-        "light-bw": "mywhite",
-        "light-bold": "myoffwhite",
-        dark: "myblack",
-        "dark-bw": "myblack",
+        light: "brand-2",
+        "light-bw": "brand-2",
+        "light-bold": "white",
+        dark: "brand-1",
+        "dark-bw": "brand-1",
         "dark-bold": "black",
       },
       theme
     ),
     paneDesigns: [
-      paneDesigns(theme, `16x9`).find(
-        p => p.id === "intro-image-bordered-16x9"
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
       ) as PaneDesign,
-    ],
-  },
-  imageSquare: {
-    name: "imageSquare test",
-    isContext: true,
-    tailwindBgColour: getComputedColor(
-      {
-        light: "mywhite",
-        "light-bw": "mywhite",
-        "light-bold": "myoffwhite",
-        dark: "myblack",
-        "dark-bw": "myblack",
-        "dark-bold": "black",
-      },
-      theme
-    ),
-    paneDesigns: [
-      paneDesigns(theme, `square`).find(
-        p => p.id === "intro-image-bordered-square"
+      paneDesigns(theme, `16x9`).find(
+        p => p.id === "intro-image-slim-16x9"
+      ) as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
   },

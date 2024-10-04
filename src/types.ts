@@ -236,6 +236,38 @@ export interface PageDesign {
 
 export type Variant = `default` | `center` | `onecolumn` | `square` | `16x9`;
 
+export type ReconciledData = {
+  storyFragment?: {
+    data: StoryFragmentDatum;
+    queries: StoryFragmentQueries;
+  };
+  contextPane?: {
+    data: ContextPaneDatum;
+    queries: ContextPaneQueries;
+  };
+};
+
+export type StoryFragmentQueries = {
+  storyfragment: TursoQuery;
+  panes: TursoQuery[];
+  markdowns: TursoQuery[];
+  storyfragment_pane: TursoQuery[];
+  file_pane: TursoQuery[];
+  file_markdown: TursoQuery[];
+};
+
+export type ContextPaneQueries = {
+  pane: TursoQuery;
+  markdown?: TursoQuery;
+  file_pane: TursoQuery[];
+  file_markdown: TursoQuery[];
+};
+
+export type TursoQuery = {
+  sql: string;
+  args: (string | number | boolean | null)[];
+};
+
 export type PaneAstTargetId = {
   outerIdx: number;
   idx: number | null;
@@ -569,7 +601,7 @@ export interface PaneDatum {
   slug: string;
   created: Date;
   changed: Date | null;
-  markdown: MarkdownDatum | false;
+  markdown: MarkdownDatum | false | null;
   optionsPayload: PaneOptionsPayload;
   isContextPane: boolean;
   heightOffsetDesktop: number;

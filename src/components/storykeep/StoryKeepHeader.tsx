@@ -5,6 +5,7 @@ import {
   PresentationChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { classNames } from "../../utils/helpers";
+import { SaveProcessModal } from "./components/SaveProcessModal";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
 import ToolAddModeSelector from "./components/ToolAddModeSelector";
@@ -53,6 +54,8 @@ import type {
   AnalyticsItem,
   PieDataItem,
   LineDataSeries,
+  StoryFragmentDatum,
+  ContextPaneDatum,
 } from "../../types";
 
 const processedAnalytics = (data: RawAnalytics): Analytics => {
@@ -83,15 +86,18 @@ export const StoryKeepHeader = memo(
     contentMap,
     user,
     isContext,
+    originalData,
   }: {
     id: string;
     slug: string;
     contentMap: ContentMap[];
     user: AuthStatus;
     isContext: boolean;
+    originalData: StoryFragmentDatum | ContextPaneDatum | null;
   }) => {
     const [hasAnalytics, setHasAnalytics] = useState(false);
     const $creationState = useStore(creationStateStore);
+    const [isSaving, setIsSaving] = useState(false);
     const thisId =
       slug !== `create` ? id : $creationState.id ? $creationState.id : `error`;
     const $showAnalytics = useStore(showAnalytics);
@@ -178,6 +184,16 @@ export const StoryKeepHeader = memo(
         console.error("Error fetching analytics data:", error);
       }
     }
+
+    const handleSave = () => {
+      setIsSaving(true);
+    };
+
+    const handleSaveComplete = () => {
+      setIsSaving(false);
+      console.log(`did save`);
+      // TODO: Handle post-save actions (e.g., redirect)
+    };
 
     useEffect(() => {
       if (toolMode === "insert" && toolAddModeRef.current) {
@@ -462,6 +478,7 @@ export const StoryKeepHeader = memo(
               ) : hasUnsavedChanges ? (
                 <button
                   type="button"
+                  onClick={handleSave}
                   className="my-1 rounded bg-myorange px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack disabled:hidden"
                   disabled={Object.values($uncleanData[thisId] || {}).some(
                     Boolean
@@ -470,6 +487,14 @@ export const StoryKeepHeader = memo(
                   Save
                 </button>
               ) : null}
+              {isSaving && (
+                <SaveProcessModal
+                  id={thisId}
+                  isContext={isContext}
+                  onClose={handleSaveComplete}
+                  originalData={originalData}
+                />
+              )}
             </div>
           </div>
           <div style={{ display: hideElements ? "none" : "block" }}>

@@ -41,6 +41,12 @@ export const getTailwindColorOptions = () => {
 };
 
 export const tailwindToHex = (tailwindColor: string): string => {
+  if (tailwindColor.startsWith("bg-brand-")) {
+    const brandColor = getBrandColor(`var(--${tailwindColor.slice(3)})`);
+    if (brandColor) {
+      return brandColor;
+    }
+  }
   if (tailwindColor.startsWith("brand-")) {
     const brandColor = getBrandColor(`var(--${tailwindColor})`);
     if (brandColor) {

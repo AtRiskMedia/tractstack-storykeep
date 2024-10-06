@@ -287,6 +287,7 @@ export async function getContextPaneBySlug(
                    p.height_ratio_tablet,
                    p.options_payload, 
                    m.body AS markdown_body,
+                   m.id AS markdown_id,
                    (
                        SELECT json_group_array(
                            json_object(

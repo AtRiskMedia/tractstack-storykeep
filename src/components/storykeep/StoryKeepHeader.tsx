@@ -191,8 +191,6 @@ export const StoryKeepHeader = memo(
 
     const handleSaveComplete = () => {
       setIsSaving(false);
-      console.log(`did save`);
-      // TODO: Handle post-save actions (e.g., redirect)
     };
 
     useEffect(() => {
@@ -213,17 +211,18 @@ export const StoryKeepHeader = memo(
       const storyFragmentChanges = Object.values(
         $unsavedChanges[thisId] || {}
       ).some(Boolean);
-      const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
+      const paneIds = isContext
+        ? [thisId]
+        : $storyFragmentPaneIds[thisId]?.current;
+      const paneChanges = paneIds?.some(paneId =>
         Object.values($unsavedChanges[paneId] || {}).some(Boolean)
       );
-      const paneFragmentChanges = $storyFragmentPaneIds[thisId]?.current.some(
-        paneId => {
-          const fragmentIds = $paneFragmentIds[paneId]?.current || [];
-          return fragmentIds.some(fragmentId =>
-            Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
-          );
-        }
-      );
+      const paneFragmentChanges = paneIds.some(paneId => {
+        const fragmentIds = $paneFragmentIds[paneId]?.current || [];
+        return fragmentIds.some(fragmentId =>
+          Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
+        );
+      });
       setHasUnsavedChanges(
         storyFragmentChanges || paneChanges || paneFragmentChanges
       );
@@ -343,26 +342,6 @@ export const StoryKeepHeader = memo(
         window.removeEventListener("scroll", debouncedHandleScroll);
       };
     }, [debouncedHandleScroll, handleScroll]);
-
-    useEffect(() => {
-      const storyFragmentChanges = Object.values(
-        $unsavedChanges[thisId] || {}
-      ).some(Boolean);
-      const paneChanges = $storyFragmentPaneIds[id]?.current.some(paneId =>
-        Object.values($unsavedChanges[paneId] || {}).some(Boolean)
-      );
-      const paneFragmentChanges = $storyFragmentPaneIds[thisId]?.current.some(
-        paneId => {
-          const fragmentIds = $paneFragmentIds[paneId]?.current || [];
-          return fragmentIds.some(fragmentId =>
-            Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)
-          );
-        }
-      );
-      const newHasUnsavedChanges =
-        storyFragmentChanges || paneChanges || paneFragmentChanges;
-      setHasUnsavedChanges(newHasUnsavedChanges);
-    }, [$unsavedChanges, thisId, $storyFragmentPaneIds, $paneFragmentIds]);
 
     const toggleAnalytics = () => {
       showAnalytics.set(!$showAnalytics);

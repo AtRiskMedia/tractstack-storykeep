@@ -254,6 +254,7 @@ export type StoryFragmentQueries = {
   storyfragment_pane: TursoQuery[];
   file_pane: TursoQuery[];
   file_markdown: TursoQuery[];
+  files: TursoQuery[];
 };
 
 export type ContextPaneQueries = {
@@ -261,6 +262,7 @@ export type ContextPaneQueries = {
   markdown?: TursoQuery;
   file_pane: TursoQuery[];
   file_markdown: TursoQuery[];
+  files: TursoQuery[];
 };
 
 export type TursoQuery = {

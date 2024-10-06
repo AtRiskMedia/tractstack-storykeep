@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { ulid } from "ulid";
 import { useStore } from "@nanostores/react";
 import { Combobox } from "@headlessui/react";
 import {
@@ -29,6 +30,16 @@ import type { ChangeEvent } from "react";
 import type { FileDatum } from "../../../types";
 
 const TARGET_WIDTH = 1920;
+
+const generateRandomFilename = () => {
+  const characters =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = "";
+  for (let i = 0; i < 10; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
 
 const ImageMeta = (props: {
   paneId: string;
@@ -216,15 +227,15 @@ const ImageMeta = (props: {
       reader.onload = e => {
         const base64 = e.target?.result as string;
         setImageSrc(base64);
-        setFilename(processedFile.name);
-        updateStore(
-          `Please provide a description of this image`,
-          processedFile.name
-        );
+        const randomFilename = generateRandomFilename();
+        const fileExtension = processedFile.name.split(".").pop();
+        const newFilename = `${randomFilename}.${fileExtension}`;
+        setFilename(newFilename);
+        updateStore(`Please provide a description of this image`, newFilename);
 
         const newFile: FileDatum = {
-          id: Date.now().toString(),
-          filename: processedFile.name,
+          id: ulid(),
+          filename: newFilename,
           altDescription: "Please provide a description of this image",
           src: base64,
           optimizedSrc: base64,

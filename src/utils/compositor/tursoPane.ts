@@ -31,6 +31,7 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
       title: `Copy for ${row.slug}`,
       htmlAst: cleanHtmlAst(toHast(fromMarkdown(row.markdown_body)) as Root),
     };
+
   if (
     typeof row?.id === `string` &&
     typeof row?.title === `string` &&

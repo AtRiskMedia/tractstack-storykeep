@@ -1,8 +1,11 @@
 :root {
+  /*
   --font-main: "Font-Main";
   --font-action: "Font-Action";
+  */
+  --font-main: "Inter";
+  --font-action: "Inter";
   --scale: 1;
-  --use-custom-fonts: 0; /* 1 for custom fonts, 0 for Inter */
   --brand-1:#10120d; /* black */
   --brand-2:#fcfcfc; /* white */
   --brand-3:#f58333; /* bright orange */
@@ -39,7 +42,7 @@ html {
 }
 
 body {
-    font-family: var(--use-custom-fonts) ? var(--font-main) : Inter, Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: var(--font-main), Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 @media (prefers-reduced-motion) {

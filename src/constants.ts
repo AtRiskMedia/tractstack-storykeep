@@ -408,7 +408,8 @@ export const knownEnvSettings: EnvSetting[] = [
     name: "CONCIERGE_SECRET",
     defaultValue: "randomhighentropystring",
     type: "string",
-    description: "Enter a random string for encrypted communication between storykeep and concierge",
+    description:
+      "Enter a random string for encrypted communication between storykeep and concierge",
     group: "Backend",
     priority: false,
     required: true,

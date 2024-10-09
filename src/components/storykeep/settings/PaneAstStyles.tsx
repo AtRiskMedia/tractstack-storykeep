@@ -1067,7 +1067,7 @@ export const PaneAstStyles = (props: {
 
   const Nav = () =>
     !linkTargetKey &&
-      tabs &&
+    tabs &&
     !widgetConfigMode && (
       <>
         <div className="flex justify-between items-center">

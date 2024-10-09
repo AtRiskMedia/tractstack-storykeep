@@ -11,6 +11,7 @@ interface Dimensions {
   };
   isVisible: boolean;
   isFullScreen: boolean;
+  isFullWidthMobileShort: boolean;
 }
 
 const SHORT_SCREEN_THRESHOLD = 600;
@@ -25,6 +26,7 @@ export const useEditModalDimensions = (
     position: { bottom: "0", right: "0" },
     isVisible: false,
     isFullScreen: false,
+    isFullWidthMobileShort: false,
   });
 
   const updateDimensions = useCallback(() => {
@@ -41,6 +43,7 @@ export const useEditModalDimensions = (
         position: { bottom: "0", left: "0", right: "0" },
         isVisible: isEditModeActive,
         isFullScreen: false,
+        isFullWidthMobileShort: true,
       };
     } else if (innerWidth < 1368) {
       newDimensions = {
@@ -49,6 +52,7 @@ export const useEditModalDimensions = (
         position: { bottom: "0px", right: "8px" },
         isVisible: isEditModeActive,
         isFullScreen: false,
+        isFullWidthMobileShort: false,
       };
     } else {
       newDimensions = {
@@ -57,6 +61,7 @@ export const useEditModalDimensions = (
         position: { top: `${headerBottom}px`, right: "0" },
         isVisible: isEditModeActive,
         isFullScreen: false,
+        isFullWidthMobileShort: false,
       };
     }
     setDimensions(newDimensions);

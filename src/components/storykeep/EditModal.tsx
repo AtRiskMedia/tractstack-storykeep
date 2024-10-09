@@ -37,8 +37,37 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
       ? "desktop"
       : "mobile"
   );
-  const { height, width, position, isVisible, isFullScreen } =
-    useEditModalDimensions($editMode !== null);
+  const {
+    height,
+    width,
+    position,
+    isVisible,
+    isFullScreen,
+    isFullWidthMobileShort,
+  } = useEditModalDimensions($editMode !== null);
+
+  useEffect(() => {
+    const header = document.getElementById("main-header");
+    if (header) {
+      if (isFullWidthMobileShort && isVisible) {
+        header.classList.add("header-hidden");
+      } else {
+        header.classList.remove("header-hidden");
+      }
+    }
+  }, [isFullWidthMobileShort, isVisible]);
+
+  useEffect(() => {
+    if ($editMode?.targetId && isVisible) {
+      const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        setTimeout(() => {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 100);
+      }
+    }
+  }, [$editMode?.targetId, isVisible, height]);
 
   useEffect(() => {
     const handleResize = () => {

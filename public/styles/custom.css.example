@@ -54,3 +54,13 @@ body {
   color: #888;
   font-style: italic;
 }
+
+#main-header {
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+#main-header.header-hidden {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}

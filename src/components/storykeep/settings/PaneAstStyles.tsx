@@ -1065,119 +1065,173 @@ export const PaneAstStyles = (props: {
     }
   }, [activeTagData]);
 
-  if (!tabs) return null;
-
-  return (
-    <div>
-      <div>
-        {!linkTargetKey && !widgetConfigMode && (
-          <>
-            <div className="flex justify-between items-center">
-              <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
-                {tabs.map((tab: StyleTab, idx: number) => (
-                  <button
-                    key={idx}
-                    aria-current={tab.tag === activeTag ? "page" : undefined}
-                    onClick={() => {
-                      setActiveTag(tab.tag);
-                      setImageMeta(false);
-                      setLinkTargetKey(``);
-                      setLinkMode(null);
-                      setSelectedStyle(null);
-                    }}
-                    className={classNames(
-                      tab.tag === activeTag
-                        ? "text-black font-bold"
-                        : "text-mydarkgrey hover:text-black underline",
-                      "text-md"
-                    )}
-                  >
-                    {tab.name}
-                  </button>
-                ))}
-              </nav>
-              <div className="flex flex-nowrap gap-x-4">
-                {hasHistory ? (
-                  <button
-                    onClick={() => {
-                      handleUndo("paneFragmentMarkdown", markdownFragmentId);
-                      setImageMeta(false);
-                      setLinkTargetKey(``);
-                      setLinkMode(null);
-                      setSelectedStyle(null);
-                    }}
-                    className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
-                    disabled={
-                      $paneFragmentMarkdown[markdownFragmentId]?.history
-                        .length === 0
-                    }
-                  >
-                    Undo
-                  </button>
-                ) : null}
-                {activeTag && (
-                  <StyleMemory
-                    currentKey={activeTag}
-                    classNamesPayload={
-                      activeTag === `parent` &&
-                      parentClassNamesPayload?.classes &&
-                      Array.isArray(parentClassNamesPayload.classes)
-                        ? parentClassNamesPayload.classes
-                        : activeTag === `modal`
-                          ? modalClassNamesPayload?.classes || {}
-                          : mergeClassesWithAllOverrides(
-                              classNamesPayload || { classes: {} }
-                            )
-                    }
-                    onPaste={handlePasteStyles}
-                  />
+  const Nav = () =>
+    !linkTargetKey &&
+      tabs &&
+    !widgetConfigMode && (
+      <>
+        <div className="flex justify-between items-center">
+          <nav aria-label="Tabs" className="flex space-x-4 mt-4 mb-1 mr-6">
+            {tabs.map((tab: StyleTab, idx: number) => (
+              <button
+                key={idx}
+                aria-current={tab.tag === activeTag ? "page" : undefined}
+                onClick={() => {
+                  setActiveTag(tab.tag);
+                  setImageMeta(false);
+                  setLinkTargetKey(``);
+                  setLinkMode(null);
+                  setSelectedStyle(null);
+                }}
+                className={classNames(
+                  tab.tag === activeTag
+                    ? "text-black font-bold"
+                    : "text-mydarkgrey hover:text-black underline",
+                  "text-md"
                 )}
-              </div>
-            </div>
+              >
+                {tab.name}
+              </button>
+            ))}
+          </nav>
+          <div className="flex flex-nowrap gap-x-4">
+            {hasHistory ? (
+              <button
+                onClick={() => {
+                  handleUndo("paneFragmentMarkdown", markdownFragmentId);
+                  setImageMeta(false);
+                  setLinkTargetKey(``);
+                  setLinkMode(null);
+                  setSelectedStyle(null);
+                }}
+                className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
+                disabled={
+                  $paneFragmentMarkdown[markdownFragmentId]?.history.length ===
+                  0
+                }
+              >
+                Undo
+              </button>
+            ) : null}
+            {activeTag && (
+              <StyleMemory
+                currentKey={activeTag}
+                classNamesPayload={
+                  activeTag === `parent` &&
+                  parentClassNamesPayload?.classes &&
+                  Array.isArray(parentClassNamesPayload.classes)
+                    ? parentClassNamesPayload.classes
+                    : activeTag === `modal`
+                      ? modalClassNamesPayload?.classes || {}
+                      : mergeClassesWithAllOverrides(
+                          classNamesPayload || { classes: {} }
+                        )
+                }
+                onPaste={handlePasteStyles}
+              />
+            )}
+          </div>
+        </div>
 
-            <hr />
-          </>
+        <hr />
+      </>
+    );
+
+  const WidgetConfigMode = () =>
+    widgetConfigMode && (
+      <div>
+        <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+          <Widget
+            id={widgetData[0]}
+            values={widgetData.slice(1)}
+            paneId={targetId.paneId}
+            outerIdx={targetId.outerIdx}
+            idx={targetId.idx}
+          />
+        </div>
+        <span className="flex gap-x-6">
+          <button
+            className="my-2 underline"
+            title="Close Widget Config panel"
+            onClick={() => {
+              setSelectedStyle(null);
+              setAddClass(false);
+              setWidgetConfigMode(false);
+            }}
+          >
+            BACK
+          </button>
+          {activeTag === `code` && (
+            <button
+              className="my-2 underline"
+              title="Apply styles to widget"
+              onClick={handleWidgetStyle}
+            >
+              STYLE THIS WIDGET
+            </button>
+          )}
+        </span>
+      </div>
+    );
+
+  const AppliedStyles = () =>
+    !imageMeta &&
+    !linkTargetKey &&
+    !widgetConfigMode &&
+    activeTag &&
+    ![`parent`, `modal`].includes(activeTag) && (
+      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+        {classNamesPayload?.classes &&
+        Object.keys(classNamesPayload.classes).length ? (
+          Object.keys(classNamesPayload.classes).map(className =>
+            ClassTag(className)
+          )
+        ) : (
+          <span>No styles</span>
         )}
-        {widgetConfigMode && (
+      </div>
+    );
+
+  const IsLink = () =>
+    linkTargetKey && (
+      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+        {linkMode && linkTargetKey !== `*` ? (
           <div>
-            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              <Widget
-                id={widgetData[0]}
-                values={widgetData.slice(1)}
-                paneId={targetId.paneId}
-                outerIdx={targetId.outerIdx}
-                idx={targetId.idx}
+            <div className="flex flex-nowrap justify-between">
+              <div className="flex flex-nowrap gap-x-4">
+                <button
+                  className={classNames(
+                    linkMode === `button` ? `font-bold` : `underline`,
+                    "my-2"
+                  )}
+                  title="Button Styles"
+                  onClick={() => {
+                    setLinkMode(`button`);
+                    setSelectedStyle(null);
+                  }}
+                >
+                  Button Styles
+                </button>
+                <button
+                  className={classNames(
+                    linkMode === `hover` ? `font-bold` : `underline`,
+                    "my-2"
+                  )}
+                  title="Hover Styles"
+                  onClick={() => {
+                    setLinkMode(`hover`);
+                    setSelectedStyle(null);
+                  }}
+                >
+                  Hover Styles
+                </button>
+              </div>
+              <StyleMemory
+                currentKey="button"
+                classNamesPayload={buttonClassNamesPayloadArray}
+                onPaste={handlePasteStyles}
               />
             </div>
-            <span className="flex gap-x-6">
-              <button
-                className="my-2 underline"
-                title="Close Widget Config panel"
-                onClick={() => {
-                  setSelectedStyle(null);
-                  setAddClass(false);
-                  setWidgetConfigMode(false);
-                }}
-              >
-                BACK
-              </button>
-              {activeTag === `code` && (
-                <button
-                  className="my-2 underline"
-                  title="Apply styles to widget"
-                  onClick={handleWidgetStyle}
-                >
-                  STYLE THIS WIDGET
-                </button>
-              )}
-            </span>
-          </div>
-        )}
-        {!imageMeta &&
-          !linkTargetKey &&
-          !widgetConfigMode &&
-          activeTag &&
-          ![`parent`, `modal`].includes(activeTag) && (
             <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
               {classNamesPayload?.classes &&
               Object.keys(classNamesPayload.classes).length ? (
@@ -1185,281 +1239,92 @@ export const PaneAstStyles = (props: {
                   ClassTag(className)
                 )
               ) : (
-                <span>No styles</span>
-              )}
-            </div>
-          )}
-        {linkTargetKey && (
-          <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-            {linkMode && linkTargetKey !== `*` ? (
-              <div>
-                <div className="flex flex-nowrap justify-between">
-                  <div className="flex flex-nowrap gap-x-4">
-                    <button
-                      className={classNames(
-                        linkMode === `button` ? `font-bold` : `underline`,
-                        "my-2"
-                      )}
-                      title="Button Styles"
-                      onClick={() => {
-                        setLinkMode(`button`);
-                        setSelectedStyle(null);
-                      }}
-                    >
-                      Button Styles
-                    </button>
-                    <button
-                      className={classNames(
-                        linkMode === `hover` ? `font-bold` : `underline`,
-                        "my-2"
-                      )}
-                      title="Hover Styles"
-                      onClick={() => {
-                        setLinkMode(`hover`);
-                        setSelectedStyle(null);
-                      }}
-                    >
-                      Hover Styles
-                    </button>
-                  </div>
-                  <StyleMemory
-                    currentKey="button"
-                    classNamesPayload={buttonClassNamesPayloadArray}
-                    onPaste={handlePasteStyles}
-                  />
-                </div>
-                <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-                  {classNamesPayload?.classes &&
-                  Object.keys(classNamesPayload.classes).length ? (
-                    Object.keys(classNamesPayload.classes).map(className =>
-                      ClassTag(className)
-                    )
-                  ) : (
-                    <div className="w-full">
-                      <label
-                        htmlFor="button-style-listbox"
-                        className="block text-sm text-mydarkgrey mb-2"
-                      >
-                        Apply default button styles
-                      </label>
-                      <Listbox
-                        value={buttonStyleOptions.at(0)}
-                        onChange={handleButtonStyleChange}
-                      >
-                        <div className="relative mt-1">
-                          <Listbox.Button
-                            ref={buttonStyleListboxRef}
-                            className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-myorange focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 xs:text-sm"
-                          >
-                            <span className="block truncate">
-                              {buttonStyleOptions.at(0)}
-                            </span>
-                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                              <ChevronUpDownIcon
-                                className="h-5 w-5 text-mydarkgrey"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </Listbox.Button>
-                          <Listbox.Options
-                            className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
-                              buttonStyleOpenAbove
-                                ? "bottom-full mb-1"
-                                : "top-full mt-1"
-                            }`}
-                            style={{ maxHeight: `${buttonStyleMaxHeight}px` }}
-                          >
-                            {buttonStyleOptions.map((option, idx) => (
-                              <Listbox.Option
-                                key={option}
-                                className={({ active }) =>
-                                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                    active
-                                      ? "bg-myorange/10 text-black"
-                                      : "text-black"
-                                  }`
-                                }
-                                value={idx}
-                              >
-                                {({ selected }) => (
-                                  <>
-                                    <span
-                                      className={`block truncate ${
-                                        selected ? "font-bold" : "font-normal"
-                                      }`}
-                                    >
-                                      {option}
-                                    </span>
-                                  </>
-                                )}
-                              </Listbox.Option>
-                            ))}
-                          </Listbox.Options>
-                        </div>
-                      </Listbox>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <LinksMeta
-                paneId={targetId.paneId}
-                target={linkTargetKey}
-                setLinkTarget={setLinkTargetKey}
-              />
-            )}
-            <span className="flex gap-x-6 w-full">
-              <button
-                className="my-2 underline"
-                title={!linkMode ? `Style this Link` : `Configure this Link`}
-                onClick={() => {
-                  if (linkMode) setLinkMode(null);
-                  else setLinkMode(`button`);
-                  setSelectedStyle(null);
-                }}
-              >
-                {!linkMode ? `STYLE THIS LINK` : `CONFIGURE THIS LINK`}
-              </button>
-              {linkMode && (
-                <button
-                  className="my-2 underline"
-                  title="Add a Style to this"
-                  onClick={() => {
-                    setSelectedStyle(null);
-                    setAddClass(!addClass);
-                  }}
-                >
-                  {!addClass ? `ADD STYLE` : `CANCEL ADD STYLE`}
-                </button>
-              )}
-              {selectedStyle && (
-                <button
-                  className="my-2 underline"
-                  title="Cancel Edit Style"
-                  onClick={() => {
-                    setSelectedStyle(null);
-                  }}
-                >
-                  CANCEL EDIT STYLE
-                </button>
-              )}
-              <button
-                className="my-2 underline"
-                title="Close Links panel"
-                onClick={() => {
-                  setSelectedStyle(null);
-                  setAddClass(false);
-                  setLinkMode(null);
-                  setLinkTargetKey(``);
-                }}
-              >
-                BACK
-              </button>
-            </span>
-          </div>
-        )}
-        {imageMeta &&
-          activeTag &&
-          activeTag === `img` &&
-          typeof targetId?.globalNth === `number` &&
-          typeof targetId?.idx === `number` && (
-            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              <ImageMeta
-                paneId={targetId.paneId}
-                outerIdx={targetId.outerIdx}
-                idx={targetId.idx}
-                files={files}
-              />
-              <span className="flex gap-x-6 w-full">
-                <button
-                  className="my-2 underline"
-                  title="Edit Image Metadata"
-                  onClick={() => {
-                    setImageMeta(false);
-                  }}
-                >
-                  STYLE IMAGE
-                </button>
-              </span>
-            </div>
-          )}
-
-        {activeTag === `parent` && (
-          <>
-            <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-2 gap-y-1.5">
-              <span className="py-1">Layer:</span>
-              <button
-                onClick={() => handleAddLayer(true)}
-                title="Insert layer before"
-                className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
-              >
-                +
-              </button>
-              {parentClassNamesPayload?.classes &&
-                Object.keys(parentClassNamesPayload?.classes).map(
-                  (_, idx: number) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setParentLayer(idx);
-                        setSelectedStyle(null);
-                      }}
-                      className={classNames(
-                        "py-1 px-1.5 rounded-md",
-                        idx !== parentLayer
-                          ? "text-md underline underline-offset-2 text-mydarkgrey hover:text-black hover:bg-myorange/20"
-                          : "text-md text-black bg-myorange/50 font-bold pointer-events-none"
-                      )}
-                    >
-                      {idx + 1}
-                    </button>
-                  )
-                )}
-              <button
-                onClick={() => handleAddLayer(false)}
-                title="Insert layer after"
-                className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
-              >
-                +
-              </button>
-            </div>
-            <hr />
-            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              {parentClassNamesPayload?.classes &&
-              Array.isArray(parentClassNamesPayload?.classes) &&
-              Object.keys(parentClassNamesPayload?.classes[parentLayer])
-                .length ? (
-                Object.keys(parentClassNamesPayload?.classes[parentLayer]).map(
-                  className => ClassTag(className)
-                )
-              ) : (
-                <div>
-                  No styles.{" "}
-                  <button
-                    className="font-bold underline"
-                    onClick={handleDeleteLayer}
+                <div className="w-full">
+                  <label
+                    htmlFor="button-style-listbox"
+                    className="block text-sm text-mydarkgrey mb-2"
                   >
-                    Delete layer.
-                  </button>
+                    Apply default button styles
+                  </label>
+                  <Listbox
+                    value={buttonStyleOptions.at(0)}
+                    onChange={handleButtonStyleChange}
+                  >
+                    <div className="relative mt-1">
+                      <Listbox.Button
+                        ref={buttonStyleListboxRef}
+                        className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-myorange focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 xs:text-sm"
+                      >
+                        <span className="block truncate">
+                          {buttonStyleOptions.at(0)}
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <ChevronUpDownIcon
+                            className="h-5 w-5 text-mydarkgrey"
+                            aria-hidden="true"
+                          />
+                        </span>
+                      </Listbox.Button>
+                      <Listbox.Options
+                        className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+                          buttonStyleOpenAbove
+                            ? "bottom-full mb-1"
+                            : "top-full mt-1"
+                        }`}
+                        style={{ maxHeight: `${buttonStyleMaxHeight}px` }}
+                      >
+                        {buttonStyleOptions.map((option, idx) => (
+                          <Listbox.Option
+                            key={option}
+                            className={({ active }) =>
+                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                active
+                                  ? "bg-myorange/10 text-black"
+                                  : "text-black"
+                              }`
+                            }
+                            value={idx}
+                          >
+                            {({ selected }) => (
+                              <>
+                                <span
+                                  className={`block truncate ${
+                                    selected ? "font-bold" : "font-normal"
+                                  }`}
+                                >
+                                  {option}
+                                </span>
+                              </>
+                            )}
+                          </Listbox.Option>
+                        ))}
+                      </Listbox.Options>
+                    </div>
+                  </Listbox>
                 </div>
               )}
             </div>
-          </>
-        )}
-
-        {activeTag === `modal` && (
-          <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
-            {modalClassNamesPayload?.classes ? (
-              Object.keys(modalClassNamesPayload?.classes).map(className =>
-                ClassTag(className)
-              )
-            ) : (
-              <span>No styles</span>
-            )}
           </div>
+        ) : (
+          <LinksMeta
+            paneId={targetId.paneId}
+            target={linkTargetKey}
+            setLinkTarget={setLinkTargetKey}
+          />
         )}
-        {!imageMeta && !linkTargetKey && !widgetConfigMode && (
-          <span className="flex gap-x-6">
+        <span className="flex gap-x-6 w-full">
+          <button
+            className="my-2 underline"
+            title={!linkMode ? `Style this Link` : `Configure this Link`}
+            onClick={() => {
+              if (linkMode) setLinkMode(null);
+              else setLinkMode(`button`);
+              setSelectedStyle(null);
+            }}
+          >
+            {!linkMode ? `STYLE THIS LINK` : `CONFIGURE THIS LINK`}
+          </button>
+          {linkMode && (
             <button
               className="my-2 underline"
               title="Add a Style to this"
@@ -1470,293 +1335,461 @@ export const PaneAstStyles = (props: {
             >
               {!addClass ? `ADD STYLE` : `CANCEL ADD STYLE`}
             </button>
-            {selectedStyle && (
-              <button
-                className="my-2 underline"
-                title="Cancel Edit Style"
-                onClick={() => {
-                  setSelectedStyle(null);
-                }}
-              >
-                CANCEL EDIT STYLE
-              </button>
-            )}
-            {activeTag === `img` && (
-              <button
-                className="my-2 underline"
-                title="Edit Image Metadata"
-                onClick={() => {
-                  setImageMeta(true);
-                  setAddClass(false);
-                }}
-              >
-                IMAGE DESCRIPTION
-              </button>
-            )}
-            {activeTag === `code` && (
-              <button
-                className="my-2 underline"
-                title="Configure Widget"
-                onClick={handleWidgetConfig}
-              >
-                CONFIGURE WIDGET
-              </button>
-            )}
-            {markdownLookup?.linksLookup[targetId.outerIdx] &&
-              Object.keys(markdownLookup.linksLookup[targetId.outerIdx])
-                .length && (
+          )}
+          {selectedStyle && (
+            <button
+              className="my-2 underline"
+              title="Cancel Edit Style"
+              onClick={() => {
+                setSelectedStyle(null);
+              }}
+            >
+              CANCEL EDIT STYLE
+            </button>
+          )}
+          <button
+            className="my-2 underline"
+            title="Close Links panel"
+            onClick={() => {
+              setSelectedStyle(null);
+              setAddClass(false);
+              setLinkMode(null);
+              setLinkTargetKey(``);
+            }}
+          >
+            BACK
+          </button>
+        </span>
+      </div>
+    );
+
+  const IsImage = () =>
+    imageMeta &&
+    activeTag &&
+    activeTag === `img` &&
+    typeof targetId?.globalNth === `number` &&
+    typeof targetId?.idx === `number` && (
+      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+        <ImageMeta
+          paneId={targetId.paneId}
+          outerIdx={targetId.outerIdx}
+          idx={targetId.idx}
+          files={files}
+        />
+        <span className="flex gap-x-6 w-full">
+          <button
+            className="my-2 underline"
+            title="Edit Image Metadata"
+            onClick={() => {
+              setImageMeta(false);
+            }}
+          >
+            STYLE IMAGE
+          </button>
+        </span>
+      </div>
+    );
+
+  const IsParent = () =>
+    activeTag === `parent` && (
+      <>
+        <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-2 gap-y-1.5">
+          <span className="py-1">Layer:</span>
+          <button
+            onClick={() => handleAddLayer(true)}
+            title="Insert layer before"
+            className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
+          >
+            +
+          </button>
+          {parentClassNamesPayload?.classes &&
+            Object.keys(parentClassNamesPayload?.classes).map(
+              (_, idx: number) => (
                 <button
-                  className="my-2 underline"
-                  title="Manage Links"
+                  key={idx}
                   onClick={() => {
-                    setLinkTargetKey(
-                      linkTargetKey || targetId.buttonTarget || `*`
-                    );
-                    setLinkMode(null);
+                    setParentLayer(idx);
                     setSelectedStyle(null);
-                    setAddClass(false);
-                    if (thisTag) setActiveTag(thisTag);
                   }}
+                  className={classNames(
+                    "py-1 px-1.5 rounded-md",
+                    idx !== parentLayer
+                      ? "text-md underline underline-offset-2 text-mydarkgrey hover:text-black hover:bg-myorange/20"
+                      : "text-md text-black bg-myorange/50 font-bold pointer-events-none"
+                  )}
                 >
-                  MANAGE LINKS
+                  {idx + 1}
                 </button>
-              )}
-          </span>
+              )
+            )}
+          <button
+            onClick={() => handleAddLayer(false)}
+            title="Insert layer after"
+            className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
+          >
+            +
+          </button>
+        </div>
+        <hr />
+        <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+          {parentClassNamesPayload?.classes &&
+          Array.isArray(parentClassNamesPayload?.classes) &&
+          Object.keys(parentClassNamesPayload?.classes[parentLayer]).length ? (
+            Object.keys(parentClassNamesPayload?.classes[parentLayer]).map(
+              className => ClassTag(className)
+            )
+          ) : (
+            <div>
+              No styles.{" "}
+              <button
+                className="font-bold underline"
+                onClick={handleDeleteLayer}
+              >
+                Delete layer.
+              </button>
+            </div>
+          )}
+        </div>
+      </>
+    );
+
+  const IsModal = () =>
+    activeTag === `modal` && (
+      <div className="mt-2 flex flex-wrap gap-x-1.5 gap-y-1.5">
+        {modalClassNamesPayload?.classes ? (
+          Object.keys(modalClassNamesPayload?.classes).map(className =>
+            ClassTag(className)
+          )
+        ) : (
+          <span>No styles</span>
         )}
       </div>
-      <div className="mt-6">
-        {selectedStyle ? (
-          <div className="bg-white shadow-inner rounded">
-            <div className="px-6 py-4">
-              <h4 className="text-lg">
-                <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
-                {isLink || activeTagData?.hasOverride ? (
-                  <span className="underline font-bold text-mydarkgrey">
-                    THIS
-                  </span>
-                ) : (
-                  <span className="underline font-bold text-mydarkgrey">
-                    ALL
-                  </span>
-                )}{" "}
-                {isLink ? `Button` : tabs.length && tagTitles[tabs.at(0)!.tag]}
-                {isLink ? null : !activeTagData?.hasOverride ? `s` : null}
-              </h4>
-              <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
-                <ViewportComboBox
-                  value={mobileValue}
-                  onChange={setMobileValue}
-                  onFinalChange={handleFinalChangeIntercept}
-                  values={activeTagData?.values ?? []}
-                  viewport="mobile"
-                  allowNegative={activeTagData?.allowNegative ?? false}
-                  isNegative={activeTagData?.mobileIsNegative ?? false}
-                />
-                <ViewportComboBox
-                  value={tabletValue}
-                  onChange={setTabletValue}
-                  onFinalChange={handleFinalChangeIntercept}
-                  values={activeTagData?.values ?? []}
-                  viewport="tablet"
-                  allowNegative={activeTagData?.allowNegative}
-                  isNegative={activeTagData?.tabletIsNegative ?? false}
-                  isInferred={tabletValue === mobileValue}
-                />
-                <ViewportComboBox
-                  value={desktopValue}
-                  onChange={setDesktopValue}
-                  onFinalChange={handleFinalChangeIntercept}
-                  values={activeTagData?.values ?? []}
-                  viewport="desktop"
-                  allowNegative={activeTagData?.allowNegative ?? false}
-                  isNegative={activeTagData?.desktopIsNegative ?? false}
-                  isInferred={desktopValue === tabletValue}
-                />
-              </div>
+    );
 
-              {!isLink &&
-              tabs.length &&
-              ![`Pane Styles`, `Modal Styles`].includes(
-                tagTitles[tabs.at(0)!.tag]
-              ) &&
-              (mobileValue ||
-                tabletValue ||
-                desktopValue ||
-                activeTagData?.hasOverride) ? (
-                <div className="flex items-center mt-4">
-                  <Switch
-                    checked={activeTagData?.hasOverride}
-                    onChange={removeOverride}
+  const SecondaryNav = () =>
+    !imageMeta &&
+    !linkTargetKey &&
+    !widgetConfigMode && (
+      <span className="flex gap-x-6">
+        <button
+          className="my-2 underline"
+          title="Add a Style to this"
+          onClick={() => {
+            setSelectedStyle(null);
+            setAddClass(!addClass);
+          }}
+        >
+          {!addClass ? `ADD STYLE` : `CANCEL ADD STYLE`}
+        </button>
+        {selectedStyle && (
+          <button
+            className="my-2 underline"
+            title="Cancel Edit Style"
+            onClick={() => {
+              setSelectedStyle(null);
+            }}
+          >
+            CANCEL EDIT STYLE
+          </button>
+        )}
+        {activeTag === `img` && (
+          <button
+            className="my-2 underline"
+            title="Edit Image Metadata"
+            onClick={() => {
+              setImageMeta(true);
+              setAddClass(false);
+            }}
+          >
+            IMAGE DESCRIPTION
+          </button>
+        )}
+        {activeTag === `code` && (
+          <button
+            className="my-2 underline"
+            title="Configure Widget"
+            onClick={handleWidgetConfig}
+          >
+            CONFIGURE WIDGET
+          </button>
+        )}
+        {markdownLookup?.linksLookup[targetId.outerIdx] &&
+          Object.keys(markdownLookup.linksLookup[targetId.outerIdx]).length && (
+            <button
+              className="my-2 underline"
+              title="Manage Links"
+              onClick={() => {
+                setLinkTargetKey(linkTargetKey || targetId.buttonTarget || `*`);
+                setLinkMode(null);
+                setSelectedStyle(null);
+                setAddClass(false);
+                if (thisTag) setActiveTag(thisTag);
+              }}
+            >
+              MANAGE LINKS
+            </button>
+          )}
+      </span>
+    );
+
+  const SelectedStyle = () =>
+    selectedStyle ? (
+      <div className="mt-6">
+        <div className="bg-white shadow-inner rounded">
+          <div className="px-6 py-4">
+            <h4 className="text-lg">
+              <strong>{tailwindClasses[selectedStyle].title}</strong> on{" "}
+              {isLink || activeTagData?.hasOverride ? (
+                <span className="underline font-bold text-mydarkgrey">
+                  THIS
+                </span>
+              ) : (
+                <span className="underline font-bold text-mydarkgrey">ALL</span>
+              )}{" "}
+              {isLink ? `Button` : tabs?.length && tagTitles[tabs.at(0)!.tag]}
+              {isLink ? null : !activeTagData?.hasOverride ? `s` : null}
+            </h4>
+            <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
+              <ViewportComboBox
+                value={mobileValue}
+                onChange={setMobileValue}
+                onFinalChange={handleFinalChangeIntercept}
+                values={activeTagData?.values ?? []}
+                viewport="mobile"
+                allowNegative={activeTagData?.allowNegative ?? false}
+                isNegative={activeTagData?.mobileIsNegative ?? false}
+              />
+              <ViewportComboBox
+                value={tabletValue}
+                onChange={setTabletValue}
+                onFinalChange={handleFinalChangeIntercept}
+                values={activeTagData?.values ?? []}
+                viewport="tablet"
+                allowNegative={activeTagData?.allowNegative}
+                isNegative={activeTagData?.tabletIsNegative ?? false}
+                isInferred={tabletValue === mobileValue}
+              />
+              <ViewportComboBox
+                value={desktopValue}
+                onChange={setDesktopValue}
+                onFinalChange={handleFinalChangeIntercept}
+                values={activeTagData?.values ?? []}
+                viewport="desktop"
+                allowNegative={activeTagData?.allowNegative ?? false}
+                isNegative={activeTagData?.desktopIsNegative ?? false}
+                isInferred={desktopValue === tabletValue}
+              />
+            </div>
+
+            {!isLink &&
+            tabs?.length &&
+            ![`Pane Styles`, `Modal Styles`].includes(
+              tagTitles[tabs.at(0)!.tag]
+            ) &&
+            (mobileValue ||
+              tabletValue ||
+              desktopValue ||
+              activeTagData?.hasOverride) ? (
+              <div className="flex items-center mt-4">
+                <Switch
+                  checked={activeTagData?.hasOverride}
+                  onChange={removeOverride}
+                  className={`${
+                    activeTagData?.hasOverride ? "bg-myorange" : "bg-mydarkgrey"
+                  } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+                >
+                  <span
                     className={`${
                       activeTagData?.hasOverride
-                        ? "bg-myorange"
-                        : "bg-mydarkgrey"
-                    } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-                  >
-                    <span
-                      className={`${
-                        activeTagData?.hasOverride
-                          ? "translate-x-6"
-                          : "translate-x-1"
-                      } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                    />
-                  </Switch>
-                  <div className="ml-3">
-                    <div className="text-md text-black font-bold">
-                      {!activeTagData?.hasOverride
-                        ? `Quick style mode`
-                        : `Custom styles`}
-                    </div>
-                    <div className="text-md text-mydarkgrey">
-                      {!activeTagData?.hasOverride
-                        ? `all ${tagTitles[tabs.at(0)!.tag]}s (in this pane)`
-                        : `on this ${tagTitles[tabs.at(0)!.tag]} only`}
-                    </div>
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                  />
+                </Switch>
+                <div className="ml-3">
+                  <div className="text-md text-black font-bold">
+                    {!activeTagData?.hasOverride
+                      ? `Quick style mode`
+                      : `Custom styles`}
+                  </div>
+                  <div className="text-md text-mydarkgrey">
+                    {!activeTagData?.hasOverride
+                      ? `all ${tagTitles[tabs?.at(0)!.tag] ?? `common element`}s (in this pane)`
+                      : `on this ${tagTitles[tabs?.at(0)!.tag] ?? `element`} only`}
                   </div>
                 </div>
-              ) : null}
-            </div>
-          </div>
-        ) : addClass ? (
-          <div className="bg-white shadow-inner rounded">
-            <div className="px-6 py-4">
-              <h4 className="text-lg">Add Styles</h4>
-              <div className="my-4">
-                <Listbox value={styleFilter} onChange={setStyleFilter}>
-                  <div className="relative mt-1">
-                    <Listbox.Button
-                      ref={addStyleListboxRef}
-                      className="relative w-full cursor-default rounded-md border border-mydarkgrey bg-white py-2 pl-3 pr-10 text-left text-black shadow-sm focus:outline-none focus:ring-1 focus:ring-myorange focus:border-myorange xs:text-sm"
-                    >
-                      <span className="block truncate">
-                        {
-                          styleFilterOptions.find(
-                            option => option.value === styleFilter
-                          )?.label
-                        }
-                      </span>
-                      <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                        <ChevronUpDownIcon
-                          className="h-5 w-5 text-mydarkgrey"
-                          aria-hidden="true"
-                        />
-                      </span>
-                    </Listbox.Button>
-                    <Listbox.Options
-                      className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
-                        addStyleOpenAbove ? "bottom-full mb-1" : "top-full mt-1"
-                      }`}
-                      style={{ maxHeight: `${addStyleMaxHeight}px` }}
-                    >
-                      {styleFilterOptions.map(option => (
-                        <Listbox.Option
-                          key={option.value}
-                          value={option.value}
-                          className={({ active }) =>
-                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                              active ? "bg-myorange text-white" : "text-black"
-                            }`
-                          }
-                        >
-                          {({ selected, active }) => (
-                            <>
-                              <span
-                                className={`block truncate ${
-                                  selected ? "font-bold" : "font-normal"
-                                }`}
-                              >
-                                {option.label}
-                              </span>
-                              {selected ? (
-                                <span
-                                  className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                    active ? "text-white" : "text-myorange"
-                                  }`}
-                                >
-                                  <CheckIcon
-                                    className="h-5 w-5"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </div>
-                </Listbox>
               </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    ) : null;
 
-              <div className="relative">
-                <Combobox value={selectedClass} onChange={setSelectedClass}>
-                  <div className="relative mt-1">
-                    <Combobox.Input
-                      className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
-                      displayValue={(className: string) =>
-                        tailwindClasses[className]?.title || ""
-                      }
-                      onChange={event => setQuery(event.target.value)}
-                      autoComplete="off"
-                      placeholder="Select a style to add"
+  const AddClass = () => (
+    <div className="mt-6">
+      <div className="bg-white shadow-inner rounded">
+        <div className="px-6 py-4">
+          <h4 className="text-lg">Add Styles</h4>
+          <div className="my-4">
+            <Listbox value={styleFilter} onChange={setStyleFilter}>
+              <div className="relative mt-1">
+                <Listbox.Button
+                  ref={addStyleListboxRef}
+                  className="relative w-full cursor-default rounded-md border border-mydarkgrey bg-white py-2 pl-3 pr-10 text-left text-black shadow-sm focus:outline-none focus:ring-1 focus:ring-myorange focus:border-myorange xs:text-sm"
+                >
+                  <span className="block truncate">
+                    {
+                      styleFilterOptions.find(
+                        option => option.value === styleFilter
+                      )?.label
+                    }
+                  </span>
+                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
                     />
-                    <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-mydarkgrey"
-                        aria-hidden="true"
-                      />
-                    </Combobox.Button>
-                  </div>
-                  <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
-                    {filteredClasses.map(([className, classInfo]) => (
-                      <Combobox.Option
-                        key={className}
-                        value={className}
-                        className={({ active }) =>
-                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                            active ? "bg-myorange text-white" : "text-black"
-                          }`
-                        }
-                      >
-                        {({ selected, active }) => (
-                          <>
+                  </span>
+                </Listbox.Button>
+                <Listbox.Options
+                  className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+                    addStyleOpenAbove ? "bottom-full mb-1" : "top-full mt-1"
+                  }`}
+                  style={{ maxHeight: `${addStyleMaxHeight}px` }}
+                >
+                  {styleFilterOptions.map(option => (
+                    <Listbox.Option
+                      key={option.value}
+                      value={option.value}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                          active ? "bg-myorange text-white" : "text-black"
+                        }`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span
+                            className={`block truncate ${
+                              selected ? "font-bold" : "font-normal"
+                            }`}
+                          >
+                            {option.label}
+                          </span>
+                          {selected ? (
                             <span
-                              className={`block truncate ${
-                                selected ? "font-bold" : "font-normal"
+                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                active ? "text-white" : "text-myorange"
                               }`}
                             >
-                              {classInfo.title}
+                              <CheckIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
                             </span>
-                            {selected ? (
-                              <span
-                                className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                  active ? "text-white" : "text-myorange"
-                                }`}
-                              >
-                                <CheckIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            ) : null}
-                          </>
-                        )}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
-                </Combobox>
+                          ) : null}
+                        </>
+                      )}
+                    </Listbox.Option>
+                  ))}
+                </Listbox.Options>
               </div>
-
-              <button
-                onClick={handleAddStyleIntercept}
-                className="mt-4 w-full py-2 bg-myorange text-white rounded-md hover:bg-myorange/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-myorange"
-              >
-                Add Style
-              </button>
-            </div>
+            </Listbox>
           </div>
-        ) : null}
+
+          <div className="relative">
+            <Combobox value={selectedClass} onChange={setSelectedClass}>
+              <div className="relative mt-1">
+                <Combobox.Input
+                  className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
+                  displayValue={(className: string) =>
+                    tailwindClasses[className]?.title || ""
+                  }
+                  onChange={event => setQuery(event.target.value)}
+                  autoComplete="off"
+                  placeholder="Select a style to add"
+                />
+                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon
+                    className="h-5 w-5 text-mydarkgrey"
+                    aria-hidden="true"
+                  />
+                </Combobox.Button>
+              </div>
+              <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
+                {filteredClasses.map(([className, classInfo]) => (
+                  <Combobox.Option
+                    key={className}
+                    value={className}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active ? "bg-myorange text-white" : "text-black"
+                      }`
+                    }
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-bold" : "font-normal"
+                          }`}
+                        >
+                          {classInfo.title}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? "text-white" : "text-myorange"
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </Combobox>
+          </div>
+
+          <button
+            onClick={handleAddStyleIntercept}
+            className="mt-4 w-full py-2 bg-myorange text-white rounded-md hover:bg-myorange/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-myorange"
+          >
+            Add Style
+          </button>
+        </div>
       </div>
+    </div>
+  );
+
+  if (!tabs) return null;
+
+  return (
+    <div>
+      <div>
+        {!linkTargetKey && !widgetConfigMode && <Nav />}
+        {widgetConfigMode && <WidgetConfigMode />}
+        {!imageMeta &&
+          !linkTargetKey &&
+          !widgetConfigMode &&
+          activeTag &&
+          !selectedStyle &&
+          !addClass &&
+          ![`parent`, `modal`].includes(activeTag) && <AppliedStyles />}
+        {linkTargetKey && <IsLink />}
+        {imageMeta &&
+          activeTag &&
+          activeTag === `img` &&
+          typeof targetId?.globalNth === `number` &&
+          typeof targetId?.idx === `number` && <IsImage />}
+        {!addClass && !selectedStyle && activeTag === `parent` && <IsParent />}
+        {!addClass && !selectedStyle && activeTag === `modal` && <IsModal />}
+        {!imageMeta && !linkTargetKey && !widgetConfigMode && <SecondaryNav />}
+      </div>
+      {addClass && <AddClass />}
+      {selectedStyle && !addClass && <SelectedStyle />}
     </div>
   );
 };

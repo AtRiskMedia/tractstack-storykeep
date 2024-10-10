@@ -158,6 +158,18 @@ const value3 =
       href={targetUrl || thisAst.properties.href}
     >
       {thisAst.children[0].value}
+      <span
+        class="ml-0.5"
+        style="display: inline-block; vertical-align: middle; width: 1em; height: 1em;"
+      >
+        <svg viewBox="0 0 16 16" style="width: 1em; height: 1em;">
+          <title>External Link</title>
+          <path
+            d="M12 0H4C2.9 0 2 .9 2 2v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V2c0-1.1-.9-2-2-2zm0 14H4V2h8v12zm-1.5-2.5L6 8l4.5-4.5L8 3l-6 6 6 6 1.5-1.5z"
+            fill="currentColor"
+          />
+        </svg>
+      </span>
     </a>
   ) : null
 }

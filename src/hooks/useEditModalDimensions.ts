@@ -33,7 +33,6 @@ export const useEditModalDimensions = (
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
     const isShortScreen =
       innerHeight <= SHORT_SCREEN_THRESHOLD && innerWidth < SMALL_SCREEN_WIDTH;
-    console.log(innerHeight, SHORT_SCREEN_THRESHOLD);
     let newDimensions: Dimensions;
 
     if (innerWidth < SMALL_SCREEN_WIDTH || isShortScreen) {

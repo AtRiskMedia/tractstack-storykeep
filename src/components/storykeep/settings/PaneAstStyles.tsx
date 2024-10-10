@@ -55,8 +55,9 @@ export const PaneAstStyles = (props: {
   id: string;
   targetId: PaneAstTargetId;
   files: FileDatum[];
+  triggerScroll: () => void;
 }) => {
-  const { id, targetId, files } = props;
+  const { id, targetId, files, triggerScroll } = props;
   const buttonStyleListboxRef = useRef<HTMLButtonElement>(null);
   const addStyleListboxRef = useRef<HTMLButtonElement>(null);
   const { openAbove: buttonStyleOpenAbove, maxHeight: buttonStyleMaxHeight } =
@@ -803,6 +804,7 @@ export const PaneAstStyles = (props: {
             onClick={() => {
               setSelectedStyle(className);
               setConfirm(null);
+              triggerScroll();
             }}
           >
             {typeof tailwindClasses[className] !== `undefined`
@@ -814,6 +816,7 @@ export const PaneAstStyles = (props: {
             title="Remove style"
             onClick={() => {
               removeStyleIntercept(className);
+              triggerScroll();
             }}
           >
             <XMarkIcon className="w-3 h-6" />
@@ -834,7 +837,10 @@ export const PaneAstStyles = (props: {
           <button
             className="ml-[-0.5rem] p-1 bg-black text-white font-bold rounded-full hover:bg-myorange hover:text-white"
             title="Keep style"
-            onClick={() => cancelRemoveStyle()}
+            onClick={() => {
+              cancelRemoveStyle();
+              triggerScroll();
+            }}
           >
             <XMarkIcon className="w-3 h-5" />
           </button>
@@ -1082,6 +1088,7 @@ export const PaneAstStyles = (props: {
                   setLinkTargetKey(``);
                   setLinkMode(null);
                   setSelectedStyle(null);
+                  triggerScroll();
                 }}
                 className={classNames(
                   tab.tag === activeTag
@@ -1103,6 +1110,7 @@ export const PaneAstStyles = (props: {
                   setLinkTargetKey(``);
                   setLinkMode(null);
                   setSelectedStyle(null);
+                  triggerScroll();
                 }}
                 className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
                 disabled={
@@ -1157,6 +1165,7 @@ export const PaneAstStyles = (props: {
               setSelectedStyle(null);
               setAddClass(false);
               setWidgetConfigMode(false);
+              triggerScroll();
             }}
           >
             BACK
@@ -1165,7 +1174,10 @@ export const PaneAstStyles = (props: {
             <button
               className="my-2 underline"
               title="Apply styles to widget"
-              onClick={handleWidgetStyle}
+              onClick={() => {
+                handleWidgetStyle();
+                triggerScroll();
+              }}
             >
               STYLE THIS WIDGET
             </button>
@@ -1208,6 +1220,7 @@ export const PaneAstStyles = (props: {
                   onClick={() => {
                     setLinkMode(`button`);
                     setSelectedStyle(null);
+                    triggerScroll();
                   }}
                 >
                   Button Styles
@@ -1221,6 +1234,7 @@ export const PaneAstStyles = (props: {
                   onClick={() => {
                     setLinkMode(`hover`);
                     setSelectedStyle(null);
+                    triggerScroll();
                   }}
                 >
                   Hover Styles
@@ -1312,6 +1326,12 @@ export const PaneAstStyles = (props: {
             setLinkTarget={setLinkTargetKey}
           />
         )}
+      </div>
+    );
+
+  const IsLinkNav = () =>
+    linkTargetKey && (
+      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
         <span className="flex gap-x-6 w-full">
           <button
             className="my-2 underline"
@@ -1320,6 +1340,8 @@ export const PaneAstStyles = (props: {
               if (linkMode) setLinkMode(null);
               else setLinkMode(`button`);
               setSelectedStyle(null);
+              setAddClass(false);
+              triggerScroll();
             }}
           >
             {!linkMode ? `STYLE THIS LINK` : `CONFIGURE THIS LINK`}
@@ -1331,6 +1353,7 @@ export const PaneAstStyles = (props: {
               onClick={() => {
                 setSelectedStyle(null);
                 setAddClass(!addClass);
+                triggerScroll();
               }}
             >
               {!addClass ? `ADD STYLE` : `CANCEL ADD STYLE`}
@@ -1342,6 +1365,7 @@ export const PaneAstStyles = (props: {
               title="Cancel Edit Style"
               onClick={() => {
                 setSelectedStyle(null);
+                triggerScroll();
               }}
             >
               CANCEL EDIT STYLE
@@ -1355,6 +1379,7 @@ export const PaneAstStyles = (props: {
               setAddClass(false);
               setLinkMode(null);
               setLinkTargetKey(``);
+              triggerScroll();
             }}
           >
             BACK
@@ -1382,6 +1407,7 @@ export const PaneAstStyles = (props: {
             title="Edit Image Metadata"
             onClick={() => {
               setImageMeta(false);
+              triggerScroll();
             }}
           >
             STYLE IMAGE
@@ -1396,7 +1422,10 @@ export const PaneAstStyles = (props: {
         <div className="bg-myblue/5 text-md mt-2 px-2 flex flex-wrap gap-x-2 gap-y-1.5">
           <span className="py-1">Layer:</span>
           <button
-            onClick={() => handleAddLayer(true)}
+            onClick={() => {
+              handleAddLayer(true);
+              triggerScroll();
+            }}
             title="Insert layer before"
             className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
           >
@@ -1410,6 +1439,7 @@ export const PaneAstStyles = (props: {
                   onClick={() => {
                     setParentLayer(idx);
                     setSelectedStyle(null);
+                    triggerScroll();
                   }}
                   className={classNames(
                     "py-1 px-1.5 rounded-md",
@@ -1423,7 +1453,10 @@ export const PaneAstStyles = (props: {
               )
             )}
           <button
-            onClick={() => handleAddLayer(false)}
+            onClick={() => {
+              handleAddLayer(false);
+              triggerScroll();
+            }}
             title="Insert layer after"
             className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
           >
@@ -1443,7 +1476,10 @@ export const PaneAstStyles = (props: {
               No styles.{" "}
               <button
                 className="font-bold underline"
-                onClick={handleDeleteLayer}
+                onClick={() => {
+                  handleDeleteLayer();
+                  triggerScroll();
+                }}
               >
                 Delete layer.
               </button>
@@ -1477,6 +1513,7 @@ export const PaneAstStyles = (props: {
           onClick={() => {
             setSelectedStyle(null);
             setAddClass(!addClass);
+            triggerScroll();
           }}
         >
           {!addClass ? `ADD STYLE` : `CANCEL ADD STYLE`}
@@ -1487,6 +1524,7 @@ export const PaneAstStyles = (props: {
             title="Cancel Edit Style"
             onClick={() => {
               setSelectedStyle(null);
+              triggerScroll();
             }}
           >
             CANCEL EDIT STYLE
@@ -1499,6 +1537,7 @@ export const PaneAstStyles = (props: {
             onClick={() => {
               setImageMeta(true);
               setAddClass(false);
+              triggerScroll();
             }}
           >
             IMAGE DESCRIPTION
@@ -1508,7 +1547,10 @@ export const PaneAstStyles = (props: {
           <button
             className="my-2 underline"
             title="Configure Widget"
-            onClick={handleWidgetConfig}
+            onClick={() => {
+              handleWidgetConfig();
+              triggerScroll();
+            }}
           >
             CONFIGURE WIDGET
           </button>
@@ -1524,6 +1566,7 @@ export const PaneAstStyles = (props: {
                 setSelectedStyle(null);
                 setAddClass(false);
                 if (thisTag) setActiveTag(thisTag);
+                triggerScroll();
               }}
             >
               MANAGE LINKS
@@ -1754,7 +1797,10 @@ export const PaneAstStyles = (props: {
           </div>
 
           <button
-            onClick={handleAddStyleIntercept}
+            onClick={() => {
+              handleAddStyleIntercept();
+              triggerScroll();
+            }}
             className="mt-4 w-full py-2 bg-myorange text-white rounded-md hover:bg-myorange/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-myorange"
           >
             Add Style
@@ -1778,7 +1824,8 @@ export const PaneAstStyles = (props: {
           !selectedStyle &&
           !addClass &&
           ![`parent`, `modal`].includes(activeTag) && <AppliedStyles />}
-        {linkTargetKey && <IsLink />}
+        {!addClass && !selectedStyle && linkTargetKey && <IsLink />}
+        {linkTargetKey && <IsLinkNav />}
         {imageMeta &&
           activeTag &&
           activeTag === `img` &&

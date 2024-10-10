@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ulid } from "ulid";
@@ -25,6 +25,7 @@ interface EditModalProps {
 
 export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const $creationState = useStore(creationStateStore);
+  const [shouldScroll, setShouldScroll] = useState(false);
   const thisId = id !== `create` ? id : ($creationState.id ?? `error`);
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
@@ -46,6 +47,34 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
     isFullWidthMobileShort,
   } = useEditModalDimensions($editMode !== null);
 
+  const scrollToTarget = useCallback(() => {
+    if ($editMode?.targetId) {
+      const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
+
+      const targetElement = document.getElementById(targetId);
+      const modalElement = document.getElementById("edit-modal");
+
+      if (targetElement && modalElement) {
+        const modalRect = modalElement.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const currentScrollY = window.scrollY;
+        const modalHeight = modalRect.height;
+        const spaceAboveModal = viewportHeight - modalHeight;
+        const targetDesiredTop = Math.max(
+          spaceAboveModal / 2 - targetRect.height / 2,
+          0
+        );
+        const newScrollY = currentScrollY + targetRect.top - targetDesiredTop;
+        const finalScrollY = Math.max(0, newScrollY);
+        window.scrollTo({
+          top: finalScrollY,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [$editMode?.targetId]);
+
   useEffect(() => {
     const header = document.getElementById("main-header");
     if (header) {
@@ -58,16 +87,21 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   }, [isFullWidthMobileShort, isVisible]);
 
   useEffect(() => {
-    if ($editMode?.targetId && isVisible) {
-      const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        setTimeout(() => {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-        }, 100);
-      }
+    if (
+      (shouldScroll || $editMode?.targetId) &&
+      isVisible &&
+      isFullWidthMobileShort
+    ) {
+      setTimeout(() => {
+        scrollToTarget();
+        setShouldScroll(false);
+      }, 100);
     }
-  }, [$editMode?.targetId, isVisible, height]);
+  }, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
+
+  const triggerScroll = useCallback(() => {
+    if (isFullWidthMobileShort) setShouldScroll(true);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -116,9 +150,10 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   return (
     <div className="relative">
       <div
+        id="edit-modal"
         className={classNames(
           `fixed z-[9000]`,
-          `backdrop-blur-sm bg-mylightgrey/20 dark:bg-black/85`,
+          `backdrop-blur-sm bg-mydarkgrey/50`,
           `shadow-lg transition-all duration-300 ease-in-out`,
           type === `desktop` ? "rounded-bl-lg" : "rounded-t-lg"
         )}
@@ -217,6 +252,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
                 id={thisId}
                 files={files}
                 targetId={$editMode.targetId}
+                triggerScroll={triggerScroll}
               />
             ) : $editMode?.type === `pane` && $editMode?.mode === `break` ? (
               <PaneBreakSettings id={$editMode.id} />

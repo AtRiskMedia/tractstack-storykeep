@@ -14,8 +14,8 @@ interface Dimensions {
   isFullWidthMobileShort: boolean;
 }
 
-const SHORT_SCREEN_THRESHOLD = 600;
-const SMALL_SCREEN_WIDTH = 640;
+const SHORT_SCREEN_THRESHOLD = 900;
+const SMALL_SCREEN_WIDTH = 600;
 
 export const useEditModalDimensions = (
   isEditModeActive: boolean

@@ -217,7 +217,7 @@ export const StoryKeepHeader = memo(
       const paneChanges = paneIds?.some(paneId =>
         Object.values($unsavedChanges[paneId] || {}).some(Boolean)
       );
-      const paneFragmentChanges = paneIds.some(paneId => {
+      const paneFragmentChanges = paneIds?.some(paneId => {
         const fragmentIds = $paneFragmentIds[paneId]?.current || [];
         return fragmentIds.some(fragmentId =>
           Object.values($unsavedChanges[fragmentId] || {}).some(Boolean)

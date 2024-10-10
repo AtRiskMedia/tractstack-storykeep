@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import { classNames } from "../../../utils/helpers";
@@ -47,39 +47,75 @@ const ViewportComboBox = ({
         ? DeviceTabletIcon
         : ComputerDesktopIcon;
 
-  const handleNegativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFinalChange(value, viewport, event.target.checked);
-    setIsNowNegative(event.target.checked);
-  };
+  const handleNegativeChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onFinalChange(value, viewport, event.target.checked);
+      setIsNowNegative(event.target.checked);
+    },
+    [value, viewport, onFinalChange]
+  );
 
-  const handleChange = (newValue: string) => {
-    setInternalValue(newValue ?? "");
-    onChange(newValue ?? "");
-  };
+  const handleChange = useCallback(
+    (newValue: string) => {
+      setInternalValue(newValue ?? "");
+      onChange(newValue ?? "");
+    },
+    [onChange]
+  );
 
-  const handleSelect = (selectedValue: string) => {
-    setInternalValue(selectedValue);
-    onChange(selectedValue);
-    onFinalChange(selectedValue, viewport, isNowNegative);
-    inputRef.current?.blur();
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      onFinalChange(value, viewport, isNowNegative);
+  const handleSelect = useCallback(
+    (selectedValue: string) => {
+      setInternalValue(selectedValue);
+      onChange(selectedValue);
+      onFinalChange(selectedValue, viewport, isNowNegative);
       inputRef.current?.blur();
-    }
-  };
+    },
+    [onChange, onFinalChange, viewport, isNowNegative]
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        onFinalChange(value, viewport, isNowNegative);
+        inputRef.current?.blur();
+      }
+    },
+    [value, viewport, isNowNegative, onFinalChange]
+  );
 
   useEffect(() => {
     setInternalValue(value || "");
   }, [value]);
 
+  useEffect(() => {
+    const input = inputRef.current;
+    if (input) {
+      const handleFocus = () => {
+        setTimeout(() => {
+          input.select();
+        }, 0);
+      };
+      input.addEventListener("focus", handleFocus);
+      return () => {
+        input.removeEventListener("focus", handleFocus);
+      };
+    }
+  }, []);
+
+  const handleTouchStart = useCallback(
+    (event: React.TouchEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      inputRef.current?.focus();
+    },
+    []
+  );
+
   return (
     <div
       className="flex flex-nowrap items-center"
       title={`Value on ${viewport} Screens`}
+      onTouchStart={handleTouchStart}
     >
       <Icon className="h-8 w-8 mr-2" aria-hidden="true" />
       <div className="relative w-full">

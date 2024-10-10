@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect, useMemo, memo } from "react";
+import { useCallback, useState, useRef, useEffect, memo } from "react";
 import { useStore } from "@nanostores/react";
 import {
   RectangleGroupIcon,
@@ -110,6 +110,13 @@ export const StoryKeepHeader = memo(
     const $paneTitle = useStore(paneTitle, { keys: [thisId] });
     const $paneSlug = useStore(paneSlug, { keys: [thisId] });
     const $editMode = useStore(editModeStore);
+    const $unsavedChanges = useStore(unsavedChangesStore);
+    const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
+      keys: [thisId],
+    });
+    const $paneFragmentIds = useStore(paneFragmentIds, { keys: [thisId] });
+
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const $viewportSet = useStore(viewportSetStore);
     const $viewport = useStore(viewportStore);
     const $viewportKey = useStore(viewportKeyStore);
@@ -125,7 +132,7 @@ export const StoryKeepHeader = memo(
     const [isClient, setIsClient] = useState(false);
     const [hideElements, setHideElements] = useState(false);
     const headerRef = useRef<HTMLDivElement>(null);
-    let lastScrollTop = 0;
+    const lastScrollPosition = useRef(0);
     const usedSlugs = [
       ...contentMap.filter(item => item.slug !== slug).map(item => item.slug),
       ...Object.keys($paneSlug).map(s => $paneSlug[s].current),
@@ -202,20 +209,6 @@ export const StoryKeepHeader = memo(
       window.addEventListener("resize", checkMobile);
       return () => window.removeEventListener("resize", checkMobile);
     }, []);
-
-    useEffect(() => {
-      if (toolMode === "insert" && toolAddModeRef.current) {
-        toolAddModeRef.current.focus();
-      }
-    }, [toolMode]);
-
-    const $unsavedChanges = useStore(unsavedChangesStore);
-    const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
-      keys: [thisId],
-    });
-    const $paneFragmentIds = useStore(paneFragmentIds, { keys: [thisId] });
-
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     useEffect(() => {
       const storyFragmentChanges = Object.values(
@@ -321,37 +314,42 @@ export const StoryKeepHeader = memo(
       if (headerRef.current) {
         const scrollPosition =
           window.scrollY || document.documentElement.scrollTop;
-        const scrollingDown = scrollPosition > lastScrollTop;
+        const headerHeight = headerRef.current.offsetHeight;
+        const scrollThreshold = MIN_SCROLL_THRESHOLD - headerHeight;
 
-        setHideElements(prevHideElements => {
-          if (scrollingDown) {
-            // When scrolling down, hide elements if we've scrolled past the threshold
-            return scrollPosition > MIN_SCROLL_THRESHOLD;
-          } else {
-            // When scrolling up, show elements if we've scrolled up past (threshold - hysteresis)
-            return (
-              prevHideElements &&
-              scrollPosition > MIN_SCROLL_THRESHOLD - HYSTERESIS
-            );
-          }
-        });
-        lastScrollTop = scrollPosition;
+        if (
+          Math.abs(scrollPosition - lastScrollPosition.current) > HYSTERESIS
+        ) {
+          setHideElements(prevHideElements => {
+            const newHideElements = scrollPosition > scrollThreshold;
+            if (newHideElements !== prevHideElements) {
+              lastScrollPosition.current = scrollPosition;
+              return newHideElements;
+            }
+            return prevHideElements;
+          });
+        }
       }
     }, []);
 
-    const debouncedHandleScroll = useMemo(
-      () => debounce(handleScroll, 30),
-      [handleScroll]
-    );
+    const debouncedHandleScroll = useCallback(debounce(handleScroll, 100), [
+      handleScroll,
+    ]);
 
     useEffect(() => {
       window.addEventListener("scroll", debouncedHandleScroll);
-      // Call handleScroll immediately to set initial state
-      handleScroll();
+      debouncedHandleScroll(); // Call immediately to set initial state
+
       return () => {
         window.removeEventListener("scroll", debouncedHandleScroll);
       };
-    }, [debouncedHandleScroll, handleScroll]);
+    }, [debouncedHandleScroll]);
+
+    useEffect(() => {
+      if (toolMode === "insert" && toolAddModeRef.current) {
+        toolAddModeRef.current.focus();
+      }
+    }, [toolMode]);
 
     const toggleAnalytics = () => {
       showAnalytics.set(!$showAnalytics);

@@ -51,7 +51,7 @@ const contentMap: ContentMap[] = await getContentMap();
       )
     }
     <header
-      class="z-10 bg-mywhite shadow-inner px-4 flex justify-between items-center w-full"
+      class="z-[8999] sticky top-0 z-10 bg-mywhite flex justify-between items-center w-full"
       id="main-header"
     >
       <StoryKeepHeader
@@ -97,13 +97,4 @@ const contentMap: ContentMap[] = await getContentMap();
       />
     </div>
   </div>
-
-  <script>
-    import { initStoryKeep } from "../../utils/storykeep";
-    function setupStoryKeep() {
-      initStoryKeep();
-    }
-    setupStoryKeep();
-    document.addEventListener("astro:page-load", setupStoryKeep);
-  </script>
 </StoryKeep>

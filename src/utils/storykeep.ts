@@ -30,12 +30,11 @@ import {
   paneFragmentIds,
   paneFragmentBgColour,
 } from "../store/storykeep";
-import { debounce, isDeepEqual } from "./helpers";
+import { isDeepEqual } from "./helpers";
 import {
   MS_BETWEEN_UNDO,
   MAX_HISTORY_LENGTH,
   SHORT_SCREEN_THRESHOLD,
-  MIN_SCROLL_THRESHOLD,
   reservedSlugs,
 } from "../constants";
 import type {
@@ -311,35 +310,6 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
     handleEditingChange,
   };
 };
-
-export function initStoryKeep() {
-  const header = document.getElementById("main-header") as HTMLElement;
-
-  function handleHeaderBehavior(): void {
-    const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-    if (header) {
-      header.classList.toggle("sticky", scrollPosition > MIN_SCROLL_THRESHOLD);
-      header.classList.toggle("top-0", scrollPosition > MIN_SCROLL_THRESHOLD);
-      header.style.zIndex = "9000";
-    }
-  }
-
-  function handleResize(): void {
-    handleHeaderBehavior();
-  }
-
-  function handleScroll(): void {
-    handleHeaderBehavior();
-  }
-
-  const debouncedHandleScroll = debounce(handleScroll, 50);
-  const debouncedHandleResize = debounce(handleResize, 50);
-
-  // Initialize
-  handleHeaderBehavior();
-  window.addEventListener("resize", debouncedHandleResize);
-  window.addEventListener("scroll", debouncedHandleScroll);
-}
 
 // Global functions to toggle layout (updated to include targetElementId)
 export const handleToggleOn = (mode: string, targetElementId?: string) => {

@@ -30,8 +30,8 @@ export const MAX_LENGTH_CONTENT = 10000;
 
 export const SHORT_SCREEN_THRESHOLD = 900;
 export const SMALL_SCREEN_WIDTH = 600;
-export const MIN_SCROLL_THRESHOLD = 100;
-export const HYSTERESIS = 99;
+export const MIN_SCROLL_THRESHOLD = 200;
+export const HYSTERESIS = 100;
 
 export const tagTitles: Record<Tag, string> = {
   p: "Paragraph",

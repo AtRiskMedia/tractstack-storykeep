@@ -1,9 +1,6 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Combobox } from "@headlessui/react";
-import {
-  ChevronUpDownIcon,
-  CheckIcon,
-} from "@heroicons/react/20/solid";
+import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import { classNames } from "../../../utils/helpers";
 import {
   DevicePhoneMobileIcon,

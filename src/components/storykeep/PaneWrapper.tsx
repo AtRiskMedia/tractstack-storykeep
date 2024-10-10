@@ -31,25 +31,43 @@ const InsertAboveBelowWrapper = ({
   onInsertClick: (position: "above" | "below") => void;
 }) => {
   return (
-    <div className="relative group">
+    <div className="relative">
       {children}
-      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top mix-blend-exclusion hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
-        <div
-          onClick={() => onInsertClick("above")}
-          title="Insert new Pane above this one"
-          className="absolute inset-0 w-full h-full
+      <div className="group absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top  hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
+        <>
+          <div
+            className="absolute top-1/2 left-1/2 transform translate-x-1/2 -translate-y-1/2
+             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
+             text-md font-action mx-6 group-hover:bg-black group-hover:text-white"
+          >
+            Insert new Pane above
+          </div>
+          <div
+            onClick={() => onInsertClick("above")}
+            title="Insert new Pane above this one"
+            className="absolute inset-0 w-full h-full
                      before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-4
                      before:border-t-4 before:border-dashed before:border-white/25 hover:before:border-white"
-        />
+          />
+        </>
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom mix-blend-exclusion hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
-        <div
-          onClick={() => onInsertClick("below")}
-          title="Insert new Pane below this one"
-          className="absolute inset-0 w-full h-full
+      <div className="group absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom  hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
+        <>
+          <div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
+             text-md font-action mx-6  group-hover:bg-black group-hover:text-white"
+          >
+            Insert new Pane below
+          </div>
+          <div
+            onClick={() => onInsertClick("below")}
+            title="Insert new Pane below this one"
+            className="absolute inset-0 w-full h-full
                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-4
                      after:border-b-4 after:border-dashed after:border-white/25 hover:after:border-white"
-        />
+          />
+        </>
       </div>
     </div>
   );
@@ -220,10 +238,10 @@ const PaneWrapper = (props: {
           Content
         )}
         {toolMode === "settings" && (
-          <div className="absolute inset-0 hover:backdrop-blur-sm hover:bg-white/50 hover:dark:bg-black/50 flex items-center justify-center group z-104 cursor-pointer pointer-events-auto">
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/50 dark:bg-black/50 flex items-center justify-center group z-104 cursor-pointer pointer-events-auto">
             <div className="relative">
-              <div className="bg-yellow-300 p-4 rounded-md invisible group-hover:visible">
-                <h2 className="text-xl text-black font-bold mb-2">
+              <div className="bg-yellow-300 p-4 rounded-md group-hover:bg-black">
+                <h2 className="text-xl text-black font-bold mb-2 group-hover:text-white">
                   Configure this Pane
                 </h2>
               </div>

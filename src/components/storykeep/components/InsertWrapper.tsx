@@ -193,42 +193,58 @@ const InsertWrapper = ({
   }
 
   return (
-    <div className="relative group">
+    <div className="relative">
       {children}
       <div
         className={classNames(
-          "absolute inset-x-0 top-0 h-1/2 z-100 group/top mix-blend-exclusion",
+          "group absolute inset-x-0 top-0 h-1/2 z-100 group/top ",
           allowTag.before ? `cursor-pointer` : ``
         )}
       >
         {allowTag.before && (
-          <div
-            onClick={() => handleInsert("before")}
-            title={`Insert new ${toolAddModeTitles[toolAddMode]} above`}
-            className="absolute inset-0 w-full h-full
+          <>
+            <div
+              className="absolute top-1/2 left-1/2 transform translate-x-1/2 -translate-y-1/2
+             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
+             text-md font-action mx-6 group-hover:bg-black group-hover:text-white"
+            >
+              Add {toolAddModeTitles[toolAddMode]} Above
+            </div>
+            <div
+              onClick={() => handleInsert("before")}
+              title={`Insert new ${toolAddModeTitles[toolAddMode]} above`}
+              className="absolute inset-0 w-full h-full
                      hover:bg-gradient-to-b hover:from-mylightgrey/25 hover:via-mylightgrey/25 hover:to-transparent
-                     mix-blend-exclusion
                      before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1
                      before:border-t-4 before:border-dotted before:border-mylightgrey/25 hover:before:border-mylightgrey"
-          />
+            />
+          </>
         )}
       </div>
       <div
         className={classNames(
-          "absolute inset-x-0 bottom-0 h-1/2 z-100 group/bottom mix-blend-exclusion",
+          "group absolute inset-x-0 bottom-0 h-1/2 z-100 group/bottom ",
           allowTag.after ? `cursor-pointer` : ``
         )}
       >
         {allowTag.after && (
-          <div
-            onClick={() => handleInsert("after")}
-            title={`Insert new ${toolAddModeTitles[toolAddMode]} below`}
-            className="absolute inset-0 w-full h-full
+          <>
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
+             text-md font-action mx-6  group-hover:bg-black group-hover:text-white"
+            >
+              Add {toolAddModeTitles[toolAddMode]} Below
+            </div>
+            <div
+              onClick={() => handleInsert("after")}
+              title={`Insert new ${toolAddModeTitles[toolAddMode]} below`}
+              className="absolute inset-0 w-full h-full
                      hover:bg-gradient-to-t hover:from-mylightgrey/25 hover:via-mylightgrey/25 hover:to-transparent
-                     mix-blend-exclusion
                      after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1
                      after:border-b-4 after:border-dotted after:border-mylightgrey/25 hover:after:border-mylightgrey"
-          />
+            />
+          </>
         )}
       </div>
     </div>

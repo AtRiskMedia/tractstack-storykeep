@@ -347,21 +347,7 @@ export const StoryFragment = (props: {
                 isContext={isContext}
               />
             </div>
-          ) : isDesigningNew && paneId !== `insert` ? (
-            <div className="relative">
-              <div className="absolute inset-0 bg-black/85 z-[8999]"></div>
-              <PaneWrapper
-                id={paneId}
-                slug={slug}
-                isContext={isContext}
-                viewportKey={viewportKey}
-                insertPane={insertPane}
-                toolMode={toolMode}
-                toolAddMode={toolAddMode}
-                isDesigningNew={isDesigningNew}
-              />
-            </div>
-          ) : (
+          ) : isDesigningNew && paneId !== `insert` ? null : (
             <PaneWrapper
               id={paneId}
               slug={slug}

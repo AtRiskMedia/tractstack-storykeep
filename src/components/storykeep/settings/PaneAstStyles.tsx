@@ -1595,7 +1595,6 @@ export const PaneAstStyles = (props: {
             <div className="flex flex-col gap-y-2.5 my-3 text-mydarkgrey text-xl">
               <ViewportComboBox
                 value={mobileValue}
-                onChange={setMobileValue}
                 onFinalChange={handleFinalChangeIntercept}
                 values={activeTagData?.values ?? []}
                 viewport="mobile"
@@ -1604,7 +1603,6 @@ export const PaneAstStyles = (props: {
               />
               <ViewportComboBox
                 value={tabletValue}
-                onChange={setTabletValue}
                 onFinalChange={handleFinalChangeIntercept}
                 values={activeTagData?.values ?? []}
                 viewport="tablet"
@@ -1614,7 +1612,6 @@ export const PaneAstStyles = (props: {
               />
               <ViewportComboBox
                 value={desktopValue}
-                onChange={setDesktopValue}
                 onFinalChange={handleFinalChangeIntercept}
                 values={activeTagData?.values ?? []}
                 viewport="desktop"

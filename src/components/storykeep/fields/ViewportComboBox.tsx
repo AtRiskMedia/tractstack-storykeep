@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
 import { classNames } from "../../../utils/helpers";
@@ -8,10 +8,10 @@ import {
   ComputerDesktopIcon,
 } from "@heroicons/react/24/outline";
 import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
+import type { ChangeEvent } from "react";
 
 interface ViewportComboBoxProps {
   value: string;
-  onChange: (value: string) => void;
   onFinalChange: (
     value: string,
     viewport: "mobile" | "tablet" | "desktop",
@@ -26,7 +26,6 @@ interface ViewportComboBoxProps {
 
 const ViewportComboBox = ({
   value,
-  onChange,
   onFinalChange,
   values,
   viewport,
@@ -34,8 +33,9 @@ const ViewportComboBox = ({
   isNegative = false,
   isInferred = false,
 }: ViewportComboBoxProps) => {
-  const [internalValue, setInternalValue] = useState(value ?? "");
+  const [internalValue, setInternalValue] = useState(value);
   const [isNowNegative, setIsNowNegative] = useState(isNegative);
+  const [filteredValues, setFilteredValues] = useState(values);
   const inputRef = useRef<HTMLInputElement>(null);
   const comboboxButtonRef = useRef<HTMLButtonElement>(null);
   const { openAbove, maxHeight } = useDropdownDirection(comboboxButtonRef);
@@ -47,34 +47,48 @@ const ViewportComboBox = ({
         ? DeviceTabletIcon
         : ComputerDesktopIcon;
 
-  const handleNegativeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFinalChange(value, viewport, event.target.checked);
-    setIsNowNegative(event.target.checked);
-  };
-
-  const handleChange = (newValue: string) => {
-    setInternalValue(newValue ?? "");
-    onChange(newValue ?? "");
-  };
-
-  const handleSelect = (selectedValue: string) => {
-    setInternalValue(selectedValue);
-    onChange(selectedValue);
-    onFinalChange(selectedValue, viewport, isNowNegative);
-    inputRef.current?.blur();
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      onFinalChange(value, viewport, isNowNegative);
-      inputRef.current?.blur();
+  useEffect(() => {
+    if (value !== internalValue) {
+      setInternalValue(value);
     }
-  };
+    if (isNegative !== isNowNegative) {
+      setIsNowNegative(isNegative);
+    }
+  }, [value, isNegative]);
 
   useEffect(() => {
-    setInternalValue(value || "");
-  }, [value]);
+    setFilteredValues(
+      values.filter(item =>
+        item.toLowerCase().includes(internalValue.toLowerCase())
+      )
+    );
+  }, [internalValue, values]);
+
+  const handleNegativeChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setIsNowNegative(event.target.checked);
+    },
+    [viewport]
+  );
+
+  const handleChange = useCallback(
+    (newValue: string) => {
+      setInternalValue(newValue);
+    },
+    [viewport]
+  );
+
+  const handleSelect = useCallback(
+    (selectedValue: string) => {
+      setInternalValue(selectedValue);
+      onFinalChange(selectedValue, viewport, isNowNegative);
+    },
+    [onFinalChange, viewport, isNowNegative]
+  );
+
+  const handleBlur = useCallback(() => {
+    onFinalChange(internalValue, viewport, isNowNegative);
+  }, [internalValue, onFinalChange, viewport, isNowNegative]);
 
   return (
     <div
@@ -83,7 +97,7 @@ const ViewportComboBox = ({
     >
       <Icon className="h-8 w-8 mr-2" aria-hidden="true" />
       <div className="relative w-full">
-        <Combobox value={value} onChange={handleSelect}>
+        <Combobox value={internalValue} onChange={handleSelect}>
           <div className="flex items-center">
             <div className="relative flex-grow">
               <Combobox.Input
@@ -93,9 +107,8 @@ const ViewportComboBox = ({
                   isInferred ? "text-black/20" : "text-black"
                 )}
                 onChange={event => handleChange(event.target.value)}
-                onKeyDown={handleKeyDown}
-                value={internalValue}
-                displayValue={v => (typeof v === `string` ? v : "")}
+                onBlur={handleBlur}
+                displayValue={(v: string) => v}
                 autoComplete="off"
               />
               <Combobox.Button
@@ -132,42 +145,38 @@ const ViewportComboBox = ({
             }`}
             style={{ maxHeight: `${maxHeight}px` }}
           >
-            {values
-              .filter(item =>
-                item.toLowerCase().includes((value || "").toLowerCase())
-              )
-              .map(item => (
-                <Combobox.Option
-                  key={item}
-                  value={item}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-3 pr-9 ${
-                      active ? "bg-myorange text-white" : "text-black"
-                    }`
-                  }
-                >
-                  {({ selected, active }) => (
-                    <>
+            {filteredValues.map(item => (
+              <Combobox.Option
+                key={item}
+                value={item}
+                className={({ active }) =>
+                  `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                    active ? "bg-myorange text-white" : "text-black"
+                  }`
+                }
+              >
+                {({ selected, active }) => (
+                  <>
+                    <span
+                      className={`block truncate ${
+                        selected ? "font-bold" : "font-normal"
+                      }`}
+                    >
+                      {item}
+                    </span>
+                    {selected && (
                       <span
-                        className={`block truncate ${
-                          selected ? "font-bold" : "font-normal"
+                        className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                          active ? "text-white" : "text-myorange"
                         }`}
                       >
-                        {item}
+                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
                       </span>
-                      {selected && (
-                        <span
-                          className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
-                            active ? "text-white" : "text-myorange"
-                          }`}
-                        >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                      )}
-                    </>
-                  )}
-                </Combobox.Option>
-              ))}
+                    )}
+                  </>
+                )}
+              </Combobox.Option>
+            ))}
           </Combobox.Options>
         </Combobox>
       </div>

@@ -84,12 +84,12 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
         header.classList.remove("header-hidden");
       }
       setTimeout(() => {
-      if (isFullWidthMobileShort && isVisible) {
-        header.classList.add("hidden");
-        header.classList.remove("block");
-      } else {
-        header.classList.remove("hidden");
-        header.classList.add("block");
+        if (isFullWidthMobileShort && isVisible) {
+          header.classList.add("hidden");
+          header.classList.remove("block");
+        } else {
+          header.classList.remove("hidden");
+          header.classList.add("block");
         }
       }, 100);
     }

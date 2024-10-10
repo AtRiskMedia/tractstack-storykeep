@@ -1,6 +1,9 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Combobox } from "@headlessui/react";
-import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronUpDownIcon,
+  CheckIcon,
+} from "@heroicons/react/20/solid";
 import { classNames } from "../../../utils/helpers";
 import {
   DevicePhoneMobileIcon,
@@ -67,12 +70,16 @@ const ViewportComboBox = ({
   }, [value, isNegative]);
 
   useEffect(() => {
-    setFilteredValues(
-      values.filter(item =>
-        item.toLowerCase().includes(internalValue.toLowerCase())
-      )
-    );
-  }, [internalValue, values]);
+    if (!isMobile) {
+      setFilteredValues(
+        values.filter(item =>
+          item.toLowerCase().includes(internalValue.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredValues(values);
+    }
+  }, [internalValue, values, isMobile]);
 
   const handleNegativeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -99,20 +106,27 @@ const ViewportComboBox = ({
   }, [internalValue, onFinalChange, viewport, isNowNegative]);
 
   const renderMobileInput = () => (
-    <select
-      value={internalValue}
-      onChange={e => handleSelect(e.target.value)}
-      className={classNames(
-        "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
-        isInferred ? "text-black/20" : "text-black"
-      )}
-    >
-      {filteredValues.map(item => (
-        <option key={item} value={item}>
-          {item}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <select
+        value={internalValue}
+        onChange={e => handleSelect(e.target.value)}
+        className={classNames(
+          "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange appearance-none",
+          isInferred ? "text-black/20" : "text-black"
+        )}
+      >
+        {values.map(item => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
+      </select>
+      <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+        <div className="pointer-events-none pl-2 text-gray-700">
+          <ChevronUpDownIcon className="h-5 w-5" aria-hidden="true" />
+        </div>
+      </div>
+    </div>
   );
 
   return (
@@ -132,7 +146,7 @@ const ViewportComboBox = ({
                   <Combobox.Input
                     ref={inputRef}
                     className={classNames(
-                      "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
+                      "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-16 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
                       isInferred ? "text-black/20" : "text-black"
                     )}
                     onChange={event => handleChange(event.target.value)}
@@ -140,15 +154,17 @@ const ViewportComboBox = ({
                     displayValue={(v: string) => v}
                     autoComplete="off"
                   />
-                  <Combobox.Button
-                    ref={comboboxButtonRef}
-                    className="absolute inset-y-0 right-0 flex items-center pr-2"
-                  >
-                    <ChevronUpDownIcon
-                      className="h-5 w-5 text-mydarkgrey"
-                      aria-hidden="true"
-                    />
-                  </Combobox.Button>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <Combobox.Button
+                      ref={comboboxButtonRef}
+                      className="flex items-center pl-2"
+                    >
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-mydarkgrey"
+                        aria-hidden="true"
+                      />
+                    </Combobox.Button>
+                  </div>
                 </div>
                 <Combobox.Options
                   className={`absolute z-10 left-0 right-0 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${

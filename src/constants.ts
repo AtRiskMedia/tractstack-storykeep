@@ -28,7 +28,8 @@ export const MAX_HISTORY_LENGTH = 10;
 export const MS_BETWEEN_UNDO = 6000;
 export const MAX_LENGTH_CONTENT = 10000;
 
-export const SHORT_SCREEN_THRESHOLD = 600;
+export const SHORT_SCREEN_THRESHOLD = 900;
+export const SMALL_SCREEN_WIDTH = 600;
 export const MIN_SCROLL_THRESHOLD = 100;
 export const HYSTERESIS = 99;
 

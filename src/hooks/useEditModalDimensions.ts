@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { SHORT_SCREEN_THRESHOLD, SMALL_SCREEN_WIDTH } from "../constants";
 
 interface Dimensions {
   height: string;
@@ -13,9 +14,6 @@ interface Dimensions {
   isFullScreen: boolean;
   isFullWidthMobileShort: boolean;
 }
-
-const SHORT_SCREEN_THRESHOLD = 900;
-const SMALL_SCREEN_WIDTH = 600;
 
 export const useEditModalDimensions = (
   isEditModeActive: boolean

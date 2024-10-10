@@ -36,6 +36,7 @@ const ViewportComboBox = ({
   const [internalValue, setInternalValue] = useState(value);
   const [isNowNegative, setIsNowNegative] = useState(isNegative);
   const [filteredValues, setFilteredValues] = useState(values);
+  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const comboboxButtonRef = useRef<HTMLButtonElement>(null);
   const { openAbove, maxHeight } = useDropdownDirection(comboboxButtonRef);
@@ -46,6 +47,15 @@ const ViewportComboBox = ({
       : viewport === "tablet"
         ? DeviceTabletIcon
         : ComputerDesktopIcon;
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     if (value !== internalValue) {
@@ -67,16 +77,14 @@ const ViewportComboBox = ({
   const handleNegativeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       setIsNowNegative(event.target.checked);
+      onFinalChange(internalValue, viewport, event.target.checked);
     },
-    [viewport]
+    [internalValue, onFinalChange, viewport]
   );
 
-  const handleChange = useCallback(
-    (newValue: string) => {
-      setInternalValue(newValue);
-    },
-    [viewport]
-  );
+  const handleChange = useCallback((newValue: string) => {
+    setInternalValue(newValue);
+  }, []);
 
   const handleSelect = useCallback(
     (selectedValue: string) => {
@@ -90,6 +98,23 @@ const ViewportComboBox = ({
     onFinalChange(internalValue, viewport, isNowNegative);
   }, [internalValue, onFinalChange, viewport, isNowNegative]);
 
+  const renderMobileInput = () => (
+    <select
+      value={internalValue}
+      onChange={e => handleSelect(e.target.value)}
+      className={classNames(
+        "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
+        isInferred ? "text-black/20" : "text-black"
+      )}
+    >
+      {filteredValues.map(item => (
+        <option key={item} value={item}>
+          {item}
+        </option>
+      ))}
+    </select>
+  );
+
   return (
     <div
       className="flex flex-nowrap items-center"
@@ -97,88 +122,97 @@ const ViewportComboBox = ({
     >
       <Icon className="h-8 w-8 mr-2" aria-hidden="true" />
       <div className="relative w-full">
-        <Combobox value={internalValue} onChange={handleSelect}>
-          <div className="flex items-center">
-            <div className="relative flex-grow">
-              <Combobox.Input
-                ref={inputRef}
-                className={classNames(
-                  "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
-                  isInferred ? "text-black/20" : "text-black"
-                )}
-                onChange={event => handleChange(event.target.value)}
-                onBlur={handleBlur}
-                displayValue={(v: string) => v}
-                autoComplete="off"
-              />
-              <Combobox.Button
-                ref={comboboxButtonRef}
-                className="absolute inset-y-0 right-0 flex items-center pr-2"
-              >
-                <ChevronUpDownIcon
-                  className="h-5 w-5 text-mydarkgrey"
-                  aria-hidden="true"
-                />
-              </Combobox.Button>
-            </div>
-            {allowNegative && (
-              <div className="ml-2 flex items-center">
-                <input
-                  type="checkbox"
-                  id={`negative-${viewport}`}
-                  checked={isNowNegative}
-                  onChange={handleNegativeChange}
-                  className="h-4 w-4 text-myorange focus:ring-myorange border-mydarkgrey rounded"
-                />
-                <label
-                  htmlFor={`negative-${viewport}`}
-                  className="ml-2 block text-sm text-black"
+        <div className="flex items-center">
+          <div className="relative flex-grow">
+            {isMobile ? (
+              renderMobileInput()
+            ) : (
+              <Combobox value={internalValue} onChange={handleSelect}>
+                <div className="relative">
+                  <Combobox.Input
+                    ref={inputRef}
+                    className={classNames(
+                      "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
+                      isInferred ? "text-black/20" : "text-black"
+                    )}
+                    onChange={event => handleChange(event.target.value)}
+                    onBlur={handleBlur}
+                    displayValue={(v: string) => v}
+                    autoComplete="off"
+                  />
+                  <Combobox.Button
+                    ref={comboboxButtonRef}
+                    className="absolute inset-y-0 right-0 flex items-center pr-2"
+                  >
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <Combobox.Options
+                  className={`absolute z-10 left-0 right-0 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
+                    openAbove ? "bottom-full mb-1" : "top-full mt-1"
+                  }`}
+                  style={{ maxHeight: `${maxHeight}px` }}
                 >
-                  Negative
-                </label>
-              </div>
+                  {filteredValues.map(item => (
+                    <Combobox.Option
+                      key={item}
+                      value={item}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                          active ? "bg-myorange text-white" : "text-black"
+                        }`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span
+                            className={`block truncate ${
+                              selected ? "font-bold" : "font-normal"
+                            }`}
+                          >
+                            {item}
+                          </span>
+                          {selected && (
+                            <span
+                              className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                                active ? "text-white" : "text-myorange"
+                              }`}
+                            >
+                              <CheckIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              </Combobox>
             )}
           </div>
-          <Combobox.Options
-            className={`absolute z-10 left-0 right-0 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
-              openAbove ? "bottom-full mb-1" : "top-full mt-1"
-            }`}
-            style={{ maxHeight: `${maxHeight}px` }}
-          >
-            {filteredValues.map(item => (
-              <Combobox.Option
-                key={item}
-                value={item}
-                className={({ active }) =>
-                  `relative cursor-default select-none py-2 pl-3 pr-9 ${
-                    active ? "bg-myorange text-white" : "text-black"
-                  }`
-                }
+          {allowNegative && (
+            <div className="ml-2 flex items-center">
+              <input
+                type="checkbox"
+                id={`negative-${viewport}`}
+                checked={isNowNegative}
+                onChange={handleNegativeChange}
+                className="h-4 w-4 text-myorange focus:ring-myorange border-mydarkgrey rounded"
+              />
+              <label
+                htmlFor={`negative-${viewport}`}
+                className="ml-2 block text-sm text-black"
               >
-                {({ selected, active }) => (
-                  <>
-                    <span
-                      className={`block truncate ${
-                        selected ? "font-bold" : "font-normal"
-                      }`}
-                    >
-                      {item}
-                    </span>
-                    {selected && (
-                      <span
-                        className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
-                          active ? "text-white" : "text-myorange"
-                        }`}
-                      >
-                        <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                      </span>
-                    )}
-                  </>
-                )}
-              </Combobox.Option>
-            ))}
-          </Combobox.Options>
-        </Combobox>
+                Negative
+              </label>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -95,6 +95,7 @@ export const StoryKeepHeader = memo(
     isContext: boolean;
     originalData: StoryFragmentDatum | ContextPaneDatum | null;
   }) => {
+    const [isMobile, setIsMobile] = useState(false);
     const [hasAnalytics, setHasAnalytics] = useState(false);
     const $creationState = useStore(creationStateStore);
     const [isSaving, setIsSaving] = useState(false);
@@ -192,6 +193,15 @@ export const StoryKeepHeader = memo(
     const handleSaveComplete = () => {
       setIsSaving(false);
     };
+
+    useEffect(() => {
+      const checkMobile = () => {
+        setIsMobile(window.innerWidth < 768);
+      };
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+    }, []);
 
     useEffect(() => {
       if (toolMode === "insert" && toolAddModeRef.current) {
@@ -374,13 +384,15 @@ export const StoryKeepHeader = memo(
                 </div>
               ) : null}
             </div>
-            <ViewportSelector
-              viewport={viewport}
-              viewportKey={viewportKey}
-              auto={!$viewportSet}
-              setViewport={setViewport}
-              hideElements={hideElements}
-            />
+            {!isMobile && (
+              <ViewportSelector
+                viewport={viewport}
+                viewportKey={viewportKey}
+                auto={!$viewportSet}
+                setViewport={setViewport}
+                hideElements={hideElements}
+              />
+            )}
 
             <div className="flex flex-nowrap gap-x-2">
               {!isContext ? (

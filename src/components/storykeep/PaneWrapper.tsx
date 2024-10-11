@@ -36,9 +36,9 @@ const InsertAboveBelowWrapper = ({
       <div className="group absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top  hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
         <>
           <div
-            className="absolute top-1/2 left-1/2 transform translate-x-1/2 -translate-y-1/2
+            className="absolute top-1/2 left-0 transform -translate-y-1/2
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
-             text-md font-action mx-6 group-hover:bg-black group-hover:text-white"
+             text-md font-action ml-6 group-hover:bg-black group-hover:text-white"
           >
             Insert new Pane above
           </div>
@@ -54,9 +54,9 @@ const InsertAboveBelowWrapper = ({
       <div className="group absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom  hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
         <>
           <div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+            className="absolute top-1/2 right-0 transform -translate-y-1/2
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
-             text-md font-action mx-6  group-hover:bg-black group-hover:text-white"
+             text-md font-action mr-6 group-hover:bg-black group-hover:text-white"
           >
             Insert new Pane below
           </div>

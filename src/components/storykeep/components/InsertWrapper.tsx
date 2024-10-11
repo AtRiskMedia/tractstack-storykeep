@@ -204,9 +204,9 @@ const InsertWrapper = ({
         {allowTag.before && (
           <>
             <div
-              className="absolute top-1/2 left-1/2 transform translate-x-1/2 -translate-y-1/2
+              className="absolute top-1/2 left-0 transform -translate-y-1/2
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
-             text-md font-action mx-6 group-hover:bg-black group-hover:text-white"
+             text-md font-action ml-6 group-hover:bg-black group-hover:text-white"
             >
               Add {toolAddModeTitles[toolAddMode]} Above
             </div>
@@ -230,9 +230,9 @@ const InsertWrapper = ({
         {allowTag.after && (
           <>
             <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
+              className="absolute top-1/2 right-0 transform -translate-y-1/2
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
-             text-md font-action mx-6  group-hover:bg-black group-hover:text-white"
+             text-md font-action mr-6 group-hover:bg-black group-hover:text-white"
             >
               Add {toolAddModeTitles[toolAddMode]} Below
             </div>

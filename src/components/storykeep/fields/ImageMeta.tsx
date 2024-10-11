@@ -313,7 +313,7 @@ const ImageMeta = (props: {
         );
 
   return (
-    <div ref={comboboxRef} className="space-y-4 w-full">
+    <div className="space-y-4 w-full">
       <div>
         <label
           htmlFor="image-alt-text-input"
@@ -345,7 +345,7 @@ const ImageMeta = (props: {
           />
         )}
       </div>
-      <div>
+      <div ref={comboboxRef}>
         <span className="block text-sm text-mydarkgrey mb-2">Image</span>
         <div className="flex items-center space-x-4">
           <div className="relative w-24 aspect-video bg-mylightgrey/5 rounded-md overflow-hidden">

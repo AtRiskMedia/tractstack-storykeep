@@ -50,7 +50,7 @@ const ImageMeta = (props: {
 }) => {
   const { paneId, outerIdx, idx, files } = props;
   const [isMobile, setIsMobile] = useState(false);
-  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -86,21 +86,37 @@ const ImageMeta = (props: {
     };
   }, []);
 
-  useEffect(() => {
-    if (isMobile && mobileInputRef.current) {
-      const handleTouchStart = (e: TouchEvent) => {
-        e.preventDefault();
-        mobileInputRef.current?.focus();
-      };
-      mobileInputRef.current.addEventListener("touchstart", handleTouchStart);
-      return () => {
-        mobileInputRef.current?.removeEventListener(
-          "touchstart",
-          handleTouchStart
-        );
-      };
-    }
-  }, [isMobile]);
+  const updateStore = useCallback(
+    (newAltText: string, newFilename?: string) => {
+      if (!markdownFragmentId || !markdownFragment) return;
+      lastInteractedTypeStore.set(`markdown`);
+      lastInteractedPaneStore.set(paneId);
+      const newBody = updateMarkdownElement(
+        markdownFragment.markdown.body,
+        `![${newAltText}](${newFilename || filename})`,
+        "li",
+        outerIdx,
+        idx
+      );
+      updateStoreField("paneFragmentMarkdown", {
+        ...markdownFragment,
+        markdown: {
+          ...markdownFragment.markdown,
+          body: newBody,
+          htmlAst: markdownToHtmlAst(newBody),
+        },
+      });
+    },
+    [
+      markdownFragmentId,
+      markdownFragment,
+      filename,
+      outerIdx,
+      idx,
+      updateStoreField,
+      paneId,
+    ]
+  );
 
   useEffect(() => {
     if (markdownFragment?.markdown) {
@@ -128,6 +144,27 @@ const ImageMeta = (props: {
     setAltText(newValue);
     return true;
   }, []);
+
+  const handleEditingChange = useCallback(
+    (editing: boolean) => {
+      if (!editing) {
+        updateStore(altText);
+      }
+    },
+    [altText, updateStore]
+  );
+
+  const handleInputChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const newValue = event.target.value;
+      setAltText(newValue);
+    },
+    []
+  );
+
+  const handleInputBlur = useCallback(() => {
+    updateStore(altText);
+  }, [altText, updateStore]);
 
   const renderMobileSelect = () => (
     <div className="relative mt-1">
@@ -165,47 +202,6 @@ const ImageMeta = (props: {
         />
       </div>
     </div>
-  );
-
-  const updateStore = useCallback(
-    (newAltText: string, newFilename?: string) => {
-      if (!markdownFragmentId || !markdownFragment) return;
-      lastInteractedTypeStore.set(`markdown`);
-      lastInteractedPaneStore.set(paneId);
-      const newBody = updateMarkdownElement(
-        markdownFragment.markdown.body,
-        `![${newAltText}](${newFilename || filename})`,
-        "li",
-        outerIdx,
-        idx
-      );
-      updateStoreField("paneFragmentMarkdown", {
-        ...markdownFragment,
-        markdown: {
-          ...markdownFragment.markdown,
-          body: newBody,
-          htmlAst: markdownToHtmlAst(newBody),
-        },
-      });
-    },
-    [
-      markdownFragmentId,
-      markdownFragment,
-      filename,
-      outerIdx,
-      idx,
-      updateStoreField,
-      paneId,
-    ]
-  );
-
-  const handleEditingChange = useCallback(
-    (editing: boolean) => {
-      if (!editing) {
-        updateStore(altText);
-      }
-    },
-    [altText, updateStore]
   );
 
   const handleRemoveFile = () => {
@@ -340,11 +336,12 @@ const ImageMeta = (props: {
         </label>
         {isMobile ? (
           <input
+            ref={inputRef}
             id="image-alt-text"
             type="text"
             value={altText}
-            onChange={e => setAltText(e.target.value)}
-            onBlur={() => handleEditingChange(false)}
+            onChange={handleInputChange}
+            onBlur={handleInputBlur}
             placeholder="Enter image description"
             className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
           />

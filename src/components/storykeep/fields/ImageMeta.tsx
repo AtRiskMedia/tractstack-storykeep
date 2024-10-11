@@ -88,9 +88,19 @@ const ImageMeta = (props: {
 
   useEffect(() => {
     if (isMobile && mobileInputRef.current) {
-      mobileInputRef.current.value = altText;
+      const handleTouchStart = (e: TouchEvent) => {
+        e.preventDefault();
+        mobileInputRef.current?.focus();
+      };
+      mobileInputRef.current.addEventListener("touchstart", handleTouchStart);
+      return () => {
+        mobileInputRef.current?.removeEventListener(
+          "touchstart",
+          handleTouchStart
+        );
+      };
     }
-  }, [isMobile, altText]);
+  }, [isMobile]);
 
   useEffect(() => {
     if (markdownFragment?.markdown) {
@@ -330,7 +340,6 @@ const ImageMeta = (props: {
         </label>
         {isMobile ? (
           <input
-            ref={mobileInputRef}
             id="image-alt-text"
             type="text"
             value={altText}

@@ -36,7 +36,7 @@ import {
   creationStateStore,
 } from "../../store/storykeep";
 import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
-import { classNames, debounce,cleanString } from "../../utils/helpers";
+import { classNames, debounce, cleanString } from "../../utils/helpers";
 import {
   useStoryKeepUtils,
   handleToggleOn,

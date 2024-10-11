@@ -192,14 +192,10 @@ const ImageMeta = (props: {
   const handleEditingChange = useCallback(
     (editing: boolean) => {
       if (!editing) {
-        if (isMobile && mobileInputRef.current) {
-          updateStore(mobileInputRef.current.value);
-        } else {
-          updateStore(altText);
-        }
+        updateStore(altText);
       }
     },
-    [altText, updateStore, isMobile]
+    [altText, updateStore]
   );
 
   const handleRemoveFile = () => {
@@ -337,7 +333,8 @@ const ImageMeta = (props: {
             ref={mobileInputRef}
             id="image-alt-text"
             type="text"
-            defaultValue={altText}
+            value={altText}
+            onChange={e => setAltText(e.target.value)}
             onBlur={() => handleEditingChange(false)}
             placeholder="Enter image description"
             className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"

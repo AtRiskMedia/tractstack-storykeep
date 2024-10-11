@@ -1148,7 +1148,7 @@ export const PaneAstStyles = (props: {
   const WidgetConfigMode = () =>
     widgetConfigMode && (
       <div>
-        <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+        <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
           <Widget
             id={widgetData[0]}
             values={widgetData.slice(1)}
@@ -1192,7 +1192,7 @@ export const PaneAstStyles = (props: {
     !widgetConfigMode &&
     activeTag &&
     ![`parent`, `modal`].includes(activeTag) && (
-      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+      <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
         {classNamesPayload?.classes &&
         Object.keys(classNamesPayload.classes).length ? (
           Object.keys(classNamesPayload.classes).map(className =>
@@ -1206,7 +1206,7 @@ export const PaneAstStyles = (props: {
 
   const IsLink = () =>
     linkTargetKey && (
-      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+      <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
         {linkMode && linkTargetKey !== `*` ? (
           <div>
             <div className="flex flex-nowrap justify-between">
@@ -1246,7 +1246,7 @@ export const PaneAstStyles = (props: {
                 onPaste={handlePasteStyles}
               />
             </div>
-            <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+            <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
               {classNamesPayload?.classes &&
               Object.keys(classNamesPayload.classes).length ? (
                 Object.keys(classNamesPayload.classes).map(className =>
@@ -1331,7 +1331,7 @@ export const PaneAstStyles = (props: {
 
   const IsLinkNav = () =>
     linkTargetKey && (
-      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+      <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
         <span className="flex gap-x-6 w-full">
           <button
             className="my-2 underline"
@@ -1394,7 +1394,7 @@ export const PaneAstStyles = (props: {
     activeTag === `img` &&
     typeof targetId?.globalNth === `number` &&
     typeof targetId?.idx === `number` && (
-      <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+      <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
         <ImageMeta
           paneId={targetId.paneId}
           outerIdx={targetId.outerIdx}
@@ -1464,7 +1464,7 @@ export const PaneAstStyles = (props: {
           </button>
         </div>
         <hr />
-        <div className="max-w-md my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+        <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
           {parentClassNamesPayload?.classes &&
           Array.isArray(parentClassNamesPayload?.classes) &&
           Object.keys(parentClassNamesPayload?.classes[parentLayer]).length ? (

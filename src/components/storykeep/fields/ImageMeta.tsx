@@ -309,7 +309,7 @@ const ImageMeta = (props: {
         );
 
   return (
-    <div ref={comboboxRef} className="space-y-4">
+    <div ref={comboboxRef} className="space-y-4 w-full">
       <div>
         <label
           htmlFor="image-alt-text"
@@ -317,14 +317,26 @@ const ImageMeta = (props: {
         >
           Image Description (Alt Text)
         </label>
-        <ContentEditableField
-          id="image-alt-text"
-          value={altText}
-          onChange={handleAltTextChange}
-          onEditingChange={handleEditingChange}
-          placeholder="Enter image description"
-          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
-        />
+        {isMobile ? (
+          <input
+            id="image-alt-text"
+            type="text"
+            value={altText}
+            onChange={e => handleAltTextChange(e.target.value)}
+            onBlur={() => handleEditingChange(false)}
+            placeholder="Enter image description"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
+          />
+        ) : (
+          <ContentEditableField
+            id="image-alt-text"
+            value={altText}
+            onChange={handleAltTextChange}
+            onEditingChange={handleEditingChange}
+            placeholder="Enter image description"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
+          />
+        )}
       </div>
       <div>
         <label
@@ -380,7 +392,7 @@ const ImageMeta = (props: {
 
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full text-center">
+          <div className="bg-white p-6 rounded-lg w-full text-center">
             <h3 className="text-xl font-semibold mb-4">Processing Image</h3>
             <div className="animate-pulse mb-4">
               <div className="h-2 bg-myorange rounded"></div>
@@ -392,7 +404,7 @@ const ImageMeta = (props: {
 
       {isSelectingFile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+          <div className="bg-white p-4 rounded-lg w-full">
             <h3 className="text-lg font-semibold mb-2">Select a file</h3>
             {isMobile ? (
               renderMobileSelect()

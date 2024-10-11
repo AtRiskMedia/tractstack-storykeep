@@ -50,7 +50,6 @@ const ImageMeta = (props: {
 }) => {
   const { paneId, outerIdx, idx, files } = props;
   const [isMobile, setIsMobile] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -324,7 +323,6 @@ const ImageMeta = (props: {
         </label>
         {isMobile ? (
           <input
-            ref={inputRef}
             id="image-alt-text-input"
             type="text"
             defaultValue={altText}
@@ -348,12 +346,7 @@ const ImageMeta = (props: {
         )}
       </div>
       <div>
-        <label
-          htmlFor="image-filename"
-          className="block text-sm text-mydarkgrey mb-2"
-        >
-          Image
-        </label>
+        <span className="block text-sm text-mydarkgrey mb-2">Image</span>
         <div className="flex items-center space-x-4">
           <div className="relative w-24 aspect-video bg-mylightgrey/5 rounded-md overflow-hidden">
             <img

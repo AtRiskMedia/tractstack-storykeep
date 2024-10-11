@@ -23,7 +23,6 @@ export function useDropdownDirection(
       const newMaxHeight = newOpenAbove
         ? Math.min(spaceAbove - 10, 300)
         : Math.min(spaceBelow - 10, 300);
-
       setState({ openAbove: newOpenAbove, maxHeight: newMaxHeight });
     }
   }, [triggerRef]);

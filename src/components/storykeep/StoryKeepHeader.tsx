@@ -4,7 +4,6 @@ import {
   RectangleGroupIcon,
   PresentationChartBarIcon,
 } from "@heroicons/react/24/outline";
-import { classNames } from "../../utils/helpers";
 import { SaveProcessModal } from "./components/SaveProcessModal";
 import ViewportSelector from "./components/ViewportSelector";
 import ToolModeSelector from "./components/ToolModeSelector";
@@ -37,12 +36,12 @@ import {
   creationStateStore,
 } from "../../store/storykeep";
 import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
+import { classNames, debounce,cleanString } from "../../utils/helpers";
 import {
   useStoryKeepUtils,
   handleToggleOn,
   handleToggleOff,
 } from "../../utils/storykeep";
-import { cleanString, debounce } from "../../utils/helpers";
 import type {
   AuthStatus,
   StoreKey,
@@ -205,9 +204,12 @@ export const StoryKeepHeader = memo(
       const checkMobile = () => {
         setIsMobile(window.innerWidth < 768);
       };
+      const debouncedCheckMobile = debounce(checkMobile, 250);
       checkMobile();
-      window.addEventListener("resize", checkMobile);
-      return () => window.removeEventListener("resize", checkMobile);
+      window.addEventListener("resize", debouncedCheckMobile);
+      return () => {
+        window.removeEventListener("resize", debouncedCheckMobile);
+      };
     }, []);
 
     useEffect(() => {

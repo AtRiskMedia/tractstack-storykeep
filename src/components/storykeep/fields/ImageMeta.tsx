@@ -18,6 +18,7 @@ import {
   paneFiles,
 } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
+import { debounce } from "../../../utils/helpers";
 import ContentEditableField from "../components/ContentEditableField";
 import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import {
@@ -49,6 +50,7 @@ const ImageMeta = (props: {
 }) => {
   const { paneId, outerIdx, idx, files } = props;
   const [isMobile, setIsMobile] = useState(false);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -76,10 +78,19 @@ const ImageMeta = (props: {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
+    const debouncedCheckMobile = debounce(checkMobile, 250);
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    window.addEventListener("resize", debouncedCheckMobile);
+    return () => {
+      window.removeEventListener("resize", debouncedCheckMobile);
+    };
   }, []);
+
+  useEffect(() => {
+    if (isMobile && mobileInputRef.current) {
+      mobileInputRef.current.value = altText;
+    }
+  }, [isMobile, altText]);
 
   useEffect(() => {
     if (markdownFragment?.markdown) {
@@ -181,10 +192,14 @@ const ImageMeta = (props: {
   const handleEditingChange = useCallback(
     (editing: boolean) => {
       if (!editing) {
-        updateStore(altText);
+        if (isMobile && mobileInputRef.current) {
+          updateStore(mobileInputRef.current.value);
+        } else {
+          updateStore(altText);
+        }
       }
     },
-    [altText, updateStore]
+    [altText, updateStore, isMobile]
   );
 
   const handleRemoveFile = () => {
@@ -319,10 +334,10 @@ const ImageMeta = (props: {
         </label>
         {isMobile ? (
           <input
+            ref={mobileInputRef}
             id="image-alt-text"
             type="text"
-            value={altText}
-            onChange={e => handleAltTextChange(e.target.value)}
+            defaultValue={altText}
             onBlur={() => handleEditingChange(false)}
             placeholder="Enter image description"
             className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"

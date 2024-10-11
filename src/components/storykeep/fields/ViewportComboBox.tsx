@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
-import { classNames } from "../../../utils/helpers";
+import { classNames, debounce } from "../../../utils/helpers";
 import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
@@ -52,9 +52,12 @@ const ViewportComboBox = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
+    const debouncedCheckMobile = debounce(checkMobile, 250);
     checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    window.addEventListener("resize", debouncedCheckMobile);
+    return () => {
+      window.removeEventListener("resize", debouncedCheckMobile);
+    };
   }, []);
 
   useEffect(() => {

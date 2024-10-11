@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
+import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import {
   paneInit,
   paneTitle,
@@ -40,7 +41,7 @@ const InsertAboveBelowWrapper = ({
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
              text-md font-action ml-6 group-hover:bg-black group-hover:text-white"
           >
-            Insert new Pane above
+            <ArrowUpIcon className="h-4 w-4" />
           </div>
           <div
             onClick={() => onInsertClick("above")}
@@ -58,7 +59,7 @@ const InsertAboveBelowWrapper = ({
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
              text-md font-action mr-6 group-hover:bg-black group-hover:text-white"
           >
-            Insert new Pane below
+            <ArrowDownIcon className="h-4 w-4" />
           </div>
           <div
             onClick={() => onInsertClick("below")}

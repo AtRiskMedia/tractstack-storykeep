@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useStore } from "@nanostores/react";
+import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import {
   paneFragmentMarkdown,
   unsavedChangesStore,
@@ -208,7 +209,7 @@ const InsertWrapper = ({
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
              text-md font-action ml-6 group-hover:bg-black group-hover:text-white"
             >
-              Add {toolAddModeTitles[toolAddMode]} Above
+              <ArrowUpIcon className="h-4 w-4" />
             </div>
             <div
               onClick={() => handleInsert("before")}
@@ -234,7 +235,7 @@ const InsertWrapper = ({
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
              text-md font-action mr-6 group-hover:bg-black group-hover:text-white"
             >
-              Add {toolAddModeTitles[toolAddMode]} Below
+              <ArrowDownIcon className="h-4 w-4" />
             </div>
             <div
               onClick={() => handleInsert("after")}

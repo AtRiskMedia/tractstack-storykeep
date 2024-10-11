@@ -154,18 +154,6 @@ const ImageMeta = (props: {
     [altText, updateStore]
   );
 
-  const handleInputChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const newValue = event.target.value;
-      setAltText(newValue);
-    },
-    []
-  );
-
-  const handleInputBlur = useCallback(() => {
-    updateStore(altText);
-  }, [altText, updateStore]);
-
   const renderMobileSelect = () => (
     <div className="relative mt-1">
       <select
@@ -329,7 +317,7 @@ const ImageMeta = (props: {
     <div ref={comboboxRef} className="space-y-4 w-full">
       <div>
         <label
-          htmlFor="image-alt-text"
+          htmlFor="image-alt-text-input"
           className="block text-sm text-mydarkgrey"
         >
           Image Description (Alt Text)
@@ -337,17 +325,20 @@ const ImageMeta = (props: {
         {isMobile ? (
           <input
             ref={inputRef}
-            id="image-alt-text"
+            id="image-alt-text-input"
             type="text"
-            value={altText}
-            onChange={handleInputChange}
-            onBlur={handleInputBlur}
+            defaultValue={altText}
+            onBlur={e => {
+              const newValue = e.target.value;
+              setAltText(newValue);
+              updateStore(newValue);
+            }}
             placeholder="Enter image description"
             className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
           />
         ) : (
           <ContentEditableField
-            id="image-alt-text"
+            id="image-alt-text-input"
             value={altText}
             onChange={handleAltTextChange}
             onEditingChange={handleEditingChange}

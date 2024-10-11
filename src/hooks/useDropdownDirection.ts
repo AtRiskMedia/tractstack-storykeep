@@ -17,7 +17,10 @@ export function useDropdownDirection(
   const updateDirection = useCallback(() => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
+      const viewportHeight = window.visualViewport
+        ? window.visualViewport.height
+        : window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
       const spaceAbove = rect.top;
       const newOpenAbove = spaceBelow < 300 && spaceAbove > spaceBelow;
       const newMaxHeight = newOpenAbove
@@ -29,14 +32,27 @@ export function useDropdownDirection(
 
   useEffect(() => {
     updateDirection();
-    window.addEventListener("resize", updateDirection);
-    const rafId = requestAnimationFrame(updateDirection);
+
+    const handleResize = () => {
+      // Only update if the width changes, to avoid keyboard triggers
+      if (window.innerWidth !== window.visualViewport?.width) {
+        updateDirection();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Use ResizeObserver to watch for changes in the trigger element's size or position
+    const resizeObserver = new ResizeObserver(updateDirection);
+    if (triggerRef.current) {
+      resizeObserver.observe(triggerRef.current);
+    }
 
     return () => {
-      window.removeEventListener("resize", updateDirection);
-      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
     };
-  }, [updateDirection]);
+  }, [updateDirection, triggerRef]);
 
   return state;
 }

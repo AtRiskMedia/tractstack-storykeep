@@ -68,11 +68,18 @@ export const useEditModalDimensions = (
 
   useEffect(() => {
     updateDimensions();
-    window.addEventListener("resize", updateDimensions);
+
+    const handleResize = () => {
+      if (window.innerWidth >= SMALL_SCREEN_WIDTH) {
+        updateDimensions();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", updateDimensions);
 
     return () => {
-      window.removeEventListener("resize", updateDimensions);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", updateDimensions);
     };
   }, [updateDimensions]);

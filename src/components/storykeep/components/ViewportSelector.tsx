@@ -45,7 +45,7 @@ const ViewportSelector = ({
   ] as const;
 
   return (
-    <div>
+    <div className="hidden md:block">
       <div className="flex items-center">
         <span className={`mr-1 text-sm text-mydarkgrey`}>Designing for:</span>
         <span className={`font-bold text-xl text-myblue pr-2.5`}>

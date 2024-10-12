@@ -48,7 +48,6 @@ const ImageMeta = (props: {
   files: FileDatum[];
 }) => {
   const { paneId, outerIdx, idx, files } = props;
-  const [isMobile, setIsMobile] = useState(false);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -72,14 +71,14 @@ const ImageMeta = (props: {
   const comboboxRef = useRef<HTMLDivElement>(null);
   const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+  //useEffect(() => {
+  //  const checkMobile = () => {
+  //    setIsMobile(window.innerWidth < 768);
+  //  };
+  //  checkMobile();
+  //  window.addEventListener("resize", checkMobile);
+  //  return () => window.removeEventListener("resize", checkMobile);
+  //}, []);
 
   useEffect(() => {
     if (markdownFragment?.markdown) {
@@ -107,44 +106,6 @@ const ImageMeta = (props: {
     setAltText(newValue);
     return true;
   }, []);
-
-  const renderMobileSelect = () => (
-    <div className="relative mt-1">
-      <select
-        value={selectedFile?.id || ""}
-        onChange={e => {
-          const file = files.find(f => f.id === e.target.value);
-          if (file) {
-            setSelectedFile(file);
-            setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
-            setIsSelectingFile(false);
-            updateStore(file.altDescription, file.filename);
-            const currentPaneFiles = $paneFiles[paneId]?.current || [];
-            const updatedPaneFiles = currentPaneFiles.some(
-              f => f.id === file.id
-            )
-              ? currentPaneFiles
-              : [...currentPaneFiles, file];
-            updateStoreField("paneFiles", updatedPaneFiles, paneId);
-          }
-        }}
-        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
-      >
-        <option value="">Select a file</option>
-        {filteredFiles.map(file => (
-          <option key={file.id} value={file.id}>
-            {file.altDescription}
-          </option>
-        ))}
-      </select>
-      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-        <ChevronUpDownIcon
-          className="h-5 w-5 text-mydarkgrey"
-          aria-hidden="true"
-        />
-      </div>
-    </div>
-  );
 
   const updateStore = useCallback(
     (newAltText: string, newFilename?: string) => {
@@ -394,84 +355,80 @@ const ImageMeta = (props: {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg max-w-md w-full">
             <h3 className="text-lg font-semibold mb-2">Select a file</h3>
-            {isMobile ? (
-              renderMobileSelect()
-            ) : (
-              <Combobox
-                value={selectedFile}
-                onChange={file => {
-                  if (file) {
-                    setSelectedFile(file);
-                    setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
-                    setIsSelectingFile(false);
-                    updateStore(file.altDescription, file.filename);
-                    const currentPaneFiles = $paneFiles[paneId]?.current || [];
-                    const updatedPaneFiles = currentPaneFiles.some(
-                      f => f.id === file.id
-                    )
-                      ? currentPaneFiles
-                      : [...currentPaneFiles, file];
-                    updateStoreField("paneFiles", updatedPaneFiles, paneId);
-                  }
-                }}
-              >
-                <div className="relative mt-1">
-                  <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
-                    <Combobox.Input
-                      className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
-                      displayValue={(file: FileDatum) => file?.filename || ""}
-                      onChange={event => setQuery(event.target.value)}
-                      placeholder="Search files..."
-                      autoComplete="off"
+            <Combobox
+              value={selectedFile}
+              onChange={file => {
+                if (file) {
+                  setSelectedFile(file);
+                  setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
+                  setIsSelectingFile(false);
+                  updateStore(file.altDescription, file.filename);
+                  const currentPaneFiles = $paneFiles[paneId]?.current || [];
+                  const updatedPaneFiles = currentPaneFiles.some(
+                    f => f.id === file.id
+                  )
+                    ? currentPaneFiles
+                    : [...currentPaneFiles, file];
+                  updateStoreField("paneFiles", updatedPaneFiles, paneId);
+                }
+              }}
+            >
+              <div className="relative mt-1">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
+                    displayValue={(file: FileDatum) => file?.filename || ""}
+                    onChange={event => setQuery(event.target.value)}
+                    placeholder="Search files..."
+                    autoComplete="off"
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
                     />
-                    <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-mydarkgrey"
-                        aria-hidden="true"
-                      />
-                    </Combobox.Button>
-                  </div>
-                  <Combobox.Options
-                    className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm ${
-                      openAbove ? "bottom-full mb-1" : "top-full mt-1"
-                    }`}
-                    style={{ maxHeight: `${maxHeight}px` }}
-                  >
-                    {filteredFiles.map(file => (
-                      <Combobox.Option
-                        key={file.id}
-                        value={file}
-                        className={({ active }) =>
-                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                            active ? "bg-myorange text-white" : "text-myblack"
-                          }`
-                        }
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            <span
-                              className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
-                            >
-                              {file.altDescription}
-                            </span>
-                            {selected && (
-                              <span
-                                className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-myorange"}`}
-                              >
-                                <CheckIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
+                  </Combobox.Button>
                 </div>
-              </Combobox>
-            )}
+                <Combobox.Options
+                  className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm ${
+                    openAbove ? "bottom-full mb-1" : "top-full mt-1"
+                  }`}
+                  style={{ maxHeight: `${maxHeight}px` }}
+                >
+                  {filteredFiles.map(file => (
+                    <Combobox.Option
+                      key={file.id}
+                      value={file}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                          active ? "bg-myorange text-white" : "text-myblack"
+                        }`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span
+                            className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
+                          >
+                            {file.altDescription}
+                          </span>
+                          {selected && (
+                            <span
+                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-myorange"}`}
+                            >
+                              <CheckIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              </div>
+            </Combobox>
             <button
               className="mt-4 bg-mylightgrey px-4 py-2 rounded-md text-sm text-myblack hover:bg-myorange hover:text-white"
               onClick={() => setIsSelectingFile(false)}

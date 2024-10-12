@@ -36,7 +36,7 @@ import {
   analyticsDuration,
   creationStateStore,
 } from "../../store/storykeep";
-import { classNames, debounce, cleanString } from "../../utils/helpers";
+import { classNames, cleanString } from "../../utils/helpers";
 import { useStoryKeepUtils } from "../../utils/storykeep";
 import type {
   AuthStatus,
@@ -90,7 +90,6 @@ export const StoryKeepHeader = memo(
     isContext: boolean;
     originalData: StoryFragmentDatum | ContextPaneDatum | null;
   }) => {
-    const [isMobile, setIsMobile] = useState(false);
     const [hasAnalytics, setHasAnalytics] = useState(false);
     const $creationState = useStore(creationStateStore);
     const [isSaving, setIsSaving] = useState(false);
@@ -206,18 +205,6 @@ export const StoryKeepHeader = memo(
     const handleSaveComplete = () => {
       setIsSaving(false);
     };
-
-    useEffect(() => {
-      const checkMobile = () => {
-        setIsMobile(window.innerWidth < 768);
-      };
-      const debouncedCheckMobile = debounce(checkMobile, 250);
-      checkMobile();
-      window.addEventListener("resize", debouncedCheckMobile);
-      return () => {
-        window.removeEventListener("resize", debouncedCheckMobile);
-      };
-    }, []);
 
     useEffect(() => {
       const storyFragmentChanges = Object.values(
@@ -353,14 +340,12 @@ export const StoryKeepHeader = memo(
                 </div>
               ) : null}
             </div>
-            {!isMobile && (
-              <ViewportSelector
-                viewport={viewport}
-                viewportKey={viewportKey}
-                auto={!$viewportSet}
-                setViewport={setViewport}
-              />
-            )}
+            <ViewportSelector
+              viewport={viewport}
+              viewportKey={viewportKey}
+              auto={!$viewportSet}
+              setViewport={setViewport}
+            />
 
             <div className="flex flex-nowrap gap-x-2">
               {!isContext ? (

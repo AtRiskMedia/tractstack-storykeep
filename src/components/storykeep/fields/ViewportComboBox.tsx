@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { Combobox } from "@headlessui/react";
 import { ChevronUpDownIcon, CheckIcon } from "@heroicons/react/20/solid";
-import { classNames, debounce } from "../../../utils/helpers";
+import { classNames } from "../../../utils/helpers";
 import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
@@ -36,7 +36,6 @@ const ViewportComboBox = ({
   const [internalValue, setInternalValue] = useState(value);
   const [isNowNegative, setIsNowNegative] = useState(isNegative);
   const [filteredValues, setFilteredValues] = useState(values);
-  const [isMobile, setIsMobile] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const comboboxButtonRef = useRef<HTMLButtonElement>(null);
   const { openAbove, maxHeight } = useDropdownDirection(comboboxButtonRef);
@@ -48,17 +47,17 @@ const ViewportComboBox = ({
         ? DeviceTabletIcon
         : ComputerDesktopIcon;
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    const debouncedCheckMobile = debounce(checkMobile, 250);
-    checkMobile();
-    window.addEventListener("resize", debouncedCheckMobile);
-    return () => {
-      window.removeEventListener("resize", debouncedCheckMobile);
-    };
-  }, []);
+  //useEffect(() => {
+  //  const checkMobile = () => {
+  //    setIsMobile(window.innerWidth < 768);
+  //  };
+  //  const debouncedCheckMobile = debounce(checkMobile, 250);
+  //  checkMobile();
+  //  window.addEventListener("resize", debouncedCheckMobile);
+  //  return () => {
+  //    window.removeEventListener("resize", debouncedCheckMobile);
+  //  };
+  //}, []);
 
   useEffect(() => {
     if (value !== internalValue) {
@@ -70,16 +69,8 @@ const ViewportComboBox = ({
   }, [value, isNegative]);
 
   useEffect(() => {
-    if (!isMobile) {
-      setFilteredValues(
-        values.filter(item =>
-          item.toLowerCase().includes(internalValue.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredValues(values);
-    }
-  }, [internalValue, values, isMobile]);
+    setFilteredValues(values);
+  }, [internalValue, values]);
 
   const handleNegativeChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -105,30 +96,6 @@ const ViewportComboBox = ({
     onFinalChange(internalValue, viewport, isNowNegative);
   }, [internalValue, onFinalChange, viewport, isNowNegative]);
 
-  const renderMobileInput = () => (
-    <div className="relative">
-      <select
-        value={internalValue}
-        onChange={e => handleSelect(e.target.value)}
-        className={classNames(
-          "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange appearance-none",
-          isInferred ? "text-black/20" : "text-black"
-        )}
-      >
-        {values.map(item => (
-          <option key={item} value={item}>
-            {item}
-          </option>
-        ))}
-      </select>
-      <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-        <div className="pointer-events-none pl-2 text-gray-700">
-          <ChevronUpDownIcon className="h-5 w-5" aria-hidden="true" />
-        </div>
-      </div>
-    </div>
-  );
-
   return (
     <div
       className="flex flex-nowrap items-center"
@@ -138,78 +105,71 @@ const ViewportComboBox = ({
       <div className="relative w-full">
         <div className="flex items-center">
           <div className="relative flex-grow">
-            {isMobile ? (
-              renderMobileInput()
-            ) : (
-              <Combobox value={internalValue} onChange={handleSelect}>
-                <div className="relative">
-                  <Combobox.Input
-                    ref={inputRef}
-                    className={classNames(
-                      "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-16 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
-                      isInferred ? "text-black/20" : "text-black"
-                    )}
-                    onChange={event => handleChange(event.target.value)}
-                    onBlur={handleBlur}
-                    displayValue={(v: string) => v}
-                    autoComplete="off"
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-2">
-                    <Combobox.Button
-                      ref={comboboxButtonRef}
-                      className="flex items-center pl-2"
-                    >
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-mydarkgrey"
-                        aria-hidden="true"
-                      />
-                    </Combobox.Button>
-                  </div>
+            <Combobox value={internalValue} onChange={handleSelect}>
+              <div className="relative">
+                <Combobox.Input
+                  ref={inputRef}
+                  className={classNames(
+                    "w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-16 text-xl leading-5 focus:ring-1 focus:ring-myorange focus:border-myorange",
+                    isInferred ? "text-black/20" : "text-black"
+                  )}
+                  onChange={event => handleChange(event.target.value)}
+                  onBlur={handleBlur}
+                  displayValue={(v: string) => v}
+                  autoComplete="off"
+                />
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <Combobox.Button
+                    ref={comboboxButtonRef}
+                    className="flex items-center pl-2"
+                  >
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
                 </div>
-                <Combobox.Options
-                  className={`absolute z-10 left-0 right-0 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
-                    openAbove ? "bottom-full mb-1" : "top-full mt-1"
-                  }`}
-                  style={{ maxHeight: `${maxHeight}px` }}
-                >
-                  {filteredValues.map(item => (
-                    <Combobox.Option
-                      key={item}
-                      value={item}
-                      className={({ active }) =>
-                        `relative cursor-default select-none py-2 pl-3 pr-9 ${
-                          active ? "bg-myorange text-white" : "text-black"
-                        }`
-                      }
-                    >
-                      {({ selected, active }) => (
-                        <>
+              </div>
+              <Combobox.Options
+                className={`absolute z-10 left-0 right-0 w-full overflow-auto rounded-md bg-white py-1 text-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none ${
+                  openAbove ? "bottom-full mb-1" : "top-full mt-1"
+                }`}
+                style={{ maxHeight: `${maxHeight}px` }}
+              >
+                {filteredValues.map(item => (
+                  <Combobox.Option
+                    key={item}
+                    value={item}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-3 pr-9 ${
+                        active ? "bg-myorange text-white" : "text-black"
+                      }`
+                    }
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span
+                          className={`block truncate ${
+                            selected ? "font-bold" : "font-normal"
+                          }`}
+                        >
+                          {item}
+                        </span>
+                        {selected && (
                           <span
-                            className={`block truncate ${
-                              selected ? "font-bold" : "font-normal"
+                            className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+                              active ? "text-white" : "text-myorange"
                             }`}
                           >
-                            {item}
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
                           </span>
-                          {selected && (
-                            <span
-                              className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
-                                active ? "text-white" : "text-myorange"
-                              }`}
-                            >
-                              <CheckIcon
-                                className="h-5 w-5"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </Combobox.Option>
-                  ))}
-                </Combobox.Options>
-              </Combobox>
-            )}
+                        )}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </Combobox>
           </div>
           {allowNegative && (
             <div className="ml-2 flex items-center">

@@ -1251,10 +1251,10 @@ export const htmlToMarkdown = (html: string): string => {
   return markdown;
 };
 
-export function findLinkNodes(ast: Element): Element[] {
-  const linkNodes: Element[] = [];
+export function findLinkNodes(ast: HastElement): HastElement[] {
+  const linkNodes: HastElement[] = [];
 
-  function traverse(node: Element): void {
+  function traverse(node: HastElement): void {
     if (node.tagName === "a") {
       linkNodes.push(node);
     }

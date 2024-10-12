@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef,useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ulid } from "ulid";
@@ -79,29 +79,6 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
       }, 100);
     }
   }, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
-
-  //useEffect(() => {
-  //  const header = document.getElementById("main-header");
-  //  if (
-  //    header &&
-  //    !($editMode?.type === `storyfragment` && $editMode?.mode === `settings`)
-  //  ) {
-  //    if (isFullWidthMobileShort && isVisible) {
-  //      header.classList.add("header-hidden");
-  //    } else {
-  //      header.classList.remove("header-hidden");
-  //    }
-  //    setTimeout(() => {
-  //      if (isFullWidthMobileShort && isVisible) {
-  //        header.classList.add("hidden");
-  //        header.classList.remove("block");
-  //      } else {
-  //        header.classList.remove("hidden");
-  //        header.classList.add("block");
-  //      }
-  //    }, 100);
-  //  }
-  //}, [isFullWidthMobileShort, isVisible, $editMode]);
 
   useEffect(() => {
     const handleResize = () => {

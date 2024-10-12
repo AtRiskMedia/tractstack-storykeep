@@ -137,6 +137,7 @@ export const StoryKeepHeader = memo(
       useStoryKeepUtils(thisId, usedSlugs);
     const [untitled, setUntitled] = useState<boolean>(
       $storyFragmentTitle[id]?.current === ``
+      || typeof $storyFragmentTitle[id]?.current === `undefined`
     );
 
     const setViewport = (

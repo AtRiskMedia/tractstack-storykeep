@@ -1,4 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useLayoutEffect,
+  useCallback,
+} from "react";
+import { debounce } from "../utils/helpers";
 import { SMALL_SCREEN_WIDTH } from "../constants";
 
 interface Dimensions {
@@ -14,23 +21,29 @@ interface Dimensions {
 }
 
 export const useEditModalDimensions = (): Dimensions => {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
   const [headerBottom, setHeaderBottom] = useState(0);
 
-  useEffect(() => {
+  const updateHeaderBottom = useCallback(() => {
     const header = document.getElementById("main-header");
     setHeaderBottom(header?.getBoundingClientRect().bottom || 0);
+  }, []);
 
-    const handleResize = () => {
+  useLayoutEffect(() => {
+    updateHeaderBottom();
+  }, [updateHeaderBottom]);
+
+  useEffect(() => {
+    const handleResize = debounce(() => {
       setWindowWidth(window.innerWidth);
-      setHeaderBottom(header?.getBoundingClientRect().bottom || 0);
-    };
+      updateHeaderBottom();
+    }, 150);
 
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [updateHeaderBottom]);
 
   const dimensions = useMemo<Dimensions>(() => {
     if (windowWidth < SMALL_SCREEN_WIDTH) {

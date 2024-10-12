@@ -1,4 +1,4 @@
-import {  useState, useRef, useEffect, memo } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { useStore } from "@nanostores/react";
 import {
   RectangleGroupIcon,
@@ -136,8 +136,8 @@ export const StoryKeepHeader = memo(
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(thisId, usedSlugs);
     const [untitled, setUntitled] = useState<boolean>(
-      $storyFragmentTitle[id]?.current === ``
-      || typeof $storyFragmentTitle[id]?.current === `undefined`
+      $storyFragmentTitle[id]?.current === `` ||
+        typeof $storyFragmentTitle[id]?.current === `undefined`
     );
 
     const setViewport = (

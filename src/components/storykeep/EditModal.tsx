@@ -179,7 +179,11 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           </button>
         </div>
         <div ref={contentRef} className={classNames("h-full flex flex-col")}>
-          <div className={classNames("bg-white px-3.5 relative flex-grow")}>
+          <div
+            className={classNames(
+              "bg-mywhite shadow-inner px-3.5 relative flex-grow"
+            )}
+          >
             {$editMode?.type === `storyfragment` &&
             $editMode?.mode === `settings` ? (
               <StoryFragmentSettings id={$editMode.id} />

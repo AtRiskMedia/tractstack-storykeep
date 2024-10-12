@@ -794,7 +794,7 @@ export const PaneAstStyles = (props: {
       {!confirm || confirm !== className ? (
         <>
           <button
-            className="peer text-md py-1 px-3 bg-mywhite text-black rounded-md hover:bg-yellow-300 shadow hover:underline"
+            className="peer text-md py-1 px-1 mr-4 bg-mywhite text-black rounded-md hover:bg-yellow-300 shadow hover:underline"
             title={`Adjust ${
               typeof tailwindClasses[className] !== `undefined`
                 ? tailwindClasses[className].title
@@ -810,7 +810,7 @@ export const PaneAstStyles = (props: {
               : className}
           </button>
           <button
-            className="ml-[-0.5rem] py-1 px-0.5 bg-myorange/10 text-myorange font-bold rounded-full hover:bg-myorange/50 hover:text-black peer-hover:invisible shadow"
+            className="ml-[-1rem] py-1 px-0.5 bg-myorange/10 text-myorange font-bold rounded-full hover:bg-myorange/50 hover:text-black peer-hover:invisible shadow"
             title="Remove style"
             onClick={() => {
               removeStyleIntercept(className);

@@ -61,7 +61,7 @@ const ImageMeta = (props: {
   const { updateStoreField } = useStoryKeepUtils(markdownFragmentId || "");
   const [altText, setAltText] = useState("");
   const [filename, setFilename] = useState("");
-  const [imageSrc, setImageSrc] = useState("");
+  const [imageSrc, setImageSrc] = useState("/static.jpg");
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStep, setProcessingStep] = useState("");
   const [query, setQuery] = useState("");
@@ -70,15 +70,6 @@ const ImageMeta = (props: {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const comboboxRef = useRef<HTMLDivElement>(null);
   const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
-
-  //useEffect(() => {
-  //  const checkMobile = () => {
-  //    setIsMobile(window.innerWidth < 768);
-  //  };
-  //  checkMobile();
-  //  window.addEventListener("resize", checkMobile);
-  //  return () => window.removeEventListener("resize", checkMobile);
-  //}, []);
 
   useEffect(() => {
     if (markdownFragment?.markdown) {
@@ -94,13 +85,13 @@ const ImageMeta = (props: {
         const thisImage = files?.find(
           image => image.filename === properties.src?.toString()
         );
-        if (thisImage || !imageSrc)
+        if (thisImage)
           setImageSrc(
             thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`
           );
       }
     }
-  }, [markdownFragment, idx, outerIdx, thisPaneFiles, imageSrc]);
+  }, [markdownFragment, idx, outerIdx, thisPaneFiles]);
 
   const handleAltTextChange = useCallback((newValue: string) => {
     setAltText(newValue);
@@ -249,7 +240,7 @@ const ImageMeta = (props: {
           src: base64,
           optimizedSrc: base64,
         };
-
+        setImageSrc(base64);
         const currentPaneFiles = $paneFiles[paneId]?.current || [];
         const updatedPaneFiles = [...currentPaneFiles, newFile];
         updateStoreField("paneFiles", updatedPaneFiles, paneId);
@@ -341,7 +332,7 @@ const ImageMeta = (props: {
 
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full text-center">
+          <div className="bg-white p-6 rounded-lg w-full text-center">
             <h3 className="text-xl font-semibold mb-4">Processing Image</h3>
             <div className="animate-pulse mb-4">
               <div className="h-2 bg-myorange rounded"></div>
@@ -353,7 +344,7 @@ const ImageMeta = (props: {
 
       {isSelectingFile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg max-w-md w-full">
+          <div className="bg-white p-4 rounded-lg w-full">
             <h3 className="text-lg font-semibold mb-2">Select a file</h3>
             <Combobox
               value={selectedFile}

@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState, useEffect, useCallback } from "react";
+import { memo, useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { Switch, Listbox } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import {
@@ -52,6 +52,10 @@ interface StyleTab {
   tag: Tag;
   priority: number;
 }
+
+const MemoizedImageMeta = memo(ImageMeta);
+const MemoizedLinksMeta = memo(LinksMeta);
+const MemoizedAddClass = memo(AddClass);
 
 export const PaneAstStyles = (props: {
   id: string;
@@ -189,46 +193,59 @@ export const PaneAstStyles = (props: {
           : activeTag === `li`
             ? listItemClassNamesPayload
             : outerTagClassNamesPayload;
-  const handleButtonStyleChange = (option: string) => {
-    if (linkMode && linkTargetKey) {
-      const index = parseInt(option);
-      const buttonStyle = buttonStyleClasses[index] as ButtonStyleClass;
-      const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
-      if (!currentField.current.payload.optionsPayload.buttons) {
-        currentField.current.payload.optionsPayload.buttons = {};
+  const handleButtonStyleChange = useCallback(
+    (option: string) => {
+      if (linkMode && linkTargetKey) {
+        const index = parseInt(option);
+        const buttonStyle = buttonStyleClasses[index] as ButtonStyleClass;
+        const currentField = cloneDeep(
+          $paneFragmentMarkdown[markdownFragmentId]
+        );
+        if (!currentField.current.payload.optionsPayload.buttons) {
+          currentField.current.payload.optionsPayload.buttons = {};
+        }
+        if (
+          !currentField.current.payload.optionsPayload.buttons[linkTargetKey]
+        ) {
+          currentField.current.payload.optionsPayload.buttons[linkTargetKey] = {
+            urlTarget: linkTargetKey,
+            callbackPayload: "",
+            className: "",
+            classNamesPayload: {
+              button: { classes: {} },
+              hover: { classes: {} },
+            },
+          };
+        }
+        currentField.current.payload.optionsPayload.buttons[
+          linkTargetKey
+        ].classNamesPayload.button.classes = Object.fromEntries(
+          Object.entries(buttonStyle[0]).map(([key, value]) => [
+            key,
+            value as Tuple,
+          ])
+        ) as ClassNamesPayloadDatumValue;
+        currentField.current.payload.optionsPayload.buttons[
+          linkTargetKey
+        ].classNamesPayload.hover.classes = Object.fromEntries(
+          Object.entries(buttonStyle[1]).map(([key, value]) => [
+            key,
+            value as Tuple,
+          ])
+        ) as ClassNamesPayloadDatumValue;
+        updateStoreField("paneFragmentMarkdown", currentField.current);
+        lastInteractedTypeStore.set(`markdown`);
+        lastInteractedPaneStore.set(targetId.paneId);
       }
-      if (!currentField.current.payload.optionsPayload.buttons[linkTargetKey]) {
-        currentField.current.payload.optionsPayload.buttons[linkTargetKey] = {
-          urlTarget: linkTargetKey,
-          callbackPayload: "",
-          className: "",
-          classNamesPayload: {
-            button: { classes: {} },
-            hover: { classes: {} },
-          },
-        };
-      }
-      currentField.current.payload.optionsPayload.buttons[
-        linkTargetKey
-      ].classNamesPayload.button.classes = Object.fromEntries(
-        Object.entries(buttonStyle[0]).map(([key, value]) => [
-          key,
-          value as Tuple,
-        ])
-      ) as ClassNamesPayloadDatumValue;
-      currentField.current.payload.optionsPayload.buttons[
-        linkTargetKey
-      ].classNamesPayload.hover.classes = Object.fromEntries(
-        Object.entries(buttonStyle[1]).map(([key, value]) => [
-          key,
-          value as Tuple,
-        ])
-      ) as ClassNamesPayloadDatumValue;
-      updateStoreField("paneFragmentMarkdown", currentField.current);
-      lastInteractedTypeStore.set(`markdown`);
-      lastInteractedPaneStore.set(targetId.paneId);
-    }
-  };
+    },
+    [
+      linkMode,
+      linkTargetKey,
+      markdownFragmentId,
+      updateStoreField,
+      targetId.paneId,
+    ]
+  );
 
   const removeLinkStyle = (className: string) => {
     setSelectedStyle(null);
@@ -1192,129 +1209,6 @@ export const PaneAstStyles = (props: {
       </div>
     );
 
-  const IsLink = () =>
-    linkTargetKey && (
-      <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-        {linkMode && linkTargetKey !== `*` ? (
-          <div>
-            <div className="flex flex-nowrap justify-between">
-              <div className="flex flex-nowrap gap-x-4">
-                <button
-                  className={classNames(
-                    linkMode === `button` ? `font-bold` : `underline`,
-                    "my-2"
-                  )}
-                  title="Button Styles"
-                  onClick={() => {
-                    setLinkMode(`button`);
-                    setSelectedStyle(null);
-                  }}
-                >
-                  Button Styles
-                </button>
-                <button
-                  className={classNames(
-                    linkMode === `hover` ? `font-bold` : `underline`,
-                    "my-2"
-                  )}
-                  title="Hover Styles"
-                  onClick={() => {
-                    setLinkMode(`hover`);
-                    setSelectedStyle(null);
-                  }}
-                >
-                  Hover Styles
-                </button>
-              </div>
-              <StyleMemory
-                currentKey="button"
-                classNamesPayload={buttonClassNamesPayloadArray}
-                onPaste={handlePasteStyles}
-              />
-            </div>
-            <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-              {classNamesPayload?.classes &&
-              Object.keys(classNamesPayload.classes).length ? (
-                Object.keys(classNamesPayload.classes).map(className =>
-                  ClassTag(className)
-                )
-              ) : (
-                <div className="w-full">
-                  <label
-                    htmlFor="button-style-listbox"
-                    className="block text-sm text-mydarkgrey mb-2"
-                  >
-                    Apply default button styles
-                  </label>
-                  <Listbox
-                    value={buttonStyleOptions.at(0)}
-                    onChange={handleButtonStyleChange}
-                  >
-                    <div className="relative mt-1">
-                      <Listbox.Button
-                        ref={buttonStyleListboxRef}
-                        className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-myorange focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 xs:text-sm"
-                      >
-                        <span className="block truncate">
-                          {buttonStyleOptions.at(0)}
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon
-                            className="h-5 w-5 text-mydarkgrey"
-                            aria-hidden="true"
-                          />
-                        </span>
-                      </Listbox.Button>
-                      <Listbox.Options
-                        className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
-                          buttonStyleOpenAbove
-                            ? "bottom-full mb-1"
-                            : "top-full mt-1"
-                        }`}
-                        style={{ maxHeight: `${buttonStyleMaxHeight}px` }}
-                      >
-                        {buttonStyleOptions.map((option, idx) => (
-                          <Listbox.Option
-                            key={option}
-                            className={({ active }) =>
-                              `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                active
-                                  ? "bg-myorange/10 text-black"
-                                  : "text-black"
-                              }`
-                            }
-                            value={idx}
-                          >
-                            {({ selected }) => (
-                              <>
-                                <span
-                                  className={`block truncate ${
-                                    selected ? "font-bold" : "font-normal"
-                                  }`}
-                                >
-                                  {option}
-                                </span>
-                              </>
-                            )}
-                          </Listbox.Option>
-                        ))}
-                      </Listbox.Options>
-                    </div>
-                  </Listbox>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <LinksMeta
-            paneId={targetId.paneId}
-            target={linkTargetKey}
-            setLinkTarget={setLinkTargetKey}
-          />
-        )}
-      </div>
-    );
-
   const IsLinkNav = () =>
     linkTargetKey && (
       <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
@@ -1365,33 +1259,6 @@ export const PaneAstStyles = (props: {
             }}
           >
             CLOSE
-          </button>
-        </span>
-      </div>
-    );
-
-  const IsImage = () =>
-    imageMeta &&
-    activeTag &&
-    activeTag === `img` &&
-    typeof targetId?.globalNth === `number` &&
-    typeof targetId?.idx === `number` && (
-      <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
-        <ImageMeta
-          paneId={targetId.paneId}
-          outerIdx={targetId.outerIdx}
-          idx={targetId.idx}
-          files={files}
-        />
-        <span className="flex gap-x-6 w-full">
-          <button
-            className="my-2 underline"
-            title="Edit Image Metadata"
-            onClick={() => {
-              setImageMeta(false);
-            }}
-          >
-            STYLE IMAGE
           </button>
         </span>
       </div>
@@ -1637,6 +1504,194 @@ export const PaneAstStyles = (props: {
       </div>
     ) : null;
 
+  const memoizedIsImage = useMemo(
+    () =>
+      imageMeta &&
+      activeTag &&
+      activeTag === `img` &&
+      typeof targetId?.globalNth === `number` &&
+      typeof targetId?.idx === `number` && (
+        <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+          <MemoizedImageMeta
+            paneId={targetId.paneId}
+            outerIdx={targetId.outerIdx}
+            idx={targetId.idx}
+            files={files}
+          />
+          <span className="flex gap-x-6 w-full">
+            <button
+              className="my-2 underline"
+              title="Edit Image Metadata"
+              onClick={() => {
+                setImageMeta(false);
+              }}
+            >
+              STYLE IMAGE
+            </button>
+          </span>
+        </div>
+      ),
+    [imageMeta, activeTag, targetId, files, setImageMeta]
+  );
+
+  const memoizedIsLink = useMemo(
+    () =>
+      linkTargetKey && (
+        <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+          {linkMode && linkTargetKey !== `*` ? (
+            <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+              {linkMode && linkTargetKey !== `*` ? (
+                <div>
+                  <div className="flex flex-nowrap justify-between">
+                    <div className="flex flex-nowrap gap-x-4">
+                      <button
+                        className={classNames(
+                          linkMode === `button` ? `font-bold` : `underline`,
+                          "my-2"
+                        )}
+                        title="Button Styles"
+                        onClick={() => {
+                          setLinkMode(`button`);
+                          setSelectedStyle(null);
+                        }}
+                      >
+                        Button Styles
+                      </button>
+                      <button
+                        className={classNames(
+                          linkMode === `hover` ? `font-bold` : `underline`,
+                          "my-2"
+                        )}
+                        title="Hover Styles"
+                        onClick={() => {
+                          setLinkMode(`hover`);
+                          setSelectedStyle(null);
+                        }}
+                      >
+                        Hover Styles
+                      </button>
+                    </div>
+                    <StyleMemory
+                      currentKey="button"
+                      classNamesPayload={buttonClassNamesPayloadArray}
+                      onPaste={handlePasteStyles}
+                    />
+                  </div>
+                  <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
+                    {classNamesPayload?.classes &&
+                    Object.keys(classNamesPayload.classes).length ? (
+                      Object.keys(classNamesPayload.classes).map(className =>
+                        ClassTag(className)
+                      )
+                    ) : (
+                      <div className="w-full">
+                        <label
+                          htmlFor="button-style-listbox"
+                          className="block text-sm text-mydarkgrey mb-2"
+                        >
+                          Apply default button styles
+                        </label>
+                        <Listbox
+                          value={buttonStyleOptions.at(0)}
+                          onChange={handleButtonStyleChange}
+                        >
+                          <div className="relative mt-1">
+                            <Listbox.Button
+                              ref={buttonStyleListboxRef}
+                              className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-myorange focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 xs:text-sm"
+                            >
+                              <span className="block truncate">
+                                {buttonStyleOptions.at(0)}
+                              </span>
+                              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                <ChevronUpDownIcon
+                                  className="h-5 w-5 text-mydarkgrey"
+                                  aria-hidden="true"
+                                />
+                              </span>
+                            </Listbox.Button>
+                            <Listbox.Options
+                              className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+                                buttonStyleOpenAbove
+                                  ? "bottom-full mb-1"
+                                  : "top-full mt-1"
+                              }`}
+                              style={{ maxHeight: `${buttonStyleMaxHeight}px` }}
+                            >
+                              {buttonStyleOptions.map((option, idx) => (
+                                <Listbox.Option
+                                  key={option}
+                                  className={({ active }) =>
+                                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                                      active
+                                        ? "bg-myorange/10 text-black"
+                                        : "text-black"
+                                    }`
+                                  }
+                                  value={idx}
+                                >
+                                  {({ selected }) => (
+                                    <>
+                                      <span
+                                        className={`block truncate ${
+                                          selected ? "font-bold" : "font-normal"
+                                        }`}
+                                      >
+                                        {option}
+                                      </span>
+                                    </>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </div>
+                        </Listbox>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <LinksMeta
+                  paneId={targetId.paneId}
+                  target={linkTargetKey}
+                  setLinkTarget={setLinkTargetKey}
+                />
+              )}
+            </div>
+          ) : (
+            <MemoizedLinksMeta
+              paneId={targetId.paneId}
+              target={linkTargetKey}
+              setLinkTarget={setLinkTargetKey}
+            />
+          )}
+        </div>
+      ),
+    [linkTargetKey, linkMode, targetId.paneId, setLinkTargetKey]
+  );
+
+  const memoizedAddClass = useMemo(
+    () =>
+      addClass && (
+        <MemoizedAddClass
+          styleFilter={styleFilter}
+          setStyleFilter={setStyleFilter}
+          selectedClass={selectedClass}
+          setSelectedClass={setSelectedClass}
+          setQuery={setQuery}
+          filteredClasses={filteredClasses}
+          handleAddStyleIntercept={handleAddStyleInterceptCallback}
+        />
+      ),
+    [
+      addClass,
+      styleFilter,
+      selectedClass,
+      filteredClasses,
+      handleAddStyleInterceptCallback,
+    ]
+  );
+
   if (!tabs) return null;
 
   return (
@@ -1651,28 +1706,14 @@ export const PaneAstStyles = (props: {
           !selectedStyle &&
           !addClass &&
           ![`parent`, `modal`].includes(activeTag) && <AppliedStyles />}
-        {!addClass && !selectedStyle && linkTargetKey && <IsLink />}
+        {memoizedIsLink}
         {linkTargetKey && <IsLinkNav />}
-        {imageMeta &&
-          activeTag &&
-          activeTag === `img` &&
-          typeof targetId?.globalNth === `number` &&
-          typeof targetId?.idx === `number` && <IsImage />}
+        {memoizedIsImage}
         {!addClass && !selectedStyle && activeTag === `parent` && <IsParent />}
         {!addClass && !selectedStyle && activeTag === `modal` && <IsModal />}
         {!imageMeta && !linkTargetKey && !widgetConfigMode && <SecondaryNav />}
       </div>
-      {addClass && (
-        <AddClass
-          styleFilter={styleFilter}
-          setStyleFilter={setStyleFilter}
-          selectedClass={selectedClass}
-          setSelectedClass={setSelectedClass}
-          setQuery={setQuery}
-          filteredClasses={filteredClasses}
-          handleAddStyleIntercept={handleAddStyleInterceptCallback}
-        />
-      )}
+      {memoizedAddClass}
       {selectedStyle && !addClass && <SelectedStyle />}
     </div>
   );

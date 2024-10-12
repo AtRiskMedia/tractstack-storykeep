@@ -260,7 +260,7 @@ const LinksMeta = (props: LinksMetaProps) => {
           </button>
         ))}
       </div>
-      <div className="max-w-xl mt-4">
+      <div className="mt-4">
         <div
           key={Object.entries(links)[index]?.[0]}
           className="border p-4 rounded"

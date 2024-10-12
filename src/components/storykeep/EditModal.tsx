@@ -80,28 +80,28 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   //  }
   //}, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
 
-  useEffect(() => {
-    const header = document.getElementById("main-header");
-    if (
-      header &&
-      !($editMode?.type === `storyfragment` && $editMode?.mode === `settings`)
-    ) {
-      if (isFullWidthMobileShort && isVisible) {
-        header.classList.add("header-hidden");
-      } else {
-        header.classList.remove("header-hidden");
-      }
-      setTimeout(() => {
-        if (isFullWidthMobileShort && isVisible) {
-          header.classList.add("hidden");
-          header.classList.remove("block");
-        } else {
-          header.classList.remove("hidden");
-          header.classList.add("block");
-        }
-      }, 100);
-    }
-  }, [isFullWidthMobileShort, isVisible, $editMode]);
+  //useEffect(() => {
+  //  const header = document.getElementById("main-header");
+  //  if (
+  //    header &&
+  //    !($editMode?.type === `storyfragment` && $editMode?.mode === `settings`)
+  //  ) {
+  //    if (isFullWidthMobileShort && isVisible) {
+  //      header.classList.add("header-hidden");
+  //    } else {
+  //      header.classList.remove("header-hidden");
+  //    }
+  //    setTimeout(() => {
+  //      if (isFullWidthMobileShort && isVisible) {
+  //        header.classList.add("hidden");
+  //        header.classList.remove("block");
+  //      } else {
+  //        header.classList.remove("hidden");
+  //        header.classList.add("block");
+  //      }
+  //    }, 100);
+  //  }
+  //}, [isFullWidthMobileShort, isVisible, $editMode]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -118,7 +118,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
         $storyFragmentInit[$editMode.id].init) ||
       ($editMode?.type === `pane` && $paneInit[$editMode.id].init)
     )
-      setTimeout(() => setIsClient(true), 50);
+      setIsClient(true);
   }, [$storyFragmentInit, $paneInit, $editMode]);
 
   useEffect(() => {
@@ -185,9 +185,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           </button>
         </div>
         <div ref={contentRef} className={classNames("h-full flex flex-col")}>
-          <div
-            className={classNames("modal-transition px-3.5 relative flex-grow")}
-          >
+          <div className={classNames("px-3.5 relative flex-grow")}>
             {$editMode?.type === `pane` &&
             $editMode?.mode === `insert` &&
             typeof $editMode?.payload !== `undefined` ? (

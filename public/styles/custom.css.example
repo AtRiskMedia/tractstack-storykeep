@@ -64,7 +64,3 @@ body {
   transform: translateY(-100%);
   pointer-events: none;
 }
-
-.modal-transition {
-  transition: all 0.3s ease-in-out;
-}

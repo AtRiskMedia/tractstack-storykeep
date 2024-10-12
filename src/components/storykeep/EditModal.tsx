@@ -95,21 +95,21 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
     }
   }, [isFullWidthMobileShort, isVisible]);
 
-  useEffect(() => {
-    if (
-      (shouldScroll || $editMode?.targetId) &&
-      isVisible &&
-      isFullWidthMobileShort
-    ) {
-      setTimeout(() => {
-        scrollToTarget();
-        setShouldScroll(false);
-      }, 100);
-    }
-  }, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
+  //useEffect(() => {
+  //  if (
+  //    (shouldScroll || $editMode?.targetId) &&
+  //    isVisible &&
+  //    isFullWidthMobileShort
+  //  ) {
+  //    setTimeout(() => {
+  //      scrollToTarget();
+  //      setShouldScroll(false);
+  //    }, 100);
+  //  }
+  //}, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
 
   const triggerScroll = useCallback(() => {
-    if (isFullWidthMobileShort) setShouldScroll(true);
+    //if (isFullWidthMobileShort) setShouldScroll(true);
   }, []);
 
   useEffect(() => {

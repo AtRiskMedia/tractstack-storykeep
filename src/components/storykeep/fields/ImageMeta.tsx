@@ -18,7 +18,6 @@ import {
   paneFiles,
 } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
-import { debounce } from "../../../utils/helpers";
 import ContentEditableField from "../components/ContentEditableField";
 import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import {
@@ -49,7 +48,6 @@ const ImageMeta = (props: {
   files: FileDatum[];
 }) => {
   const { paneId, outerIdx, idx, files } = props;
-  const [isMobile, setIsMobile] = useState(false);
   const $paneMarkdownFragmentId = useStore(paneMarkdownFragmentId, {
     keys: [paneId],
   });
@@ -74,15 +72,30 @@ const ImageMeta = (props: {
   const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    const debouncedCheckMobile = debounce(checkMobile, 250);
-    checkMobile();
-    window.addEventListener("resize", debouncedCheckMobile);
-    return () => {
-      window.removeEventListener("resize", debouncedCheckMobile);
-    };
+    if (markdownFragment?.markdown) {
+      const imageNode = findImageNode(
+        markdownFragment.markdown.htmlAst as Root,
+        outerIdx,
+        idx
+      );
+      if (imageNode && "properties" in imageNode) {
+        const properties = imageNode.properties as Properties;
+        setAltText(properties.alt?.toString() || "");
+        setFilename(properties.src?.toString() || "");
+        const thisImage = files?.find(
+          image => image.filename === properties.src?.toString()
+        );
+        if (thisImage || !imageSrc)
+          setImageSrc(
+            thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`
+          );
+      }
+    }
+  }, [markdownFragment, idx, outerIdx, thisPaneFiles, imageSrc]);
+
+  const handleAltTextChange = useCallback((newValue: string) => {
+    setAltText(newValue);
+    return true;
   }, []);
 
   const updateStore = useCallback(
@@ -117,33 +130,6 @@ const ImageMeta = (props: {
     ]
   );
 
-  useEffect(() => {
-    if (markdownFragment?.markdown) {
-      const imageNode = findImageNode(
-        markdownFragment.markdown.htmlAst as Root,
-        outerIdx,
-        idx
-      );
-      if (imageNode && "properties" in imageNode) {
-        const properties = imageNode.properties as Properties;
-        setAltText(properties.alt?.toString() || "");
-        setFilename(properties.src?.toString() || "");
-        const thisImage = files?.find(
-          image => image.filename === properties.src?.toString()
-        );
-        if (thisImage || !imageSrc)
-          setImageSrc(
-            thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`
-          );
-      }
-    }
-  }, [markdownFragment, idx, outerIdx, thisPaneFiles, imageSrc]);
-
-  const handleAltTextChange = useCallback((newValue: string) => {
-    setAltText(newValue);
-    return true;
-  }, []);
-
   const handleEditingChange = useCallback(
     (editing: boolean) => {
       if (!editing) {
@@ -151,44 +137,6 @@ const ImageMeta = (props: {
       }
     },
     [altText, updateStore]
-  );
-
-  const renderMobileSelect = () => (
-    <div className="relative mt-1">
-      <select
-        value={selectedFile?.id || ""}
-        onChange={e => {
-          const file = files.find(f => f.id === e.target.value);
-          if (file) {
-            setSelectedFile(file);
-            setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
-            setIsSelectingFile(false);
-            updateStore(file.altDescription, file.filename);
-            const currentPaneFiles = $paneFiles[paneId]?.current || [];
-            const updatedPaneFiles = currentPaneFiles.some(
-              f => f.id === file.id
-            )
-              ? currentPaneFiles
-              : [...currentPaneFiles, file];
-            updateStoreField("paneFiles", updatedPaneFiles, paneId);
-          }
-        }}
-        className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
-      >
-        <option value="">Select a file</option>
-        {filteredFiles.map(file => (
-          <option key={file.id} value={file.id}>
-            {file.altDescription}
-          </option>
-        ))}
-      </select>
-      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-        <ChevronUpDownIcon
-          className="h-5 w-5 text-mydarkgrey"
-          aria-hidden="true"
-        />
-      </div>
-    </div>
   );
 
   const handleRemoveFile = () => {
@@ -313,40 +261,30 @@ const ImageMeta = (props: {
         );
 
   return (
-    <div className="space-y-4 w-full">
+    <div className="space-y-4">
       <div>
         <label
-          htmlFor="image-alt-text-input"
+          htmlFor="image-alt-text"
           className="block text-sm text-mydarkgrey"
         >
           Image Description (Alt Text)
         </label>
-        {isMobile ? (
-          <input
-            id="image-alt-text-input"
-            type="text"
-            defaultValue={altText}
-            onBlur={e => {
-              const newValue = e.target.value;
-              setAltText(newValue);
-              updateStore(newValue);
-            }}
-            placeholder="Enter image description"
-            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
-          />
-        ) : (
-          <ContentEditableField
-            id="image-alt-text-input"
-            value={altText}
-            onChange={handleAltTextChange}
-            onEditingChange={handleEditingChange}
-            placeholder="Enter image description"
-            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
-          />
-        )}
+        <ContentEditableField
+          id="image-alt-text"
+          value={altText}
+          onChange={handleAltTextChange}
+          onEditingChange={handleEditingChange}
+          placeholder="Enter image description"
+          className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
+        />
       </div>
-      <div ref={comboboxRef}>
-        <span className="block text-sm text-mydarkgrey mb-2">Image</span>
+      <div>
+        <label
+          htmlFor="image-filename"
+          className="block text-sm text-mydarkgrey mb-2"
+        >
+          Image
+        </label>
         <div className="flex items-center space-x-4">
           <div className="relative w-24 aspect-video bg-mylightgrey/5 rounded-md overflow-hidden">
             <img
@@ -394,7 +332,7 @@ const ImageMeta = (props: {
 
       {isProcessing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-full text-center">
+          <div className="bg-white p-6 rounded-lg max-w-md w-full text-center">
             <h3 className="text-xl font-semibold mb-4">Processing Image</h3>
             <div className="animate-pulse mb-4">
               <div className="h-2 bg-myorange rounded"></div>
@@ -406,86 +344,85 @@ const ImageMeta = (props: {
 
       {isSelectingFile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg w-full">
+          <div
+            ref={comboboxRef}
+            className="bg-white p-4 rounded-lg max-w-md w-full"
+          >
             <h3 className="text-lg font-semibold mb-2">Select a file</h3>
-            {isMobile ? (
-              renderMobileSelect()
-            ) : (
-              <Combobox
-                value={selectedFile}
-                onChange={file => {
-                  if (file) {
-                    setSelectedFile(file);
-                    setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
-                    setIsSelectingFile(false);
-                    updateStore(file.altDescription, file.filename);
-                    const currentPaneFiles = $paneFiles[paneId]?.current || [];
-                    const updatedPaneFiles = currentPaneFiles.some(
-                      f => f.id === file.id
-                    )
-                      ? currentPaneFiles
-                      : [...currentPaneFiles, file];
-                    updateStoreField("paneFiles", updatedPaneFiles, paneId);
-                  }
-                }}
-              >
-                <div className="relative mt-1">
-                  <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
-                    <Combobox.Input
-                      className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
-                      displayValue={(file: FileDatum) => file?.filename || ""}
-                      onChange={event => setQuery(event.target.value)}
-                      placeholder="Search files..."
-                      autoComplete="off"
+            <Combobox
+              value={selectedFile}
+              onChange={file => {
+                if (file) {
+                  setSelectedFile(file);
+                  setImageSrc(file.optimizedSrc || file.src || `/static.jpg`);
+                  setIsSelectingFile(false);
+                  updateStore(file.altDescription, file.filename);
+                  const currentPaneFiles = $paneFiles[paneId]?.current || [];
+                  const updatedPaneFiles = currentPaneFiles.some(
+                    f => f.id === file.id
+                  )
+                    ? currentPaneFiles
+                    : [...currentPaneFiles, file];
+                  updateStoreField("paneFiles", updatedPaneFiles, paneId);
+                }
+              }}
+            >
+              <div className="relative mt-1">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
+                  <Combobox.Input
+                    className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-myblack focus:ring-0"
+                    displayValue={(file: FileDatum) => file?.filename || ""}
+                    onChange={event => setQuery(event.target.value)}
+                    placeholder="Search files..."
+                    autoComplete="off"
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
                     />
-                    <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-mydarkgrey"
-                        aria-hidden="true"
-                      />
-                    </Combobox.Button>
-                  </div>
-                  <Combobox.Options
-                    className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm ${
-                      openAbove ? "bottom-full mb-1" : "top-full mt-1"
-                    }`}
-                    style={{ maxHeight: `${maxHeight}px` }}
-                  >
-                    {filteredFiles.map(file => (
-                      <Combobox.Option
-                        key={file.id}
-                        value={file}
-                        className={({ active }) =>
-                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                            active ? "bg-myorange text-white" : "text-myblack"
-                          }`
-                        }
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            <span
-                              className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
-                            >
-                              {file.altDescription}
-                            </span>
-                            {selected && (
-                              <span
-                                className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-myorange"}`}
-                              >
-                                <CheckIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </Combobox.Option>
-                    ))}
-                  </Combobox.Options>
+                  </Combobox.Button>
                 </div>
-              </Combobox>
-            )}
+                <Combobox.Options
+                  className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm ${
+                    openAbove ? "bottom-full mb-1" : "top-full mt-1"
+                  }`}
+                  style={{ maxHeight: `${maxHeight}px` }}
+                >
+                  {filteredFiles.map(file => (
+                    <Combobox.Option
+                      key={file.id}
+                      value={file}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                          active ? "bg-myorange text-white" : "text-myblack"
+                        }`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span
+                            className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
+                          >
+                            {file.altDescription}
+                          </span>
+                          {selected && (
+                            <span
+                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? "text-white" : "text-myorange"}`}
+                            >
+                              <CheckIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              </div>
+            </Combobox>
             <button
               className="mt-4 bg-mylightgrey px-4 py-2 rounded-md text-sm text-myblack hover:bg-myorange hover:text-white"
               onClick={() => setIsSelectingFile(false)}

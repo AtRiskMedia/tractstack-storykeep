@@ -1,5 +1,5 @@
 import { useRef, useMemo, useState, useEffect, useCallback } from "react";
-import { Switch, Combobox, Listbox } from "@headlessui/react";
+import { Switch, Listbox } from "@headlessui/react";
 import { useStore } from "@nanostores/react";
 import {
   XMarkIcon,
@@ -34,6 +34,8 @@ import Widget from "../fields/Widget";
 import ImageMeta from "../fields/ImageMeta";
 import LinksMeta from "../fields/LinksMeta";
 import StyleMemory from "../fields/StyleMemory";
+import AddClass from "../components/AddClass";
+import type { StyleFilter } from "../components/AddClass";
 import type { Root } from "hast";
 import type {
   ClassNamesPayloadInnerDatum,
@@ -57,14 +59,11 @@ export const PaneAstStyles = (props: {
   files: FileDatum[];
 }) => {
   const { id, targetId, files } = props;
+  const [styleFilter, setStyleFilter] = useState<StyleFilter>("popular");
   const buttonStyleListboxRef = useRef<HTMLButtonElement>(null);
-  const addStyleListboxRef = useRef<HTMLButtonElement>(null);
   const { openAbove: buttonStyleOpenAbove, maxHeight: buttonStyleMaxHeight } =
     useDropdownDirection(buttonStyleListboxRef);
-  const { openAbove: addStyleOpenAbove, maxHeight: addStyleMaxHeight } =
-    useDropdownDirection(addStyleListboxRef);
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
-  const [styleFilter, setStyleFilter] = useState("popular");
   const [selectedClass, setSelectedClass] = useState("");
   const [widgetConfigMode, setWidgetConfigMode] = useState(false);
   const [widgetData, setWidgetData] = useState<string[]>([]);
@@ -759,16 +758,13 @@ export const PaneAstStyles = (props: {
     if (isLink) handleAddStyleLink();
     else handleAddStyle();
   };
+  const handleAddStyleInterceptCallback = useCallback(() => {
+    handleAddStyleIntercept();
+  }, [handleAddStyleIntercept]);
 
   const cancelRemoveStyle = () => {
     setConfirm(null);
   };
-
-  const styleFilterOptions = [
-    { value: "popular", label: "Popular Styles" },
-    { value: "advanced", label: "+ Advanced" },
-    { value: "effects", label: "+ Effects" },
-  ];
 
   const filteredClasses = useMemo(() => {
     return Object.entries(tailwindClasses)
@@ -1350,12 +1346,12 @@ export const PaneAstStyles = (props: {
           {selectedStyle && (
             <button
               className="my-2 underline"
-              title="Cancel Edit Style"
+              title="All Styles"
               onClick={() => {
                 setSelectedStyle(null);
               }}
             >
-              CANCEL EDIT STYLE
+              ALL STYLES
             </button>
           )}
           <button
@@ -1368,7 +1364,7 @@ export const PaneAstStyles = (props: {
               setLinkTargetKey(``);
             }}
           >
-            BACK
+            CLOSE
           </button>
         </span>
       </div>
@@ -1641,147 +1637,6 @@ export const PaneAstStyles = (props: {
       </div>
     ) : null;
 
-  const AddClass = () => (
-    <div className="mt-6">
-      <div className="bg-white shadow-inner rounded">
-        <div className="px-6 py-4">
-          <h4 className="text-lg">Add Styles</h4>
-          <div className="my-4">
-            <Listbox value={styleFilter} onChange={setStyleFilter}>
-              <div className="relative mt-1">
-                <Listbox.Button
-                  ref={addStyleListboxRef}
-                  className="relative w-full cursor-default rounded-md border border-mydarkgrey bg-white py-2 pl-3 pr-10 text-left text-black shadow-sm focus:outline-none focus:ring-1 focus:ring-myorange focus:border-myorange xs:text-sm"
-                >
-                  <span className="block truncate">
-                    {
-                      styleFilterOptions.find(
-                        option => option.value === styleFilter
-                      )?.label
-                    }
-                  </span>
-                  <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                    <ChevronUpDownIcon
-                      className="h-5 w-5 text-mydarkgrey"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </Listbox.Button>
-                <Listbox.Options
-                  className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
-                    addStyleOpenAbove ? "bottom-full mb-1" : "top-full mt-1"
-                  }`}
-                  style={{ maxHeight: `${addStyleMaxHeight}px` }}
-                >
-                  {styleFilterOptions.map(option => (
-                    <Listbox.Option
-                      key={option.value}
-                      value={option.value}
-                      className={({ active }) =>
-                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                          active ? "bg-myorange text-white" : "text-black"
-                        }`
-                      }
-                    >
-                      {({ selected, active }) => (
-                        <>
-                          <span
-                            className={`block truncate ${
-                              selected ? "font-bold" : "font-normal"
-                            }`}
-                          >
-                            {option.label}
-                          </span>
-                          {selected ? (
-                            <span
-                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                active ? "text-white" : "text-myorange"
-                              }`}
-                            >
-                              <CheckIcon
-                                className="h-5 w-5"
-                                aria-hidden="true"
-                              />
-                            </span>
-                          ) : null}
-                        </>
-                      )}
-                    </Listbox.Option>
-                  ))}
-                </Listbox.Options>
-              </div>
-            </Listbox>
-          </div>
-
-          <div className="relative">
-            <Combobox value={selectedClass} onChange={setSelectedClass}>
-              <div className="relative mt-1">
-                <Combobox.Input
-                  className="w-full border border-mydarkgrey rounded-md py-2 pl-3 pr-10 text-xl leading-5 text-black focus:ring-1 focus:ring-myorange focus:border-myorange"
-                  displayValue={(className: string) =>
-                    tailwindClasses[className]?.title || ""
-                  }
-                  onChange={event => setQuery(event.target.value)}
-                  autoComplete="off"
-                  placeholder="Select a style to add"
-                />
-                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                  <ChevronUpDownIcon
-                    className="h-5 w-5 text-mydarkgrey"
-                    aria-hidden="true"
-                  />
-                </Combobox.Button>
-              </div>
-              <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm">
-                {filteredClasses.map(([className, classInfo]) => (
-                  <Combobox.Option
-                    key={className}
-                    value={className}
-                    className={({ active }) =>
-                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                        active ? "bg-myorange text-white" : "text-black"
-                      }`
-                    }
-                  >
-                    {({ selected, active }) => (
-                      <>
-                        <span
-                          className={`block truncate ${
-                            selected ? "font-bold" : "font-normal"
-                          }`}
-                        >
-                          {classInfo.title}
-                        </span>
-                        {selected ? (
-                          <span
-                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                              active ? "text-white" : "text-myorange"
-                            }`}
-                          >
-                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                          </span>
-                        ) : null}
-                      </>
-                    )}
-                  </Combobox.Option>
-                ))}
-              </Combobox.Options>
-            </Combobox>
-          </div>
-
-          <button
-            onClick={() => {
-              handleAddStyleIntercept();
-            }}
-            className="mt-4 w-full py-2 bg-myorange text-white rounded-md hover:bg-myorange/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-myorange"
-          >
-            Add Style
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   if (!tabs) return null;
 
   return (
@@ -1807,7 +1662,17 @@ export const PaneAstStyles = (props: {
         {!addClass && !selectedStyle && activeTag === `modal` && <IsModal />}
         {!imageMeta && !linkTargetKey && !widgetConfigMode && <SecondaryNav />}
       </div>
-      {addClass && <AddClass />}
+      {addClass && (
+        <AddClass
+          styleFilter={styleFilter}
+          setStyleFilter={setStyleFilter}
+          selectedClass={selectedClass}
+          setSelectedClass={setSelectedClass}
+          setQuery={setQuery}
+          filteredClasses={filteredClasses}
+          handleAddStyleIntercept={handleAddStyleInterceptCallback}
+        />
+      )}
       {selectedStyle && !addClass && <SelectedStyle />}
     </div>
   );

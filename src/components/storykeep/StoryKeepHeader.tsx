@@ -385,7 +385,7 @@ export const StoryKeepHeader = memo(
                   }
                   className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                 >
-                  Cancel
+                  Reset
                 </a>
               ) : (
                 <a
@@ -393,7 +393,7 @@ export const StoryKeepHeader = memo(
                   href={!isContext ? `/${slug}` : `/context/${slug}`}
                   className="inline-block my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
                 >
-                  Close
+                  View Page
                 </a>
               )}
 

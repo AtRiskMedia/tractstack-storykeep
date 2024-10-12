@@ -136,7 +136,9 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           `backdrop-blur-sm bg-mydarkgrey/50`,
           `bg-mywhite shadow-lg transition-all duration-300 ease-in-out`,
           isFullWidthMobileShort ? `border-t-2 border-mylightgrey` : ``,
-          type === `desktop` ? "rounded-bl-lg" : "rounded-t-lg"
+          type === `desktop`
+            ? "rounded-bl-lg border-l-2 border-b-2 border-mylightgrey"
+            : "rounded-t-lg border-l-2 border-t-2 border-r-2 border-mylightgrey"
         )}
         style={{
           height: height,

@@ -16,7 +16,6 @@ interface Dimensions {
 export const useEditModalDimensions = (
   isEditModeActive: boolean
 ): Dimensions => {
-  const [mode, setMode] = useState(0);
   const [dimensions, setDimensions] = useState<Dimensions>({
     height: "auto",
     width: "100%",
@@ -30,7 +29,6 @@ export const useEditModalDimensions = (
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
     let newDimensions: Dimensions;
     if (innerWidth < SMALL_SCREEN_WIDTH) {
-      setMode(1);
       newDimensions = {
         height: "auto",
         width: "100%",
@@ -38,7 +36,6 @@ export const useEditModalDimensions = (
         isFullWidthMobileShort: true,
       };
     } else if (innerWidth < 1368) {
-      setMode(2);
       newDimensions = {
         height: "auto",
         width: `${Math.min(innerWidth * 0.8, 500)}px`,
@@ -46,7 +43,6 @@ export const useEditModalDimensions = (
         isFullWidthMobileShort: false,
       };
     } else {
-      setMode(3);
       newDimensions = {
         height: "auto",
         width: "33%",
@@ -62,9 +58,6 @@ export const useEditModalDimensions = (
     const handleResize = () => {
       if (
         innerWidth >= SMALL_SCREEN_WIDTH
-        //(innerWidth < SMALL_SCREEN_WIDTH && mode !== 1) ||
-        //(innerWidth < 1368 && mode !== 2) ||
-        //(innerWidth >= 1368 && mode !== 3)
       )
         updateDimensions();
     };
@@ -72,7 +65,7 @@ export const useEditModalDimensions = (
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [mode, updateDimensions]);
+  }, [updateDimensions]);
 
   return dimensions;
 };

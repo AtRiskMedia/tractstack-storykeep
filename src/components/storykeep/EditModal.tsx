@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import {useCallback, useState, useEffect, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ulid } from "ulid";
@@ -41,49 +41,45 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const { height, width, position, isFullWidthMobileShort } =
     useEditModalDimensions($editMode !== null);
 
-  //const [shouldScroll, setShouldScroll] = useState(false);
-  //const scrollToTarget = useCallback(() => {
-  //  if ($editMode?.targetId) {
-  //    const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
-  //    const targetElement = document.getElementById(targetId);
-  //    const modalElement = document.getElementById("edit-modal");
-  //    if (targetElement && modalElement) {
-  //      const modalRect = modalElement.getBoundingClientRect();
-  //      const targetRect = targetElement.getBoundingClientRect();
-  //      const viewportHeight = window.innerHeight;
-  //      const currentScrollY = window.scrollY;
-  //      const modalHeight = modalRect.height;
-  //      const spaceAboveModal = viewportHeight - modalHeight;
-  //      const targetDesiredTop = Math.max(
-  //        spaceAboveModal / 2 - targetRect.height / 2,
-  //        0
-  //      );
-  //      const newScrollY = currentScrollY + targetRect.top - targetDesiredTop;
-  //      const finalScrollY = Math.max(0, newScrollY);
-  //      window.scrollTo({
-  //        top: finalScrollY,
-  //        behavior: "smooth",
-  //      });
-  //    }
-  //  }
-  //}, [$editMode?.targetId]);
+  const [shouldScroll, setShouldScroll] = useState(false);
+  const scrollToTarget = useCallback(() => {
+    if ($editMode?.targetId) {
+      const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
+      const targetElement = document.getElementById(targetId);
+      const modalElement = document.getElementById("edit-modal");
+      if (targetElement && modalElement) {
+        const modalRect = modalElement.getBoundingClientRect();
+        const targetRect = targetElement.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const currentScrollY = window.scrollY;
+        const modalHeight = modalRect.height;
+        const spaceAboveModal = viewportHeight - modalHeight;
+        const targetDesiredTop = Math.max(
+          spaceAboveModal / 2 - targetRect.height / 2,
+          0
+        );
+        const newScrollY = currentScrollY + targetRect.top - targetDesiredTop;
+        const finalScrollY = Math.max(0, newScrollY);
+        window.scrollTo({
+          top: finalScrollY,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [$editMode?.targetId]);
 
-  //useEffect(() => {
-  //  if (
-  //    (shouldScroll || $editMode?.targetId) &&
-  //    isVisible &&
-  //    isFullWidthMobileShort
-  //  ) {
-  //    setTimeout(() => {
-  //      scrollToTarget();
-  //      setShouldScroll(false);
-  //    }, 100);
-  //  }
-  //}, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
-
-  //const triggerScroll = useCallback(() => {
-  //  if (isFullWidthMobileShort) setShouldScroll(true);
-  //}, []);
+  useEffect(() => {
+    if (
+      (shouldScroll || $editMode?.targetId) &&
+      isVisible &&
+      isFullWidthMobileShort
+    ) {
+      setTimeout(() => {
+        scrollToTarget();
+        setShouldScroll(false);
+      }, 100);
+    }
+  }, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
 
   useEffect(() => {
     const header = document.getElementById("main-header");

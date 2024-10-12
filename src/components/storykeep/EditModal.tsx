@@ -39,7 +39,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   );
   const isVisible = $editMode !== null;
   const { height, width, position, isFullWidthMobileShort } =
-    useEditModalDimensions()
+    useEditModalDimensions();
 
   //const [shouldScroll, setShouldScroll] = useState(false);
   //const scrollToTarget = useCallback(() => {
@@ -83,7 +83,10 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
 
   useEffect(() => {
     const header = document.getElementById("main-header");
-    if (header) {
+    if (
+      header &&
+      !($editMode?.type === `storyfragment` && $editMode?.mode === `settings`)
+    ) {
       if (isFullWidthMobileShort && isVisible) {
         header.classList.add("header-hidden");
       } else {
@@ -99,7 +102,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
         }
       }, 100);
     }
-  }, [isFullWidthMobileShort, isVisible]);
+  }, [isFullWidthMobileShort, isVisible, $editMode]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -145,6 +148,9 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
 
   if (!isClient) return null;
 
+  if ($editMode?.type === `storyfragment` && $editMode?.mode === `settings`)
+    return null;
+
   return (
     <div className="relative">
       <div
@@ -153,6 +159,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           `fixed z-[9000]`,
           `backdrop-blur-sm bg-mydarkgrey/50`,
           `shadow-lg transition-all duration-300 ease-in-out`,
+          isFullWidthMobileShort ? `border-t-2 border-mylightgrey` : ``,
           type === `desktop` ? "rounded-bl-lg" : "rounded-t-lg"
         )}
         style={{
@@ -184,12 +191,9 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
               "bg-mywhite shadow-inner px-3.5 relative flex-grow"
             )}
           >
-            {$editMode?.type === `storyfragment` &&
-            $editMode?.mode === `settings` ? (
-              <StoryFragmentSettings id={$editMode.id} />
-            ) : $editMode?.type === `pane` &&
-              $editMode?.mode === `insert` &&
-              typeof $editMode?.payload !== `undefined` ? (
+            {$editMode?.type === `pane` &&
+            $editMode?.mode === `insert` &&
+            typeof $editMode?.payload !== `undefined` ? (
               <PaneInsert
                 storyFragmentId={$editMode.id}
                 paneId={

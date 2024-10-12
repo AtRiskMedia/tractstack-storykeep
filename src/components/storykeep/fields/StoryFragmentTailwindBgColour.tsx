@@ -106,9 +106,9 @@ const StoryFragmentTailwindBgColour = ({
         </button>
       </div>
       <div>
-        <label className="block text-sm text-mydarkgrey mb-1">
+        <span className="block text-sm text-mydarkgrey mb-1">
           Tailwind Color Class
-        </label>
+        </span>
         <TailwindColorCombobox
           selectedColor={selectedTailwindColor}
           onColorChange={handleTailwindColorChange}

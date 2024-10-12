@@ -1,4 +1,4 @@
-import { useState, useEffect , useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SMALL_SCREEN_WIDTH } from "../constants";
 
 interface Dimensions {
@@ -13,8 +13,7 @@ interface Dimensions {
   isFullWidthMobileShort: boolean;
 }
 
-export const useEditModalDimensions = (
-): Dimensions => {
+export const useEditModalDimensions = (): Dimensions => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [headerBottom, setHeaderBottom] = useState(0);
 

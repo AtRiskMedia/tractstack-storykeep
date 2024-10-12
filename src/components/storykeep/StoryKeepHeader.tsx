@@ -12,6 +12,7 @@ import PaneTitle from "./fields/PaneTitle";
 import PaneSlug from "./fields/PaneSlug";
 import StoryFragmentTitle from "./fields/StoryFragmentTitle";
 import StoryFragmentSlug from "./fields/StoryFragmentSlug";
+import { StoryFragmentSettings } from "./settings/StoryFragmentSettings";
 import {
   editModeStore,
   unsavedChangesStore,
@@ -137,6 +138,10 @@ export const StoryKeepHeader = memo(
     ];
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(thisId, usedSlugs);
+    const [untitled, setUntitled] = useState<boolean>(
+      $storyFragmentTitle[id]?.current === `` ||
+        [`create`, ``].includes($storyFragmentSlug[id]?.current ?? ``)
+    );
 
     const setViewport = (
       newViewport: "auto" | "mobile" | "tablet" | "desktop"
@@ -162,6 +167,16 @@ export const StoryKeepHeader = memo(
     const setToolAddMode = (newToolAddMode: ToolAddMode) => {
       toolAddModeStore.set({ value: newToolAddMode });
     };
+
+    useEffect(() => {
+      if (
+        untitled &&
+        $storyFragmentTitle[id]?.current !== `` &&
+        ![`create`, ``].includes($storyFragmentSlug[id]?.current ?? ``)
+      ) {
+        setUntitled(false);
+      }
+    }, [isContext, $storyFragmentTitle, $storyFragmentSlug, untitled]);
 
     useEffect(() => {
       fetchAnalytics();
@@ -483,7 +498,10 @@ export const StoryKeepHeader = memo(
             </div>
           </div>
           <div style={{ display: hideElements ? "none" : "block" }}>
-            {!isContext ? (
+            {(($editMode?.type === `storyfragment` &&
+              $editMode?.mode === `settings`) ||
+              untitled) &&
+            !isContext ? (
               <>
                 <StoryFragmentTitle
                   id={thisId}
@@ -504,7 +522,7 @@ export const StoryKeepHeader = memo(
                   />
                 )}
               </>
-            ) : (
+            ) : isContext ? (
               <>
                 <PaneTitle
                   id={thisId}
@@ -525,7 +543,20 @@ export const StoryKeepHeader = memo(
                   />
                 )}
               </>
-            )}
+            ) : null}
+            {$editMode?.type === `storyfragment` &&
+              $editMode?.mode === `settings` && (
+                <>
+                  <StoryFragmentSettings id={$editMode.id} />
+                  <button
+                    type="button"
+                    className="my-1 rounded bg-myblue px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myorange"
+                    onClick={handleEditModeToggle}
+                  >
+                    Close Panel
+                  </button>
+                </>
+              )}
           </div>
         </div>
       </div>

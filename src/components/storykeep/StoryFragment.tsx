@@ -379,6 +379,7 @@ export const StoryFragment = (props: {
   if (!isClient || !thisPaneIds) return <div>Loading...</div>;
   else if (untitled)
     return <div className="p-6">Please enter a title to get started...</div>;
+  else if ($editMode?.mode === `settings`) return null;
 
   return (
     <>
@@ -388,15 +389,6 @@ export const StoryFragment = (props: {
           title={$storyFragmentTitle[thisId].current}
           isPane={false}
         />
-      )}
-      {$editMode?.mode === `settings` && (
-        <div
-          title="Close panel"
-          onClick={() => {
-            editModeStore.set(null);
-          }}
-          className="fixed inset-0 z-[8999] pointer-events-auto cursor-pointer"
-        ></div>
       )}
       {$editMode?.mode === `insert` && (
         <div className="fixed inset-0 bg-black/95 z-[8999]"></div>

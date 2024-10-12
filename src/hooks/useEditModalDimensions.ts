@@ -61,9 +61,10 @@ export const useEditModalDimensions = (
     updateDimensions();
     const handleResize = () => {
       if (
-        (innerWidth < SMALL_SCREEN_WIDTH && mode !== 1) ||
-        (innerWidth < 1368 && mode !== 2) ||
-        (innerWidth >= 1368 && mode !== 3)
+        innerWidth >= SMALL_SCREEN_WIDTH
+        //(innerWidth < SMALL_SCREEN_WIDTH && mode !== 1) ||
+        //(innerWidth < 1368 && mode !== 2) ||
+        //(innerWidth >= 1368 && mode !== 3)
       )
         updateDimensions();
     };

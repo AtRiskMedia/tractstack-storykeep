@@ -379,7 +379,11 @@ export const StoryFragment = (props: {
   if (!isClient || !thisPaneIds) return <div>Loading...</div>;
   else if (untitled)
     return <div className="p-6">Please enter a title to get started...</div>;
-  else if ($editMode?.mode === `settings`) return null;
+  else if (
+    $editMode?.type === `storyfragment` &&
+    $editMode?.mode === `settings`
+  )
+    return null;
 
   return (
     <>

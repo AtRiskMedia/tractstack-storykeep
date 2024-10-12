@@ -400,7 +400,7 @@ export const StoryFragment = (props: {
       <div
         id="storykeep-preview"
         className={classNames(
-          tailwindBgColour ? `bg-${tailwindBgColour}` : `white`,
+          tailwindBgColour ? `${tailwindBgColour}` : `white`,
           `overflow-hidden`,
           $viewport.value === `mobile`
             ? `min-w-[500px] max-w-[780px]`

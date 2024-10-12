@@ -246,7 +246,7 @@ const Pane = (props: {
       key={memoizedPaneData.bgColour}
       id={`pane-inner-${id}`}
       style={{
-        backgroundColor: memoizedPaneData.bgColour || `current`,
+        backgroundColor: memoizedPaneData.bgColour || `transparent`,
       }}
       className={classNames(
         memoizedPaneData.hasMaxHScreen ? `max-h-screen` : ``,

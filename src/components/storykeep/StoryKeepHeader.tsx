@@ -312,40 +312,40 @@ export const StoryKeepHeader = memo(
       }
     }, [thisId, $storyFragmentInit, $paneInit]);
 
-    const handleScroll = useCallback(() => {
-      if (headerRef.current) {
-        const scrollPosition =
-          window.scrollY || document.documentElement.scrollTop;
-        const headerHeight = headerRef.current.offsetHeight;
-        const scrollThreshold = MIN_SCROLL_THRESHOLD - headerHeight;
+    //const handleScroll = useCallback(() => {
+    //  if (headerRef.current) {
+    //    const scrollPosition =
+    //      window.scrollY || document.documentElement.scrollTop;
+    //    const headerHeight = headerRef.current.offsetHeight;
+    //    const scrollThreshold = MIN_SCROLL_THRESHOLD - headerHeight;
 
-        if (
-          Math.abs(scrollPosition - lastScrollPosition.current) > HYSTERESIS
-        ) {
-          setHideElements(prevHideElements => {
-            const newHideElements = scrollPosition > scrollThreshold;
-            if (newHideElements !== prevHideElements) {
-              lastScrollPosition.current = scrollPosition;
-              return newHideElements;
-            }
-            return prevHideElements;
-          });
-        }
-      }
-    }, []);
+    //    if (
+    //      Math.abs(scrollPosition - lastScrollPosition.current) > HYSTERESIS
+    //    ) {
+    //      setHideElements(prevHideElements => {
+    //        const newHideElements = scrollPosition > scrollThreshold;
+    //        if (newHideElements !== prevHideElements) {
+    //          lastScrollPosition.current = scrollPosition;
+    //          return newHideElements;
+    //        }
+    //        return prevHideElements;
+    //      });
+    //    }
+    //  }
+    //}, []);
 
-    const debouncedHandleScroll = useCallback(debounce(handleScroll, 100), [
-      handleScroll,
-    ]);
+    //const debouncedHandleScroll = useCallback(debounce(handleScroll, 100), [
+    //  handleScroll,
+    //]);
 
-    useEffect(() => {
-      window.addEventListener("scroll", debouncedHandleScroll);
-      debouncedHandleScroll(); // Call immediately to set initial state
+    //useEffect(() => {
+    //  window.addEventListener("scroll", debouncedHandleScroll);
+    //  debouncedHandleScroll(); // Call immediately to set initial state
 
-      return () => {
-        window.removeEventListener("scroll", debouncedHandleScroll);
-      };
-    }, [debouncedHandleScroll]);
+    //  return () => {
+    //    window.removeEventListener("scroll", debouncedHandleScroll);
+    //  };
+    //}, [debouncedHandleScroll]);
 
     useEffect(() => {
       if (toolMode === "insert" && toolAddModeRef.current) {

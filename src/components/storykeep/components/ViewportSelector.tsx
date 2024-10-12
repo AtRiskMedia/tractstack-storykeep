@@ -11,7 +11,6 @@ interface ViewportSelectorProps {
   viewport: ViewportKey;
   auto: boolean;
   setViewport: (viewport: "auto" | "mobile" | "tablet" | "desktop") => void;
-  hideElements?: boolean;
 }
 
 const ViewportSelector = ({
@@ -19,7 +18,6 @@ const ViewportSelector = ({
   viewportKey,
   auto,
   setViewport,
-  hideElements,
 }: ViewportSelectorProps) => {
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
@@ -49,14 +47,8 @@ const ViewportSelector = ({
   return (
     <div>
       <div className="flex items-center">
-        <span
-          className={`mr-1 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
-        >
-          Designing for:
-        </span>
-        <span
-          className={`font-bold text-xl text-myblue pr-2.5 ${hideElements ? `hidden md:block` : ``}`}
-        >
+        <span className={`mr-1 text-sm text-mydarkgrey`}>Designing for:</span>
+        <span className={`font-bold text-xl text-myblue pr-2.5`}>
           {!auto ? viewport : viewportKey}
         </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">

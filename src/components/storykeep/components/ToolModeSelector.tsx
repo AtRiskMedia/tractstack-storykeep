@@ -4,14 +4,12 @@ import { toolModeButtons } from "../../../constants";
 interface ToolModeSelectorProps {
   toolMode: ToolMode;
   setToolMode: (toolMode: ToolMode) => void;
-  hideElements?: boolean;
   isContext: boolean;
 }
 
 const ToolModeSelector = ({
   toolMode,
   setToolMode,
-  hideElements,
   isContext,
 }: ToolModeSelectorProps) => {
   const classNames = (...classes: string[]) =>
@@ -20,14 +18,8 @@ const ToolModeSelector = ({
   return (
     <div>
       <div className="flex items-center">
-        <span
-          className={`mr-1 text-sm text-mydarkgrey ${hideElements ? `hidden md:block` : ``}`}
-        >
-          Mode:
-        </span>
-        <span
-          className={`font-bold text-xl text-myblue pr-2.5 ${hideElements ? `hidden md:block` : ``}`}
-        >
+        <span className={`mr-1 text-sm text-mydarkgrey`}>Mode:</span>
+        <span className={`font-bold text-xl text-myblue pr-2.5`}>
           {toolMode}
         </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">

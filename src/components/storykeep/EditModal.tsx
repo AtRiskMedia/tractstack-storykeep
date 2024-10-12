@@ -8,7 +8,6 @@ import {
   storyFragmentInit,
   creationStateStore,
 } from "../../store/storykeep";
-import { StoryFragmentSettings } from "./settings/StoryFragmentSettings";
 import { PaneSettings } from "./settings/PaneSettings";
 import { PaneBreakSettings } from "./settings/PaneBreakSettings";
 import { PaneInsert } from "./settings/PaneInsert";

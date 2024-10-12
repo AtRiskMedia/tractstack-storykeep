@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect, memo } from "react";
+import {  useState, useRef, useEffect, memo } from "react";
 import { useStore } from "@nanostores/react";
 import {
   RectangleGroupIcon,
@@ -36,7 +36,6 @@ import {
   analyticsDuration,
   creationStateStore,
 } from "../../store/storykeep";
-import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
 import { classNames, debounce, cleanString } from "../../utils/helpers";
 import { useStoryKeepUtils } from "../../utils/storykeep";
 import type {
@@ -126,9 +125,7 @@ export const StoryKeepHeader = memo(
     const $storyFragmentInit = useStore(storyFragmentInit, { keys: [thisId] });
     const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [thisId] });
     const [isClient, setIsClient] = useState(false);
-    const [hideElements, setHideElements] = useState(false);
     const headerRef = useRef<HTMLDivElement>(null);
-    const lastScrollPosition = useRef(0);
     const usedSlugs = [
       ...contentMap.filter(item => item.slug !== slug).map(item => item.slug),
       ...Object.keys($paneSlug).map(s => $paneSlug[s].current),
@@ -139,8 +136,7 @@ export const StoryKeepHeader = memo(
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(thisId, usedSlugs);
     const [untitled, setUntitled] = useState<boolean>(
-      $storyFragmentTitle[id]?.current === `` ||
-        [`create`, ``].includes($storyFragmentSlug[id]?.current ?? ``)
+      $storyFragmentTitle[id]?.current === ``
     );
 
     const setViewport = (
@@ -320,41 +316,6 @@ export const StoryKeepHeader = memo(
       }
     }, [thisId, $storyFragmentInit, $paneInit]);
 
-    const handleScroll = useCallback(() => {
-      if (headerRef.current) {
-        const scrollPosition =
-          window.scrollY || document.documentElement.scrollTop;
-        const headerHeight = headerRef.current.offsetHeight;
-        const scrollThreshold = MIN_SCROLL_THRESHOLD - headerHeight;
-
-        if (
-          Math.abs(scrollPosition - lastScrollPosition.current) > HYSTERESIS
-        ) {
-          setHideElements(prevHideElements => {
-            const newHideElements = scrollPosition > scrollThreshold;
-            if (newHideElements !== prevHideElements) {
-              lastScrollPosition.current = scrollPosition;
-              return newHideElements;
-            }
-            return prevHideElements;
-          });
-        }
-      }
-    }, []);
-
-    const debouncedHandleScroll = useCallback(debounce(handleScroll, 100), [
-      handleScroll,
-    ]);
-
-    useEffect(() => {
-      window.addEventListener("scroll", debouncedHandleScroll);
-      debouncedHandleScroll(); // Call immediately to set initial state
-
-      return () => {
-        window.removeEventListener("scroll", debouncedHandleScroll);
-      };
-    }, [debouncedHandleScroll]);
-
     useEffect(() => {
       if (toolMode === "insert" && toolAddModeRef.current) {
         toolAddModeRef.current.focus();
@@ -379,7 +340,6 @@ export const StoryKeepHeader = memo(
               <ToolModeSelector
                 toolMode={toolMode}
                 setToolMode={setToolMode}
-                hideElements={hideElements}
                 isContext={isContext}
               />
               {toolMode === `insert` ? (
@@ -398,7 +358,6 @@ export const StoryKeepHeader = memo(
                 viewportKey={viewportKey}
                 auto={!$viewportSet}
                 setViewport={setViewport}
-                hideElements={hideElements}
               />
             )}
 
@@ -497,7 +456,7 @@ export const StoryKeepHeader = memo(
               )}
             </div>
           </div>
-          <div style={{ display: hideElements ? "none" : "block" }}>
+          <div>
             {(($editMode?.type === `storyfragment` &&
               $editMode?.mode === `settings`) ||
               untitled) &&

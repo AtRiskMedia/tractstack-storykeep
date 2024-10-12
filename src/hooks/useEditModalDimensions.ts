@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { SHORT_SCREEN_THRESHOLD, SMALL_SCREEN_WIDTH } from "../constants";
+import { SMALL_SCREEN_WIDTH } from "../constants";
 
 interface Dimensions {
   height: string;
@@ -10,8 +10,6 @@ interface Dimensions {
     bottom?: string;
     left?: string;
   };
-  isVisible: boolean;
-  isFullScreen: boolean;
   isFullWidthMobileShort: boolean;
 }
 
@@ -22,26 +20,19 @@ export const useEditModalDimensions = (
     height: "auto",
     width: "100%",
     position: { bottom: "0", right: "0" },
-    isVisible: false,
-    isFullScreen: false,
     isFullWidthMobileShort: false,
   });
 
   const updateDimensions = useCallback(() => {
-    const { innerWidth, innerHeight } = window;
+    const { innerWidth } = window;
     const header = document.getElementById("main-header");
     const headerBottom = header?.getBoundingClientRect().bottom || 0;
-    const isShortScreen =
-      innerHeight <= SHORT_SCREEN_THRESHOLD && innerWidth < SMALL_SCREEN_WIDTH;
     let newDimensions: Dimensions;
-
-    if (innerWidth < SMALL_SCREEN_WIDTH || isShortScreen) {
+    if (innerWidth < SMALL_SCREEN_WIDTH) {
       newDimensions = {
         height: "auto",
         width: "100%",
         position: { bottom: "0", left: "0", right: "0" },
-        isVisible: isEditModeActive,
-        isFullScreen: false,
         isFullWidthMobileShort: true,
       };
     } else if (innerWidth < 1368) {
@@ -49,8 +40,6 @@ export const useEditModalDimensions = (
         height: "auto",
         width: `${Math.min(innerWidth * 0.8, 500)}px`,
         position: { bottom: "0px", right: "8px" },
-        isVisible: isEditModeActive,
-        isFullScreen: false,
         isFullWidthMobileShort: false,
       };
     } else {
@@ -58,8 +47,6 @@ export const useEditModalDimensions = (
         height: "auto",
         width: "33%",
         position: { top: `${headerBottom}px`, right: "0" },
-        isVisible: isEditModeActive,
-        isFullScreen: false,
         isFullWidthMobileShort: false,
       };
     }
@@ -68,19 +55,12 @@ export const useEditModalDimensions = (
 
   useEffect(() => {
     updateDimensions();
-
     const handleResize = () => {
-      if (window.innerWidth >= SMALL_SCREEN_WIDTH) {
-        updateDimensions();
-      }
+      updateDimensions();
     };
-
     window.addEventListener("resize", handleResize);
-    //window.addEventListener("scroll", updateDimensions);
-
     return () => {
       window.removeEventListener("resize", handleResize);
-      //window.removeEventListener("scroll", updateDimensions);
     };
   }, [updateDimensions]);
 

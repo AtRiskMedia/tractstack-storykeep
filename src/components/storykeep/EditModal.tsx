@@ -38,7 +38,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
       : "mobile"
   );
   const isVisible = $editMode !== null;
-  const { height, width, position, isFullScreen, isFullWidthMobileShort } =
+  const { height, width, position, isFullWidthMobileShort } =
     useEditModalDimensions($editMode !== null);
 
   //const [shouldScroll, setShouldScroll] = useState(false);
@@ -160,63 +160,30 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           type === `desktop` ? "rounded-bl-lg" : "rounded-t-lg"
         )}
         style={{
-          height: isFullScreen ? "100%" : height,
+          height: height,
           width,
           ...position,
           display: isVisible ? "block" : "none",
           maxHeight: "80vh",
         }}
       >
-        {isFullScreen ? (
-          <div className="sticky top-0 z-[9001] w-full bg-myorange p-2 flex justify-end">
-            <button
-              onClick={toggleOffEditModal}
-              className="bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg transition-all duration-300 ease-in-out"
-              title={
-                $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`
-              }
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-        ) : (
-          <div className="relative">
-            <button
-              onClick={toggleOffEditModal}
-              className={classNames(
-                "absolute z-[9001] bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg",
-                "transition-all duration-300 ease-in-out",
-                type === "desktop" ? "-left-12 top-2" : "-top-12 right-2"
-              )}
-              title={
-                $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`
-              }
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-          </div>
-        )}
-        <div
-          ref={contentRef}
-          className={classNames(
-            isFullScreen
-              ? "px-1.5 pt-1.5 pb-0"
-              : type === `desktop`
-                ? "pr-0 pl-1.5 pb-1.5"
-                : "px-1.5 pt-1.5 pb-0",
-            "h-full flex flex-col"
-          )}
-        >
-          <div
+        <div className="relative">
+          <button
+            onClick={toggleOffEditModal}
             className={classNames(
-              isFullScreen
-                ? "rounded-t-lg"
-                : type === `desktop`
-                  ? "rounded-bl-lg py-1.5"
-                  : "rounded-t-lg pt-1.5 pb-2.5",
-              "bg-white px-3.5 relative flex-grow"
+              "absolute z-[9001] bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg",
+              "transition-all duration-300 ease-in-out",
+              type === "desktop" ? "-left-12 top-2" : "-top-12 right-2"
             )}
+            title={
+              $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`
+            }
           >
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        </div>
+        <div ref={contentRef} className={classNames("h-full flex flex-col")}>
+          <div className={classNames("bg-white px-3.5 relative flex-grow")}>
             {$editMode?.type === `storyfragment` &&
             $editMode?.mode === `settings` ? (
               <StoryFragmentSettings id={$editMode.id} />

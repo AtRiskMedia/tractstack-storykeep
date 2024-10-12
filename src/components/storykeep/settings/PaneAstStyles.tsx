@@ -1340,7 +1340,7 @@ export const PaneAstStyles = (props: {
                 setAddClass(!addClass);
               }}
             >
-              {!addClass ? `ADD STYLE` : `CANCEL ADD STYLE`}
+              {!addClass ? `ADD STYLE` : `ALL STYLES`}
             </button>
           )}
           {selectedStyle && (

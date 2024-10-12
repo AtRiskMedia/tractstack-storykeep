@@ -135,8 +135,8 @@ export const StoryKeepHeader = memo(
     const { isEditing, updateStoreField, handleEditingChange, handleUndo } =
       useStoryKeepUtils(thisId, usedSlugs);
     const [untitled, setUntitled] = useState<boolean>(
-      $storyFragmentTitle[id]?.current === `` ||
-        typeof $storyFragmentTitle[id]?.current === `undefined`
+      $storyFragmentTitle[thisId]?.current === `` ||
+        typeof $storyFragmentTitle[thisId]?.current === `undefined`
     );
 
     const setViewport = (
@@ -358,7 +358,7 @@ export const StoryKeepHeader = memo(
                 </button>
               ) : null}
 
-              {hasUnsavedChanges ? (
+              {id !== `create` && hasUnsavedChanges ? (
                 <a
                   data-astro-reload
                   href={
@@ -372,7 +372,7 @@ export const StoryKeepHeader = memo(
                 >
                   Reset
                 </a>
-              ) : (
+              ) : id !== `create` ? (
                 <a
                   data-astro-reload
                   href={!isContext ? `/${slug}` : `/context/${slug}`}
@@ -380,7 +380,7 @@ export const StoryKeepHeader = memo(
                 >
                   View Page
                 </a>
-              )}
+              ) : null}
 
               {!hasUnsavedChanges && (
                 <a

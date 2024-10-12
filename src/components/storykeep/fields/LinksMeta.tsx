@@ -7,10 +7,12 @@ import {
   lastInteractedPaneStore,
 } from "../../../store/storykeep";
 import { useStoryKeepUtils } from "../../../utils/storykeep";
-import { cloneDeep } from "../../../utils/helpers";
-import { cleanHtmlAst } from "../../../utils/compositor/markdownUtils";
+import { cloneDeep, classNames } from "../../../utils/helpers";
+import {
+  cleanHtmlAst,
+  findLinkNodes,
+} from "../../../utils/compositor/markdownUtils";
 import ContentEditableField from "../components/ContentEditableField";
-import { classNames } from "../../../utils/helpers";
 import { toHast } from "mdast-util-to-hast";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { fromMarkdown } from "mdast-util-from-markdown";
@@ -303,24 +305,3 @@ const LinksMeta = (props: LinksMetaProps) => {
 };
 
 export default LinksMeta;
-
-// Helper function to find link nodes in the AST
-function findLinkNodes(ast: Element): Element[] {
-  const linkNodes: Element[] = [];
-
-  function traverse(node: Element): void {
-    if (node.tagName === "a") {
-      linkNodes.push(node);
-    }
-    if (node.children) {
-      for (const child of node.children) {
-        if ("tagName" in child) {
-          traverse(child);
-        }
-      }
-    }
-  }
-
-  traverse(ast);
-  return linkNodes;
-}

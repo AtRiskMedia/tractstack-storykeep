@@ -1250,3 +1250,23 @@ export const htmlToMarkdown = (html: string): string => {
 
   return markdown;
 };
+
+export function findLinkNodes(ast: Element): Element[] {
+  const linkNodes: Element[] = [];
+
+  function traverse(node: Element): void {
+    if (node.tagName === "a") {
+      linkNodes.push(node);
+    }
+    if (node.children) {
+      for (const child of node.children) {
+        if ("tagName" in child) {
+          traverse(child);
+        }
+      }
+    }
+  }
+
+  traverse(ast);
+  return linkNodes;
+}

@@ -44,7 +44,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
     position,
     isVisible,
     isFullScreen,
-    //isFullWidthMobileShort,
+    isFullWidthMobileShort,
   } = useEditModalDimensions($editMode !== null);
 
   //const scrollToTarget = useCallback(() => {
@@ -76,26 +76,6 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   //}, [$editMode?.targetId]);
 
   //useEffect(() => {
-  //  const header = document.getElementById("main-header");
-  //  if (header) {
-  //    if (isFullWidthMobileShort && isVisible) {
-  //      header.classList.add("header-hidden");
-  //    } else {
-  //      header.classList.remove("header-hidden");
-  //    }
-  //    setTimeout(() => {
-  //      if (isFullWidthMobileShort && isVisible) {
-  //        header.classList.add("hidden");
-  //        header.classList.remove("block");
-  //      } else {
-  //        header.classList.remove("hidden");
-  //        header.classList.add("block");
-  //      }
-  //    }, 100);
-  //  }
-  //}, [isFullWidthMobileShort, isVisible]);
-
-  //useEffect(() => {
   //  if (
   //    (shouldScroll || $editMode?.targetId) &&
   //    isVisible &&
@@ -111,6 +91,26 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const triggerScroll = useCallback(() => {
     //if (isFullWidthMobileShort) setShouldScroll(true);
   }, []);
+
+  useEffect(() => {
+    const header = document.getElementById("main-header");
+    if (header) {
+      if (isFullWidthMobileShort && isVisible) {
+        header.classList.add("header-hidden");
+      } else {
+        header.classList.remove("header-hidden");
+      }
+      setTimeout(() => {
+        if (isFullWidthMobileShort && isVisible) {
+          header.classList.add("hidden");
+          header.classList.remove("block");
+        } else {
+          header.classList.remove("hidden");
+          header.classList.add("block");
+        }
+      }, 100);
+    }
+  }, [isFullWidthMobileShort, isVisible]);
 
   useEffect(() => {
     const handleResize = () => {

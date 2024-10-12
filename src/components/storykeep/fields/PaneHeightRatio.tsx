@@ -109,50 +109,54 @@ const PaneHeightRatio = ({ id }: PaneHeightRatioProps) => {
   );
 
   return (
-    <div className="flex items-center space-x-4">
-      <span className="text-md text-mydarkgrey flex-shrink-0">
-        Height Ratio:
-      </span>
-      <InformationCircleIcon
-        className="h-5 w-5"
-        title="0 means height:auto, otherwise fixed proportion based on viewport; 100 is square, 178.778 is 16/9"
-      />
-      {renderInput(
-        desktopInput,
-        setDesktopInput,
-        "paneHeightRatioDesktop",
-        "Desktop"
-      )}
-      {renderInput(
-        tabletInput,
-        setTabletInput,
-        "paneHeightRatioTablet",
-        "Tablet"
-      )}
-      {renderInput(
-        mobileInput,
-        setMobileInput,
-        "paneHeightRatioMobile",
-        "Mobile"
-      )}
-      <button
-        onClick={() => {
-          handleUndo("paneHeightRatioDesktop", id);
-          handleUndo("paneHeightRatioTablet", id);
-          handleUndo("paneHeightRatioMobile", id);
-        }}
-        className="disabled:hidden ml-2"
-        disabled={
-          $paneHeightRatioDesktop[id]?.history.length === 0 &&
-          $paneHeightRatioTablet[id]?.history.length === 0 &&
-          $paneHeightRatioMobile[id]?.history.length === 0
-        }
-      >
-        <ChevronDoubleLeftIcon
-          className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
-          title="Undo"
+    <div className="flex flex-col space-y-2">
+      <div className="flex items-center space-x-2">
+        <span className="text-md text-mydarkgrey flex-shrink-0">
+          Height Ratio:
+        </span>
+        <InformationCircleIcon
+          className="h-5 w-5 text-mydarkgrey"
+          title="0 means height:auto, otherwise fixed proportion based on viewport; 100 is square, 178.778 is 16/9"
         />
-      </button>
+        <button
+          onClick={() => {
+            handleUndo("paneHeightRatioDesktop", id);
+            handleUndo("paneHeightRatioTablet", id);
+            handleUndo("paneHeightRatioMobile", id);
+          }}
+          className="disabled:invisible"
+          disabled={
+            $paneHeightRatioDesktop[id]?.history.length === 0 &&
+            $paneHeightRatioTablet[id]?.history.length === 0 &&
+            $paneHeightRatioMobile[id]?.history.length === 0
+          }
+        >
+          <ChevronDoubleLeftIcon
+            className="h-5 w-5 text-myblack rounded bg-mygreen/50 hover:bg-myorange hover:text-white"
+            title="Undo"
+          />
+        </button>
+      </div>
+      <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+        {renderInput(
+          desktopInput,
+          setDesktopInput,
+          "paneHeightRatioDesktop",
+          "Desktop"
+        )}
+        {renderInput(
+          tabletInput,
+          setTabletInput,
+          "paneHeightRatioTablet",
+          "Tablet"
+        )}
+        {renderInput(
+          mobileInput,
+          setMobileInput,
+          "paneHeightRatioMobile",
+          "Mobile"
+        )}
+      </div>
     </div>
   );
 };

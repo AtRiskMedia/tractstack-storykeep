@@ -108,50 +108,54 @@ const PaneHeightOffset = ({ id }: PaneHeightOffsetProps) => {
   );
 
   return (
-    <div className="flex items-center space-x-4">
-      <span className="text-md text-mydarkgrey flex-shrink-0">
-        Height Offset:
-      </span>
-      <InformationCircleIcon
-        className="h-5 w-5"
-        title="In rare instance to add negative (or positive) margin between panes"
-      />
-      {renderInput(
-        desktopInput,
-        setDesktopInput,
-        "paneHeightOffsetDesktop",
-        "Desktop"
-      )}
-      {renderInput(
-        tabletInput,
-        setTabletInput,
-        "paneHeightOffsetTablet",
-        "Tablet"
-      )}
-      {renderInput(
-        mobileInput,
-        setMobileInput,
-        "paneHeightOffsetMobile",
-        "Mobile"
-      )}
-      <button
-        onClick={() => {
-          handleUndo("paneHeightOffsetDesktop", id);
-          handleUndo("paneHeightOffsetTablet", id);
-          handleUndo("paneHeightOffsetMobile", id);
-        }}
-        className="disabled:hidden ml-2"
-        disabled={
-          $paneHeightOffsetDesktop[id]?.history.length === 0 &&
-          $paneHeightOffsetTablet[id]?.history.length === 0 &&
-          $paneHeightOffsetMobile[id]?.history.length === 0
-        }
-      >
-        <ChevronDoubleLeftIcon
-          className="h-8 w-8 text-myblack rounded bg-mygreen/50 px-1 hover:bg-myorange hover:text-white"
-          title="Undo"
+    <div className="flex flex-col space-y-2">
+      <div className="flex items-center space-x-2">
+        <span className="text-md text-mydarkgrey flex-shrink-0">
+          Height Offset:
+        </span>
+        <InformationCircleIcon
+          className="h-5 w-5 text-mydarkgrey"
+          title="In rare instance to add negative (or positive) margin between panes"
         />
-      </button>
+        <button
+          onClick={() => {
+            handleUndo("paneHeightOffsetDesktop", id);
+            handleUndo("paneHeightOffsetTablet", id);
+            handleUndo("paneHeightOffsetMobile", id);
+          }}
+          className="disabled:invisible"
+          disabled={
+            $paneHeightOffsetDesktop[id]?.history.length === 0 &&
+            $paneHeightOffsetTablet[id]?.history.length === 0 &&
+            $paneHeightOffsetMobile[id]?.history.length === 0
+          }
+        >
+          <ChevronDoubleLeftIcon
+            className="h-5 w-5 text-myblack rounded bg-mygreen/50 hover:bg-myorange hover:text-white"
+            title="Undo"
+          />
+        </button>
+      </div>
+      <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+        {renderInput(
+          desktopInput,
+          setDesktopInput,
+          "paneHeightOffsetDesktop",
+          "Desktop"
+        )}
+        {renderInput(
+          tabletInput,
+          setTabletInput,
+          "paneHeightOffsetTablet",
+          "Tablet"
+        )}
+        {renderInput(
+          mobileInput,
+          setMobileInput,
+          "paneHeightOffsetMobile",
+          "Mobile"
+        )}
+      </div>
     </div>
   );
 };

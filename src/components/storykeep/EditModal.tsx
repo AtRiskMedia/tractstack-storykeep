@@ -118,7 +118,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
         $storyFragmentInit[$editMode.id].init) ||
       ($editMode?.type === `pane` && $paneInit[$editMode.id].init)
     )
-      setIsClient(true);
+      setTimeout(() => setIsClient(true), 50);
   }, [$storyFragmentInit, $paneInit, $editMode]);
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
         className={classNames(
           `fixed z-[9000]`,
           `backdrop-blur-sm bg-mydarkgrey/50`,
-          `shadow-lg transition-all duration-300 ease-in-out`,
+          `bg-mywhite shadow-lg transition-all duration-300 ease-in-out`,
           isFullWidthMobileShort ? `border-t-2 border-mylightgrey` : ``,
           type === `desktop` ? "rounded-bl-lg" : "rounded-t-lg"
         )}
@@ -186,9 +186,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
         </div>
         <div ref={contentRef} className={classNames("h-full flex flex-col")}>
           <div
-            className={classNames(
-              "bg-mywhite shadow-inner px-3.5 relative flex-grow"
-            )}
+            className={classNames("modal-transition px-3.5 relative flex-grow")}
           >
             {$editMode?.type === `pane` &&
             $editMode?.mode === `insert` &&

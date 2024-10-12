@@ -39,7 +39,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   );
   const isVisible = $editMode !== null;
   const { height, width, position, isFullWidthMobileShort } =
-    useEditModalDimensions($editMode !== null);
+    useEditModalDimensions()
 
   //const [shouldScroll, setShouldScroll] = useState(false);
   //const scrollToTarget = useCallback(() => {

@@ -23,7 +23,7 @@ import {
   creationStateStore,
 } from "../../store/storykeep";
 import AnalyticsWrapper from "./nivo/AnalyticsWrapper";
-import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
+import { useStoryKeepUtils } from "../../utils/storykeep";
 import PaneWrapper from "./PaneWrapper";
 import DesignNewPane from "./components/DesignNewPane";
 import { classNames, handleEditorResize, debounce } from "../../utils/helpers";
@@ -394,7 +394,6 @@ export const StoryFragment = (props: {
           title="Close panel"
           onClick={() => {
             editModeStore.set(null);
-            handleToggleOff();
           }}
           className="fixed inset-0 z-[8999] pointer-events-auto cursor-pointer"
         ></div>

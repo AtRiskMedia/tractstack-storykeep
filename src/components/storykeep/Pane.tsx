@@ -1,7 +1,6 @@
 import { useRef, memo, useMemo, useState, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
 import { classNames } from "../../utils/helpers";
-import { handleToggleOn } from "../../utils/storykeep";
 import {
   paneInit,
   paneSlug,
@@ -238,7 +237,6 @@ const Pane = (props: {
       type: `pane`,
       mode: `break`,
     });
-    handleToggleOn(`styles`);
   };
 
   if (!isClient) return null;

@@ -15,7 +15,7 @@ import {
   markdownToHtmlAst,
   cleanHtmlAst,
 } from "../../../utils/compositor/markdownUtils";
-import { handleToggleOn, useStoryKeepUtils } from "../../../utils/storykeep";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import type { ButtonData, ClassNamesPayloadDatumValue } from "../../../types";
 import type { KeyboardEvent, ClipboardEvent } from "react";
@@ -190,7 +190,6 @@ const EditableContent = ({
                   buttonTarget: newLink.href,
                 },
               });
-              handleToggleOn("styles");
             }
           }
         }

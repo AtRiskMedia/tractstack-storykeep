@@ -37,11 +37,7 @@ import {
 } from "../../store/storykeep";
 import { MIN_SCROLL_THRESHOLD, HYSTERESIS } from "../../constants";
 import { classNames, debounce, cleanString } from "../../utils/helpers";
-import {
-  useStoryKeepUtils,
-  handleToggleOn,
-  handleToggleOff,
-} from "../../utils/storykeep";
+import { useStoryKeepUtils } from "../../utils/storykeep";
 import type {
   AuthStatus,
   StoreKey,
@@ -160,7 +156,6 @@ export const StoryKeepHeader = memo(
 
     const setToolMode = (newToolMode: ToolMode) => {
       editModeStore.set(null);
-      handleToggleOff();
       toolModeStore.set({ value: newToolMode });
     };
 
@@ -240,14 +235,12 @@ export const StoryKeepHeader = memo(
         $editMode?.id === thisId
       ) {
         editModeStore.set(null);
-        handleToggleOff();
       } else {
         editModeStore.set({
           id: thisId,
           mode: `settings`,
           type: `storyfragment`,
         });
-        handleToggleOn(`settings`);
       }
     };
 

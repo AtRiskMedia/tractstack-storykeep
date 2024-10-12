@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { navigate } from "astro:transitions/client";
-import { handleToggleOff, useStoryKeepUtils } from "../../utils/storykeep";
+import { useStoryKeepUtils } from "../../utils/storykeep";
 import {
   paneInit,
   paneSlug,
@@ -183,7 +183,6 @@ export const ContextPane = (props: { id: string | null; slug: string }) => {
           title="Close panel"
           onClick={() => {
             editModeStore.set(null);
-            handleToggleOff();
           }}
           className="fixed inset-0 z-[8999] pointer-events-auto cursor-pointer"
         ></div>

@@ -311,19 +311,6 @@ export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   };
 };
 
-// Global functions to toggle layout (updated to include targetElementId)
-export const handleToggleOn = (mode: string, targetElementId?: string) => {
-  const event = new CustomEvent("toggle-on-edit-modal", {
-    detail: { mode, targetElementId },
-  });
-  document.dispatchEvent(event);
-};
-
-export const handleToggleOff = () => {
-  const event = new CustomEvent("toggle-off-edit-modal", {});
-  document.dispatchEvent(event);
-};
-
 export const isFullScreenEditModal = (mode: string) => {
   const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
   const isDesktop = window.innerWidth >= BREAKPOINTS.xl;

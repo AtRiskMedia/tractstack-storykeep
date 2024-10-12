@@ -15,11 +15,7 @@ import AnalyticsWrapper from "./nivo/AnalyticsWrapper";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
 import { SHORT_SCREEN_THRESHOLD } from "../../constants";
-import {
-  isFullScreenEditModal,
-  handleToggleOn,
-  handleToggleOff,
-} from "../../utils/storykeep";
+import { isFullScreenEditModal } from "../../utils/storykeep";
 import { classNames } from "../../utils/helpers";
 import type { ReactNode } from "react";
 import type { ViewportAuto, ToolMode, ToolAddMode } from "../../types";
@@ -139,7 +135,6 @@ const PaneWrapper = (props: {
   }, [$editMode, id, paneElement]);
 
   const toggleOffEditModal = useCallback(() => {
-    handleToggleOff();
     editModeStore.set(null);
   }, []);
 
@@ -156,7 +151,6 @@ const PaneWrapper = (props: {
         mode: "settings",
         type: "pane",
       });
-      handleToggleOn(`settings`, `pane-inner-${id}`);
     }
   };
 

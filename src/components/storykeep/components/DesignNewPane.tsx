@@ -11,7 +11,6 @@ import {
 import PreviewPane from "./PreviewPane";
 import { paneDesigns } from "../../../assets/paneDesigns";
 import { editModeStore, themeStore } from "../../../store/storykeep";
-import { handleToggleOn } from "../../../utils/storykeep";
 import { tursoClient } from "../../../api/tursoClient";
 import { PUBLIC_THEME } from "../../../constants";
 import ThemeSelector from "./ThemeSelector";
@@ -84,7 +83,6 @@ const DesignNewPane = ({
         doInsert,
       },
     });
-    handleToggleOn(`insert`, `pane-insert`);
   };
 
   const changeMode = (newMode: `design` | `reuse` | `break`) => {

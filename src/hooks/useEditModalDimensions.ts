@@ -76,11 +76,11 @@ export const useEditModalDimensions = (
     };
 
     window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", updateDimensions);
+    //window.addEventListener("scroll", updateDimensions);
 
     return () => {
       window.removeEventListener("resize", handleResize);
-      window.removeEventListener("scroll", updateDimensions);
+      //window.removeEventListener("scroll", updateDimensions);
     };
   }, [updateDimensions]);
 

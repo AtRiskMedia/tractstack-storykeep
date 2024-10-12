@@ -15,7 +15,7 @@ import PaneImpression from "../fields/PaneImpression";
 import PaneBeliefs from "../fields/PaneBeliefs";
 import PaneBgColour from "../fields/PaneBgColour";
 import CodeHookSettings from "../fields/CodeHook";
-import { handleToggleOff, useStoryKeepUtils } from "../../../utils/storykeep";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   paneTitle,
   paneSlug,
@@ -116,7 +116,6 @@ export const PaneSettings = (props: {
       const updatedPaneIds = currentPaneIds.filter(paneId => paneId !== id);
       updateStoreField("storyFragmentPaneIds", updatedPaneIds, storyFragmentId);
       editModeStore.set(null);
-      handleToggleOff();
       setConfirmRemoval(false);
     } else setConfirmRemoval(true);
   };

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ulid } from "ulid";
@@ -25,7 +25,6 @@ interface EditModalProps {
 
 export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const $creationState = useStore(creationStateStore);
-  //const [shouldScroll, setShouldScroll] = useState(false);
   const thisId = id !== `create` ? id : ($creationState.id ?? `error`);
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
@@ -38,22 +37,16 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
       ? "desktop"
       : "mobile"
   );
-  const {
-    height,
-    width,
-    position,
-    isVisible,
-    isFullScreen,
-    isFullWidthMobileShort,
-  } = useEditModalDimensions($editMode !== null);
+  const isVisible = $editMode !== null;
+  const { height, width, position, isFullScreen, isFullWidthMobileShort } =
+    useEditModalDimensions($editMode !== null);
 
+  //const [shouldScroll, setShouldScroll] = useState(false);
   //const scrollToTarget = useCallback(() => {
   //  if ($editMode?.targetId) {
   //    const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
-
   //    const targetElement = document.getElementById(targetId);
   //    const modalElement = document.getElementById("edit-modal");
-
   //    if (targetElement && modalElement) {
   //      const modalRect = modalElement.getBoundingClientRect();
   //      const targetRect = targetElement.getBoundingClientRect();
@@ -88,9 +81,9 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   //  }
   //}, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
 
-  const triggerScroll = useCallback(() => {
-    //if (isFullWidthMobileShort) setShouldScroll(true);
-  }, []);
+  //const triggerScroll = useCallback(() => {
+  //  if (isFullWidthMobileShort) setShouldScroll(true);
+  //}, []);
 
   useEffect(() => {
     const header = document.getElementById("main-header");
@@ -154,7 +147,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
     editModeStore.set(null);
   };
 
-  if (!isClient || !isVisible) return null;
+  if (!isClient) return null;
 
   return (
     <div className="relative">
@@ -261,7 +254,6 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
                 id={thisId}
                 files={files}
                 targetId={$editMode.targetId}
-                triggerScroll={triggerScroll}
               />
             ) : $editMode?.type === `pane` && $editMode?.mode === `break` ? (
               <PaneBreakSettings id={$editMode.id} />

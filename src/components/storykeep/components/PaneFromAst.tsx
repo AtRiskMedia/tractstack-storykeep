@@ -13,7 +13,6 @@ import { getGlobalNth } from "../../../utils/compositor/markdownUtils";
 import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
 import { wrapWithStylesIndicator } from "./StylesWrapper";
-import { handleToggleOn } from "../../../utils/storykeep";
 import { classNames } from "../../../utils/helpers";
 import { Belief } from "@components/widgets/Belief";
 import { IdentifyAs } from "@components/widgets/IdentifyAs";
@@ -224,7 +223,6 @@ const PaneFromAst = ({
         mustConfig: toolMode === `text`,
       },
     });
-    handleToggleOn(`styles`, thisId);
   }, [thisId, toolMode, paneId, Tag, outerIdx, idx]);
 
   const handleToolModeLinkClick = useCallback(() => {
@@ -245,7 +243,6 @@ const PaneFromAst = ({
         mustConfig: false,
       },
     });
-    handleToggleOn(`styles`, thisId);
   }, [paneId]);
 
   // Extract class names

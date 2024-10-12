@@ -25,7 +25,7 @@ interface EditModalProps {
 
 export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const $creationState = useStore(creationStateStore);
-  const [shouldScroll, setShouldScroll] = useState(false);
+  //const [shouldScroll, setShouldScroll] = useState(false);
   const thisId = id !== `create` ? id : ($creationState.id ?? `error`);
   const [isClient, setIsClient] = useState(false);
   const $editMode = useStore(editModeStore);
@@ -44,56 +44,56 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
     position,
     isVisible,
     isFullScreen,
-    isFullWidthMobileShort,
+    //isFullWidthMobileShort,
   } = useEditModalDimensions($editMode !== null);
 
-  const scrollToTarget = useCallback(() => {
-    if ($editMode?.targetId) {
-      const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
+  //const scrollToTarget = useCallback(() => {
+  //  if ($editMode?.targetId) {
+  //    const targetId = `${$editMode.targetId.paneId}-${$editMode.targetId.tag}-${$editMode.targetId.outerIdx}${$editMode.targetId.idx !== null ? `-${$editMode.targetId.idx}` : ""}`;
 
-      const targetElement = document.getElementById(targetId);
-      const modalElement = document.getElementById("edit-modal");
+  //    const targetElement = document.getElementById(targetId);
+  //    const modalElement = document.getElementById("edit-modal");
 
-      if (targetElement && modalElement) {
-        const modalRect = modalElement.getBoundingClientRect();
-        const targetRect = targetElement.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        const currentScrollY = window.scrollY;
-        const modalHeight = modalRect.height;
-        const spaceAboveModal = viewportHeight - modalHeight;
-        const targetDesiredTop = Math.max(
-          spaceAboveModal / 2 - targetRect.height / 2,
-          0
-        );
-        const newScrollY = currentScrollY + targetRect.top - targetDesiredTop;
-        const finalScrollY = Math.max(0, newScrollY);
-        window.scrollTo({
-          top: finalScrollY,
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [$editMode?.targetId]);
+  //    if (targetElement && modalElement) {
+  //      const modalRect = modalElement.getBoundingClientRect();
+  //      const targetRect = targetElement.getBoundingClientRect();
+  //      const viewportHeight = window.innerHeight;
+  //      const currentScrollY = window.scrollY;
+  //      const modalHeight = modalRect.height;
+  //      const spaceAboveModal = viewportHeight - modalHeight;
+  //      const targetDesiredTop = Math.max(
+  //        spaceAboveModal / 2 - targetRect.height / 2,
+  //        0
+  //      );
+  //      const newScrollY = currentScrollY + targetRect.top - targetDesiredTop;
+  //      const finalScrollY = Math.max(0, newScrollY);
+  //      window.scrollTo({
+  //        top: finalScrollY,
+  //        behavior: "smooth",
+  //      });
+  //    }
+  //  }
+  //}, [$editMode?.targetId]);
 
-  useEffect(() => {
-    const header = document.getElementById("main-header");
-    if (header) {
-      if (isFullWidthMobileShort && isVisible) {
-        header.classList.add("header-hidden");
-      } else {
-        header.classList.remove("header-hidden");
-      }
-      setTimeout(() => {
-        if (isFullWidthMobileShort && isVisible) {
-          header.classList.add("hidden");
-          header.classList.remove("block");
-        } else {
-          header.classList.remove("hidden");
-          header.classList.add("block");
-        }
-      }, 100);
-    }
-  }, [isFullWidthMobileShort, isVisible]);
+  //useEffect(() => {
+  //  const header = document.getElementById("main-header");
+  //  if (header) {
+  //    if (isFullWidthMobileShort && isVisible) {
+  //      header.classList.add("header-hidden");
+  //    } else {
+  //      header.classList.remove("header-hidden");
+  //    }
+  //    setTimeout(() => {
+  //      if (isFullWidthMobileShort && isVisible) {
+  //        header.classList.add("hidden");
+  //        header.classList.remove("block");
+  //      } else {
+  //        header.classList.remove("hidden");
+  //        header.classList.add("block");
+  //      }
+  //    }, 100);
+  //  }
+  //}, [isFullWidthMobileShort, isVisible]);
 
   //useEffect(() => {
   //  if (

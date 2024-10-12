@@ -154,7 +154,7 @@ const value3 =
     <a
       target="_blank"
       rel="noreferrer"
-      class=`whitespace-nowrap truncate ${buttonPayload?.className || injectClassNames}`
+      class={`whitespace-nowrap truncate ${buttonPayload?.className || injectClassNames}`}
       href={targetUrl || thisAst.properties.href}
     >
       {thisAst.children[0].value}

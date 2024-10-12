@@ -56,10 +56,7 @@ export const useEditModalDimensions = (
   useEffect(() => {
     updateDimensions();
     const handleResize = () => {
-      if (
-        innerWidth >= SMALL_SCREEN_WIDTH
-      )
-        updateDimensions();
+      if (innerWidth >= SMALL_SCREEN_WIDTH) updateDimensions();
     };
     window.addEventListener("resize", handleResize);
     return () => {

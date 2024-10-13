@@ -35,7 +35,7 @@ const ToolModeSelector = ({
                   toolMode === key
                     ? "bg-myblue text-white"
                     : "bg-mylightgrey/20 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",
-                  "relative inline-flex items-center px-3 py-2",
+                  "relative inline-flex items-center px-2 py-1.5 md:px-3 md:py-2",
                   index === 0 ? "rounded-l-md" : "",
                   index === toolModeButtons.length - 1 ? "rounded-r-md" : ""
                 )}

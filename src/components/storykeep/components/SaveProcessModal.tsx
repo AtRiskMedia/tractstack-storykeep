@@ -126,13 +126,13 @@ export const SaveProcessModal = ({
 
   const restorePoint = async (): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/concierge/storykeep/restorePoint`, {
+      const response = await fetch(`/api/concierge/storykeep/publish`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-        }),
+        target: `restorePoint`})
       });
       const data = await response.json();
       if (data.success) return true;

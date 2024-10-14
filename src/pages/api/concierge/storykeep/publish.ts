@@ -5,16 +5,15 @@ const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 
 export const POST: APIRoute = async context => {
   try {
-    console.log(`RESTOREPOINT`);
-
+    const body = await context.request.json();
     const { response } = await proxyRequestToConcierge(
-      `${BACKEND_URL}/storykeep/restorePoint`,
+      `${BACKEND_URL}/storykeep/publish`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(body),
       }
     );
 

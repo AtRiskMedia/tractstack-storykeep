@@ -6,8 +6,6 @@ const BACKEND_URL = import.meta.env.PRIVATE_CONCIERGE_BASE_URL;
 export const POST: APIRoute = async context => {
   try {
     const body = await context.request.json();
-    console.log(body);
-
     const { response } = await proxyRequestToConcierge(
       `${BACKEND_URL}/storykeep/tailwind`,
       {

@@ -5,7 +5,7 @@ import type {
   MarkdownPaneDatum,
 } from "../../types";
 
-export function cleanOptionsPayload(rows: Row[]) {
+export function getTailwindWhitelist(rows: Row[]) {
   if (!rows.length) return [];
 
   let whitelistString = ``;

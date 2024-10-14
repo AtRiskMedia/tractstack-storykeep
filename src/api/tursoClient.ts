@@ -69,6 +69,16 @@ export const tursoClient = {
       throw error;
     }
   },
+  uniqueTailwindClasses: async (id: string): Promise<unknown> => {
+    try {
+      return await fetchTurso("uniqueTailwindClasses", { id });
+    } catch (error) {
+      if (isTursoClientError(error)) {
+        logError(error);
+      }
+      throw error;
+    }
+  },
   paneDesigns: async (): Promise<unknown> => {
     try {
       return await fetchTurso("paneDesigns");

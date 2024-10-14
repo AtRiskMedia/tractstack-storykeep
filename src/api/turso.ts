@@ -7,7 +7,7 @@ import { cleanTursoContextPane } from "../utils/compositor/tursoContextPane";
 import { cleanTursoFile } from "../utils/compositor/tursoFile";
 import { cleanTursoMenu } from "../utils/compositor/tursoMenu";
 import { cleanPaneDesigns } from "../utils/compositor/paneDesigns";
-import { cleanOptionsPayload } from "../utils/compositor/tursoOptionsPayload";
+import { getTailwindWhitelist } from "../utils/compositor/tursoTailwindWhitelist";
 import type {
   ResourceDatum,
   StoryFragmentDatum,
@@ -26,12 +26,13 @@ export const turso = createClient({
   authToken: import.meta.env.TURSO_AUTH_TOKEN,
 });
 
-export async function getUniqueTailwindClasses() {
+export async function getUniqueTailwindClasses(id: string) {
   try {
-    const { rows } = await turso.execute(
-      `SELECT id, options_payload FROM pane`
-    );
-    return cleanOptionsPayload(rows);
+    const { rows } = await turso.execute({
+      sql: `SELECT id, options_payload FROM pane WHERE id != ?`,
+      args: [id],
+    });
+    return getTailwindWhitelist(rows);
   } catch (error) {
     console.error("Error fetching pane payloads:", error);
     throw error;

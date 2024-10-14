@@ -1,9 +1,7 @@
 import type { APIRoute } from "astro";
-import { getPaneDesigns } from "../../../api/turso";
+import { getPaneDesigns, getUniqueTailwindClasses } from "../../../api/turso";
 
-export const POST: APIRoute = async ({
-  /* request, */ params /*, locals */,
-}) => {
+export const POST: APIRoute = async ({ request, params /*, locals */ }) => {
   //if (!(locals.user?.isAuthenticated || locals.user?.isOpenDemo)) {
   //  return new Response(JSON.stringify({ error: "Unauthorized" }), {
   //    status: 401,
@@ -12,7 +10,7 @@ export const POST: APIRoute = async ({
   //}
 
   const { operation } = params;
-  //const body = await request.json();
+  const body = await request.json();
 
   try {
     let result;
@@ -23,7 +21,10 @@ export const POST: APIRoute = async ({
 
       case "paneDesigns":
         result = await getPaneDesigns();
-        //result = JSON.stringify({ success: true });
+        break;
+
+      case "uniqueTailwindClasses":
+        result = await getUniqueTailwindClasses(body.id);
         break;
 
       //case "getResourcesBySlug":

@@ -35,7 +35,7 @@ export interface AuthStatus {
   isOpenDemo: boolean;
 }
 
-export type TursoOperation = "test" | "paneDesigns";
+export type TursoOperation = "test" | "paneDesigns" | "uniqueTailwindClasses";
 
 export interface TursoClientError extends Error {
   name: string;

@@ -176,7 +176,7 @@ const ImageMeta = (props: {
             resolve(new File([blob], file.name, { type: file.type }));
           },
           file.type,
-          0.95 // Quality parameter for JPEG compression
+          0.7 // Quality parameter for JPEG compression
         );
       };
       img.onerror = () => reject(new Error("Failed to load image"));

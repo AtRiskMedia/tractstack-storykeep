@@ -74,7 +74,7 @@ export const SaveProcessModal = ({
                 return p.files
                   .map(f => {
                     if (f.src.startsWith(`data:image`)) return {
-                      id:f.id,
+                      filename:f.filename,
                       src:f.src
                     };
                     return null;

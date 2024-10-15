@@ -185,10 +185,13 @@ const ImageMeta = (props: {
   };
 
   const compressImage = async (file: File) => {
-    const options = {
-      maxSizeMB: 1,
-      useWebWorker: true,
-    };
+  const options = {
+    maxSizeMB: 1,
+    useWebWorker: true,
+    initialQuality: 0.8,
+    alwaysKeepResolution: true,
+    fileType: file.type === 'image/png' ? 'image/webp' : file.type
+  };
 
     try {
       const compressedFile = await imageCompression(file, options);

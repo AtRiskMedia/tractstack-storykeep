@@ -295,7 +295,7 @@ const PaneFromAst = ({
     thisImage?.altDescription ||
     "This should be descriptive text of an image | We apologize the alt text is missing.";
   const imageSrc = thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`;
-  const imageSrcSet = thisImage?.srcSet ? thisImage.src : null;
+  const imageSrcSet = thisImage?.srcSet ? thisImage.optimizedSrc : null;
 
   // Handle code hooks
   const regexpHook =

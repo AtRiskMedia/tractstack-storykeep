@@ -204,6 +204,8 @@ export const StoryKeepHeader = memo(
 
     const handleSaveComplete = () => {
       setIsSaving(false);
+      // reload to re-bootstrap from turso (keep things clean)
+      location.reload();
     };
 
     useEffect(() => {

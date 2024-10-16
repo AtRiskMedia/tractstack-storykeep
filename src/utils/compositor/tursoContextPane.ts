@@ -1,6 +1,6 @@
 import { cleanTursoPane } from "../../utils/compositor/tursoPane";
-import { getImage } from "astro:assets";
 import { getResourcesByCategorySlug } from "../../api/turso";
+import {getOptimizedImage} from "../../utils/helpers"
 import type { Row } from "@libsql/client";
 import type {
   ContextPaneDatum,
@@ -10,19 +10,6 @@ import type {
   PaneFileNode,
   FileNode,
 } from "../../types";
-
-export async function getOptimizedImage(src: string) {
-  try {
-    const img = await getImage({
-      src,
-      inferSize: true,
-    });
-    return img.src;
-  } catch {
-    console.log(`error generating images -- are you offline?`);
-    return null;
-  }
-}
 
 export async function cleanTursoContextPane(rows: Row[]) {
   if (!rows.length) return null;

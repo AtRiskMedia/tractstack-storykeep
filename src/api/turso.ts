@@ -238,7 +238,7 @@ export async function getStoryFragmentBySlug(
                                        'src_set', f.src_set,
                                        'paneId', p.id,
                                        'markdown', CASE 
-                                           WHEN fm.file_id IS NOT NULL THEN json('true')
+                                           WHEN md.id IS NOT NULL THEN json('true')
                                            ELSE json('false')
                                        END
                                    )
@@ -308,8 +308,8 @@ export async function getContextPaneBySlug(
                                'url', f.url,
                                'src_set', f.src_set,
                                'paneId', p.id,
-                               markdown', CASE 
-                                   WHEN fm.file_id IS NOT NULL THEN json('true')
+                               'markdown', CASE 
+                                   WHEN m.id IS NOT NULL THEN json('true')
                                    ELSE json('false')
                                END
                            )

@@ -93,7 +93,7 @@ const altText =
   thisImage?.altDescription ||
   `This should be descriptive text of an image | We apologize the alt text is missing.`;
 const imageSrc = thisImage?.optimizedSrc || thisImage?.src || null;
-if (thisImage) console.log(thisImage);
+const imageSrcSet = thisImage?.srcSet ? thisImage.src : null;
 
 // applies only when Tag === `code`
 // currently supported: YouTube, Bunny, toggle, belief, *resource not implemented
@@ -192,7 +192,14 @@ const value3 =
   ) : null
 }
 {
-  Tag === `img` && imageSrc ? (
+  Tag === `img` && imageSrc && imageSrcSet ? (
+    <img
+      class={injectClassNames}
+      src={imageSrcSet.split(" ")[0]}
+      srcset={imageSrcSet}
+      alt={altText}
+    />
+  ) : Tag === `img` && imageSrc ? (
     <img class={injectClassNames} src={imageSrc} alt={altText} />
   ) : null
 }

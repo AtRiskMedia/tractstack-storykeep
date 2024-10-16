@@ -295,6 +295,7 @@ const PaneFromAst = ({
     thisImage?.altDescription ||
     "This should be descriptive text of an image | We apologize the alt text is missing.";
   const imageSrc = thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`;
+  const imageSrcSet = thisImage?.srcSet ? thisImage.src : null;
 
   // Handle code hooks
   const regexpHook =
@@ -546,7 +547,23 @@ const PaneFromAst = ({
       );
   }
 
-  if (Tag === "img" && imageSrc) {
+  if (Tag === "img" && imageSrc && imageSrcSet) {
+    return (
+      <ImageWrapper
+        showOverlay={showOverlay}
+        toolMode={toolMode}
+        thisId={thisId}
+        handleToolModeClick={handleToolModeClick}
+      >
+        <img
+          className={injectClassNames}
+          src={imageSrcSet.split(" ")[0]}
+          srcSet={imageSrcSet}
+          alt={altText}
+        />
+      </ImageWrapper>
+    );
+  } else if (Tag === "img" && imageSrc) {
     return (
       <ImageWrapper
         showOverlay={showOverlay}

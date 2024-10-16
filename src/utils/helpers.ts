@@ -506,6 +506,7 @@ export function cleanString(s: string): string {
 
 export async function getOptimizedImage(src: string) {
   try {
+    console.log(`image optimize on ${src}`);
     const img = await getImage({
       src,
       inferSize: true,

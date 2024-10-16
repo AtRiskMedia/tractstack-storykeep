@@ -964,6 +964,9 @@ export interface FileNode {
   altDescription: string;
   url?: string;
   src: string;
+  srcSet: boolean;
+  paneId: string;
+  markdown: boolean;
   optimizedSrc?: string;
 }
 
@@ -979,6 +982,7 @@ export interface FileDatum {
   paneId: string;
   markdown: boolean;
   src: string;
+  srcSet: boolean;
   url?: string;
   optimizedSrc?: string;
 }

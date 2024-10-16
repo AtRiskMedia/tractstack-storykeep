@@ -444,10 +444,8 @@ export async function getFileById(id: string): Promise<FileDatum | null> {
       args: [id],
     });
     const files = cleanTursoFile(rows);
-    console.log(`getFileByIds`, rows);
     if (files.length > 0) {
       const file = files[0];
-      console.log(`getFileById`, file);
       return {
         id: file.id,
         filename: file.filename,
@@ -455,6 +453,7 @@ export async function getFileById(id: string): Promise<FileDatum | null> {
         paneId: file.paneId,
         markdown: file.markdown,
         src: `${import.meta.env.PUBLIC_IMAGE_URL}${file.url}`,
+        srcSet: file.src_set,
       };
     }
     return null;

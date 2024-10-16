@@ -48,8 +48,9 @@ export const SaveProcessModal = ({
       const newFile: FileDatum = {
         id: ulid(),
         filename: file.filename,
-        altDescription: "Please provide a description of this image",
+        altDescription: file.altDescription,
         src: file.src,
+        srcSet: file.srcSet,
         optimizedSrc: file.optimizedSrc,
         paneId: file.paneId,
         markdown: file.markdown,

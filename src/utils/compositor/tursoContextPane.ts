@@ -1,6 +1,6 @@
 import { cleanTursoPane } from "../../utils/compositor/tursoPane";
 import { getResourcesByCategorySlug } from "../../api/turso";
-import {getOptimizedImage} from "../../utils/helpers"
+import { getOptimizedImage } from "../../utils/helpers";
 import type { Row } from "@libsql/client";
 import type {
   ContextPaneDatum,

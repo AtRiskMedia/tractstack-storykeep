@@ -88,6 +88,7 @@ const isExternalUrl =
 const thisImage = payload?.imageData?.filter(
   (image: any) => image.filename === thisAst.properties?.src
 )[0];
+console.log(thisImage);
 const altText =
   thisAst.properties?.alt ||
   thisImage?.altDescription ||

@@ -254,6 +254,7 @@ const ImageMeta = (props: {
           altDescription: "Please provide a description of this image",
           src: base64,
           optimizedSrc: base64,
+          srcSet: true,
           paneId,
           markdown: true,
         };

@@ -103,6 +103,18 @@ const ImageMeta = (props: {
       if (!markdownFragmentId || !markdownFragment) return;
       lastInteractedTypeStore.set(`markdown`);
       lastInteractedPaneStore.set(paneId);
+      const files = $paneFiles[paneId]?.current || [];
+      const [thisFile, ...restFiles] = [
+        files.find(file => file.filename === filename),
+        ...files.filter(file => file.filename !== filename),
+      ];
+      if (thisFile) {
+        const updatedFile = {
+          ...thisFile,
+          altDescription: newAltText,
+        };
+        updateStoreField("paneFiles", [...restFiles, updatedFile], paneId);
+      }
       const newBody = updateMarkdownElement(
         markdownFragment.markdown.body,
         `![${newAltText}](${newFilename || filename})`,

@@ -26,7 +26,7 @@ import {
   paneHeldBeliefs,
   paneWithheldBeliefs,
 } from "../../store/storykeep";
-
+import { isDeepEqual } from "../../utils/helpers";
 import type {
   StoryFragmentDatum,
   ContextPaneDatum,
@@ -436,6 +436,7 @@ function comparePaneFields(
     "heightRatioTablet",
     "optionsPayload",
     "markdown",
+    "files",
   ];
 
   validFields.forEach(key => {
@@ -458,6 +459,9 @@ function comparePaneFields(
         }
         changedFields[key] = current[key];
       }
+    } else if (key === "files") {
+      if (!isDeepEqual(current[key], original[key]))
+        changedFields[key] = current[key];
     } else if (key === "markdown") {
       if (current[key] && original[key]) {
         if (current[key]!.body !== original[key]!.body) {
@@ -685,6 +689,7 @@ function reconcileFiles(
   const originalFileIds = new Set(originalFiles.map(f => f.id));
 
   // Handle markdown files
+  // files are matched by filename; doesn't account for paneId or markdown in datum
   if (
     currentPane.markdown &&
     typeof currentPane.markdown === "object" &&
@@ -705,21 +710,22 @@ function reconcileFiles(
           const currentDate = new Date();
           const url = `/custom/images/${formatDateForUrl(currentDate)}/${file.filename}`;
 
-          queries.files.push({
-            sql: `INSERT INTO file (id, filename, url, alt_description, src_set) 
+          if (isImageDataUrl(file.src))
+            queries.files.push({
+              sql: `INSERT INTO file (id, filename, url, alt_description, src_set) 
                   VALUES (?, ?, ?, ?, ?)
                   ON CONFLICT (id) DO UPDATE SET 
                   filename = excluded.filename, 
                   url = excluded.url, 
                   alt_description = excluded.alt_description`,
-            args: [
-              file.id,
-              file.filename,
-              url,
-              altText || file.altDescription || null,
-              true,
-            ],
-          });
+              args: [
+                file.id,
+                file.filename,
+                url,
+                altText || file.altDescription || null,
+                true,
+              ],
+            });
 
           queries.file_markdown.push({
             sql: `INSERT INTO file_markdown (id, file_id, markdown_id) VALUES (?, ?, ?)
@@ -732,6 +738,17 @@ function reconcileFiles(
                 : null,
             ],
           });
+        } else {
+          const originalFile = originalFiles.find(f => f.id === file.id);
+          if (
+            originalFile &&
+            originalFile.altDescription !== (altText || file.altDescription)
+          ) {
+            queries.files.push({
+              sql: `UPDATE file SET alt_description = ? WHERE id = ?`,
+              args: [altText || file.altDescription || null, file.id],
+            });
+          }
         }
       }
     }

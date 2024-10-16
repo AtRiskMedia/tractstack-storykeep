@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
+import { ulid } from "ulid";
 import { classNames } from "../../../utils/helpers";
 import { tursoClient } from "../../../api/tursoClient";
+import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   reconcileData,
   resetUnsavedChanges,
 } from "../../../utils/compositor/reconcileData";
-//import { paneFiles } from "../../../store/storykeep";
+import { paneFiles } from "../../../store/storykeep";
 import type {
   ReconciledData,
   StoryFragmentDatum,
@@ -29,11 +31,6 @@ type SaveProcessModalProps = {
   onClose: () => void;
 };
 
-const updateFiles = (files: FileDatum[]) => {
-  //console.log(paneFiles.get()[id].current)
-  console.log(`update store`, files);
-};
-
 export const SaveProcessModal = ({
   id,
   isContext,
@@ -44,6 +41,24 @@ export const SaveProcessModal = ({
   const [error, setError] = useState<string | null>(null);
   const [whitelist, setWhitelist] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { updateStoreField } = useStoryKeepUtils(id);
+
+  const updateFiles = (files: FileDatum[]) => {
+    files.forEach((file: FileDatum) => {
+      const newFile: FileDatum = {
+        id: ulid(),
+        filename: file.filename,
+        altDescription: "Please provide a description of this image",
+        src: file.src,
+        optimizedSrc: file.optimizedSrc,
+        paneId: file.paneId,
+        markdown: file.markdown,
+      };
+      const currentPaneFiles = paneFiles.get()[file.paneId].current ?? [];
+      const updatedPaneFiles = [...currentPaneFiles, newFile];
+      updateStoreField("paneFiles", updatedPaneFiles, file.paneId);
+    });
+  };
 
   useEffect(() => {
     async function runFetch() {
@@ -51,7 +66,6 @@ export const SaveProcessModal = ({
         const result = (await tursoClient.uniqueTailwindClasses(
           id
         )) as string[];
-
         setWhitelist(result);
         setError(null);
       } catch (err) {
@@ -96,7 +110,7 @@ export const SaveProcessModal = ({
             .flat() as FileDatum[];
           setStage("UPDATING_STYLES");
           await updateCustomStyles();
-          if (files) {
+          if (files && files.length) {
             setStage("UPLOADING_IMAGES");
             await uploadFiles(files);
           }
@@ -219,6 +233,7 @@ export const SaveProcessModal = ({
       return;
     }
     try {
+      console.log(`execute queries`);
       for (const [, tableQueries] of Object.entries(queries)) {
         const thisQueries = Array.isArray(tableQueries)
           ? tableQueries

@@ -5,11 +5,12 @@ import {
   reconcileData,
   resetUnsavedChanges,
 } from "../../../utils/compositor/reconcileData";
+//import { paneFiles } from "../../../store/storykeep";
 import type {
   ReconciledData,
   StoryFragmentDatum,
   ContextPaneDatum,
-  FileDatum
+  FileDatum,
 } from "../../../types";
 
 type SaveStage =
@@ -26,6 +27,11 @@ type SaveProcessModalProps = {
   isContext: boolean;
   originalData: StoryFragmentDatum | ContextPaneDatum | null;
   onClose: () => void;
+};
+
+const updateFiles = (files: FileDatum[]) => {
+  //console.log(paneFiles.get()[id].current)
+  console.log(`update store`, files);
 };
 
 export const SaveProcessModal = ({
@@ -73,10 +79,13 @@ export const SaveProcessModal = ({
               if (p?.files.length) {
                 return p.files
                   .map(f => {
-                    if (f.src.startsWith(`data:image`)) return {
-                      filename:f.filename,
-                      src:f.src
-                    };
+                    if (f.src.startsWith(`data:image`))
+                      return {
+                        filename: f.filename,
+                        src: f.src,
+                        paneId: f.paneId,
+                        markdown: f.markdown,
+                      };
                     return null;
                   })
                   .filter(n => n);
@@ -132,7 +141,8 @@ export const SaveProcessModal = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-        target: `restorePoint`})
+          target: `restorePoint`,
+        }),
       });
       const data = await response.json();
       if (data.success) return true;
@@ -160,7 +170,10 @@ export const SaveProcessModal = ({
         }),
       });
       const data = await response.json();
-      if (data.success) return true;
+      if (data.success) {
+        updateFiles(files);
+        return true;
+      }
       return false;
     } catch (err) {
       setStage("ERROR");

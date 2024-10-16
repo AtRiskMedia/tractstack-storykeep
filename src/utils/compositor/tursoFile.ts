@@ -9,13 +9,17 @@ export function cleanTursoFile(rows: Row[]): TursoFileNode[] {
       typeof r?.id === `string` &&
       typeof r?.filename === `string` &&
       typeof r?.alt_description === `string` &&
+      typeof r?.src_set === `number` &&
       typeof r?.url === `string`
     )
       return {
         id: r.id,
         filename: r.filename,
-        altDescription: r.alt_description,
+        alt_description: r.alt_description,
         url: r.url,
+        src_set: r.src_set === 1,
+        paneId: `none`,
+        markdown: false,
       } as TursoFileNode;
     return null;
   });

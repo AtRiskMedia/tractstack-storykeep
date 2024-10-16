@@ -952,7 +952,10 @@ export interface TursoFileNode {
   id: string;
   filename: string;
   url: string;
-  altDescription: string;
+  alt_description: string;
+  src_set: boolean;
+  paneId: string;
+  markdown: boolean;
 }
 
 export interface FileNode {
@@ -973,6 +976,8 @@ export interface FileDatum {
   id: string;
   filename: string;
   altDescription: string;
+  paneId: string;
+  markdown: boolean;
   src: string;
   url?: string;
   optimizedSrc?: string;

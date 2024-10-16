@@ -42,6 +42,8 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
 
   if (!isClient) return null;
 
+  if (hotStoryFragments.length === 0) return null;
+
   return (
     <div>
       <div className="flex justify-between items-center px-3.5 mt-12">

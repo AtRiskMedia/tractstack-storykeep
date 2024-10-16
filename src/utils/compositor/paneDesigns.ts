@@ -34,8 +34,11 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
           optimizedImagesPre.push({
             id: f.id,
             filename: f.filename,
-            altDescription: f.altDescription,
+            alt_description: f.alt_description,
             url: f.url,
+            src_set: f.src_set,
+            paneId: typeof row?.id === `string` ? row.id : `none`,
+            markdown: typeof row.markdown_id === `string`,
           });
       });
       const optimizedImages: FileNode[] = await Promise.all(
@@ -45,9 +48,12 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
           return {
             id: i.id,
             filename: i.filename,
-            altDescription: i.altDescription,
+            altDescription: i.alt_description,
             optimizedSrc: optimizedSrc || undefined,
             src,
+            srcSet: i.src_set,
+            paneId: i.paneId,
+            markdown: i.markdown,
           };
         })
       );
@@ -68,6 +74,8 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
         if (match && typeof match[1] === `string`) altText = match[1];
         return {
           ...f,
+          paneId: typeof row?.id === `string` ? row.id : `none`,
+          markdown: typeof row.markdown_id === `string`,
           id: f.id,
           index: idx,
           altText:

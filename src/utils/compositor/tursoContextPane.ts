@@ -49,8 +49,11 @@ export async function cleanTursoContextPane(rows: Row[]) {
               optimizedImagesPre.push({
                 id: f.id,
                 filename: f.filename,
-                altDescription: f.altDescription,
+                alt_description: f.alt_description,
                 url: f.url,
+                src_set: f.src_set,
+                paneId: f.paneId,
+                markdown: f.markdown,
               });
           });
           const optimizedImages: FileNode[] = await Promise.all(
@@ -63,9 +66,12 @@ export async function cleanTursoContextPane(rows: Row[]) {
               return {
                 id: i.id,
                 filename: i.filename,
-                altDescription: i.altDescription,
+                altDescription: i.alt_description,
                 optimizedSrc,
                 src,
+                srcSet: i.src_set,
+                paneId: i.paneId,
+                markdown: i.markdown,
               };
             })
           );

@@ -102,8 +102,9 @@ file_data AS (
   SELECT json_group_array(json_object(
     'id', id,
     'filename', filename,
-    'alt_description', f.alt_description,
-    'url', url
+    'alt_description', alt_description,
+    'url', url,
+    'src_set', src_set
   )) AS files
   FROM file
 ),
@@ -228,22 +229,31 @@ export async function getStoryFragmentBySlug(
                              'markdown_body', md.body,
                              'markdown_id', md.id,
                              'files', (
-                                 SELECT json_group_array(json_object(
-                                     'id', f.id,
-                                     'filename', f.filename,
-                                     'alt_description', f.alt_description,
-                                     'url', f.url
-                                 ))
-                                 FROM (
-                                     SELECT fp.file_id
-                                     FROM file_pane fp
-                                     WHERE fp.pane_id = p.id
-                                     UNION
-                                     SELECT fm.file_id
-                                     FROM file_markdown fm
-                                     WHERE fm.markdown_id = p.markdown_id
-                                 ) AS combined_files
-                                 JOIN file f ON combined_files.file_id = f.id
+                                SELECT json_group_array(
+                                   json_object(
+                                       'id', f.id,
+                                       'filename', f.filename,
+                                       'alt_description', f.alt_description,
+                                       'url', f.url,
+                                       'src_set', f.src_set,
+                                       'paneId', p.id,
+                                       'markdown', CASE 
+                                           WHEN fm.file_id IS NOT NULL THEN json('true')
+                                           ELSE json('false')
+                                       END
+                                   )
+                               )
+                               FROM (
+                                   SELECT fp.file_id
+                                   FROM file_pane fp
+                                   WHERE fp.pane_id = p.id
+                                   UNION
+                                   SELECT fm.file_id
+                                   FROM file_markdown fm
+                                   WHERE fm.markdown_id = p.markdown_id
+                               ) AS combined_files
+                               JOIN file f ON combined_files.file_id = f.id
+                               LEFT JOIN file_markdown fm ON fm.file_id = f.id AND fm.markdown_id = p.markdown_id 
                              )
                          ))
                          FROM storyfragment_pane sp
@@ -295,7 +305,13 @@ export async function getContextPaneBySlug(
                                'id', f.id,
                                'filename', f.filename,
                                'alt_description', f.alt_description,
-                               'url', f.url
+                               'url', f.url,
+                               'src_set', f.src_set,
+                               'paneId', p.id,
+                               markdown', CASE 
+                                   WHEN fm.file_id IS NOT NULL THEN json('true')
+                                   ELSE json('false')
+                               END
                            )
                        )
                        FROM (
@@ -359,24 +375,37 @@ export async function getContentMap(): Promise<ContentMap[]> {
 export async function getPaneDesigns(): Promise<PaneDesign[]> {
   try {
     const { rows } = await turso.execute(`
-      WITH file_data AS (
-        SELECT pane_id, json_group_array(json_object(
-          'id', f.id,
-          'filename', f.filename,
-          'alt_description', f.alt_description,
-          'url', f.url
-        )) AS files
-        FROM (
-          SELECT fp.pane_id, fp.file_id
-          FROM file_pane fp
-          UNION
-          SELECT p.id as pane_id, fm.file_id
-          FROM pane p
-          JOIN file_markdown fm ON p.markdown_id = fm.markdown_id
-        ) AS combined_files
-        JOIN file f ON combined_files.file_id = f.id
-        GROUP BY pane_id
-      )
+     WITH file_data AS (
+       SELECT 
+         combined_files.pane_id,
+         json_group_array(
+           json_object(
+             'id', f.id,
+             'filename', f.filename,
+             'alt_description', f.alt_description,
+             'url', f.url,
+             'src_set', f.src_set,
+             'paneId', combined_files.pane_id,
+             'markdown', CASE 
+               WHEN fm.file_id IS NOT NULL THEN json('true')
+               ELSE json('false')
+             END
+           )
+         ) AS files
+       FROM (
+         SELECT fp.pane_id, fp.file_id
+         FROM file_pane fp
+         UNION
+         SELECT p.id as pane_id, fm.file_id
+         FROM pane p
+         JOIN file_markdown fm ON p.markdown_id = fm.markdown_id
+       ) AS combined_files
+       JOIN file f ON combined_files.file_id = f.id
+       LEFT JOIN file_markdown fm ON fm.file_id = f.id AND fm.markdown_id = (
+         SELECT markdown_id FROM pane WHERE id = combined_files.pane_id
+       )
+       GROUP BY combined_files.pane_id
+     ) 
       SELECT 
         p.id,
         p.title,
@@ -409,16 +438,22 @@ export async function getPaneDesigns(): Promise<PaneDesign[]> {
 export async function getFileById(id: string): Promise<FileDatum | null> {
   try {
     const { rows } = await turso.execute({
-      sql: `SELECT id, filename, alt_description, url
+      sql: `SELECT id, filename, alt_description, url, src_set
             FROM file
             WHERE id = ?`,
       args: [id],
     });
     const files = cleanTursoFile(rows);
+    console.log(`getFileByIds`, rows);
     if (files.length > 0) {
       const file = files[0];
+      console.log(`getFileById`, file);
       return {
-        ...file,
+        id: file.id,
+        filename: file.filename,
+        altDescription: file.alt_description,
+        paneId: file.paneId,
+        markdown: file.markdown,
         src: `${import.meta.env.PUBLIC_IMAGE_URL}${file.url}`,
       };
     }
@@ -432,10 +467,9 @@ export async function getFileById(id: string): Promise<FileDatum | null> {
 export async function getAllFileDatum(): Promise<TursoFileNode[]> {
   try {
     const { rows } = await turso.execute(`
-      SELECT id, filename, alt_description, url
+      SELECT id, filename, alt_description, url, src_set
       FROM file
     `);
-
     return cleanTursoFile(rows);
   } catch (error) {
     console.error("Error fetching all file data:", error);

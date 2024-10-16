@@ -185,13 +185,13 @@ const ImageMeta = (props: {
   };
 
   const compressImage = async (file: File) => {
-  const options = {
-    maxSizeMB: 1,
-    useWebWorker: true,
-    initialQuality: 0.8,
-    alwaysKeepResolution: true,
-    fileType: file.type === 'image/png' ? 'image/webp' : file.type
-  };
+    const options = {
+      maxSizeMB: 1,
+      useWebWorker: true,
+      initialQuality: 0.8,
+      alwaysKeepResolution: true,
+      fileType: file.type === "image/png" ? "image/webp" : file.type,
+    };
 
     try {
       const compressedFile = await imageCompression(file, options);
@@ -242,6 +242,8 @@ const ImageMeta = (props: {
           altDescription: "Please provide a description of this image",
           src: base64,
           optimizedSrc: base64,
+          paneId,
+          markdown: true,
         };
         setImageSrc(base64);
         const currentPaneFiles = $paneFiles[paneId]?.current || [];
@@ -329,7 +331,7 @@ const ImageMeta = (props: {
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
-        accept="image/*"
+        accept=".jpg, .jpeg, .png, .webp"
         style={{ display: "none" }}
       />
 

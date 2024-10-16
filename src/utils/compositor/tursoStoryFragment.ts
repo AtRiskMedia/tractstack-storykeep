@@ -44,8 +44,11 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
                 optimizedImagesPre.push({
                   id: f.id,
                   filename: f.filename,
-                  altDescription: f.altDescription,
+                  alt_description: f.alt_description,
                   url: f.url,
+                  src_set: f.src_set,
+                  paneId: f.paneId,
+                  markdown: f.markdown,
                 });
             });
           });
@@ -57,8 +60,11 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
                 id: i.id,
                 filename: i.filename,
                 optimizedSrc: optimizedSrc || undefined,
-                altDescription: i.altDescription,
+                altDescription: i.alt_description,
                 src,
+                srcSet: i.src_set,
+                paneId: i.paneId,
+                markdown: i.markdown,
               };
             })
           );

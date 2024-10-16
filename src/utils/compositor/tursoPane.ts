@@ -15,6 +15,8 @@ export function cleanTursoPane(row: Row, files: FileNode[]) {
     if (match && typeof match[1] === `string`) altText = match[1];
     return {
       ...f,
+      paneId: typeof row?.id === `string` ? row.id : `none`,
+      markdown: typeof row.markdown_id === `string`,
       id: f.id,
       index: idx,
       altDescription:

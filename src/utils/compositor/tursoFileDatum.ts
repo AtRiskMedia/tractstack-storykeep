@@ -7,15 +7,22 @@ export function cleanTursoFileDatum(rows: TursoFileNode[]): FileDatum[] {
     if (
       typeof r?.id === `string` &&
       typeof r?.filename === `string` &&
-      typeof r?.altDescription === `string` &&
-      typeof r?.url === `string`
+      typeof r?.alt_description === `string` &&
+      typeof r?.url === `string` &&
+      typeof r?.src_set === `boolean` &&
+      typeof r?.src_set === `boolean` &&
+      typeof r?.paneId === `string` &&
+      typeof r?.markdown === `boolean`
     )
       return {
         id: r.id,
         filename: r.filename,
-        altDescription: r.altDescription,
+        altDescription: r.alt_description,
         url: r.url,
         src: `${import.meta.env.PUBLIC_IMAGE_URL}${r.url}`,
+        srcSet: r.src_set,
+        paneId: r.paneId,
+        markdown: r.markdown,
       } as FileDatum;
     return null;
   });

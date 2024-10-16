@@ -40,6 +40,8 @@ const DashboardActivity = () => {
     return <div>Loading activity data...</div>;
   }
 
+  if (processedData.length === 0) return <div />;
+
   return (
     <div>
       <h3 className="text-black font-action font-bold my-4">Recent Activity</h3>

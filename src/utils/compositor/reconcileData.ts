@@ -706,8 +706,8 @@ function reconcileFiles(
           const url = `/custom/images/${formatDateForUrl(currentDate)}/${file.filename}`;
 
           queries.files.push({
-            sql: `INSERT INTO file (id, filename, url, alt_description) 
-                  VALUES (?, ?, ?, ?)
+            sql: `INSERT INTO file (id, filename, url, alt_description, src_set) 
+                  VALUES (?, ?, ?, ?, ?)
                   ON CONFLICT (id) DO UPDATE SET 
                   filename = excluded.filename, 
                   url = excluded.url, 
@@ -717,6 +717,7 @@ function reconcileFiles(
               file.filename,
               url,
               altText || file.altDescription || null,
+              true,
             ],
           });
 

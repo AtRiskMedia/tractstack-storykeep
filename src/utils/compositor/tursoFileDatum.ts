@@ -10,20 +10,35 @@ export function cleanTursoFileDatum(rows: TursoFileNode[]): FileDatum[] {
       typeof r?.alt_description === `string` &&
       typeof r?.url === `string` &&
       typeof r?.src_set === `boolean` &&
-      typeof r?.src_set === `boolean` &&
       typeof r?.paneId === `string` &&
       typeof r?.markdown === `boolean`
-    )
+    ) {
+      if (!r.src_set)
+        return {
+          id: r.id,
+          filename: r.filename,
+          altDescription: r.alt_description,
+          url: r.url,
+          src: `${import.meta.env.PUBLIC_IMAGE_URL}${r.url}`,
+          srcSet: false,
+          paneId: r.paneId,
+          markdown: r.markdown,
+        } as FileDatum;
+      // srcSet; must override image
       return {
         id: r.id,
         filename: r.filename,
         altDescription: r.alt_description,
         url: r.url,
-        src: `${import.meta.env.PUBLIC_IMAGE_URL}${r.url}`,
-        srcSet: r.src_set,
+        src: `${import.meta.env.PUBLIC_IMAGE_URL}${r.url}`.replace(
+          /(\.[^.]+)$/,
+          "_600px$1"
+        ),
+        srcSet: false,
         paneId: r.paneId,
         markdown: r.markdown,
       } as FileDatum;
+    }
     return null;
   });
 

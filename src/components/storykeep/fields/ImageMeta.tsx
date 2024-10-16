@@ -87,7 +87,7 @@ const ImageMeta = (props: {
         );
         if (thisImage)
           setImageSrc(
-            thisImage?.optimizedSrc || thisImage?.url || `/static.jpg`
+            thisImage?.optimizedSrc || thisImage?.src || `/static.jpg`
           );
       }
     }

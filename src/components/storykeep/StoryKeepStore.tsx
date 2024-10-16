@@ -201,7 +201,6 @@ export const StoryKeepStore = (props: {
                   payload.optionsPayload.withheldBeliefs || ({} as BeliefDatum)
                 ),
               });
-
               paneFiles.set({
                 ...paneFiles.get(),
                 [payload.id]: createFieldWithHistory(payload.files || []),

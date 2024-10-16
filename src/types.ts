@@ -983,7 +983,6 @@ export interface FileDatum {
   markdown: boolean;
   src: string;
   srcSet: boolean;
-  url?: string;
   optimizedSrc?: string;
 }
 

@@ -1,10 +1,9 @@
 import { cleanTursoPane } from "../../utils/compositor/tursoPane";
 import { getResourcesByCategorySlug } from "../../api/turso";
-import { getOptimizedImage } from "../../utils/helpers";
+import { getOptimizedImages } from "../../utils/helpers";
 import type { Row } from "@libsql/client";
 import type {
   ContextPaneDatum,
-  TursoFileNode,
   ResourceDatum,
   ImpressionDatum,
   PaneFileNode,
@@ -24,59 +23,19 @@ export async function cleanTursoContextPane(rows: Row[]) {
           typeof r?.created === `string`
         ) {
           const files = typeof r?.files === `string` && JSON.parse(r.files);
-
-          // optimize images
-          const optimizedImagesPre: TursoFileNode[] = [];
-          files?.forEach((f: TursoFileNode) => {
-            if (
-              !optimizedImagesPre.filter(
-                (i: TursoFileNode) => i.filename === f.filename
-              ).length
-            )
-              optimizedImagesPre.push({
-                id: f.id,
-                filename: f.filename,
-                alt_description: f.alt_description,
-                url: f.url,
-                src_set: f.src_set,
-                paneId: f.paneId,
-                markdown: f.markdown,
-              });
-          });
-          const optimizedImages: FileNode[] = await Promise.all(
-            optimizedImagesPre.map(async (i: TursoFileNode) => {
-              const src = `${import.meta.env.PUBLIC_IMAGE_URL}${i.url}`;
-              const _optimizedSrc = await getOptimizedImage(src);
-              const optimizedSrc =
-                (typeof _optimizedSrc === `string` && _optimizedSrc) ||
-                undefined;
-              return {
-                id: i.id,
-                filename: i.filename,
-                altDescription: i.alt_description,
-                optimizedSrc,
-                src,
-                srcSet: i.src_set,
-                paneId: i.paneId,
-                markdown: i.markdown,
-              };
-            })
+          const thisFilesPayload: FileNode[] = await getOptimizedImages(
+            files,
+            r.id
           );
           const paneFileNodes: PaneFileNode[] = [];
-          const thisFilesPayload: FileNode[] = [];
-          files?.forEach((f: FileNode) => {
-            const optimizedSrc = optimizedImages.find(
-              (o: FileNode) => o.filename === f.filename
-            );
-            if (optimizedSrc) thisFilesPayload.push(optimizedSrc);
-          });
-          if (thisFilesPayload.length)
+          if (thisFilesPayload.length) {
             paneFileNodes.push({
               id: r.id,
               files: thisFilesPayload,
             });
+          }
 
-          // now prepare panes payload
+          // prepare panes payload
           const paneOptionsPayload =
             typeof r?.options_payload === `string` &&
             JSON.parse(r.options_payload);

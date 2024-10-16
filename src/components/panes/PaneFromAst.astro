@@ -88,12 +88,12 @@ const isExternalUrl =
 const thisImage = payload?.imageData?.filter(
   (image: any) => image.filename === thisAst.properties?.src
 )[0];
-console.log(thisImage);
 const altText =
   thisAst.properties?.alt ||
   thisImage?.altDescription ||
   `This should be descriptive text of an image | We apologize the alt text is missing.`;
 const imageSrc = thisImage?.optimizedSrc || thisImage?.src || null;
+if (thisImage) console.log(thisImage);
 
 // applies only when Tag === `code`
 // currently supported: YouTube, Bunny, toggle, belief, *resource not implemented

@@ -6,6 +6,8 @@ import type {
   GraphNodeDatum,
   GraphRelationshipDatum,
   ClassNamesPayloadValue,
+  TursoFileNode,
+  FileNode,
 } from "../types";
 
 export const getComputedColor = (color: string): string => {
@@ -506,7 +508,6 @@ export function cleanString(s: string): string {
 
 export async function getOptimizedImage(src: string) {
   try {
-    console.log(`image optimize on ${src}`);
     const img = await getImage({
       src,
       inferSize: true,
@@ -516,6 +517,61 @@ export async function getOptimizedImage(src: string) {
     console.log(`error generating images -- are you offline?`);
     return null;
   }
+}
+
+export async function getOptimizedImages(
+  filesInput: TursoFileNode[] | TursoFileNode[][],
+  paneId?: string
+): Promise<FileNode[]> {
+  // Flatten the input if it's an array of arrays
+  const allFiles = Array.isArray(filesInput[0])
+    ? (filesInput as TursoFileNode[][]).flat()
+    : (filesInput as TursoFileNode[]);
+
+  // Create optimizedImagesPre
+  const optimizedImagesPre: TursoFileNode[] = [];
+  allFiles.forEach((f: TursoFileNode) => {
+    if (!optimizedImagesPre.some(i => i.filename === f.filename)) {
+      optimizedImagesPre.push({
+        id: f.id,
+        filename: f.filename,
+        alt_description: f.alt_description,
+        url: f.url,
+        src_set: f.src_set,
+        paneId: paneId || f.paneId,
+        markdown: f.markdown,
+      });
+    }
+  });
+
+  // Create optimizedImages
+  const optimizedImages: FileNode[] = await Promise.all(
+    optimizedImagesPre.map(async (i: TursoFileNode) => {
+      const src = `${import.meta.env.PUBLIC_IMAGE_URL}${i.url}`;
+      const optimizedSrc = await getOptimizedImage(src);
+      return {
+        id: i.id,
+        filename: i.filename,
+        altDescription: i.alt_description,
+        optimizedSrc: optimizedSrc || undefined,
+        src,
+        srcSet: i.src_set,
+        paneId: i.paneId,
+        markdown: i.markdown,
+      };
+    })
+  );
+
+  // Create thisFilesPayload
+  const thisFilesPayload: FileNode[] = [];
+  allFiles.forEach((f: TursoFileNode) => {
+    const optimizedFile = optimizedImages.find(o => o.filename === f.filename);
+    if (optimizedFile) {
+      thisFilesPayload.push(optimizedFile);
+    }
+  });
+
+  return thisFilesPayload;
 }
 
 export function sortULIDs(ulids: string[]) {

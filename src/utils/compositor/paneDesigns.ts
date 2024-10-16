@@ -1,5 +1,5 @@
 import { cleanTursoFile } from "./tursoFile";
-import { getOptimizedImage } from "../helpers";
+import { getOptimizedImages } from "../helpers";
 import type { Row } from "@libsql/client";
 import type {
   PaneDesign,
@@ -10,7 +10,6 @@ import type {
   BgPaneDatum,
   PaneDesignOptionsPayload,
   FileNode,
-  TursoFileNode,
   FileDatum,
 } from "../../types";
 
@@ -24,47 +23,10 @@ export async function cleanPaneDesigns(rows: Row[]): Promise<PaneDesign[]> {
       const filesPayload =
         (typeof row?.files === `string` && JSON.parse(row.files)) || [];
       const files = cleanTursoFile(filesPayload);
-      const optimizedImagesPre: TursoFileNode[] = [];
-      files.forEach((f: TursoFileNode) => {
-        if (
-          !optimizedImagesPre.filter(
-            (i: TursoFileNode) => i.filename === f.filename
-          ).length
-        )
-          optimizedImagesPre.push({
-            id: f.id,
-            filename: f.filename,
-            alt_description: f.alt_description,
-            url: f.url,
-            src_set: f.src_set,
-            paneId: typeof row?.id === `string` ? row.id : `none`,
-            markdown: typeof row.markdown_id === `string`,
-          });
-      });
-      const optimizedImages: FileNode[] = await Promise.all(
-        optimizedImagesPre.map(async (i: TursoFileNode) => {
-          const src = `${import.meta.env.PUBLIC_IMAGE_URL}${i.url}`;
-          const optimizedSrc = await getOptimizedImage(src);
-          return {
-            id: i.id,
-            filename: i.filename,
-            altDescription: i.alt_description,
-            optimizedSrc: optimizedSrc || undefined,
-            src,
-            srcSet: i.src_set,
-            paneId: i.paneId,
-            markdown: i.markdown,
-          };
-        })
+      const thisFilesPayload: FileNode[] = await getOptimizedImages(
+        files,
+        typeof row?.id === `string` ? row.id : `none`
       );
-      const thisFilesPayload: FileNode[] = [];
-      files?.forEach((f: TursoFileNode) => {
-        const optimizedSrc = optimizedImages.find(
-          (o: FileNode) => o.filename === f.filename
-        );
-        if (optimizedSrc) thisFilesPayload.push(optimizedSrc);
-      });
-
       const thisFiles = thisFilesPayload?.map((f: FileNode, idx: number) => {
         let altText = ``;
         const regexpImage = `^.*\\[(.*)\\]\\((${f.filename})\\)`;

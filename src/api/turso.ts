@@ -19,6 +19,7 @@ import type {
   FullContentMap,
   MenuDatum,
   FileDatum,
+  TursoQuery,
 } from "../types.ts";
 
 export const turso = createClient({
@@ -532,4 +533,23 @@ export async function getFullContentMap(): Promise<FullContentMap[]> {
     console.error("Error fetching full content map:", error);
     throw error;
   }
+}
+
+export async function executeQueries(
+  queries: TursoQuery[]
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+): Promise<{ success: boolean; results: any[] }> {
+  const results = [];
+
+  for (const query of queries) {
+    try {
+      const result = query; //await turso.execute(query);
+      results.push(result);
+    } catch (error) {
+      console.error("Error executing query:", query, error);
+      throw error;
+    }
+  }
+
+  return { success: true, results };
 }

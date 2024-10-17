@@ -1,5 +1,9 @@
 import type { APIRoute } from "astro";
-import { getPaneDesigns, getUniqueTailwindClasses } from "../../../api/turso";
+import {
+  getPaneDesigns,
+  executeQueries,
+  getUniqueTailwindClasses,
+} from "../../../api/turso";
 
 export const POST: APIRoute = async ({ request, params /*, locals */ }) => {
   //if (!(locals.user?.isAuthenticated || locals.user?.isOpenDemo)) {
@@ -25,6 +29,13 @@ export const POST: APIRoute = async ({ request, params /*, locals */ }) => {
 
       case "uniqueTailwindClasses":
         result = await getUniqueTailwindClasses(body.id);
+        break;
+
+      case "execute":
+        if (!Array.isArray(body.queries)) {
+          throw new Error("Invalid or missing queries array");
+        }
+        result = await executeQueries(body.queries);
         break;
 
       //case "getResourcesBySlug":

@@ -3,7 +3,7 @@ import {
   UnauthorizedError,
   TursoOperationError,
 } from "../types";
-import type { TursoOperation, TursoClientError } from "../types";
+import type { TursoQuery, TursoOperation, TursoClientError } from "../types";
 
 const BASE_URL = `/api/turso`;
 
@@ -89,16 +89,14 @@ export const tursoClient = {
       throw error;
     }
   },
-  // Add other methods here...
-  //getResourcesBySlug: async (slugs: string[]): Promise<unknown> => {
-  //  try {
-  //    return await fetchTurso("getResourcesBySlug", { slugs });
-  //  } catch (error) {
-  //    if (isTursoClientError(error)) {
-  //      logError(error);
-  //    }
-  //    throw error;
-  //  }
-  //},
-  // ... other methods
+  execute: async (queries: TursoQuery[]): Promise<unknown> => {
+    try {
+      return await fetchTurso("execute", { queries });
+    } catch (error) {
+      if (isTursoClientError(error)) {
+        logError(error);
+      }
+      throw error;
+    }
+  },
 };

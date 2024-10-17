@@ -14,7 +14,6 @@ import {
 import AnalyticsWrapper from "./nivo/AnalyticsWrapper";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
-import { SHORT_SCREEN_THRESHOLD } from "../../constants";
 import { isFullScreenEditModal } from "../../utils/storykeep";
 import { classNames } from "../../utils/helpers";
 import type { ReactNode } from "react";

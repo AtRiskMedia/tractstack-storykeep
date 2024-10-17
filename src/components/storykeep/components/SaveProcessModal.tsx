@@ -1,13 +1,10 @@
 import { useState, useEffect } from "react";
-import { ulid } from "ulid";
 import { classNames } from "../../../utils/helpers";
 import { tursoClient } from "../../../api/tursoClient";
-import { useStoryKeepUtils } from "../../../utils/storykeep";
 import {
   reconcileData,
   resetUnsavedChanges,
 } from "../../../utils/compositor/reconcileData";
-import { paneFiles } from "../../../store/storykeep";
 import type {
   ReconciledData,
   StoryFragmentDatum,
@@ -41,7 +38,6 @@ export const SaveProcessModal = ({
   const [error, setError] = useState<string | null>(null);
   const [whitelist, setWhitelist] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { updateStoreField } = useStoryKeepUtils(id);
 
   useEffect(() => {
     async function runFetch() {
@@ -167,8 +163,7 @@ export const SaveProcessModal = ({
         }),
       });
       const data = await response.json();
-      if (data.success)
-        return true;
+      if (data.success) return true;
       return false;
     } catch (err) {
       setStage("ERROR");
@@ -215,22 +210,13 @@ export const SaveProcessModal = ({
     }
     try {
       console.log(`execute queries`);
-      for (const [, tableQueries] of Object.entries(queries)) {
-        const thisQueries = Array.isArray(tableQueries)
-          ? tableQueries
-          : [tableQueries];
-        for (const query of thisQueries) {
-          if (query.sql) {
-            console.log("Executing query:", query);
-            // Uncomment the following lines when ready to actually execute queries
-            // await fetch("/api/turso/execute", {
-            //   method: "POST",
-            //   headers: { "Content-Type": "application/json" },
-            //   body: JSON.stringify(query),
-            // });
-          }
-        }
-      }
+      const allQueries = Object.values(queries)
+        .flat()
+        .filter(query => query.sql);
+
+      const result = await tursoClient.execute(allQueries);
+
+      console.log("Queries executed successfully:", result);
     } catch (err) {
       setStage("ERROR");
       setError(

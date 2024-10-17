@@ -138,7 +138,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           <button
             onClick={toggleOffEditModal}
             className={classNames(
-              "absolute z-[9001] bg-myorange/10 hover:bg-black hover:text-white text-black rounded-full p-2 shadow-lg",
+              "absolute z-[9001] bg-black hover:bg-myorange text-white rounded-full p-2 shadow-lg",
               "transition-all duration-300 ease-in-out",
               "-top-12 right-2"
             )}

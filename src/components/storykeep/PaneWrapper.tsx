@@ -177,7 +177,6 @@ const PaneWrapper = (props: {
         visiblePanesStore.setKey(id, entry.isIntersecting);
         if (!entry.isIntersecting) {
           const currentEditMode = editModeStore.get();
-          const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
           if (
             currentEditMode?.type === "pane" &&
             (currentEditMode.mode === "settings" ||
@@ -185,7 +184,7 @@ const PaneWrapper = (props: {
               currentEditMode.mode === "styles") &&
             currentEditMode.id === id
           ) {
-            if (!isShortScreen) toggleOffEditModal();
+            toggleOffEditModal();
           }
         }
       },

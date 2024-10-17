@@ -213,6 +213,35 @@ export const StoryFragment = (props: {
     };
   }, [$viewportSet]);
 
+  // runs first; once
+  useEffect(() => {
+    // ensure correct viewport based on window width
+    const scrollBarOffset =
+      window.innerWidth - document.documentElement.clientWidth;
+    const previewWidth = window.innerWidth;
+    const adjustedWidth =
+      previewWidth +
+      scrollBarOffset *
+        (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
+    let newViewportKey: ViewportKey;
+    if (adjustedWidth <= 800) {
+      newViewportKey = `mobile`;
+    } else if (adjustedWidth <= 1367) {
+      newViewportKey = `tablet`;
+    } else {
+      newViewportKey = `desktop`;
+    }
+    viewportKeyStore.set({ value: newViewportKey });
+
+    const timerId = setTimeout(() => {
+      const cleanup = handleEditorResize();
+      return () => {
+        if (cleanup) cleanup();
+        clearTimeout(timerId);
+      };
+    }, 100);
+  }, []);
+
   useEffect(() => {
     if (toolMode !== "insert") {
       resetInsertMode();
@@ -271,34 +300,6 @@ export const StoryFragment = (props: {
       setIsClient(true);
     } else if (slug === `create`) navigate(`/storykeep`);
   }, [slug, thisId, $storyFragmentInit, $creationState.isInitialized]);
-
-  useEffect(() => {
-    // ensure correct viewport based on window width
-    const scrollBarOffset =
-      window.innerWidth - document.documentElement.clientWidth;
-    const previewWidth = window.innerWidth;
-    const adjustedWidth =
-      previewWidth +
-      scrollBarOffset *
-        (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
-    let newViewportKey: ViewportKey;
-    if (adjustedWidth <= 800) {
-      newViewportKey = `mobile`;
-    } else if (adjustedWidth <= 1367) {
-      newViewportKey = `tablet`;
-    } else {
-      newViewportKey = `desktop`;
-    }
-    viewportKeyStore.set({ value: newViewportKey });
-
-    const timerId = setTimeout(() => {
-      const cleanup = handleEditorResize();
-      return () => {
-        if (cleanup) cleanup();
-        clearTimeout(timerId);
-      };
-    }, 100);
-  }, []);
 
   useEffect(() => {
     const outerDiv = document.getElementById(`storykeep`);

@@ -31,11 +31,6 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
   const $storyFragmentInit = useStore(storyFragmentInit);
   const $paneInit = useStore(paneInit);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [type, setType] = useState<"desktop" | "mobile">(
-    typeof window !== "undefined" && window.innerWidth >= 1368
-      ? "desktop"
-      : "mobile"
-  );
   const isVisible = $editMode !== null;
   const { height, width, position, isFullWidthMobileShort } =
     useEditModalDimensions();
@@ -79,14 +74,6 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
       }, 100);
     }
   }, [shouldScroll, $editMode?.targetId, isVisible, scrollToTarget]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setType(window.innerWidth >= 1368 ? "desktop" : "mobile");
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   useEffect(() => {
     if (
@@ -135,10 +122,9 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
           `fixed z-[9000]`,
           `backdrop-blur-sm bg-mydarkgrey/50`,
           `bg-mywhite shadow-lg transition-all duration-300 ease-in-out`,
-          isFullWidthMobileShort ? `border-t-2 border-mylightgrey` : ``,
-          type === `desktop`
-            ? "rounded-bl-lg border-l-2 border-b-2 border-mylightgrey"
-            : "rounded-t-lg border-l-2 border-t-2 border-r-2 border-mylightgrey"
+          isFullWidthMobileShort
+            ? `border-t-2 border-mylightgrey`
+            : `border-t-2 border-l-2 border-mylightgrey`
         )}
         style={{
           height: height,
@@ -154,7 +140,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             className={classNames(
               "absolute z-[9001] bg-myorange/80 hover:bg-myorange text-white rounded-full p-2 shadow-lg",
               "transition-all duration-300 ease-in-out",
-              type === "desktop" ? "-left-12 top-2" : "-top-12 right-2"
+              "-top-12 right-2"
             )}
             title={
               $editMode?.mode === `insert` ? `Cancel Insert` : `Close panel`

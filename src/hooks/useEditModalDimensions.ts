@@ -64,20 +64,20 @@ export const useEditModalDimensions = (): Dimensions => {
       isFullWidthMobileShort: false,
     };
 
-    const largeScreenDimensions = {
-      height: "auto",
-      width: "33%",
-      position: { top: `${headerBottom}px`, right: "0" },
-      isFullWidthMobileShort: false,
-    };
+    //const largeScreenDimensions = {
+    //  height: "auto",
+    //  width: "33%",
+    //  position: { top: `${headerBottom}px`, right: "0" },
+    //  isFullWidthMobileShort: false,
+    //};
 
     let currentDimensions;
     if (windowWidth < SMALL_SCREEN_WIDTH) {
       currentDimensions = smallScreenDimensions;
-    } else if (windowWidth < 1368) {
-      currentDimensions = mediumScreenDimensions;
+      //} else if (windowWidth < 1368) {
     } else {
-      currentDimensions = largeScreenDimensions;
+      currentDimensions = mediumScreenDimensions;
+      //  currentDimensions = largeScreenDimensions;
     }
 
     return {

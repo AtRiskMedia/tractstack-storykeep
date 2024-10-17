@@ -17,7 +17,7 @@ import type {
 
 type SaveStage =
   | "RECONCILING"
-  | "RESTORE_POINT"
+  | "PUBLISH_TAILWIND"
   | "UPDATING_STYLES"
   | "UPLOADING_IMAGES"
   | "PUBLISHING"
@@ -42,24 +42,6 @@ export const SaveProcessModal = ({
   const [whitelist, setWhitelist] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const { updateStoreField } = useStoryKeepUtils(id);
-
-  const updateFiles = (files: FileDatum[]) => {
-    files.forEach((file: FileDatum) => {
-      const newFile: FileDatum = {
-        id: ulid(),
-        filename: file.filename,
-        altDescription: file.altDescription,
-        src: file.src,
-        srcSet: file.srcSet,
-        optimizedSrc: file.optimizedSrc,
-        paneId: file.paneId,
-        markdown: file.markdown,
-      };
-      const currentPaneFiles = paneFiles.get()[file.paneId].current ?? [];
-      const updatedPaneFiles = [...currentPaneFiles, newFile];
-      updateStoreField("paneFiles", updatedPaneFiles, file.paneId);
-    });
-  };
 
   useEffect(() => {
     async function runFetch() {
@@ -117,8 +99,8 @@ export const SaveProcessModal = ({
           }
           setStage("PUBLISHING");
           await publishChanges(data);
-          setStage("RESTORE_POINT");
-          await restorePoint();
+          setStage("PUBLISH_TAILWIND");
+          await publishTailwind();
           setStage("COMPLETED");
           resetUnsavedChanges(id, isContext);
         } catch (err) {
@@ -148,7 +130,7 @@ export const SaveProcessModal = ({
     }
   };
 
-  const restorePoint = async (): Promise<boolean> => {
+  const publishTailwind = async (): Promise<boolean> => {
     try {
       const response = await fetch(`/api/concierge/storykeep/publish`, {
         method: "POST",
@@ -156,7 +138,7 @@ export const SaveProcessModal = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          target: `restorePoint`,
+          target: `tailwind`,
         }),
       });
       const data = await response.json();
@@ -185,10 +167,8 @@ export const SaveProcessModal = ({
         }),
       });
       const data = await response.json();
-      if (data.success) {
-        updateFiles(files);
+      if (data.success)
         return true;
-      }
       return false;
     } catch (err) {
       setStage("ERROR");
@@ -270,10 +250,10 @@ export const SaveProcessModal = ({
         return "Updating custom styles...";
       case "UPLOADING_IMAGES":
         return "Uploading images...";
+      case "PUBLISH_TAILWIND":
+        return "Updating tailwind whitelist...";
       case "PUBLISHING":
         return "Publishing changes...";
-      case "RESTORE_POINT":
-        return "Creating new restore point...";
       case "COMPLETED":
         return "Save completed successfully!";
       case "ERROR":
@@ -300,7 +280,7 @@ export const SaveProcessModal = ({
                     ? "w-2/6"
                     : stage === "UPLOADING_IMAGES"
                       ? "w-3/6"
-                      : stage === "RESTORE_POINT"
+                      : stage === "PUBLISH_TAILWIND"
                         ? "w-4/6"
                         : stage === "PUBLISHING"
                           ? "w-5/6"

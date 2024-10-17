@@ -51,6 +51,31 @@ function formatDateForUrl(date: Date): string {
   return `${year}-${month}`;
 }
 
+function createGenericUpdateQuery<T>(
+  tableName: string,
+  id: string,
+  changedFields: Partial<T>,
+  fieldMapping: Record<keyof T, string>
+): TursoQuery {
+  const fields = Object.keys(changedFields) as Array<keyof T>;
+  const values = Object.values(changedFields).map(value =>
+    value instanceof Date
+      ? value.toISOString()
+      : typeof value === "object"
+        ? JSON.stringify(value)
+        : value
+  );
+
+  const sqlFields = fields
+    .map(field => `${fieldMapping[field] || field.toString()} = ?`)
+    .join(", ");
+
+  return {
+    sql: `UPDATE ${tableName} SET ${sqlFields} WHERE id = ?`,
+    args: [...values, id],
+  };
+}
+
 export function reconcileData(
   id: string,
   isContext: boolean,
@@ -61,116 +86,6 @@ export function reconcileData(
   } else {
     return reconcileStoryFragment(id, originalData as StoryFragmentDatum);
   }
-}
-
-function reconcileStoryFragment(
-  id: string,
-  originalData: StoryFragmentDatum | null
-): ReconciledData {
-  const currentData: StoryFragmentDatum = {
-    id,
-    title: storyFragmentTitle.get()[id].current,
-    slug: storyFragmentSlug.get()[id].current,
-    tractStackId: storyFragmentTractStackId.get()[id].current,
-    tractStackTitle: originalData?.tractStackTitle ?? "",
-    tractStackSlug: originalData?.tractStackSlug ?? "",
-    menuId: storyFragmentMenuId.get()[id].current,
-    socialImagePath: storyFragmentSocialImagePath.get()[id].current,
-    tailwindBgColour: storyFragmentTailwindBgColour.get()[id].current,
-    created: originalData!.created!,
-    changed: new Date(),
-    panesPayload: reconcilePanes(
-      storyFragmentPaneIds.get()[id].current,
-      originalData?.panesPayload
-    ),
-    hasMenu: !!storyFragmentMenuId.get()[id].current,
-    menuPayload: null,
-    impressions: [],
-    resourcesPayload: {
-      resources: [],
-      headerWidget: [],
-      perCodeHookPayload: {},
-      perCodeHookOptions: {},
-      perCodeHookResourceCategory: {},
-    },
-  };
-  const queries: StoryFragmentQueries = {
-    storyfragment: { sql: "", args: [] },
-    panes: [],
-    markdowns: [],
-    storyfragment_pane: [],
-    file_pane: [],
-    file_markdown: [],
-    files: [],
-  };
-
-  if (originalData) {
-    const changedFields = compareStoryFragmentFields(currentData, originalData);
-    if (Object.keys(changedFields).length > 0) {
-      queries.storyfragment = createStoryFragmentUpdateQuery(
-        id,
-        changedFields as Partial<StoryFragmentDatum>
-      );
-    }
-  } else {
-    queries.storyfragment = createStoryFragmentInsertQuery(currentData);
-  }
-  // Reconcile panes
-  currentData.panesPayload.forEach((pane, index) => {
-    const originalPane = originalData?.panesPayload.find(p => p.id === pane.id);
-    const paneQueries = reconcilePaneData(pane, originalPane);
-    queries.panes.push(...paneQueries.pane);
-    queries.markdowns.push(...paneQueries.markdown);
-    queries.file_pane.push(...paneQueries.file_pane);
-    queries.file_markdown.push(...paneQueries.file_markdown);
-    queries.files.push(...paneQueries.files);
-
-    if (!originalPane) {
-      queries.storyfragment_pane.push(
-        createStoryFragmentPaneQuery(id, pane.id, index)
-      );
-    }
-  });
-
-  return { storyFragment: { data: currentData, queries } };
-}
-
-function reconcileContextPane(
-  id: string,
-  originalData: ContextPaneDatum | null
-): ReconciledData {
-  const currentData: ContextPaneDatum = {
-    id,
-    title: paneTitle.get()[id].current,
-    slug: paneSlug.get()[id].current,
-    created: originalData!.created!,
-    changed: new Date(),
-    panePayload: reconcilePanePayload(id, true, originalData?.panePayload),
-    impressions: [],
-    resourcesPayload: [],
-    codeHookOptions: {},
-  };
-  const queries: ContextPaneQueries = {
-    pane: createPaneQuery(currentData.panePayload!, originalData?.panePayload),
-    file_pane: [],
-    file_markdown: [],
-    files: [],
-  };
-
-  if (currentData?.panePayload?.markdown) {
-    queries.markdown = createMarkdownQuery(
-      currentData.panePayload.markdown,
-      originalData?.panePayload?.markdown
-    );
-  }
-
-  reconcileFiles(currentData.panePayload!, originalData?.panePayload ?? null, {
-    files: queries.files,
-    file_pane: queries.file_pane,
-    file_markdown: queries.file_markdown,
-  });
-
-  return { contextPane: { data: currentData, queries } };
 }
 
 function compareStoryFragmentFields(
@@ -198,7 +113,7 @@ function compareStoryFragmentFields(
   }
 
   validFields.forEach(key => {
-    if (current[key] !== original[key] && current[key] != null) {
+    if (current[key] !== original[key] && current[key] != null && current[key] !== ``) {
       setChangedField(
         key,
         current[key] as NonNullable<StoryFragmentDatum[typeof key]>
@@ -207,44 +122,6 @@ function compareStoryFragmentFields(
   });
 
   return changedFields;
-}
-
-function createStoryFragmentUpdateQuery(
-  id: string,
-  changedFields: Partial<StoryFragmentDatum>
-): TursoQuery {
-  const fields = Object.keys(changedFields);
-  const values = Object.values(changedFields);
-
-  return {
-    sql: `UPDATE storyfragment SET ${fields
-      .map(f => {
-        // Map the fields to their correct database column names
-        switch (f) {
-          case "tractStackId":
-            return "tractstack_id";
-          case "menuId":
-            return "menu_id";
-          case "socialImagePath":
-            return "social_image_path";
-          case "tailwindBgColour":
-            return "tailwind_background_colour";
-          default:
-            return f;
-        }
-      })
-      .join(" = ?, ")} = ? WHERE id = ?`,
-    args: [
-      ...values.map(v =>
-        v instanceof Date
-          ? v.toISOString()
-          : typeof v === "object"
-            ? JSON.stringify(v)
-            : v
-      ),
-      id,
-    ],
-  };
 }
 
 function createStoryFragmentInsertQuery(data: StoryFragmentDatum): TursoQuery {
@@ -368,54 +245,6 @@ function reconcilePaneFragments(
   });
 }
 
-function reconcilePaneData(
-  currentPane: PaneDatum,
-  originalPane: PaneDatum | null | undefined
-) {
-  const queries = {
-    pane: [] as TursoQuery[],
-    markdown: [] as TursoQuery[],
-    file_pane: [] as TursoQuery[],
-    file_markdown: [] as TursoQuery[],
-    files: [] as TursoQuery[],
-  };
-
-  // Pane handling
-  if (originalPane) {
-    const changedFields = comparePaneFields(currentPane, originalPane);
-    if (Object.keys(changedFields).length > 0) {
-      queries.pane.push(createPaneUpdateQuery(currentPane.id, changedFields));
-    }
-  } else {
-    queries.pane.push(createPaneInsertQuery(currentPane));
-  }
-
-  // Markdown handling
-  if (currentPane.markdown) {
-    if (originalPane?.markdown) {
-      if (currentPane.markdown.body !== originalPane.markdown.body) {
-        queries.markdown.push(createMarkdownUpdateQuery(currentPane.markdown));
-      }
-    } else {
-      queries.markdown.push(createMarkdownInsertQuery(currentPane.markdown));
-    }
-  } else if (originalPane?.markdown) {
-    queries.markdown.push({
-      sql: `DELETE FROM markdown WHERE id = ?`,
-      args: [originalPane.markdown.id],
-    });
-  }
-
-  // Reconcile files
-  reconcileFiles(currentPane, originalPane ?? null, {
-    files: queries.files,
-    file_pane: queries.file_pane,
-    file_markdown: queries.file_markdown,
-  });
-
-  return queries;
-}
-
 function comparePaneFields(
   current: PaneDatum,
   original: PaneDatum
@@ -435,8 +264,6 @@ function comparePaneFields(
     "heightRatioMobile",
     "heightRatioTablet",
     "optionsPayload",
-    "markdown",
-    "files",
   ];
 
   validFields.forEach(key => {
@@ -459,17 +286,8 @@ function comparePaneFields(
         }
         changedFields[key] = current[key];
       }
-    } else if (key === "files") {
-      if (!isDeepEqual(current[key], original[key]))
-        changedFields[key] = current[key];
-    } else if (key === "markdown") {
-      if (current[key] && original[key]) {
-        if (current[key]!.body !== original[key]!.body) {
-          changedFields[key] = current[key];
-        }
-      } else if (current[key] !== original[key]) {
-        changedFields[key] = current[key];
-      }
+    } else if (key === "isContextPane") {
+      if (current[key] && !original[key]) changedFields[key] = current[key];
     } else if (current[key] !== original[key]) {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       changedFields[key] = current[key] as any;
@@ -477,87 +295,6 @@ function comparePaneFields(
   });
 
   return changedFields;
-}
-
-function createPaneUpdateQuery(
-  id: string,
-  changedFields: Partial<PaneDatum>
-): TursoQuery {
-  const fields = Object.keys(changedFields);
-  const values = Object.values(changedFields).map(value =>
-    typeof value === "object" ? JSON.stringify(value) : value
-  );
-
-  return {
-    sql: `UPDATE pane SET ${fields
-      .map(f => {
-        // Map the fields to their correct database column names
-        switch (f) {
-          case "isContextPane":
-            return "is_context_pane";
-          case "heightOffsetDesktop":
-            return "height_offset_desktop";
-          case "heightOffsetMobile":
-            return "height_offset_mobile";
-          case "heightOffsetTablet":
-            return "height_offset_tablet";
-          case "heightRatioDesktop":
-            return "height_ratio_desktop";
-          case "heightRatioMobile":
-            return "height_ratio_mobile";
-          case "heightRatioTablet":
-            return "height_ratio_tablet";
-          case "optionsPayload":
-            return "options_payload";
-          default:
-            return f;
-        }
-      })
-      .join(" = ?, ")} = ? WHERE id = ?`,
-    args: [...values, id],
-  };
-}
-
-function createPaneInsertQuery(data: PaneDatum): TursoQuery {
-  const fields = [
-    "id",
-    "title",
-    "slug",
-    "is_context_pane",
-    "created",
-    "changed",
-    "height_offset_desktop",
-    "height_offset_mobile",
-    "height_offset_tablet",
-    "height_ratio_desktop",
-    "height_ratio_mobile",
-    "height_ratio_tablet",
-    "options_payload",
-    "markdown_id",
-  ];
-  const placeholders = fields.map(() => "?").join(", ");
-
-  return {
-    sql: `INSERT INTO pane (${fields.join(", ")}) VALUES (${placeholders})`,
-    args: [
-      data.id,
-      data.title,
-      data.slug,
-      data.isContextPane,
-      data.created.toISOString(),
-      data.changed ? data.changed.toISOString() : null,
-      data.heightOffsetDesktop,
-      data.heightOffsetMobile,
-      data.heightOffsetTablet,
-      data.heightRatioDesktop,
-      data.heightRatioMobile,
-      data.heightRatioTablet,
-      JSON.stringify(data.optionsPayload),
-      data.markdown && typeof data.markdown === "object"
-        ? data.markdown.id
-        : null,
-    ],
-  };
 }
 
 function createMarkdownUpdateQuery(markdown: MarkdownDatum): TursoQuery {
@@ -612,47 +349,6 @@ export const resetUnsavedChanges = (id: string, isContext: boolean) => {
   }
 };
 
-function createPaneQuery(
-  currentPane: PaneDatum,
-  originalPane: PaneDatum | null | undefined
-): TursoQuery {
-  if (!originalPane) {
-    return {
-      sql: `INSERT INTO pane (id, title, slug, is_context_pane, height_offset_desktop, height_offset_mobile, height_offset_tablet, height_ratio_desktop, height_ratio_mobile, height_ratio_tablet, options_payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [
-        currentPane.id,
-        currentPane.title,
-        currentPane.slug,
-        currentPane.isContextPane,
-        currentPane.heightOffsetDesktop,
-        currentPane.heightOffsetMobile,
-        currentPane.heightOffsetTablet,
-        currentPane.heightRatioDesktop,
-        currentPane.heightRatioMobile,
-        currentPane.heightRatioTablet,
-        JSON.stringify(currentPane.optionsPayload),
-      ],
-    };
-  } else {
-    return {
-      sql: `UPDATE pane SET title = ?, slug = ?, is_context_pane = ?, height_offset_desktop = ?, height_offset_mobile = ?, height_offset_tablet = ?, height_ratio_desktop = ?, height_ratio_mobile = ?, height_ratio_tablet = ?, options_payload = ? WHERE id = ?`,
-      args: [
-        currentPane.title,
-        currentPane.slug,
-        currentPane.isContextPane,
-        currentPane.heightOffsetDesktop,
-        currentPane.heightOffsetMobile,
-        currentPane.heightOffsetTablet,
-        currentPane.heightRatioDesktop,
-        currentPane.heightRatioMobile,
-        currentPane.heightRatioTablet,
-        JSON.stringify(currentPane.optionsPayload),
-        currentPane.id,
-      ],
-    };
-  }
-}
-
 function createMarkdownQuery(
   currentMarkdown: MarkdownDatum | false | null,
   originalMarkdown?: MarkdownDatum | false | null
@@ -673,6 +369,219 @@ function createMarkdownQuery(
   }
 }
 
+function createStoryFragmentUpdateQuery(
+  id: string,
+  changedFields: Partial<StoryFragmentDatum>
+): TursoQuery {
+  const fieldMapping: Record<keyof StoryFragmentDatum, string> = {
+    tractStackId: "tractstack_id",
+    menuId: "menu_id",
+    socialImagePath: "social_image_path",
+    tailwindBgColour: "tailwind_background_colour",
+  };
+  return createGenericUpdateQuery(
+    "storyfragment",
+    id,
+    changedFields,
+    fieldMapping
+  );
+}
+
+function createPaneUpdateQuery(
+  id: string,
+  changedFields: Partial<PaneDatum>
+): TursoQuery {
+  const fieldMapping: Record<keyof PaneDatum, string> = {
+    isContextPane: "is_context_pane",
+    heightOffsetDesktop: "height_offset_desktop",
+    heightOffsetMobile: "height_offset_mobile",
+    heightOffsetTablet: "height_offset_tablet",
+    heightRatioDesktop: "height_ratio_desktop",
+    heightRatioMobile: "height_ratio_mobile",
+    heightRatioTablet: "height_ratio_tablet",
+    optionsPayload: "options_payload",
+  };
+  return createGenericUpdateQuery("pane", id, changedFields, fieldMapping);
+}
+
+function createPaneInsertQuery(data: PaneDatum): TursoQuery {
+  return {
+    sql: `INSERT INTO pane (id, title, slug, is_context_pane, height_offset_desktop, height_offset_mobile, height_offset_tablet, height_ratio_desktop, height_ratio_mobile, height_ratio_tablet, options_payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      data.id,
+      data.title,
+      data.slug,
+      data.isContextPane,
+      data.heightOffsetDesktop,
+      data.heightOffsetMobile,
+      data.heightOffsetTablet,
+      data.heightRatioDesktop,
+      data.heightRatioMobile,
+      data.heightRatioTablet,
+      JSON.stringify(data.optionsPayload),
+    ],
+  };
+}
+
+function reconcileStoryFragment(
+  id: string,
+  originalData: StoryFragmentDatum | null
+): ReconciledData {
+  const currentData: StoryFragmentDatum = {
+    id,
+    title: storyFragmentTitle.get()[id].current,
+    slug: storyFragmentSlug.get()[id].current,
+    tractStackId: storyFragmentTractStackId.get()[id].current,
+    tractStackTitle: originalData?.tractStackTitle ?? "",
+    tractStackSlug: originalData?.tractStackSlug ?? "",
+    menuId: storyFragmentMenuId.get()[id].current,
+    socialImagePath: storyFragmentSocialImagePath.get()[id].current,
+    tailwindBgColour: storyFragmentTailwindBgColour.get()[id].current,
+    created: originalData!.created!,
+    changed: new Date(),
+    panesPayload: reconcilePanes(
+      storyFragmentPaneIds.get()[id].current,
+      originalData?.panesPayload
+    ),
+    hasMenu: !!storyFragmentMenuId.get()[id].current,
+    menuPayload: null,
+    impressions: [],
+    resourcesPayload: {
+      resources: [],
+      headerWidget: [],
+      perCodeHookPayload: {},
+      perCodeHookOptions: {},
+      perCodeHookResourceCategory: {},
+    },
+  };
+  const queries: StoryFragmentQueries = {
+    storyfragment: { sql: "", args: [] },
+    panes: [],
+    markdowns: [],
+    storyfragment_pane: [],
+    file_pane: [],
+    file_markdown: [],
+    files: [],
+  };
+
+  if (originalData) {
+    const changedFields = compareStoryFragmentFields(currentData, originalData);
+    if (Object.keys(changedFields).length > 0) {
+      queries.storyfragment = createStoryFragmentUpdateQuery(id, changedFields);
+    }
+  } else {
+    queries.storyfragment = createStoryFragmentInsertQuery(currentData);
+  }
+
+  // Reconcile panes
+  currentData.panesPayload.forEach((pane, index) => {
+    const originalPane = originalData?.panesPayload.find(p => p.id === pane.id);
+    const paneQueries = reconcilePaneData(pane, originalPane);
+    queries.panes.push(...paneQueries.pane);
+    queries.markdowns.push(...paneQueries.markdown);
+    queries.file_pane.push(...paneQueries.file_pane);
+    queries.file_markdown.push(...paneQueries.file_markdown);
+    queries.files.push(...paneQueries.files);
+
+    if (!originalPane) {
+      queries.storyfragment_pane.push(
+        createStoryFragmentPaneQuery(id, pane.id, index)
+      );
+    }
+  });
+
+  return { storyFragment: { data: currentData, queries } };
+}
+
+function reconcilePaneData(
+  currentPane: PaneDatum,
+  originalPane: PaneDatum | null | undefined
+) {
+  const queries = {
+    pane: [] as TursoQuery[],
+    markdown: [] as TursoQuery[],
+    file_pane: [] as TursoQuery[],
+    file_markdown: [] as TursoQuery[],
+    files: [] as TursoQuery[],
+  };
+
+  if (originalPane) {
+    const changedFields = comparePaneFields(currentPane, originalPane);
+    if (Object.keys(changedFields).length > 0) {
+      queries.pane.push(createPaneUpdateQuery(currentPane.id, changedFields));
+    }
+  } else {
+    queries.pane.push(createPaneInsertQuery(currentPane));
+  }
+
+  // Markdown handling
+  if (currentPane.markdown) {
+    if (originalPane?.markdown) {
+      if (currentPane.markdown.body !== originalPane.markdown.body) {
+        queries.markdown.push(createMarkdownUpdateQuery(currentPane.markdown));
+      }
+    } else {
+      queries.markdown.push(createMarkdownInsertQuery(currentPane.markdown));
+    }
+  } else if (originalPane?.markdown) {
+    queries.markdown.push({
+      sql: `DELETE FROM markdown WHERE id = ?`,
+      args: [originalPane.markdown.id],
+    });
+  }
+
+  // Reconcile files
+  reconcileFiles(currentPane, originalPane ?? null, {
+    files: queries.files,
+    file_pane: queries.file_pane,
+    file_markdown: queries.file_markdown,
+  });
+
+  return queries;
+}
+
+function reconcileContextPane(
+  id: string,
+  originalData: ContextPaneDatum | null
+): ReconciledData {
+  const currentData: ContextPaneDatum = {
+    id,
+    title: paneTitle.get()[id].current,
+    slug: paneSlug.get()[id].current,
+    created: originalData!.created!,
+    changed: new Date(),
+    panePayload: reconcilePanePayload(id, true, originalData?.panePayload),
+    impressions: [],
+    resourcesPayload: [],
+    codeHookOptions: {},
+  };
+  const queries: ContextPaneQueries = {
+    pane: { sql: "", args: [] },
+    file_pane: [],
+    file_markdown: [],
+    files: [],
+  };
+  if (originalData) {
+    const changedFields = comparePaneFields(
+      currentData.panePayload,
+      originalData.panePayload
+    );
+    if (Object.keys(changedFields).length > 0) {
+      queries.pane = createPaneUpdateQuery(id, changedFields);
+    }
+  } else {
+    queries.pane = createPaneInsertQuery(currentData.panePayload);
+  }
+
+  reconcileFiles(currentData.panePayload!, originalData?.panePayload ?? null, {
+    files: queries.files,
+    file_pane: queries.file_pane,
+    file_markdown: queries.file_markdown,
+  });
+
+  return { contextPane: { data: currentData, queries } };
+}
+
 function reconcileFiles(
   currentPane: PaneDatum,
   originalPane: PaneDatum | null,
@@ -689,7 +598,6 @@ function reconcileFiles(
   const originalFileIds = new Set(originalFiles.map(f => f.id));
 
   // Handle markdown files
-  // files are matched by filename; doesn't account for paneId or markdown in datum
   if (
     currentPane.markdown &&
     typeof currentPane.markdown === "object" &&
@@ -710,33 +618,26 @@ function reconcileFiles(
           const currentDate = new Date();
           const url = `/custom/images/${formatDateForUrl(currentDate)}/${file.filename}`;
 
-          if (isImageDataUrl(file.src))
-            queries.files.push({
-              sql: `INSERT INTO file (id, filename, url, alt_description, src_set) 
-                  VALUES (?, ?, ?, ?, ?)
-                  ON CONFLICT (id) DO UPDATE SET 
-                  filename = excluded.filename, 
-                  url = excluded.url, 
-                  alt_description = excluded.alt_description`,
-              args: [
-                file.id,
-                file.filename,
-                url,
-                altText || file.altDescription || null,
-                true,
-              ],
-            });
+          queries.files.push({
+            sql: `INSERT INTO file (id, filename, url, alt_description, src_set) 
+                VALUES (?, ?, ?, ?, ?)
+                ON CONFLICT (id) DO UPDATE SET 
+                filename = excluded.filename, 
+                url = excluded.url, 
+                alt_description = excluded.alt_description`,
+            args: [
+              file.id,
+              file.filename,
+              url,
+              altText || file.altDescription || null,
+              true,
+            ],
+          });
 
           queries.file_markdown.push({
             sql: `INSERT INTO file_markdown (id, file_id, markdown_id) VALUES (?, ?, ?)
-                  ON CONFLICT (file_id, markdown_id) DO NOTHING`,
-            args: [
-              ulid(),
-              file.id,
-              currentPane.markdown && typeof currentPane.markdown === "object"
-                ? currentPane.markdown.id
-                : null,
-            ],
+                ON CONFLICT (file_id, markdown_id) DO NOTHING`,
+            args: [ulid(), file.id, currentPane.markdown.id],
           });
         } else {
           const originalFile = originalFiles.find(f => f.id === file.id);
@@ -755,10 +656,7 @@ function reconcileFiles(
 
     // Remove file_markdown entries for files that are no longer referenced in the markdown body
     currentFileIds.forEach(fileId => {
-      if (
-        !foundFileIds.has(fileId) &&
-        typeof currentPane?.markdown === "object"
-      ) {
+      if (!foundFileIds.has(fileId)) {
         queries.file_markdown.push({
           sql: `DELETE FROM file_markdown WHERE file_id = ? AND markdown_id = ?`,
           args: [fileId, currentPane.markdown!.id],
@@ -767,26 +665,14 @@ function reconcileFiles(
     });
   }
 
-  // Remove file_pane entries for files that no longer exist
-  originalFileIds.forEach(fileId => {
-    if (!currentFileIds.has(fileId)) {
-      queries.file_pane.push({
-        sql: `DELETE FROM file_pane WHERE file_id = ? AND pane_id = ?`,
-        args: [fileId, currentPane.id],
-      });
-    }
-  });
-
-  // Remove files that are no longer associated with either pane or markdown
+  // Remove files that are no longer associated with markdown
   originalFileIds.forEach(fileId => {
     if (!currentFileIds.has(fileId)) {
       queries.files.push({
         sql: `DELETE FROM file WHERE id = ? AND NOT EXISTS (
-                SELECT 1 FROM file_pane WHERE file_id = ?
-              ) AND NOT EXISTS (
                 SELECT 1 FROM file_markdown WHERE file_id = ?
               )`,
-        args: [fileId, fileId, fileId],
+        args: [fileId, fileId],
       });
     }
   });

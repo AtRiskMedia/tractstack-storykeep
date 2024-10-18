@@ -202,10 +202,12 @@ export const StoryKeepHeader = memo(
       setIsSaving(true);
     };
 
-    const handleSaveComplete = () => {
+    const handleSaveComplete = (slug: string) => {
       setIsSaving(false);
-      // reload to re-bootstrap from turso (keep things clean)
-      location.reload();
+      // reload to re-bootstrap from turso (& keep things clean)
+      if (id === `create` && !isContext) location.href = `/${slug}`;
+      else if (id === `create`) location.href = `/context/${slug}`;
+      else location.reload();
     };
 
     useEffect(() => {

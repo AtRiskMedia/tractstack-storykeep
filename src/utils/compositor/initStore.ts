@@ -52,6 +52,7 @@ import type {
 
 export function initializeStores(
   newId: string,
+  tractStackId: string,
   design: PageDesign,
   mode: "storyfragment" | "context"
 ): boolean {
@@ -63,7 +64,7 @@ export function initializeStores(
   try {
     if (mode === "storyfragment") {
       const paneIds = design.paneDesigns.map(() => ulid());
-      initializeStoryFragmentStores(newId, design, paneIds);
+      initializeStoryFragmentStores(newId, tractStackId, design, paneIds);
       design.paneDesigns.forEach((paneDesign, index) => {
         initializePaneStores(paneIds[index], paneDesign, false);
       });
@@ -80,6 +81,7 @@ export function initializeStores(
 
 function initializeStoryFragmentStores(
   newId: string,
+  tractStackId: string,
   design: PageDesign,
   paneIds: string[]
 ) {
@@ -87,7 +89,7 @@ function initializeStoryFragmentStores(
     init: { init: true },
     title: "",
     slug: "create",
-    tractStackId: "",
+    tractStackId: tractStackId,
     menuId: "",
     paneIds: paneIds,
     socialImagePath: "",

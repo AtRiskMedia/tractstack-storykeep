@@ -193,6 +193,26 @@ export async function getResourcesByCategorySlug(
   }
 }
 
+export async function getTractStackIdBySlug(
+  slug: string
+): Promise<string | null> {
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id FROM tractstack WHERE slug = ?`,
+      args: [slug],
+    });
+
+    if (rows.length > 0 && rows[0].id) {
+      return rows[0].id as string;
+    }
+
+    return null;
+  } catch (error) {
+    console.error("Error fetching TractStackIdBySlug:", error);
+    throw error;
+  }
+}
+
 export async function getStoryFragmentBySlug(
   slug: string
 ): Promise<StoryFragmentDatum | null> {
@@ -543,7 +563,8 @@ export async function executeQueries(
 
   for (const query of queries) {
     try {
-      const result = query; //await turso.execute(query);
+      const result = query;
+      //const result = await turso.execute(query);
       results.push(result);
     } catch (error) {
       console.error("Error executing query:", query, error);

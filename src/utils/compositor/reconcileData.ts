@@ -152,9 +152,9 @@ function createStoryFragmentInsertQuery(data: StoryFragmentDatum): TursoQuery {
       data.title,
       data.slug,
       data.tractStackId,
-      data.menuId,
-      data.socialImagePath,
-      data.tailwindBgColour,
+      data.menuId || null,
+      data.socialImagePath || null,
+      data.tailwindBgColour || null,
       data.created.toISOString(),
       data.changed?.toISOString() ?? null,
     ],
@@ -390,7 +390,7 @@ function createPaneUpdateQuery(
   id: string,
   changedFields: Partial<PaneDatum>
 ): TursoQuery {
-  const fieldMapping: Record<keyof PaneDatum, string> = {
+  const fieldMapping: Record<keyof PaneDatum | `markdown_id`, string> = {
     id: "id",
     title: "title",
     slug: "slug",
@@ -406,13 +406,14 @@ function createPaneUpdateQuery(
     optionsPayload: "options_payload",
     files: "files",
     markdown: "markdown",
+    markdown_id: "markdown_id",
   };
   return createGenericUpdateQuery("pane", id, changedFields, fieldMapping);
 }
 
 function createPaneInsertQuery(data: PaneDatum): TursoQuery {
   return {
-    sql: `INSERT INTO pane (id, title, slug, is_context_pane, height_offset_desktop, height_offset_mobile, height_offset_tablet, height_ratio_desktop, height_ratio_mobile, height_ratio_tablet, options_payload) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO pane (id, title, slug, is_context_pane, height_offset_desktop, height_offset_mobile, height_offset_tablet, height_ratio_desktop, height_ratio_mobile, height_ratio_tablet, options_payload, markdown_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       data.id,
       data.title,
@@ -425,6 +426,7 @@ function createPaneInsertQuery(data: PaneDatum): TursoQuery {
       data.heightRatioMobile,
       data.heightRatioTablet,
       JSON.stringify(data.optionsPayload),
+      data?.markdown ? data.markdown.id : null,
     ],
   };
 }
@@ -443,7 +445,7 @@ function reconcileStoryFragment(
     menuId: storyFragmentMenuId.get()[id].current,
     socialImagePath: storyFragmentSocialImagePath.get()[id].current,
     tailwindBgColour: storyFragmentTailwindBgColour.get()[id].current,
-    created: originalData!.created!,
+    created: originalData?.created ?? new Date(),
     changed: new Date(),
     panesPayload: reconcilePanes(
       storyFragmentPaneIds.get()[id].current,
@@ -476,6 +478,7 @@ function reconcileStoryFragment(
       queries.storyfragment = createStoryFragmentUpdateQuery(id, changedFields);
     }
   } else {
+    // If originalData is null, treat all fields as changed
     queries.storyfragment = createStoryFragmentInsertQuery(currentData);
   }
 
@@ -489,11 +492,9 @@ function reconcileStoryFragment(
     queries.file_markdown.push(...paneQueries.file_markdown);
     queries.files.push(...paneQueries.files);
 
-    if (!originalPane) {
-      queries.storyfragment_pane.push(
-        createStoryFragmentPaneQuery(id, pane.id, index)
-      );
-    }
+    queries.storyfragment_pane.push(
+      createStoryFragmentPaneQuery(id, pane.id, index)
+    );
   });
 
   return { storyFragment: { data: currentData, queries } };
@@ -517,6 +518,7 @@ function reconcilePaneData(
       queries.pane.push(createPaneUpdateQuery(currentPane.id, changedFields));
     }
   } else {
+    // If originalPane is null, treat all fields as changed
     queries.pane.push(createPaneInsertQuery(currentPane));
   }
 
@@ -580,6 +582,7 @@ function reconcileContextPane(
       queries.pane = createPaneUpdateQuery(id, changedFields);
     }
   } else if (currentData.panePayload) {
+    // If originalData is null or currentData.panePayload is newly created, treat all fields as changed
     queries.pane = createPaneInsertQuery(currentData.panePayload);
   }
   reconcileFiles(currentData.panePayload!, originalData?.panePayload ?? null, {

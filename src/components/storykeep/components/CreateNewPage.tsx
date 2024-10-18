@@ -24,9 +24,10 @@ import type { ViewportKey, PageDesign, Theme } from "../../../types";
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
   newId: string;
+  tractStackId: string;
 }
 
-const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
+const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   const [selectedDesign, setSelectedDesign] = useState<PageDesign | null>(null);
   const [query, setQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -110,7 +111,12 @@ const CreateNewPage = ({ newId, mode }: CreateNewPageProps) => {
 
   const handleEditThis = () => {
     if (selectedDesign) {
-      const success = initializeStores(newId, selectedDesign, mode);
+      const success = initializeStores(
+        newId,
+        tractStackId,
+        selectedDesign,
+        mode
+      );
       if (success) {
         creationStateStore.set({ id: newId, isInitialized: true });
         if (mode === "context") {

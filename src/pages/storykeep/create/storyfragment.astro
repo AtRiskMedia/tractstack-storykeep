@@ -1,6 +1,7 @@
 ---
 import { ulid } from "ulid";
 import StoryKeep from "@layouts/StoryKeep.astro";
+import { getTractStackIdBySlug } from "../../../api/turso";
 import CreateNewPage from "@components/storykeep/components/CreateNewPage";
 
 const slug = `create`;
@@ -8,6 +9,12 @@ const newId = ulid();
 
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
 const canonicalURL = new URL(`/${slug}`, baseUrl).href;
+
+const TRACTSTACK_SLUG = import.meta.env.PUBLIC_TRACTSTACK;
+const tractStackId = await getTractStackIdBySlug(TRACTSTACK_SLUG);
+if (!tractStackId) {
+  return Astro.redirect("/404");
+}
 ---
 
 <StoryKeep
@@ -17,6 +24,11 @@ const canonicalURL = new URL(`/${slug}`, baseUrl).href;
   canonicalURL={canonicalURL}
 >
   <div id="storykeep-content">
-    <CreateNewPage mode="storyfragment" newId={newId} client:load />
+    <CreateNewPage
+      mode="storyfragment"
+      newId={newId}
+      tractStackId={tractStackId}
+      client:load
+    />
   </div>
 </StoryKeep>

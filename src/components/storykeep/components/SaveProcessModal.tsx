@@ -10,6 +10,8 @@ import type {
   StoryFragmentDatum,
   ContextPaneDatum,
   FileDatum,
+  StoryFragmentQueries,
+  ContextPaneQueries,
 } from "../../../types";
 
 type SaveStage =
@@ -25,7 +27,7 @@ type SaveProcessModalProps = {
   id: string;
   isContext: boolean;
   originalData: StoryFragmentDatum | ContextPaneDatum | null;
-  onClose: () => void;
+  onClose: (slug: string) => void;
 };
 
 export const SaveProcessModal = ({
@@ -38,6 +40,7 @@ export const SaveProcessModal = ({
   const [error, setError] = useState<string | null>(null);
   const [whitelist, setWhitelist] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [slug, setSlug] = useState("");
 
   useEffect(() => {
     async function runFetch() {
@@ -64,6 +67,10 @@ export const SaveProcessModal = ({
       const runSaveProcess = async () => {
         try {
           const data = await reconcileChanges();
+          const slug = !isContext
+            ? data?.storyFragment?.data?.slug
+            : data?.contextPane?.data?.slug;
+          setSlug(slug ?? ``);
           const hasFiles = !isContext
             ? data?.storyFragment?.data?.panesPayload
             : [data?.contextPane?.data?.panePayload];
@@ -208,15 +215,45 @@ export const SaveProcessModal = ({
     if (!queries) {
       return;
     }
+
     try {
-      console.log(`execute queries`);
-      const allQueries = Object.values(queries)
-        .flat()
-        .filter(query => query.sql);
+      console.log(`execute queries`, queries);
 
-      const result = await tursoClient.execute(allQueries);
+      // Define the order of execution
+      const executionOrder: (
+        | keyof StoryFragmentQueries
+        | keyof ContextPaneQueries
+      )[] = [
+        "storyfragment",
+        "markdowns",
+        "panes",
+        "files",
+        "storyfragment_pane",
+        "file_pane",
+        "file_markdown",
+      ];
 
-      console.log("Queries executed successfully:", result);
+      for (const queryType of executionOrder) {
+        if (queryType in queries) {
+          const typeQueries = queries[queryType as keyof typeof queries];
+          const queryArray = Array.isArray(typeQueries)
+            ? typeQueries
+            : [typeQueries];
+
+          for (const query of queryArray) {
+            if (query && query.sql) {
+              try {
+                await tursoClient.execute([query]);
+              } catch (queryError) {
+                console.error(`Error executing query:`, query, queryError);
+                // Optionally, you might want to throw this error or handle it differently
+              }
+            }
+          }
+        }
+      }
+
+      console.log("Queries executed successfully");
     } catch (err) {
       setStage("ERROR");
       setError(
@@ -278,7 +315,7 @@ export const SaveProcessModal = ({
         <p className="text-lg mb-4">{getStageDescription(stage)}</p>
         {stage === "COMPLETED" && (
           <button
-            onClick={onClose}
+            onClick={() => onClose(slug)}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
           >
             Close

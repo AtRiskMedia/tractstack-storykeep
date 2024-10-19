@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ulid } from "ulid";
 import {
   unsavedChangesStore,
@@ -194,6 +195,25 @@ function reconcilePanePayload(
   const markdownId = markdownFragment
     ? paneFragmentMarkdown.get()[markdownFragment]?.current.markdown.id
     : null;
+  const thisPayload = {
+    paneFragmentsPayload: reconcilePaneFragments(fragmentIds),
+    codeHook: paneCodeHook.get()[id].current || undefined,
+    impressions: paneImpression.get()[id].current
+      ? [paneImpression.get()[id].current].filter(
+          (i): i is ImpressionDatum => i !== null
+        )
+      : [],
+    heldBeliefs: paneHeldBeliefs.get()[id].current,
+    withheldBeliefs: paneWithheldBeliefs.get()[id].current,
+  };
+  if (`codeHook` in thisPayload && typeof thisPayload.codeHook !== `string`)
+    delete thisPayload.codeHook;
+  if (`impressions` in thisPayload && !thisPayload.impressions?.length)
+    delete (thisPayload as any).impressions;
+  if (`heldBeliefs` in thisPayload && !thisPayload.heldBeliefs?.length)
+    delete (thisPayload as any).heldBeliefs;
+  if (`withheldBeliefs` in thisPayload && !thisPayload.withheldBeliefs?.length)
+    delete (thisPayload as any).withheldBeliefs;
 
   return {
     id,
@@ -209,17 +229,7 @@ function reconcilePanePayload(
     heightRatioMobile: paneHeightRatioMobile.get()[id].current,
     heightRatioTablet: paneHeightRatioTablet.get()[id].current,
     files: paneFiles.get()[id].current,
-    optionsPayload: {
-      paneFragmentsPayload: reconcilePaneFragments(fragmentIds),
-      codeHook: paneCodeHook.get()[id].current || undefined,
-      impressions: paneImpression.get()[id].current
-        ? [paneImpression.get()[id].current].filter(
-            (i): i is ImpressionDatum => i !== null
-          )
-        : [],
-      heldBeliefs: paneHeldBeliefs.get()[id].current,
-      withheldBeliefs: paneWithheldBeliefs.get()[id].current,
-    },
+    optionsPayload: thisPayload,
     markdown:
       markdownId && markdownFragment
         ? {
@@ -244,9 +254,58 @@ function reconcilePaneFragments(
     if (paneFragmentBgColour.get()[id]) {
       return paneFragmentBgColour.get()[id].current;
     } else if (paneFragmentBgPane.get()[id]) {
-      return paneFragmentBgPane.get()[id].current;
+      const thisPayload = paneFragmentBgPane.get()[id].current;
+      if (thisPayload?.optionsPayload?.classNamesParent)
+        delete (thisPayload as any).optionsPayload.classNamesParent;
+      if (thisPayload?.optionsPayload?.classNames)
+        delete (thisPayload as any).optionsPayload.classNames;
+      if (thisPayload?.optionsPayload?.classNamesPayload)
+        delete (thisPayload as any).optionsPayload.classNamesPayload;
+      return thisPayload;
     } else if (paneFragmentMarkdown.get()[id]) {
-      return paneFragmentMarkdown.get()[id].current.payload;
+      const thisPayload = paneFragmentMarkdown.get()[id].current.payload;
+      if ((thisPayload as any)?.markdownBody)
+        delete (thisPayload as any).markdownBody;
+      if (thisPayload?.optionsPayload?.classNames?.desktop)
+        delete (thisPayload as any).optionsPayload.classNames.desktop;
+      if (thisPayload?.optionsPayload?.classNames?.tablet)
+        delete (thisPayload as any).optionsPayload.classNames.tablet;
+      if (thisPayload?.optionsPayload?.classNames?.mobile)
+        delete (thisPayload as any).optionsPayload.classNames.mobile;
+      if (thisPayload?.optionsPayload?.classNamesParent?.desktop)
+        delete (thisPayload as any).optionsPayload.classNamesParent.desktop;
+      if (thisPayload?.optionsPayload?.classNamesParent?.tablet)
+        delete (thisPayload as any).optionsPayload.classNamesParent.tablet;
+      if (thisPayload?.optionsPayload?.classNamesParent?.mobile)
+        delete (thisPayload as any).optionsPayload.classNamesParent.mobile;
+      if (thisPayload?.optionsPayload?.classNamesModal?.desktop)
+        delete (thisPayload as any).optionsPayload.classNamesModal.desktop;
+      if (thisPayload?.optionsPayload?.classNamesModal?.tablet)
+        delete (thisPayload as any).optionsPayload.classNamesModal.tablet;
+      if (thisPayload?.optionsPayload?.classNamesModal?.mobile)
+        delete (thisPayload as any).optionsPayload.classNamesModal.mobile;
+      if (thisPayload?.optionsPayload?.buttons)
+        Object.keys(thisPayload.optionsPayload.buttons).forEach((b: string) => {
+          if (
+            typeof (thisPayload?.optionsPayload?.buttons?.[b] as any)
+              ?.desktopClassName === `string`
+          )
+            delete (thisPayload as any).optionsPayload.buttons[b]
+              .desktopClassName;
+          if (
+            typeof (thisPayload.optionsPayload.buttons?.[b] as any)
+              ?.tabletClassName === `string`
+          )
+            delete (thisPayload as any).optionsPayload.buttons[b]
+              .tabletClassName;
+          if (
+            typeof (thisPayload.optionsPayload.buttons?.[b] as any)
+              ?.mobileClassName === `string`
+          )
+            delete (thisPayload as any).optionsPayload.buttons[b]
+              .mobileClassName;
+        });
+      return thisPayload;
     }
     throw new Error(`Unknown fragment type for id: ${id}`);
   });

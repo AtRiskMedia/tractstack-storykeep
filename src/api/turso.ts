@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createClient } from "@libsql/client/web";
 import { cleanTursoResource } from "../utils/compositor/tursoResource";
 import { cleanTursoPayload } from "../utils/compositor/tursoPayload";
@@ -557,7 +558,6 @@ export async function getFullContentMap(): Promise<FullContentMap[]> {
 
 export async function executeQueries(
   queries: TursoQuery[]
-  /* eslint-disable @typescript-eslint/no-explicit-any */
 ): Promise<{ success: boolean; results: any[] }> {
   const results = [];
 

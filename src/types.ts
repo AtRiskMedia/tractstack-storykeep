@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
@@ -309,7 +310,6 @@ export type EditModeValue = {
     | "menu"
     | "file";
   targetId?: PaneAstTargetId;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   payload?: any;
 };
 
@@ -711,7 +711,6 @@ export interface ResourceDatum {
   category: string | null;
   actionLisp: string;
   oneliner: string;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   optionsPayload: any;
   timeString?: string;
   dateString?: string;
@@ -1046,7 +1045,6 @@ export interface ResourceDatumEventProps {
   category: string | null;
   actionLisp: string;
   oneliner: string;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   optionsPayload: any;
   timeString: string;
   dateString: string;
@@ -1056,7 +1054,6 @@ export interface ResourceDatumEventProps {
 export interface ResourceSetting {
   [key: string]: {
     type: "string" | "boolean" | "number" | "date";
-    /* eslint-disable @typescript-eslint/no-explicit-any */
     defaultValue?: any;
   };
 }

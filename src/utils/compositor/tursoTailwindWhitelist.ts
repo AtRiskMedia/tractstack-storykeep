@@ -1,17 +1,24 @@
-import type { Row } from "@libsql/client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   BgPaneDatum,
   BgColourDatum,
   MarkdownPaneDatum,
 } from "../../types";
 
-export function getTailwindWhitelist(rows: Row[]) {
+export function getTailwindWhitelist(rows: any[]) {
   if (!rows.length) return [];
 
   let whitelistString = ``;
-  rows.forEach((r: Row) => {
-    if (typeof r?.id === `string` && typeof r?.options_payload === `string`) {
-      const optionsPayload = JSON.parse(r.options_payload) || null;
+  rows.forEach((r: any) => {
+    if (
+      typeof r?.options_payload === `string` ||
+      // allows already processed optionsPayload to be fed through
+      typeof r?.options_payload === `object`
+    ) {
+      const optionsPayload =
+        typeof r?.options_payload === `string`
+          ? JSON.parse(r.options_payload)
+          : r.options_payload;
       const paneFragmentsPayload = optionsPayload.paneFragmentsPayload;
       const markdown = paneFragmentsPayload
         ?.filter(

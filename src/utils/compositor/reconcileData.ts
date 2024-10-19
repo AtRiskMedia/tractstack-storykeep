@@ -626,6 +626,7 @@ function reconcileContextPane(
   };
 
   const queries: ContextPaneQueries = {
+    markdowns: [],
     pane: { sql: "", args: [] },
     file_pane: [],
     file_markdown: [],
@@ -641,9 +642,27 @@ function reconcileContextPane(
       queries.pane = createPaneUpdateQuery(id, changedFields);
     }
   } else if (currentData.panePayload) {
-    // If originalData is null or currentData.panePayload is newly created, treat all fields as changed
     queries.pane = createPaneInsertQuery(currentData.panePayload);
   }
+
+  // Handle markdown
+  if (currentData.panePayload && currentData.panePayload.markdown) {
+    if (originalData?.panePayload?.markdown) {
+      if (
+        currentData.panePayload.markdown.body !==
+        originalData.panePayload.markdown.body
+      ) {
+        queries.markdowns.push(
+          createMarkdownUpdateQuery(currentData.panePayload.markdown)
+        );
+      }
+    } else {
+      queries.markdowns.push(
+        createMarkdownInsertQuery(currentData.panePayload.markdown)
+      );
+    }
+  }
+
   reconcileFiles(currentData.panePayload!, originalData?.panePayload ?? null, {
     files: queries.files,
     file_pane: queries.file_pane,

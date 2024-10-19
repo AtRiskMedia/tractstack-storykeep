@@ -264,7 +264,7 @@ export type StoryFragmentQueries = {
 
 export type ContextPaneQueries = {
   pane: TursoQuery;
-  markdown?: TursoQuery;
+  markdowns: TursoQuery[];
   file_pane: TursoQuery[];
   file_markdown: TursoQuery[];
   files: TursoQuery[];

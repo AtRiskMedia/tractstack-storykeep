@@ -205,8 +205,8 @@ export const StoryKeepHeader = memo(
     const handleSaveComplete = (slug: string) => {
       setIsSaving(false);
       // reload to re-bootstrap from turso (& keep things clean)
-      if (id === `create` && !isContext) location.href = `/${slug}`;
-      else if (id === `create`) location.href = `/context/${slug}`;
+      if (id === `create` && !isContext) location.href = `/${slug}/edit`;
+      else if (id === `create`) location.href = `/context/${slug}/edit`;
       else location.reload();
     };
 

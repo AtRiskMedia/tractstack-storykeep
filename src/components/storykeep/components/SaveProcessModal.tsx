@@ -5,6 +5,7 @@ import {
   reconcileData,
   resetUnsavedChanges,
 } from "../../../utils/compositor/reconcileData";
+import { getTailwindWhitelist } from "../../../utils/compositor/tursoTailwindWhitelist";
 import type {
   ReconciledData,
   StoryFragmentDatum,
@@ -12,6 +13,7 @@ import type {
   FileDatum,
   StoryFragmentQueries,
   ContextPaneQueries,
+  PaneDatum,
 } from "../../../types";
 
 type SaveStage =
@@ -95,7 +97,7 @@ export const SaveProcessModal = ({
             .filter(n => n)
             .flat() as FileDatum[];
           setStage("UPDATING_STYLES");
-          await updateCustomStyles();
+          await updateCustomStyles(data);
           if (files && files.length) {
             setStage("UPLOADING_IMAGES");
             await uploadFiles(files);
@@ -183,15 +185,29 @@ export const SaveProcessModal = ({
     }
   };
 
-  const updateCustomStyles = async (): Promise<boolean> => {
+  const updateCustomStyles = async (
+    payload: ReconciledData
+  ): Promise<boolean> => {
     try {
+      const panes =
+        !isContext && payload?.storyFragment?.data?.panesPayload
+          ? payload.storyFragment.data.panesPayload
+          : payload?.contextPane?.data?.panePayload
+            ? [payload.contextPane.data.panePayload].map((p: PaneDatum) => {
+                return {
+                  options_payload: p.optionsPayload,
+                };
+              })
+            : [];
+      const newWhitelistItems = getTailwindWhitelist(panes);
+      const newWhitelist = [...new Set([...newWhitelistItems, ...whitelist])];
       const response = await fetch(`/api/concierge/storykeep/tailwind`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          whitelist,
+          whitelist: newWhitelist,
         }),
       });
       const data = await response.json();
@@ -227,6 +243,7 @@ export const SaveProcessModal = ({
         "storyfragment",
         "markdowns",
         "panes",
+        "pane",
         "files",
         "storyfragment_pane",
         "file_pane",
@@ -246,14 +263,11 @@ export const SaveProcessModal = ({
                 await tursoClient.execute([query]);
               } catch (queryError) {
                 console.error(`Error executing query:`, query, queryError);
-                // Optionally, you might want to throw this error or handle it differently
               }
             }
           }
         }
       }
-
-      console.log("Queries executed successfully");
     } catch (err) {
       setStage("ERROR");
       setError(

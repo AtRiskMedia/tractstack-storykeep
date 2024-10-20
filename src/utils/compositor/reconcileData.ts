@@ -706,7 +706,7 @@ function reconcileFiles(
         foundFileIds.add(file.id);
         if (!originalFileIds.has(file.id) || isImageDataUrl(file.src)) {
           const currentDate = new Date();
-          const url = `/custom/images/${formatDateForUrl(currentDate)}/${file.filename}`;
+          const url = `/api/images/${formatDateForUrl(currentDate)}/${file.filename}`;
 
           queries.files.push({
             sql: `INSERT INTO file (id, filename, url, alt_description, src_set) 

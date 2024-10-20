@@ -244,7 +244,7 @@ const ImageMeta = (props: {
         setImageSrc(base64);
         const randomFilename = generateRandomFilename();
         const fileExtension = processedFile.name.split(".").pop();
-        const newFilename = `${randomFilename}.${fileExtension}`;
+        const newFilename = `${randomFilename}.${fileExtension === `png` ? `webp` : fileExtension}`;
         setFilename(newFilename);
         updateStore(`Please provide a description of this image`, newFilename);
 

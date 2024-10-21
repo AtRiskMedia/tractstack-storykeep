@@ -3706,6 +3706,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"assemblyai@npm:^4.7.1":
+  version: 4.7.1
+  resolution: "assemblyai@npm:4.7.1"
+  dependencies:
+    ws: "npm:^8.18.0"
+  checksum: 10c0/64b36125988edfe41f288293bc9610a8b93a9bc0b463fbfcf5baa67531b28d7146ced790aff2693454b6302c72f189e461caca519ea540c9029e26eac2c565e0
+  languageName: node
+  linkType: hard
+
 "ast-types-flow@npm:^0.0.8":
   version: 0.0.8
   resolution: "ast-types-flow@npm:0.0.8"
@@ -11338,6 +11347,7 @@ __metadata:
     "@types/uuid": "npm:^9.0.8"
     "@typescript-eslint/eslint-plugin": "npm:^7.18.0"
     "@typescript-eslint/parser": "npm:^7.18.0"
+    assemblyai: "npm:^4.7.1"
     astro: "npm:4.16.2"
     astro-eslint-parser: "npm:^1.0.3"
     browser-image-compression: "npm:^2.0.2"
@@ -12390,7 +12400,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ws@npm:^8.13.0":
+"ws@npm:^8.13.0, ws@npm:^8.18.0":
   version: 8.18.0
   resolution: "ws@npm:8.18.0"
   peerDependencies:

@@ -23,6 +23,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/api/turso/paneDesigns",
     "/api/turso/execute",
     "/api/turso/uniqueTailwindClasses",
+    "/api/aai/lemurTask",
     "/api/concierge/storykeep/analytics",
     "/api/concierge/storykeep/dashboardAnalytics",
     "/api/concierge/storykeep/env",
@@ -33,6 +34,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/storykeep",
     "/storykeep/create/*",
     "/api/turso/paneDesigns",
+    "/api/aai/lemurTask",
     "/api/concierge/storykeep/analytics",
     "/api/concierge/storykeep/dashboardAnalytics",
   ];

@@ -119,7 +119,7 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
       <div
         id="edit-modal"
         className={classNames(
-          `fixed z-[9000]`,
+          `fixed z-[9000] pb-8`,
           `backdrop-blur-sm bg-mydarkgrey/50`,
           `bg-mywhite shadow-lg transition-all duration-300 ease-in-out`,
           isFullWidthMobileShort
@@ -149,7 +149,10 @@ export const EditModal = ({ id, contentMap, files }: EditModalProps) => {
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
-        <div ref={contentRef} className={classNames("h-full flex flex-col")}>
+        <div
+          ref={contentRef}
+          className={classNames("h-full flex flex-col p-4")}
+        >
           <div className={classNames("px-3.5 relative flex-grow")}>
             {$editMode?.type === `pane` &&
             $editMode?.mode === `insert` &&

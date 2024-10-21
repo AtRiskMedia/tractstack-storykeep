@@ -1369,7 +1369,7 @@ export const PaneAstStyles = (props: {
               setSelectedStyle(null);
             }}
           >
-            CANCEL EDIT STYLE
+            SHOW ALL STYLES
           </button>
         )}
         {activeTag === `img` && (

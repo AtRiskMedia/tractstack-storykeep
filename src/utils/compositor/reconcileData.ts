@@ -206,13 +206,19 @@ function reconcilePanePayload(
     heldBeliefs: paneHeldBeliefs.get()[id].current,
     withheldBeliefs: paneWithheldBeliefs.get()[id].current,
   };
-  if (`codeHook` in thisPayload && typeof thisPayload.codeHook !== `string`)
+  if (`codeHook` in thisPayload && typeof thisPayload.codeHook !== `object`)
     delete thisPayload.codeHook;
   if (`impressions` in thisPayload && !thisPayload.impressions?.length)
     delete (thisPayload as any).impressions;
-  if (`heldBeliefs` in thisPayload && !thisPayload.heldBeliefs?.length)
+  if (
+    `heldBeliefs` in thisPayload &&
+    Object.keys(thisPayload.heldBeliefs).length === 0
+  )
     delete (thisPayload as any).heldBeliefs;
-  if (`withheldBeliefs` in thisPayload && !thisPayload.withheldBeliefs?.length)
+  if (
+    `withheldBeliefs` in thisPayload &&
+    Object.keys(thisPayload.withheldBeliefs).length === 0
+  )
     delete (thisPayload as any).withheldBeliefs;
 
   return {
@@ -278,6 +284,16 @@ function reconcilePaneFragments(
         delete (thisPayload as any).optionsPayload.classNamesParent.tablet;
       if (thisPayload?.optionsPayload?.classNamesParent?.mobile)
         delete (thisPayload as any).optionsPayload.classNamesParent.mobile;
+      if (
+        thisPayload?.optionsPayload?.classNamesModal &&
+        Object.keys(thisPayload?.optionsPayload?.classNamesModal).length === 0
+      )
+        delete (thisPayload as any).optionsPayload.classNamesModal;
+      if (
+        thisPayload?.optionsPayload?.buttons &&
+        Object.keys(thisPayload?.optionsPayload?.buttons).length === 0
+      )
+        delete (thisPayload as any).optionsPayload.buttons;
       if (thisPayload?.optionsPayload?.classNamesModal?.desktop)
         delete (thisPayload as any).optionsPayload.classNamesModal.desktop;
       if (thisPayload?.optionsPayload?.classNamesModal?.tablet)

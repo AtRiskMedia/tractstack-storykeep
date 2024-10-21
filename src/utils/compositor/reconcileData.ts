@@ -260,14 +260,7 @@ function reconcilePaneFragments(
     if (paneFragmentBgColour.get()[id]) {
       return paneFragmentBgColour.get()[id].current;
     } else if (paneFragmentBgPane.get()[id]) {
-      const thisPayload = paneFragmentBgPane.get()[id].current;
-      if (thisPayload?.optionsPayload?.classNamesParent)
-        delete (thisPayload as any).optionsPayload.classNamesParent;
-      if (thisPayload?.optionsPayload?.classNames)
-        delete (thisPayload as any).optionsPayload.classNames;
-      if (thisPayload?.optionsPayload?.classNamesPayload)
-        delete (thisPayload as any).optionsPayload.classNamesPayload;
-      return thisPayload;
+      return paneFragmentBgPane.get()[id].current;
     } else if (paneFragmentMarkdown.get()[id]) {
       const thisPayload = paneFragmentMarkdown.get()[id].current.payload;
       if ((thisPayload as any)?.markdownBody)

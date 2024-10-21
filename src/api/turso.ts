@@ -563,6 +563,7 @@ export async function executeQueries(
 
   for (const query of queries) {
     try {
+      //console.log(query);
       const result = await turso.execute(query);
       results.push(result);
     } catch (error) {

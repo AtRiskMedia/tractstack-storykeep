@@ -59,11 +59,6 @@ export const StoryKeepStore = (props: {
     const populateStores = (fragment: StoryFragmentDatum | undefined) => {
       if (fragment) {
         if (!storyFragmentInit.get()[fragment.id]?.init) {
-          storyFragmentInit.set({
-            ...storyFragmentInit.get(),
-            [fragment.id]: { init: true },
-          });
-
           // Initialize StoryFragment stores
           const storyFragmentStores = [
             { store: storyFragmentTitle, value: fragment.title },
@@ -117,10 +112,6 @@ export const StoryKeepStore = (props: {
           // Process Panes
           fragment.panesPayload.forEach((payload: PaneDatum) => {
             if (!paneInit.get()[payload.id]?.init) {
-              paneInit.set({
-                ...paneInit.get(),
-                [payload.id]: { init: true },
-              });
               // Initialize Pane stores
               const paneStores = [
                 { store: paneTitle, value: payload.title },
@@ -306,7 +297,16 @@ export const StoryKeepStore = (props: {
               unsavedChangesStore.setKey(payload.id, emptyPane);
               uncleanDataStore.setKey(payload.id, emptyPane);
               temporaryErrorsStore.setKey(payload.id, emptyPane);
+
+              paneInit.set({
+                ...paneInit.get(),
+                [payload.id]: { init: true },
+              });
             }
+          });
+          storyFragmentInit.set({
+            ...storyFragmentInit.get(),
+            [fragment.id]: { init: true },
           });
         } else if ($creationState.isInitialized) {
           console.log("Creation mode detected, stores already initialized");

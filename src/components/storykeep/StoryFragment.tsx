@@ -63,7 +63,7 @@ export const StoryFragment = (props: {
   const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [thisId] });
   const [untitled, setUntitled] = useState<boolean>(
     $storyFragmentTitle[thisId]?.current === `` ||
-      [`create`, ``].includes($storyFragmentSlug[thisId]?.current ?? ``)
+      [`create`, ``].includes($storyFragmentSlug[thisId]?.current)
   );
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
     keys: [thisId],
@@ -141,7 +141,7 @@ export const StoryFragment = (props: {
     if (
       untitled &&
       $storyFragmentTitle[thisId]?.current !== `` &&
-      ![`create`, ``].includes($storyFragmentSlug[thisId]?.current ?? ``)
+      ![`create`, ``].includes($storyFragmentSlug[thisId]?.current)
     ) {
       paneIds.forEach((paneId: string) => {
         const newTitle = `${$storyFragmentTitle[thisId].current.substring(0.2)} - ${getSubstring($paneSlug[paneId].current)}`;

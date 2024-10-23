@@ -225,7 +225,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -549,7 +549,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -899,7 +899,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -1222,7 +1222,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -1243,8 +1243,8 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
-                      "dark-bw": "brand-8",
+                      dark: "brand-4",
+                      "dark-bw": "white",
                       "dark-bold": "brand-3",
                     },
                     theme
@@ -1263,7 +1263,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-8",
+                      dark: "brand-6",
                       "dark-bw": "brand-2",
                       "dark-bold": "brand-3",
                     },
@@ -1383,7 +1383,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -1782,7 +1782,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -1918,7 +1918,7 @@ export const paneDesigns = (
                         light: "brand-5",
                         "light-bw": "brand-1",
                         "light-bold": "brand-5",
-                        dark: "brand-3",
+                        dark: "brand-4",
                         "dark-bw": "brand-8",
                         "dark-bold": "brand-3",
                       },
@@ -2152,7 +2152,7 @@ export const paneDesigns = (
                       light: "brand-5",
                       "light-bw": "brand-1",
                       "light-bold": "brand-5",
-                      dark: "brand-3",
+                      dark: "brand-4",
                       "dark-bw": "brand-8",
                       "dark-bold": "brand-3",
                     },
@@ -2288,7 +2288,7 @@ export const paneDesigns = (
                         light: "brand-5",
                         "light-bw": "brand-1",
                         "light-bold": "brand-5",
-                        dark: "brand-3",
+                        dark: "brand-4",
                         "dark-bw": "brand-8",
                         "dark-bold": "brand-3",
                       },
@@ -2672,14 +2672,7 @@ export const paneDesigns = (
     id: "borderedText",
     slug: "borderedText",
     name: "Bordered paragraphs",
-    priority: getComputedNumber(
-      {
-        default: 53,
-        onecolumn: 54,
-        center: 55,
-      },
-      variant
-    ),
+    priority: 50,
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -2710,8 +2703,32 @@ export const paneDesigns = (
               classes: [
                 { my: [12, 16], px: [12] },
                 {
-                  bgCOLOR: ["slate-50"],
-                  borderCOLOR: ["mylightgrey"],
+                  bgCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "brand-2",
+                        "light-bw": "white",
+                        "light-bold": "white",
+                        dark: "brand-1",
+                        "dark-bw": "black",
+                        "dark-bold": "brand-1",
+                      },
+                      theme
+                    ),
+                  ],
+                  borderCOLOR: [
+                    getComputedColor(
+                      {
+                        light: "brand-8",
+                        "light-bw": "brand-8",
+                        "light-bold": "brand-6",
+                        dark: "brand-7",
+                        "dark-bw": "neutral-800",
+                        "dark-bold": "brand-7",
+                      },
+                      theme
+                    ),
+                  ],
                   borderSTROKE: [2],
                   borderSTYLE: ["dashed"],
                   maxW: ["none", "3xl"],
@@ -2722,9 +2739,83 @@ export const paneDesigns = (
             },
             p: {
               classes: {
-                textCOLOR: ["mydarkgrey"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-7",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-7",
+                      dark: "brand-6",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-8",
+                    },
+                    theme
+                  ),
+                ],
                 textSIZE: ["lg", "xl"],
                 my: [3, 4],
+              },
+            },
+            h2: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-4",
+                      "dark-bw": "brand-8",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["4xl", "5xl", "6xl"],
+                fontFACE: ["action"],
+                pt: ["9", "14", "20"],
+              },
+            },
+            h3: {
+              classes: {
+                fontSTYLE: ["bold"],
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-4",
+                      "dark-bw": "white",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["2xl", "3xl"],
+                fontFACE: ["action"],
+                pt: ["9", "14", "20"],
+              },
+            },
+            h4: {
+              classes: {
+                textCOLOR: [
+                  getComputedColor(
+                    {
+                      light: "brand-5",
+                      "light-bw": "brand-1",
+                      "light-bold": "brand-5",
+                      dark: "brand-6",
+                      "dark-bw": "brand-2",
+                      "dark-bold": "brand-3",
+                    },
+                    theme
+                  ),
+                ],
+                textSIZE: ["xl", "2xl"],
+                fontFACE: ["action"],
+                pt: ["9", "14", "20"],
               },
             },
             h2: {
@@ -4103,6 +4194,26 @@ export const pageDesigns = (
     paneDesigns: [
       paneDesigns(theme, `center`).find(
         p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    ],
+  },
+  basicContextBordered: {
+    name: "Basic Context Page - Bordered",
+    isContext: true,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "mywhite",
+        "light-bw": "mywhite",
+        "light-bold": "myoffwhite",
+        dark: "myblack",
+        "dark-bw": "myblack",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(
+        p => p.id === "borderedText"
       ) as PaneDesign,
     ],
   },

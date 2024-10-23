@@ -1,0 +1,27 @@
+---
+import { ulid } from "ulid";
+import StoryKeep from "@layouts/StoryKeep.astro";
+import CreateNewAiPage from "@components/storykeep/components/CreateNewAiPage";
+
+const slug = `create`;
+const newId = ulid();
+
+const baseUrl = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
+---
+
+<StoryKeep
+  title="Create New Context Page"
+  pubDatetime={new Date()}
+  modDatetime={null}
+  canonicalURL={canonicalURL}
+>
+  <div id="storykeep-content">
+    <CreateNewAiPage
+      mode="context"
+      newId={newId}
+      tractStackId={``}
+      client:load
+    />
+  </div>
+</StoryKeep>

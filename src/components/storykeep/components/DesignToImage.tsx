@@ -184,7 +184,17 @@ export default function DesignPreviewer() {
           }
           return true;
         },
-       // Also set some additional options to help prevent these issues
+        ignoreElements: (element: Element) => {
+          if (!(element instanceof Element)) {
+            return false;
+          }
+          const style = window.getComputedStyle(element);
+          const bgImage = style.backgroundImage;
+          return (
+            bgImage.includes("data:image") || bgImage.includes('url("data:')
+          );
+        },
+        // Also set some additional options to help prevent these issues
         imagePlaceholder:
           "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
         cacheBust: true,

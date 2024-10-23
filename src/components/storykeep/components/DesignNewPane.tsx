@@ -124,13 +124,19 @@ const DesignNewPane = ({
       if (mode === "design") {
         const allStarterDesigns = [
           ...paneDesigns($theme ?? PUBLIC_THEME, "default").filter(
-            p => p.type === "starter"
+            p => p.type === "starter" && p.name
           ),
           ...paneDesigns($theme ?? PUBLIC_THEME, "center").filter(
-            p => p.type === "starter"
+            p => p.type === "starter" && p.name
           ),
           ...paneDesigns($theme ?? PUBLIC_THEME, "onecolumn").filter(
-            p => p.type === "starter"
+            p => p.type === "starter" && p.name
+          ),
+          ...paneDesigns($theme ?? PUBLIC_THEME, "square").filter(
+            p => p.type === "starter" && p.name
+          ),
+          ...paneDesigns($theme ?? PUBLIC_THEME, "16x9").filter(
+            p => p.type === "starter" && p.name
           ),
         ];
         newDesigns = Array.from(

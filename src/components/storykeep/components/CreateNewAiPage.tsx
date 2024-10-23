@@ -31,7 +31,7 @@ interface CreateNewPageProps {
 //}));
 
 const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
-  console.log(newId, tractStackId, mode);
+  console.log(`CREATE`, newId, tractStackId, mode);
   //const $viewportKey = useStore(viewportKeyStore);
   //const $theme = useStore(themeStore);
   //const viewportKey = $viewportKey.value;

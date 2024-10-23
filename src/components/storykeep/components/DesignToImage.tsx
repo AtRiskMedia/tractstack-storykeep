@@ -178,6 +178,16 @@ export default function DesignPreviewer() {
         quality: 1,
         canvasWidth: 1500,
         canvasHeight: previewRef.current.offsetHeight,
+        filter: (node): boolean => {
+          if (!(node instanceof Element)) {
+            return true;
+          }
+          return true;
+        },
+       // Also set some additional options to help prevent these issues
+        imagePlaceholder:
+          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+        cacheBust: true,
       });
 
       const filename = `${design.id}-${themes[currentTheme]}.webp`;
@@ -214,7 +224,7 @@ export default function DesignPreviewer() {
           className="px-4 py-2 bg-myblue text-white rounded"
           disabled={isGenerating}
         >
-          {isGenerating ? "Generating..." : "Generate All Previews"}
+          {isGenerating ? "Generating...!" : "Generate All Previews"}
         </button>
         <button
           onClick={() => console.log(images)}

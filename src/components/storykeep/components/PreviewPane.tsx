@@ -47,17 +47,14 @@ const PreviewPane = ({
   }
 
   return (
-    <div className="relative">
-      <PreviewPaneRenderer
-        paneData={paneData}
-        viewportKey={viewportKey}
-        toolMode="text"
-        toolAddMode="p"
-        slug={slug}
-        isContext={isContext}
-      />
-      <div className="absolute inset-0 z-[1999]" />
-    </div>
+    <PreviewPaneRenderer
+      paneData={paneData}
+      viewportKey={viewportKey}
+      toolMode="text"
+      toolAddMode="p"
+      slug={slug}
+      isContext={isContext}
+    />
   );
 };
 

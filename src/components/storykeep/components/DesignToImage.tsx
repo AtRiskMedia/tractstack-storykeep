@@ -195,8 +195,8 @@ export default function DesignPreviewer() {
         },
       });
 
-      const filename = `${design.id}-${themes[currentTheme]}.webp`;
-      const title = `${design.name} (${currentTheme})`;
+      const filename = `${design.id}-${themes[currentTheme]}.png`;
+      const title = `${design.name} (${themes[currentTheme]})`;
       setImages(prev => [...prev, { src: image, filename, title }]);
 
       // Wait between captures

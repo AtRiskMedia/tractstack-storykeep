@@ -703,7 +703,7 @@ export const paneDesigns = (
                         {
                           light: "neutral-200",
                           "light-bw": "brand-8",
-                          "light-bold": "neutral-200",
+                          "light-bold": "white",
                           dark: "neutral-800",
                           "dark-bw": "gray-800",
                           "dark-bold": "neutral-800",

@@ -140,7 +140,9 @@ const DesignNewPane = ({
           ),
         ];
         newDesigns = Array.from(
-          new Map(allStarterDesigns.map(design => [design.id, design])).values()
+          new Map(
+            allStarterDesigns.map(design => [design.name, design])
+          ).values()
         ).sort((a, b) => {
           // Convert priority to number and sort in ascending order
           return (Number(a.priority) || 0) - (Number(b.priority) || 0);

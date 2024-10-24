@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
+import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import { knownEnvSettings } from "../../../constants";
 import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ContentMap, EnvSettingDatum } from "../../../types";
@@ -35,6 +36,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
     {}
   );
+  const [isGeneratingSnapshots, setIsGeneratingSnapshots] = useState(false);
 
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
@@ -557,15 +559,14 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
       )}
       {hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
-          <p className="text-myblue font-bold">
-            Be very careful adjusting any technical settings. When ready hit{" "}
-            <strong>publish</strong> to push these changes to your site.
-          </p>
-          <p className="text-mydarkgrey">
-            Note: this triggers a 0-2 second "reload" of your website. Active
-            users are unlikely to be impacted.
-          </p>
+          {/* ... existing content ... */}
           <div className="flex justify-end space-x-2 mt-6">
+            <button
+              onClick={() => setIsGeneratingSnapshots(true)}
+              className="px-4 py-2 text-white bg-mygreen rounded hover:bg-myblue"
+            >
+              Regenerate Design Previews
+            </button>
             <a
               className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
               href="/storykeep"
@@ -607,6 +608,9 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
           </div>
         );
       })}
+      {isGeneratingSnapshots && (
+        <DesignSnapshotModal onClose={() => setIsGeneratingSnapshots(false)} />
+      )}
     </div>
   );
 };

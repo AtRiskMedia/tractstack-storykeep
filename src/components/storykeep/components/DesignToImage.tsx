@@ -178,28 +178,6 @@ export default function DesignPreviewer() {
         quality: 1,
         canvasWidth: 1500,
         canvasHeight: previewRef.current.offsetHeight,
-        filter: node => {
-          console.log(1, node);
-          // Keep critical elements including those with base64 images
-          if (!(node instanceof Element)) {
-            return true;
-          }
-          // Keep all link elements that aren't for external resources
-          if (node instanceof HTMLLinkElement) {
-            const href = node.getAttribute("href") || "";
-            return (
-              href.includes("data:") ||
-              href.startsWith("data:") ||
-              href.startsWith("blob:")
-            );
-          }
-          // Keep all image elements including those with base64 sources
-          if (node instanceof HTMLImageElement) {
-            const src = node.getAttribute("src") || "";
-            return !src.startsWith("http");
-          }
-          return true;
-        },
       });
 
       const filename = `${design.id}-${themes[currentTheme]}.webp`;

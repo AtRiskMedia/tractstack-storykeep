@@ -1,206 +1,280 @@
-import { useState, useEffect } from "react";
+import { useCallback, useMemo, useState, useEffect, useRef } from "react";
 import { classNames } from "../../../utils/helpers";
 import { paneDesigns } from "../../../assets/paneDesigns";
 import PreviewPage from "./PreviewPage";
 import { toPng } from "html-to-image";
 import imageCompression from "browser-image-compression";
-
-type SnapshotStage =
-  | "INITIALIZING"
-  | "GENERATING"
-  | "COMPRESSING"
-  | "UPLOADING"
-  | "COMPLETED"
-  | "ERROR";
+import type { Variant, Theme, PaneDesign } from "../../../types";
 
 interface DesignSnapshotModalProps {
   onClose: () => void;
 }
 
-const themes = [
+const themes: Theme[] = [
   "light",
   "light-bw",
   "light-bold",
   "dark",
   "dark-bw",
   "dark-bold",
-] as const;
+];
 
-async function compressImage(
-  image: string,
-  maxSizeMB = 1,
-  maxWidth = 1920
-): Promise<string> {
-  const blob = await fetch(image).then(r => r.blob());
-  const file = new File([blob], "image.png", { type: "image/png" });
-  const compressedFile = await imageCompression(file, {
-    maxSizeMB,
-    maxWidthOrHeight: maxWidth,
-    useWebWorker: true,
-  });
-  return new Promise((resolve, reject) => {
+type VariantMap = {
+  [key in Variant]?: string;
+};
+
+const getScaledProgress = (current: number, total: number) =>
+  total === 0 ? 1 : (Math.floor((current / total) * 11 + 1) % 12) + 1;
+
+function base64toBlob(
+  b64Data: string,
+  contentType: string = "",
+  sliceSize: number = 512
+) {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, { type: contentType });
+  return blob;
+}
+
+function blobToBase64(blob: File) {
+  return new Promise(resolve => {
     const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(compressedFile);
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
   });
 }
 
-export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
-  const [stage, setStage] = useState<SnapshotStage>("INITIALIZING");
-  const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState({ current: 0, total: 0 });
-  const [generatedImages, setGeneratedImages] = useState<
-    Array<{ src: string; filename: string }>
-  >([]);
-  const [previewRef, setPreviewRef] = useState<HTMLDivElement | null>(null);
+async function compressBase64Image(base64String: string) {
+  const blob = base64toBlob(base64String.split(",")[1], "image/png");
+  const file = new File([blob], "image.png", { type: "image/png" });
+  const compressedFile = await imageCompression(file, {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+  });
+  const compressedBase64 = (await blobToBase64(compressedFile)) as string;
+  return compressedBase64;
+}
 
-  useEffect(() => {
+function getValidVariants(design: PaneDesign): Variant[] {
+  if (!design.id.includes("${variant}")) {
+    return ["default"];
+  }
+  if (typeof design.name === "string") {
+    return ["default"];
+  }
+  const variantObject =
+    (design.name as { valueMap?: VariantMap })?.valueMap || {};
+  return Object.keys(variantObject) as Variant[];
+}
+
+async function saveFile(
+  src: string,
+  title: string,
+  filename: string
+): Promise<boolean> {
+    const files = [{ filename, src }];
+    const response = await fetch(`/api/concierge/storykeep/paneDesignImage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        files,
+      }),
+    });
+    const data = await response.json();
+    if (data.success) return true;
+    return false;
+}
+
+export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [currentDesign, setCurrentDesign] = useState(0);
+  const [currentTheme, setCurrentTheme] = useState(0);
+  const [currentVariant, setCurrentVariant] = useState(0);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const [statusMsg, setStatusMsg] = useState(``);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  // Get base designs and their valid variants
+  const designConfigs = useMemo(() => {
     const baseDesigns = paneDesigns("light", "default");
-    const total = baseDesigns.length * themes.length;
+    const configs = baseDesigns.map(design => ({
+      design,
+      validVariants: getValidVariants(design),
+    }));
+    const total = configs.reduce(
+      (acc, config) => acc + config.validVariants.length * themes.length,
+      0
+    );
     setProgress({ current: 0, total });
-    setStage("GENERATING");
+    return configs;
   }, []);
 
-  useEffect(() => {
-    if (stage === "GENERATING") {
-      generateImages();
+  const getCurrentDesign = () => {
+    const currentConfig = designConfigs[currentDesign];
+    if (!currentConfig) return null;
+
+    const theme = themes[currentTheme];
+    const variant = currentConfig.validVariants[currentVariant];
+
+    const designs = paneDesigns(theme, variant);
+    return designs.find(
+      d => d.id === currentConfig.design.id.replace("${variant}", variant)
+    );
+  };
+
+  const moveToNext = useCallback(() => {
+    if (progress.total && progress.current === progress.total - 1) {
+      setStatusMsg(`COMPLETED!`);
+      setIsCompleted(true);
+    } else setProgress(prev => ({ ...prev, current: prev.current + 1 }));
+
+    const currentConfig = designConfigs[currentDesign];
+    if (!currentConfig) {
+      setIsGenerating(false);
+      return;
     }
-  }, [stage]);
 
-  const generateImages = async () => {
+    if (currentVariant < currentConfig.validVariants.length - 1) {
+      setCurrentVariant(prev => prev + 1);
+    } else if (currentTheme < themes.length - 1) {
+      setCurrentVariant(0);
+      setCurrentTheme(prev => prev + 1);
+    } else if (currentDesign < designConfigs.length - 1) {
+      setCurrentVariant(0);
+      setCurrentTheme(0);
+      setCurrentDesign(prev => prev + 1);
+    } else {
+      setIsGenerating(false);
+    }
+  }, [currentDesign, currentTheme, currentVariant, designConfigs]);
+
+  const generateImage = async () => {
+    if (!previewRef.current) return;
+
     try {
-      const baseDesigns = paneDesigns("light", "default");
-
-      for (const design of baseDesigns) {
-        for (const theme of themes) {
-          if (!previewRef) continue;
-
-          // Apply layout fixes for capture
-          const headings = previewRef.querySelectorAll("h2");
-          headings.forEach(heading => {
-            const h = heading as HTMLElement;
-            h.style.display = "block";
-            h.style.marginBottom = "1.5rem";
-            h.style.width = "100%";
-            h.style.clear = "both";
-          });
-
-          const paragraphs = previewRef.querySelectorAll(".text-brand-7");
-          paragraphs.forEach(p => {
-            const paragraph = p as HTMLElement;
-            paragraph.style.display = "block";
-            paragraph.style.width = "100%";
-            paragraph.style.clear = "both";
-            paragraph.style.marginBottom = "1rem";
-          });
-
-          // Capture and compress image
-          const image = await toPng(previewRef, {
-            width: 1500,
-            height: previewRef.offsetHeight,
-            style: {
-              transform: "scale(1)",
-              transformOrigin: "top left",
-            },
-            pixelRatio: 1,
-            backgroundColor: "#ffffff",
-          });
-
-          setStage("COMPRESSING");
-          const compressed = await compressImage(image);
-
-          setGeneratedImages(prev => [
-            ...prev,
-            {
-              src: compressed,
-              filename: `${design.id}-${theme}.png`,
-            },
-          ]);
-
-          setProgress(prev => ({ ...prev, current: prev.current + 1 }));
-        }
+      const design = getCurrentDesign();
+      if (!design) {
+        moveToNext();
+        return;
       }
 
-      setStage("UPLOADING");
-      await uploadImages(generatedImages);
-      setStage("COMPLETED");
-    } catch (err) {
-      setStage("ERROR");
-      setError(
-        err instanceof Error ? err.message : "An unknown error occurred"
-      );
+      // Wait for styles and rendering
+      await new Promise(resolve => setTimeout(resolve, 250));
+
+      const image = await toPng(previewRef.current, {
+        width: 1500,
+        height: previewRef.current.offsetHeight,
+        style: {
+          transform: "scale(1)",
+          transformOrigin: "top left",
+        },
+        pixelRatio: 1,
+        backgroundColor: "#ffffff",
+        quality: 1,
+        canvasWidth: 1500,
+        canvasHeight: previewRef.current.offsetHeight,
+      });
+      const src = await compressBase64Image(image);
+      const filename = `${design.id}-${themes[currentTheme]}.png`;
+      const title = `${design.name} (${themes[currentTheme]})`;
+      const result = await saveFile(src, title, filename);
+      if (!result) setStatusMsg(`Error generating file`);
+      // Wait between captures
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (error) {
+      setStatusMsg(`Error generating image: ${error}`);
     }
+
+    if (!statusMsg && !isCompleted) moveToNext();
   };
 
-  const uploadImages = async (
-    images: Array<{ src: string; filename: string }>
-  ) => {
-    try {
-      const response = await fetch(
-        `/api/concierge/storykeep/design-snapshots`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ images }),
-        }
-      );
-      const data = await response.json();
-      if (!data.success) throw new Error("Failed to upload images");
-    } catch (err) {
-      throw new Error("Error uploading images: " + err);
+  useEffect(() => {
+    if (isGenerating && !isCompleted) {
+      generateImage();
+    } else {
+      setCurrentDesign(0);
+      setCurrentTheme(0);
+      setCurrentVariant(0);
+      setProgress(prev => ({ ...prev, current: 0 }));
+      setIsGenerating(true);
     }
-  };
+  }, [currentDesign, currentTheme, currentVariant, isGenerating]);
 
-  const getStageDescription = (currentStage: SnapshotStage) => {
-    switch (currentStage) {
-      case "INITIALIZING":
-        return "Preparing to generate design snapshots...";
-      case "GENERATING":
-        return `Generating design snapshots... (${progress.current}/${progress.total})`;
-      case "COMPRESSING":
-        return "Compressing images...";
-      case "UPLOADING":
-        return "Uploading snapshots...";
-      case "COMPLETED":
-        return "Snapshot generation completed successfully!";
-      case "ERROR":
-        return `Error: ${error}`;
-      default:
-        return "";
-    }
-  };
-
+  // whitelist w-1/12 w-2/12 w-3/12 w-4/12 w-5/12 w-6/12 w-7/12 w-8/12 w-9/12 w-10/12 w-11/12 w-12/12
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">Generating Design Snapshots</h2>
-        <div className="mb-4">
-          <div className="h-2 bg-gray-200 rounded-full">
-            <div
-              className={classNames(
-                "h-full rounded-full transition-all",
-                stage === "COMPLETED" ? "bg-green-500" : "bg-blue-500",
-                stage === "ERROR" ? "bg-red-500" : "",
-                stage === "INITIALIZING"
-                  ? "w-1/5"
-                  : stage === "GENERATING"
-                    ? "w-2/5"
-                    : stage === "COMPRESSING"
-                      ? "w-3/5"
-                      : stage === "UPLOADING"
-                        ? "w-4/5"
-                        : "w-full"
-              )}
-            />
+    <>
+      <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+        <div className="bg-white p-8 rounded-lg shadow-xl max-w-3xl w-full">
+          <h2 className="text-2xl font-bold mb-4">
+            Generating Design Snapshots
+          </h2>
+          <div className="mb-4">
+            <div className="h-2 bg-gray-200 rounded-full">
+              <div
+                className={classNames(
+                  "h-full rounded-full transition-all",
+                  !isCompleted
+                    ? `w-${getScaledProgress(progress.current ?? 0, progress.total ?? 1)}/12 bg-myorange`
+                    : `w-full bg-mygreen`
+                )}
+              />
+            </div>
           </div>
-        </div>
-        <p className="text-lg mb-4">{getStageDescription(stage)}</p>
 
-        {/* Hidden Preview Area */}
-        <div className="hidden">
+          <div className="mb-4 font-mono text-sm whitespace-pre-wrap h-32 overflow-auto bg-gray-100 p-2 rounded">
+            {!statusMsg && !isCompleted ? (
+              <div>
+                <h2 className="text-lg font-bold mb-2">
+                  Currently Rendering: {progress.current} of {progress.total}
+                </h2>
+                <div className="mb-2">
+                  <strong>Design:</strong> {getCurrentDesign()?.id}
+                  <br />
+                  <strong>Theme:</strong> {themes[currentTheme]}
+                  <br />
+                  <strong>Variant:</strong>{" "}
+                  {designConfigs[currentDesign]?.validVariants[currentVariant]}
+                </div>
+              </div>
+            ) : (
+              statusMsg
+            )}
+          </div>
+
+          {isCompleted && (
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={onClose}
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                Close
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="w-full">
+        {isGenerating && !isCompleted && getCurrentDesign() && (
           <div
-            ref={setPreviewRef}
+            ref={previewRef}
             className="w-[1500px]"
             style={{
               isolation: "isolate",
@@ -209,27 +283,18 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
           >
             <PreviewPage
               design={{
-                name: "Preview",
+                name: getCurrentDesign()?.name || "",
                 isContext: false,
                 tailwindBgColour: null,
-                paneDesigns: [],
+                paneDesigns: [getCurrentDesign()!],
               }}
               viewportKey="desktop"
               slug="preview"
               isContext={false}
             />
           </div>
-        </div>
-
-        {stage === "COMPLETED" && (
-          <button
-            onClick={onClose}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            Close
-          </button>
         )}
       </div>
-    </div>
+    </>
   );
 };

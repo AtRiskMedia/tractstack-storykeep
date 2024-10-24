@@ -179,7 +179,7 @@ export const SaveProcessModal = ({
       setError(
         err instanceof Error
           ? err.message
-          : "An error occurred while publishing tailwind whitelist"
+          : "An error occurred while publishing optimized images"
       );
       throw err;
     }

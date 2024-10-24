@@ -557,16 +557,38 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
           </p>
         </div>
       )}
+      <div className="flex justify-end space-x-2 mt-6">
+        <button
+          onClick={() => setIsGeneratingSnapshots(true)}
+          className="px-4 py-2 text-white bg-myblack rounded hover:bg-myblue"
+        >
+          Regenerate Design Previews
+        </button>
+        <a
+          className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
+          href="/storykeep"
+        >
+          Cancel
+        </a>
+        <button
+          onClick={handlePublish}
+          className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+          disabled={hasUncleanData}
+        >
+          Publish Changes
+        </button>
+      </div>
       {hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
-          {/* ... existing content ... */}
+          <p className="text-myblue font-bold">
+            Be very careful adjusting any technical settings. When ready hit{" "}
+            <strong>publish</strong> to push these changes to your site.
+          </p>
+          <p className="text-mydarkgrey">
+            Note: this triggers a 0-2 second "reload" of your website. Active
+            users are unlikely to be impacted.
+          </p>
           <div className="flex justify-end space-x-2 mt-6">
-            <button
-              onClick={() => setIsGeneratingSnapshots(true)}
-              className="px-4 py-2 text-white bg-mygreen rounded hover:bg-myblue"
-            >
-              Regenerate Design Previews
-            </button>
             <a
               className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
               href="/storykeep"

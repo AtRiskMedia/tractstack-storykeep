@@ -82,24 +82,20 @@ function getValidVariants(design: PaneDesign): Variant[] {
   return Object.keys(variantObject) as Variant[];
 }
 
-async function saveFile(
-  src: string,
-  title: string,
-  filename: string
-): Promise<boolean> {
-    const files = [{ filename, src }];
-    const response = await fetch(`/api/concierge/storykeep/paneDesignImage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        files,
-      }),
-    });
-    const data = await response.json();
-    if (data.success) return true;
-    return false;
+async function saveFile(src: string, filename: string): Promise<boolean> {
+  const files = [{ filename, src }];
+  const response = await fetch(`/api/concierge/storykeep/paneDesignImage`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      files,
+    }),
+  });
+  const data = await response.json();
+  if (data.success) return true;
+  return false;
 }
 
 export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
@@ -194,8 +190,7 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
       });
       const src = await compressBase64Image(image);
       const filename = `${design.id}-${themes[currentTheme]}.png`;
-      const title = `${design.name} (${themes[currentTheme]})`;
-      const result = await saveFile(src, title, filename);
+      const result = await saveFile(src, filename);
       if (!result) setStatusMsg(`Error generating file`);
       // Wait between captures
       await new Promise(resolve => setTimeout(resolve, 100));

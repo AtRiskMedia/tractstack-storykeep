@@ -33,7 +33,7 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   const $viewportKey = useStore(viewportKeyStore);
   const $theme = useStore(themeStore);
   const viewportKey = $viewportKey.value;
-  console.log(`CREATE`,newId,tractStackId,mode,viewportKey)
+  console.log(`CREATE`, newId, tractStackId, mode, viewportKey);
 
   const [missionInput, setMissionInput] = useState("");
   const [contentInput, setContentInput] = useState("");

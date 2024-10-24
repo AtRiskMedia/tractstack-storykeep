@@ -178,6 +178,21 @@ export default function DesignPreviewer() {
         quality: 1,
         canvasWidth: 1500,
         canvasHeight: previewRef.current.offsetHeight,
+        filter: node => {
+          if (node instanceof HTMLStyleElement) {
+            const style = node as HTMLStyleElement;
+            console.log(style.textContent);
+            if (style.textContent?.includes("data:image/svg+xml")) {
+              return false;
+            }
+          }
+          if (node instanceof HTMLLinkElement) {
+            if (node.href?.includes("/api/styles/")) {
+              return false;
+            }
+          }
+          return true;
+        },
       });
 
       const filename = `${design.id}-${themes[currentTheme]}.webp`;

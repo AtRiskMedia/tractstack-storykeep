@@ -186,6 +186,7 @@ export default function DesignPreviewer() {
           // Keep all link elements that aren't for external resources
           if (node instanceof HTMLLinkElement) {
             const href = node.getAttribute("href") || "";
+            console.log(href)
             return href.includes("data:") || href.startsWith("data:") || href.startsWith("blob:");
           }
           // Keep all image elements including those with base64 sources

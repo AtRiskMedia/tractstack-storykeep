@@ -1,4 +1,5 @@
 import { useCallback, useState, useRef, useEffect, useMemo } from "react";
+import imageCompression from "browser-image-compression";
 import { toPng } from "html-to-image";
 import PreviewPage from "./PreviewPage";
 import { paneDesigns } from "../../../assets/paneDesigns";
@@ -16,6 +17,50 @@ const themes: Theme[] = [
 type VariantMap = {
   [key in Variant]?: string;
 };
+
+function base64toBlob(
+  b64Data: string,
+  contentType: string = "",
+  sliceSize: number = 512
+) {
+  const byteCharacters = atob(b64Data);
+  const byteArrays = [];
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+    const byteNumbers = new Array(slice.length);
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
+
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
+
+  const blob = new Blob(byteArrays, { type: contentType });
+  return blob;
+}
+
+function blobToBase64(blob: File) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function compressBase64Image(base64String: string) {
+  const blob = base64toBlob(base64String.split(",")[1], "image/png");
+  const file = new File([blob], "image.png", { type: "image/png" });
+  const compressedFile = await imageCompression(file, {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+  });
+  const compressedBase64 = (await blobToBase64(compressedFile)) as string;
+  return compressedBase64;
+}
 
 function getValidVariants(design: PaneDesign): Variant[] {
   if (!design.id.includes("${variant}")) {
@@ -48,15 +93,11 @@ export default function DesignPreviewer() {
       design,
       validVariants: getValidVariants(design),
     }));
-
-    // Calculate total number of combinations
     const total = configs.reduce(
       (acc, config) => acc + config.validVariants.length * themes.length,
       0
     );
-
     setProgress({ current: 0, total });
-
     return configs;
   }, []);
 
@@ -194,11 +235,10 @@ export default function DesignPreviewer() {
           return true;
         },
       });
-
+      const src = await compressBase64Image(image);
       const filename = `${design.id}-${themes[currentTheme]}.png`;
       const title = `${design.name} (${themes[currentTheme]})`;
-      setImages(prev => [...prev, { src: image, filename, title }]);
-
+      setImages(prev => [...prev, { src, filename, title }]);
       // Wait between captures
       await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {

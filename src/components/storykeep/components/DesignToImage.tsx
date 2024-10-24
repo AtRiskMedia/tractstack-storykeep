@@ -195,10 +195,6 @@ export default function DesignPreviewer() {
           }
           return true;
         },
-        // Also set some additional options to help prevent these issues
-        imagePlaceholder:
-          "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-        cacheBust: true,
       });
 
       const filename = `${design.id}-${themes[currentTheme]}.webp`;

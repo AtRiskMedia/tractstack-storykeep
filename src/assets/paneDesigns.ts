@@ -91,6 +91,8 @@ export const paneDesigns = (
   {
     id: `intro-${variant}`,
     slug: `intro-${variant}`,
+    img: `intro-${variant}-${theme}.webp`,
+    variants: [`default`, `center`, `onecolumn`],
     name: getComputedValue(
       {
         default: "Intro section",
@@ -452,6 +454,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `intro-slim-${variant}-${theme}.webp`,
+    variants: [`default`, `center`, `onecolumn`],
     priority: getComputedNumber(
       {
         default: 6,
@@ -774,6 +778,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `intro-slim-bordered-${variant}-${theme}.webp`,
+    variants: [`default`, `center`, `onecolumn`],
     priority: getComputedNumber(
       {
         default: 9,
@@ -1124,6 +1130,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `paragraph-${variant}-${theme}.webp`,
+    variants: [`default`, `center`, `onecolumn`],
     priority: getComputedNumber(
       {
         default: 0,
@@ -1311,6 +1319,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `intro-image-${variant}-${theme}.webp`,
+    variants: [`square`, `16x9`],
     priority: 20,
     type: `starter`,
     panePayload: {
@@ -1682,6 +1692,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `intro-image-bordered-${variant}-${theme}.webp`,
+    variants: [`square`, `16x9`],
     priority: 21,
     type: `starter`,
     panePayload: {
@@ -2081,6 +2093,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `intro-image-slim-${variant}-${theme}.webp`,
+    variants: [`square`, `16x9`],
     priority: 22,
     type: `starter`,
     panePayload: {
@@ -2453,6 +2467,8 @@ export const paneDesigns = (
       },
       variant
     ),
+    img: `text-${theme}.webp`,
+    variants: [`default`, `center`, `onecolumn`],
     type: `starter`,
     panePayload: {
       heightOffsetDesktop: 0,
@@ -2735,6 +2751,8 @@ export const paneDesigns = (
     id: "borderedText",
     slug: "borderedText",
     name: "Bordered paragraphs",
+    img: `borderedText-${theme}.webp`,
+    variants: [`default`],
     priority: 50,
     type: `starter`,
     panePayload: {
@@ -3009,6 +3027,8 @@ export const paneDesigns = (
     id: "breaks-1",
     slug: "breaks-1",
     name: "Stepped from above",
+    img: `breaks-1-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `above`,
     type: `break`,
@@ -3114,6 +3134,8 @@ export const paneDesigns = (
     id: "breaks-2",
     slug: "breaks-2",
     name: "Cut 1 into below",
+    img: `breaks-2-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `below`,
     type: `break`,
@@ -3219,6 +3241,8 @@ export const paneDesigns = (
     id: "breaks-3",
     slug: "breaks-3",
     name: "Cut 2 into below",
+    img: `breaks-3-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `below`,
     type: `break`,
@@ -3324,6 +3348,8 @@ export const paneDesigns = (
     id: "breaks-4",
     slug: "breaks-4",
     name: "Low Cut 1 into below",
+    img: `breaks-4-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `below`,
     type: `break`,
@@ -3429,6 +3455,8 @@ export const paneDesigns = (
     id: "breaks-5",
     slug: "breaks-5",
     name: "Low Cut 2 into below",
+    img: `breaks-5-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `below`,
     type: `break`,
@@ -3534,6 +3562,8 @@ export const paneDesigns = (
     id: "breaks-6",
     slug: "breaks-6",
     name: "Jag from above",
+    img: `breaks-6-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `above`,
     type: `break`,
@@ -3639,6 +3669,8 @@ export const paneDesigns = (
     id: "breaks-7",
     slug: "breaks-7",
     name: "Burst 1 from above",
+    img: `breaks-7-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `above`,
     type: `break`,
@@ -3744,6 +3776,8 @@ export const paneDesigns = (
     id: "breaks-8",
     slug: "breaks-8",
     name: "Burst 2 from above",
+    img: `breaks-8-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `above`,
     type: `break`,
@@ -3849,6 +3883,8 @@ export const paneDesigns = (
     id: "breaks-9",
     slug: "breaks-9",
     name: "Crooked from above",
+    img: `breaks-9-${theme}.webp`,
+    variants: [`default`],
     priority: 100,
     orientation: `above`,
     type: `break`,

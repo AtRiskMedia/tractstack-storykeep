@@ -4,7 +4,7 @@ import { paneDesigns } from "../../../assets/paneDesigns";
 import PreviewPage from "./PreviewPage";
 import { toPng } from "html-to-image";
 import imageCompression from "browser-image-compression";
-import type { Variant, Theme, PaneDesign } from "../../../types";
+import type { Variant, Theme } from "../../../types";
 
 interface DesignSnapshotModalProps {
   onClose: () => void;
@@ -18,10 +18,6 @@ const themes: Theme[] = [
   "dark-bw",
   "dark-bold",
 ];
-
-type VariantMap = {
-  [key in Variant]?: string;
-};
 
 const getScaledProgress = (current: number, total: number) =>
   total === 0 ? 1 : (Math.floor((current / total) * 11 + 1) % 12) + 1;
@@ -59,8 +55,8 @@ function blobToBase64(blob: File) {
 }
 
 async function compressBase64Image(base64String: string) {
-  const blob = base64toBlob(base64String.split(",")[1], "image/png");
-  const file = new File([blob], "image.png", { type: "image/png" });
+  const blob = base64toBlob(base64String.split(",")[1], "image/webp");
+  const file = new File([blob], "image.png", { type: "image/webp" });
   const compressedFile = await imageCompression(file, {
     maxSizeMB: 1,
     maxWidthOrHeight: 1920,
@@ -68,18 +64,6 @@ async function compressBase64Image(base64String: string) {
   });
   const compressedBase64 = (await blobToBase64(compressedFile)) as string;
   return compressedBase64;
-}
-
-function getValidVariants(design: PaneDesign): Variant[] {
-  if (!design.id.includes("${variant}")) {
-    return ["default"];
-  }
-  if (typeof design.name === "string") {
-    return ["default"];
-  }
-  const variantObject =
-    (design.name as { valueMap?: VariantMap })?.valueMap || {};
-  return Object.keys(variantObject) as Variant[];
 }
 
 async function saveFile(src: string, filename: string): Promise<boolean> {
@@ -111,16 +95,18 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
   // Get base designs and their valid variants
   const designConfigs = useMemo(() => {
     const baseDesigns = paneDesigns("light", "default");
-    const configs = baseDesigns.map(design => ({
-      design,
-      validVariants: getValidVariants(design),
-    }));
-    const total = configs.reduce(
-      (acc, config) => acc + config.validVariants.length * themes.length,
-      0
-    );
+    const flattenedConfigs = baseDesigns.flatMap(design => {
+      const variants = design.variants || ["default"];
+      return variants.map(variant => {
+        return {
+          design,
+          validVariants: [variant],
+        };
+      });
+    });
+    const total = flattenedConfigs.length * themes.length;
     setProgress({ current: 0, total });
-    return configs;
+    return flattenedConfigs;
   }, []);
 
   const getCurrentDesign = () => {
@@ -128,12 +114,30 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
     if (!currentConfig) return null;
 
     const theme = themes[currentTheme];
-    const variant = currentConfig.validVariants[currentVariant];
+    const variant = currentConfig.validVariants[0]; // We know it's an array of 1 now
 
-    const designs = paneDesigns(theme, variant);
-    return designs.find(
-      d => d.id === currentConfig.design.id.replace("${variant}", variant)
-    );
+    // Get designs for this theme and variant
+    const designs = paneDesigns(theme, variant as Variant);
+
+    // Find matching design, handling variant substitution in id
+    const design = designs.find(d => {
+      // Replace the '-default' suffix with the variant
+      const expectedId = currentConfig.design.id.replace(
+        "-default",
+        `-${variant}`
+      );
+      return d.id === expectedId;
+    });
+    if (!design) {
+      console.error("Failed to find design:", {
+        baseId: currentConfig.design.id,
+        expectedId: currentConfig.design.id.replace("-default", `-${variant}`),
+        theme,
+        variant,
+        availableIds: designs.map(d => d.id),
+      });
+    }
+    return design;
   };
 
   const moveToNext = useCallback(() => {
@@ -172,10 +176,10 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
         return;
       }
 
-      // Wait for styles and rendering
       await new Promise(resolve => setTimeout(resolve, 250));
 
-      const image = await toPng(previewRef.current, {
+      // First get PNG data
+      const pngImage = await toPng(previewRef.current, {
         width: 1500,
         height: previewRef.current.offsetHeight,
         style: {
@@ -188,11 +192,24 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
         canvasWidth: 1500,
         canvasHeight: previewRef.current.offsetHeight,
       });
-      const src = await compressBase64Image(image);
-      const filename = `${design.id}-${themes[currentTheme]}.png`;
+
+      // Convert PNG to WebP
+      const img = new Image();
+      img.src = pngImage;
+      await new Promise(resolve => (img.onload = resolve));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+
+      const webpData = canvas.toDataURL("image/webp", 0.8);
+      const src = await compressBase64Image(webpData);
+      const filename = `${design.id}-${themes[currentTheme]}.webp`;
       const result = await saveFile(src, filename);
       if (!result) setStatusMsg(`Error generating file`);
-      // Wait between captures
+
       await new Promise(resolve => setTimeout(resolve, 100));
     } catch (error) {
       setStatusMsg(`Error generating image: ${error}`);

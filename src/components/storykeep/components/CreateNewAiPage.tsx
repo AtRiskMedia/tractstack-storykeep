@@ -6,10 +6,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { Combobox } from "@headlessui/react";
-import { viewportKeyStore, themeStore } from "../../../store/storykeep";
-import { classNames, debounce } from "../../../utils/helpers";
+import { themeStore } from "../../../store/storykeep";
+import { classNames } from "../../../utils/helpers";
+import { pageDesigns } from "../../../assets/paneDesigns";
 import ThemeSelector from "./ThemeSelector";
-import type { ViewportKey, Theme } from "../../../types";
+import type { PageDesign, Theme } from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
@@ -20,60 +21,52 @@ interface CreateNewPageProps {
 const pageTypes = [
   { id: 1, name: "Home Page" },
   { id: 2, name: "Long-form content" },
-  { id: 3, name: "Short context page" },
 ];
-
-const designPlaceholders = Array.from({ length: 7 }, (_, i) => ({
-  id: i + 1,
-  name: `Design ${i + 1}`,
-  imageSrc: "/static.jpg",
-}));
+const pageTypesContext = [{ id: 3, name: "Short context page" }];
 
 const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
-  const $viewportKey = useStore(viewportKeyStore);
   const $theme = useStore(themeStore);
-  const viewportKey = $viewportKey.value;
-  console.log(`CREATE`, newId, tractStackId, mode, viewportKey);
+  console.log(`CREATE`, newId, tractStackId );
 
   const [missionInput, setMissionInput] = useState("");
   const [contentInput, setContentInput] = useState("");
-  const [selectedPageType, setSelectedPageType] = useState(pageTypes[0]);
+  const [selectedPageType, setSelectedPageType] = useState(
+    mode !== `context` ? pageTypes[0] : pageTypesContext[0]
+  );
   const [query, setQuery] = useState("");
-  const [selectedDesign, setSelectedDesign] = useState(designPlaceholders[0]);
+  const [selectedDesign, setSelectedDesign] = useState(``);
+  const [pageDesignList, setPageDesignList] = useState<PageDesign[]>([]);
 
   const filteredPageTypes =
-    query === ""
-      ? pageTypes
-      : pageTypes.filter(type =>
-          type.name.toLowerCase().includes(query.toLowerCase())
-        );
-
+    mode !== `context`
+      ? query === ""
+        ? pageTypes
+        : pageTypes.filter(type =>
+            type.name.toLowerCase().includes(query.toLowerCase())
+          )
+      : query === ""
+        ? pageTypesContext
+        : pageTypesContext.filter(type =>
+            type.name.toLowerCase().includes(query.toLowerCase())
+          );
   useEffect(() => {
-    const handleResize = () => {
-      const scrollBarOffset =
-        window.innerWidth - document.documentElement.clientWidth;
-      const previewWidth = window.innerWidth;
-      const adjustedWidth =
-        previewWidth +
-        scrollBarOffset *
-          (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
-      let newViewportKey: ViewportKey;
-      if (adjustedWidth <= 800) {
-        newViewportKey = `mobile`;
-      } else if (adjustedWidth <= 1367) {
-        newViewportKey = `tablet`;
+    const designs = Object.values(pageDesigns($theme)).filter(
+      design =>
+        (mode === `context` && design.isContext === true) ||
+        (mode !== `context` && design.isContext === false)
+    );
+    setPageDesignList(designs);
+    if (selectedDesign) {
+      const newSelectedDesign = designs.find(d => d.name === selectedDesign);
+      if (newSelectedDesign) {
+        setSelectedDesign(newSelectedDesign.name);
       } else {
-        newViewportKey = `desktop`;
+        setSelectedDesign(designs[0].name);
       }
-      viewportKeyStore.set({ value: newViewportKey });
-    };
-    const debouncedHandleResize = debounce(handleResize, 250);
-    handleResize();
-    window.addEventListener("resize", debouncedHandleResize);
-    return () => {
-      window.removeEventListener("resize", debouncedHandleResize);
-    };
-  }, []);
+    } else if (designs.length > 0) {
+      setSelectedDesign(designs[0].name);
+    }
+  }, [$theme, pageDesigns]);
 
   const handleThemeChange = (newTheme: Theme) => {
     themeStore.set(newTheme);
@@ -88,7 +81,7 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
           "repeating-linear-gradient(135deg, transparent, transparent 10px, rgba(0,0,0,0.05) 10px, rgba(0,0,0,0.05) 20px)",
       }}
     >
-      <div className="rounded-lg px-3.5 py-6 shadow-inner bg-white mx-4 max-w-screen-md">
+      <div className="rounded-lg px-3.5 py-6 shadow-inner bg-white mx-4">
         <div className="flex flex-col space-y-12">
           <div className="relative">
             <h2 className="inline-block font-action text-myblue text-2xl md:text-3xl">
@@ -120,7 +113,11 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
                   id="page-type-input"
                   className="w-full text-xl p-2 border border-mylightgrey rounded-md shadow-sm focus:ring-myblue focus:border-myblue"
                   onChange={event => setQuery(event.target.value)}
-                  displayValue={(type: (typeof pageTypes)[0]) => type.name}
+                  displayValue={
+                    mode !== `context`
+                      ? (type: (typeof pageTypes)[0]) => type.name
+                      : (type: (typeof pageTypesContext)[0]) => type.name
+                  }
                 />
                 <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
                   <ChevronUpDownIcon
@@ -173,35 +170,46 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
             <fieldset>
               <div className="flex justify-between items-center mb-4">
                 <legend className="block text-xl md:text-2xl text-mydarkgrey">
-                  Select a design
+                  Select a design starter
                 </legend>
+              </div>
+              <div className="pb-12">
                 <ThemeSelector value={$theme} onChange={handleThemeChange} />
               </div>
               <div
-                className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-12"
                 role="radiogroup"
               >
-                {designPlaceholders.map(design => (
+                {pageDesignList.map(design => (
                   <button
-                    key={design.id}
-                    onClick={() => setSelectedDesign(design)}
+                    key={design.name}
+                    onClick={() => setSelectedDesign(design.name)}
                     className={classNames(
-                      "relative aspect-[9/16] rounded-lg overflow-hidden transition-all",
-                      selectedDesign.id === design.id
-                        ? "ring-4 ring-myblue ring-offset-2"
+                      "relative rounded-lg transition-all h-fit",
+                      "flex flex-col items-start",
+                      selectedDesign === design.name
+                        ? "ring-4 ring-myorange/50 ring-offset-2"
                         : "hover:ring-2 hover:ring-myorange hover:ring-offset-1"
                     )}
                     role="radio"
-                    aria-checked={selectedDesign.id === design.id}
+                    aria-checked={selectedDesign === design.name}
                     aria-label={`Select ${design.name}`}
                     name="design-selection"
                     type="button"
                   >
-                    <img
-                      src={design.imageSrc}
-                      alt={`${design.name} preview`}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="flex flex-col items-start w-full shadow-lg">
+                      {design.paneDesigns.map((pane,i) => (
+                        <img
+                          key={pane.img}
+                          src={`${import.meta.env.PUBLIC_IMAGE_URL}/api/images/paneDesigns/${pane.img}`}
+                          alt={`${pane.img}`}
+                          className={classNames("w-full h-auto object-contain",
+                          i===0 ? `rounded-t-lg` : ``,
+                            i===design.paneDesigns.length -1 ? `rounded-b-lg` : ``
+                          )}
+                        />
+                      ))}
+                    </div>
                   </button>
                 ))}
               </div>

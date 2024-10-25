@@ -45,7 +45,7 @@ export function ContentTypeFilter({
             {selectedTypes.includes(type) && (
               <CheckIcon className="h-4 w-4 mr-1" aria-hidden="true" />
             )}
-            <span>{type}</span>
+            <span>{type === `StoryFragment` ? `Web Pages` : `Short Context Pages`}</span>
           </button>
         ))}
       </div>

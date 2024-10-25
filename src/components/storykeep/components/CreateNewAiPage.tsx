@@ -170,7 +170,7 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
             <fieldset>
               <div className="flex justify-between items-center mb-4">
                 <legend className="block text-xl md:text-2xl text-mydarkgrey">
-                  Select a design starter
+                  Select a design starter *you'll get to customize from here
                 </legend>
               </div>
               <div className="pb-12">
@@ -185,11 +185,11 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
                     key={design.name}
                     onClick={() => setSelectedDesign(design.name)}
                     className={classNames(
-                      "relative rounded-lg transition-all h-fit",
+                      "relative rounded-t-lg transition-all h-fit",
                       "flex flex-col items-start",
                       selectedDesign === design.name
-                        ? "ring-4 ring-myorange/50 ring-offset-2"
-                        : "hover:ring-2 hover:ring-myorange hover:ring-offset-1"
+                        ? "ring-2 ring-myorange ring-offset-2"
+                        : "hover:ring-2 hover:ring-myorange hover:ring-offset-2"
                     )}
                     role="radio"
                     aria-checked={selectedDesign === design.name}
@@ -204,8 +204,7 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
                           src={`${import.meta.env.PUBLIC_IMAGE_URL}/api/images/paneDesigns/${pane.img}`}
                           alt={`${pane.img}`}
                           className={classNames("w-full h-auto object-contain",
-                          i===0 ? `rounded-t-lg` : ``,
-                            i===design.paneDesigns.length -1 ? `rounded-b-lg` : ``
+                          i===0 ? `rounded-t-2xl` : ``,
                           )}
                         />
                       ))}

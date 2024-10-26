@@ -13,7 +13,12 @@ import { classNames } from "../../../utils/helpers";
 import { pageDesigns } from "../../../assets/paneDesigns";
 import ThemeSelector from "./ThemeSelector";
 import GeneratePageModal from "./GeneratePageModal";
-import type { PageDesign, Theme, GenerateStage } from "../../../types";
+import type {
+  PaneDesign,
+  PageDesign,
+  Theme,
+  GenerateStage,
+} from "../../../types";
 
 interface CreateNewPageProps {
   mode: "storyfragment" | "context";
@@ -21,9 +26,10 @@ interface CreateNewPageProps {
   tractStackId: string;
 }
 
-export type GeneratedCopy = {
-  title: string;
+type GeneratedCopy = {
+  pageTitle: string;
   paragraphs: string[];
+  title?: string;
 };
 
 const pageTypes = [
@@ -104,8 +110,13 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
       //console.log(result.response);
       //console.log(result.usage);
       const copy = {
-        title: `title`,
-        paragraphs: [`paragraph 1`, `paragraph 2`],
+        pageTitle: `Page Title`,
+        title: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n[Try it now!](try) &nbsp; [Learn more](learn)\n`,
+        paragraphs: [
+          `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
+          `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
+          `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
+        ],
       };
       return copy;
     }, []);
@@ -113,8 +124,69 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   const handlePrepareDesign = useCallback(
     async (generatedCopy: GeneratedCopy): Promise<null | PageDesign> => {
       if (!selectedDesign) return null;
-      console.log(`prepare design -- must inject newMarkdown`, generatedCopy);
-      return selectedDesign;
+
+      const newPaneDesigns: PaneDesign[] = [];
+
+      selectedDesign.paneDesignsMap.forEach((designType, index) => {
+        const originalPane = selectedDesign.paneDesigns[index];
+        if (!originalPane) return;
+
+        switch (designType) {
+          case "decorative":
+            // Pass through decorative panes unchanged
+            newPaneDesigns.push(originalPane);
+            break;
+
+          case "title": {
+            // Replace markdown body in title pane with generated title
+            const titlePane = structuredClone(originalPane);
+            if (titlePane.fragments?.length) {
+              titlePane.fragments = titlePane.fragments.map(fragment => {
+                if (fragment.type === "markdown") {
+                  return {
+                    ...fragment,
+                    markdownBody: generatedCopy.title ?? ``,
+                  };
+                }
+                return fragment;
+              });
+            }
+            newPaneDesigns.push(titlePane);
+            break;
+          }
+
+          case "paragraph":
+            // Create a new pane for each paragraph while preserving styling
+            generatedCopy.paragraphs.forEach((paragraph, i) => {
+              const isOdd = i % 2 === 1;
+              const originalPaneOdd =
+                selectedDesign?.paneDesignsOdd?.[originalPane.id];
+              const paragraphPane = structuredClone(
+                !isOdd ? originalPane : originalPaneOdd
+              );
+              if (paragraphPane?.fragments?.length) {
+                paragraphPane.fragments = paragraphPane.fragments.map(
+                  fragment => {
+                    if (fragment.type === "markdown") {
+                      return {
+                        ...fragment,
+                        markdownBody: paragraph ?? ``,
+                      };
+                    }
+                    return fragment;
+                  }
+                );
+              }
+              if (paragraphPane) newPaneDesigns.push(paragraphPane);
+            });
+            break;
+        }
+      });
+      return {
+        ...selectedDesign,
+        pageTitle: generatedCopy.pageTitle,
+        paneDesigns: newPaneDesigns,
+      };
     },
     [selectedDesign]
   );
@@ -122,7 +194,6 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   const handleLoadDesign = useCallback(
     async (userDesign: PageDesign): Promise<boolean> => {
       if (!userDesign) return false;
-      console.log(`load design`);
       const success = initializeStores(newId, tractStackId, userDesign, mode);
       if (success) creationStateStore.set({ id: newId, isInitialized: true });
       return success;
@@ -131,7 +202,6 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   );
 
   const handleGenerateComplete = useCallback(() => {
-    console.log(`complete.`);
     if (mode === "context") {
       navigate(`/context/create/edit`);
     } else {
@@ -173,7 +243,6 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   ]);
 
   const handleGenerateDraft = useCallback(() => {
-    console.log(`user says go`);
     if (!isValid || !selectedDesign || isGenerating) return;
     setIsGenerating(true);
     runGeneration();

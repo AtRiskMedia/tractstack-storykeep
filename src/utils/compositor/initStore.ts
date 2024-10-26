@@ -38,6 +38,7 @@ import {
 } from "../../store/storykeep";
 import { createFieldWithHistory } from "../storykeep";
 import { markdownToHtmlAst } from "./markdownUtils";
+import { cleanString } from "../helpers";
 import type {
   StoreKey,
   PageDesign,
@@ -69,7 +70,12 @@ export function initializeStores(
         initializePaneStores(paneIds[index], paneDesign, false);
       });
     } else {
-      initializePaneStores(newId, design.paneDesigns[0], true);
+      initializePaneStores(
+        newId,
+        design.paneDesigns[0],
+        true,
+        design.pageTitle ?? ""
+      );
     }
     creationStateStore.set({ id: newId, isInitialized: true });
     return true;
@@ -87,8 +93,8 @@ function initializeStoryFragmentStores(
 ) {
   const storyFragmentStores = {
     init: { init: true },
-    title: "",
-    slug: "create",
+    title: design.pageTitle ?? "",
+    slug: cleanString(design.pageTitle ?? ``).substring(0.2) ?? "create",
     tractStackId: tractStackId,
     menuId: "",
     paneIds: paneIds,
@@ -133,16 +139,23 @@ function initializeStoryFragmentStores(
 function initializePaneStores(
   paneId: string,
   paneDesign: PaneDesign,
-  isContext: boolean
+  isContext: boolean,
+  title?: string
 ) {
   paneInit.setKey(paneId, { init: true });
   paneTitle.setKey(
     paneId,
-    createFieldWithHistory(isContext ? "" : paneDesign.name)
+    createFieldWithHistory(isContext ? (title ?? ``) : paneDesign.name)
   );
   paneSlug.setKey(
     paneId,
-    createFieldWithHistory(isContext ? "create" : paneDesign.slug)
+    createFieldWithHistory(
+      isContext && !title
+        ? "create"
+        : isContext
+          ? cleanString(title ?? ``).substring(0.2)
+          : paneDesign.slug
+    )
   );
   paneIsContextPane.setKey(paneId, createFieldWithHistory(isContext));
   paneHeightOffsetDesktop.setKey(

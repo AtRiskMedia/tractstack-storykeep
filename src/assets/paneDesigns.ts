@@ -86,7 +86,8 @@ export const buttonStyleClasses = [
 
 export const paneDesigns = (
   theme: Theme = PUBLIC_THEME,
-  variant: Variant = `default`
+  variant: Variant = `default`,
+  odd?: boolean
 ): PaneDesign[] => [
   {
     id: `intro-${variant}`,
@@ -1148,19 +1149,33 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: tailwindToHex(
-        getComputedColor(
-          {
-            light: "brand-2",
-            "light-bw": "white",
-            "light-bold": "brand-2",
-            dark: "black",
-            "dark-bw": "black",
-            "dark-bold": "brand-1",
-          },
-          theme
-        )
-      ),
+      bgColour: !odd
+        ? tailwindToHex(
+            getComputedColor(
+              {
+                light: "brand-2",
+                "light-bw": "white",
+                "light-bold": "brand-2",
+                dark: "black",
+                "dark-bw": "black",
+                "dark-bold": "brand-1",
+              },
+              theme
+            )
+          )
+        : tailwindToHex(
+            getComputedColor(
+              {
+                light: "white",
+                "light-bw": "brand-2",
+                "light-bold": "white",
+                dark: "brand-1",
+                "dark-bw": "brand-1",
+                "dark-bold": "black",
+              },
+              theme
+            )
+          ),
       codeHook: null,
     },
     files: [],
@@ -2477,19 +2492,33 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: tailwindToHex(
-        getComputedColor(
-          {
-            light: "brand-2",
-            "light-bw": "white",
-            "light-bold": "brand-2",
-            dark: "black",
-            "dark-bw": "black",
-            "dark-bold": "brand-1",
-          },
-          theme
-        )
-      ),
+      bgColour: !odd
+        ? tailwindToHex(
+            getComputedColor(
+              {
+                light: "brand-2",
+                "light-bw": "white",
+                "light-bold": "brand-2",
+                dark: "black",
+                "dark-bw": "black",
+                "dark-bold": "brand-1",
+              },
+              theme
+            )
+          )
+        : tailwindToHex(
+            getComputedColor(
+              {
+                light: "white",
+                "light-bw": "brand-2",
+                "light-bold": "white",
+                dark: "brand-1",
+                "dark-bw": "brand-1",
+                "dark-bold": "black",
+              },
+              theme
+            )
+          ),
       codeHook: null,
     },
     files: [],
@@ -2762,19 +2791,33 @@ export const paneDesigns = (
       heightRatioDesktop: `0.00`,
       heightRatioTablet: `0.00`,
       heightRatioMobile: `0.00`,
-      bgColour: tailwindToHex(
-        getComputedColor(
-          {
-            light: "brand-2",
-            "light-bw": "white",
-            "light-bold": "brand-2",
-            dark: "black",
-            "dark-bw": "black",
-            "dark-bold": "brand-1",
-          },
-          theme
-        )
-      ),
+      bgColour: !odd
+        ? tailwindToHex(
+            getComputedColor(
+              {
+                light: "brand-2",
+                "light-bw": "white",
+                "light-bold": "brand-2",
+                dark: "black",
+                "dark-bw": "black",
+                "dark-bold": "brand-1",
+              },
+              theme
+            )
+          )
+        : tailwindToHex(
+            getComputedColor(
+              {
+                light: "white",
+                "light-bw": "brand-2",
+                "light-bold": "white",
+                dark: "brand-1",
+                "dark-bw": "brand-1",
+                "dark-bold": "black",
+              },
+              theme
+            )
+          ),
       codeHook: null,
     },
     files: [],
@@ -4017,6 +4060,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-default": paneDesigns(theme, `default`, true).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    },
   },
   basicOneColumn: {
     name: "Basic Page - One Column",
@@ -4044,6 +4092,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-onecolumn"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-onecolumn": paneDesigns(theme, `onecolumn`, true).find(
+        p => p.id === "paragraph-onecolumn"
+      ) as PaneDesign,
+    },
   },
   basicCentered: {
     name: "Basic Page - Centered",
@@ -4071,6 +4124,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-center"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-center": paneDesigns(theme, `center`, true).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    },
   },
   basicSlim: {
     name: "Basic Page - Slim",
@@ -4098,6 +4156,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-default": paneDesigns(theme, `default`, true).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    },
   },
   basicSlimOneColumn: {
     name: "Basic Page - Slim, One Column",
@@ -4125,6 +4188,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-onecolumn"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-onecolumn": paneDesigns(theme, `onecolumn`, true).find(
+        p => p.id === "paragraph-onecolumn"
+      ) as PaneDesign,
+    },
   },
   basicSlimCentered: {
     name: "Basic Page - Slim, Centered",
@@ -4152,6 +4220,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-center"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-center": paneDesigns(theme, `center`, true).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    },
   },
   basicSlimBordered: {
     name: "Basic Page - Slim, Bordered",
@@ -4179,6 +4252,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-default": paneDesigns(theme, `default`, true).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    },
   },
   basicSlimOneColumnBordered: {
     name: "Basic Page - Slim, One Column, Bordered",
@@ -4206,6 +4284,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-onecolumn"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-onecolumn": paneDesigns(theme, `onecolumn`, true).find(
+        p => p.id === "paragraph-onecolumn"
+      ) as PaneDesign,
+    },
   },
   basicSlimCenteredBordered: {
     name: "Basic Page - Slim, Centered, Bordered",
@@ -4233,6 +4316,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-center"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-center": paneDesigns(theme, `center`, true).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    },
   },
   basicContext: {
     name: "Basic Context Page - One section",
@@ -4254,6 +4342,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-default": paneDesigns(theme, `default`, true).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    },
   },
   basicContextOneColumn: {
     name: "Basic Context Page - Single column",
@@ -4275,6 +4368,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-onecolumn"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-onecolumn": paneDesigns(theme, `onecolumn`, true).find(
+        p => p.id === "paragraph-onecolumn"
+      ) as PaneDesign,
+    },
   },
   basicContextCentered: {
     name: "Basic Context Page - Centered",
@@ -4296,6 +4394,11 @@ export const pageDesigns = (
         p => p.id === "paragraph-center"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-center": paneDesigns(theme, `center`, true).find(
+        p => p.id === "paragraph-center"
+      ) as PaneDesign,
+    },
   },
   basicContextBordered: {
     name: "Basic Context Page - Bordered",
@@ -4317,6 +4420,11 @@ export const pageDesigns = (
         p => p.id === "borderedText"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      borderedText: paneDesigns(theme, `default`, true).find(
+        p => p.id === "borderedText"
+      ) as PaneDesign,
+    },
   },
   basicImage16x9: {
     name: "Basic Page - with 16x9 hero image",
@@ -4344,5 +4452,10 @@ export const pageDesigns = (
         p => p.id === "paragraph-default"
       ) as PaneDesign,
     ],
+    paneDesignsOdd: {
+      "paragraph-default": paneDesigns(theme, `default`, true).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    },
   },
 });

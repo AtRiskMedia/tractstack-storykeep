@@ -62,8 +62,7 @@ export const StoryFragment = (props: {
   const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [thisId] });
   const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [thisId] });
   const [untitled, setUntitled] = useState<boolean>(
-    $storyFragmentTitle[thisId]?.current === `` ||
-      [`create`, ``].includes($storyFragmentSlug[thisId]?.current)
+    $storyFragmentTitle[thisId]?.current === ``
   );
   const $storyFragmentPaneIds = useStore(storyFragmentPaneIds, {
     keys: [thisId],

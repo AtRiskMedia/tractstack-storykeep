@@ -240,6 +240,8 @@ export interface PageDesign {
   tailwindBgColour: string | null;
   paneDesigns: PaneDesign[];
   paneDesignsMap: string[];
+  paneDesignsOdd?: { [key: string]: PaneDesign };
+  pageTitle?: string;
 }
 
 export type GenerateStage =

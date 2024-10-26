@@ -4458,4 +4458,36 @@ export const pageDesigns = (
       ) as PaneDesign,
     },
   },
+  basicImageSquare: {
+    name: "Basic Page - with square hero image",
+    isContext: false,
+    tailwindBgColour: getComputedColor(
+      {
+        light: "brand-2",
+        "light-bw": "brand-2",
+        "light-bold": "white",
+        dark: "brand-1",
+        "dark-bw": "brand-1",
+        "dark-bold": "black",
+      },
+      theme
+    ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
+    paneDesigns: [
+      paneDesigns(theme, `default`).find(
+        p => p.id === "breaks-7"
+      ) as PaneDesign,
+      paneDesigns(theme, `square`).find(
+        p => p.id === "intro-image-slim-square"
+      ) as PaneDesign,
+      paneDesigns(theme, `default`).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    ],
+    paneDesignsOdd: {
+      "paragraph-default": paneDesigns(theme, `default`, true).find(
+        p => p.id === "paragraph-default"
+      ) as PaneDesign,
+    },
+  },
 });

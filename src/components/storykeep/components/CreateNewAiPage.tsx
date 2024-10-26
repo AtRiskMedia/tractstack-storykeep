@@ -20,7 +20,7 @@ import type {
   PageDesign,
   Theme,
   GenerateStage,
-  GeneratedCopy
+  GeneratedCopy,
 } from "../../../types";
 
 interface CreateNewPageProps {
@@ -92,62 +92,35 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
 
   const handleGenerateCopy =
     useCallback(async (): Promise<GeneratedCopy | null> => {
-      const aai = `\n # The Journey of an Entrepreneur\n\n## From Selling Dragon Ball Z to Founding a Company with 100k Students\n\nFarza is an entrepreneur who has been creating things for others from a young age. He started his first business at 13, selling Dragon Ball Z video games on eBay. He eventually turned this into a larger business selling blank DVDs and t-shirts. \n\nBy 15, Farza had grown his company's revenue to $100k. After this success, he continued to build new products and companies. Most recently, he founded buildspace, which became the largest community of people learning to build everything from YouTube videos to EDM music to their own companies.\n\n### Founding and Growing buildspace\n\nbuildspace raised funding from top investors like Y Combinator, a16z, and others. Farza worked on buildspace for 5 years, but unfortunately had to close the company. However, during its height, buildspace empowered huge numbers of people to bring their ideas to life.\n\n### A Passion for Creating and Teaching  \n\nEven before buildspace, Farza shipped gaming products to over 1 million users. He also trained open source deep learning models and founded an online elementary school with 100k students.\n\nFarza loves to write about his experiences building companies and products. He sends these lessons to his email list 1-2 times per month.\n\n### Get in Touch\n\nTo get Farza's writings in your inbox, drop your email below. You can also reach out to him directly at farza@buildspace.so - he responds to every email under 300 characters.\n`;
-      console.log(aai);
-      const response = await fetch("/api/aai/lemurTask", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: `${genAiPrompt}. Here's some additional context: ${missionInput}`,
-          input_text: contentInput,
-        }),
-      });
-      const result = await response.json();
-      const copy = parseMarkdownSections(result.response);
-      console.log(result.response);
-      console.log(result.usage);
-      //     const copy = parseMarkdownSections(
-      //      ` # Farza's Journey of Creating and Building
-      //\n\n
-      //## From Selling Dragon Ball Z to Founding a Company with 100k Students
-      //\n\n
-      //Farza is an entrepreneur who has been creating things for others from a young age. He started his first business at 13, selling Dragon Ball Z video games on eBay. He eventually turned this into a larger business selling blank DVDs and t-shirts. By 15, he had grown it to $100k in revenue. After this success, he continued to build new products and companies.
-      //\n\n
-      //Most recently, he was the founder of buildspace, which became the largest community of people in the world learning to build everything from YouTube videos to EDM music to startups. The company raised funding from top investors like Y Combinator, a16z, and others. Farza worked on buildspace for five years before the company unfortunately had to close. However, even in closure, the community and impact buildspace made was incredible.
-      //\n\n
-      //### Early Days Hustling - From Anime to T-Shirts
-      //\n\n
-      //As early as 13 years old, I was hustling to make money. I started small by selling used video games on eBay. But I had bigger dreams. I expanded to producing and selling blank DVDs and t-shirts, leveraging my interests in anime and manga. Through persistence and drive, I grew the business to $100k in revenue by 15 years old. This early success gave me my first taste of creating companies and products people wanted.
-      //\n\n
-      //### Founding buildspace - Empowering Makers Worldwide
-      //\n\n
-      //After years of shipping different products and honing my skills, I founded buildspace in 2016. Our mission was to enable people around the world to learn building skills by following project-based YouTube coding tutorials. We strived to create the largest community platform for people to go from inspiration to launching their own apps, companies, and more. I worked tirelessly for 5 years to grow buildspace, raising funding from top Silicon Valley investors. At our peak, we empowered hundreds of thousands of people to level up their skills and creativity through the power of our platform and community.
-      //\n\n
-      //### What I Learned From These Experiences
-      //\n\n
-      //Through my journey of creating companies and products since 13 years old, I've learned many lessons about business, technology, and life:
-      //\n\n
-      //- Start small and iterate quickly - My first business was a humble eBay shop that I slowly grew into a $100k company.
-      //- Persistence and hustle pay off - I spent years honing my skills in coding, design, writing, and more. That grit kept me going.
-      //- Build communities, not just products - buildspace ultimately succeeded because of the community we fostered.
-      //- Failures and closures contain important teachings - While buildspace closed, I don't see it as a failure, but rather a stepping stone with invaluable learnings.
-      //\n\n
-      //I'm proud of the products I've shipped and communities I've built so far. And at just 25 years old, I know there are many great projects still ahead. My journey of creating and building has only just begun.
-      //\n`
-      //    )
-
-      //const copy = {
-      //  pageTitle: `Page Title`,
-      //  title: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n[Try it now!](try) &nbsp; [Learn more](learn)\n`,
-      //  paragraphs: [
-      //    `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
-      //    `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
-      //    `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
-      //  ],
-      //};
-      return copy;
+      const askLemur = true;
+      if (askLemur) {
+        const response = await fetch("/api/aai/lemurTask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: `${genAiPrompt}. Here's some additional context: ${missionInput}`,
+            input_text: contentInput,
+          }),
+        });
+        const result = await response.json();
+        const copy = parseMarkdownSections(result.response);
+        console.log(result.response);
+        console.log(result.usage);
+        return copy;
+      } else {
+        const copy = {
+          pageTitle: `Page Title`,
+          title: `## add a catchy title here\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n[Try it now!](try) &nbsp; [Learn more](learn)\n`,
+          paragraphs: [
+            `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
+            `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
+            `### tell us what happened\n\nyour story continues... and continues... and continues... and continues... and continues... and continues... with nice layout and typography.\n\n#### Add in those important details\n\nWrite for both the humans and for the search engine rankings!`,
+          ],
+        };
+        return copy;
+      }
     }, [contentInput, missionInput]);
 
   const handlePrepareDesign = useCallback(

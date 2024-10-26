@@ -26,6 +26,7 @@ import type {
   TupleValue,
   ToolAddMode,
   ViewportAuto,
+  GeneratedCopy,
 } from "../../types";
 
 export function allowTagErase(
@@ -1269,4 +1270,63 @@ export function findLinkNodes(ast: HastElement): HastElement[] {
 
   traverse(ast);
   return linkNodes;
+}
+
+export function parseMarkdownSections(markdown: string): GeneratedCopy {
+  // Remove any leading/trailing whitespace
+  const cleanMarkdown = markdown.trim();
+
+  // Initialize result object
+  const result: GeneratedCopy = {
+    pageTitle: "",
+    title: "",
+    paragraphs: [],
+  };
+
+  // Split the markdown into sections by double newlines
+  const sections = cleanMarkdown.split(/\n\n+/);
+
+  // Process sections
+  let currentIndex = 0;
+
+  // Find the H1 title (starts with single #)
+  if (sections[currentIndex]?.startsWith("# ")) {
+    result.pageTitle = sections[currentIndex].replace(/^# /, "").trim();
+    currentIndex++;
+  }
+
+  // Process H2 section and its paragraphs
+  const h2StartIndex = sections.findIndex(section => section.startsWith("## "));
+  if (h2StartIndex !== -1) {
+    // Collect all content from H2 until the first H3
+    const h3StartIndex = sections.findIndex(
+      (section, index) => index > h2StartIndex && section.startsWith("### ")
+    );
+
+    const h2EndIndex = h3StartIndex === -1 ? sections.length : h3StartIndex;
+
+    // Join H2 section with its paragraphs
+    result.title =
+      sections.slice(h2StartIndex, h2EndIndex).join("\n\n").trim() + "\n\n";
+
+    currentIndex = h3StartIndex;
+  }
+
+  // Process remaining H3 sections
+  while (currentIndex !== -1 && currentIndex < sections.length) {
+    const nextH3Index = sections.findIndex(
+      (section, index) => index > currentIndex && section.startsWith("### ")
+    );
+
+    // Get content from current H3 to next H3 or end
+    const sectionEnd = nextH3Index === -1 ? sections.length : nextH3Index;
+    const sectionContent =
+      sections.slice(currentIndex, sectionEnd).join("\n\n").trim() + "\n\n";
+
+    result.paragraphs.push(sectionContent);
+
+    currentIndex = nextH3Index;
+  }
+
+  return result;
 }

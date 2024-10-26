@@ -244,6 +244,12 @@ export interface PageDesign {
   pageTitle?: string;
 }
 
+export type GeneratedCopy = {
+  pageTitle: string;
+  paragraphs: string[];
+  title?: string;
+};
+
 export type GenerateStage =
   | "GENERATING_COPY"
   | "PREPARING_DESIGN"

@@ -436,6 +436,12 @@ export const StoryKeepHeader = memo(
                   Save
                 </button>
               ) : null}
+              <a
+                href="/storykeep"
+                className="my-1 rounded bg-mydarkgrey px-2 py-1 text-lg text-white shadow-sm hover:bg-myorange/50 hover:text-black hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-myblack disabled:hidden"
+              >
+                Cancel
+              </a>
               {isSaving && (
                 <SaveProcessModal
                   id={thisId}

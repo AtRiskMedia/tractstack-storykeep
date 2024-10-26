@@ -239,7 +239,15 @@ export interface PageDesign {
   isContext: boolean;
   tailwindBgColour: string | null;
   paneDesigns: PaneDesign[];
+  paneDesignsMap: string[];
 }
+
+export type GenerateStage =
+  | "GENERATING_COPY"
+  | "PREPARING_DESIGN"
+  | "LOADING_DESIGN"
+  | "COMPLETED"
+  | "ERROR";
 
 export type Variant = `default` | `center` | `onecolumn` | `square` | `16x9`;
 

@@ -4005,6 +4005,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4031,6 +4032,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4057,6 +4059,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4083,6 +4086,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4109,6 +4113,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4135,6 +4140,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4161,6 +4167,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4187,6 +4194,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4213,6 +4221,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"
@@ -4239,6 +4248,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "paragraph-default"
@@ -4259,6 +4269,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`paragraph`],
     paneDesigns: [
       paneDesigns(theme, `onecolumn`).find(
         p => p.id === "paragraph-onecolumn"
@@ -4279,6 +4290,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`paragraph`],
     paneDesigns: [
       paneDesigns(theme, `center`).find(
         p => p.id === "paragraph-center"
@@ -4299,6 +4311,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "borderedText"
@@ -4319,6 +4332,7 @@ export const pageDesigns = (
       },
       theme
     ),
+    paneDesignsMap: [`decorative`, `title`, `paragraph`],
     paneDesigns: [
       paneDesigns(theme, `default`).find(
         p => p.id === "breaks-7"

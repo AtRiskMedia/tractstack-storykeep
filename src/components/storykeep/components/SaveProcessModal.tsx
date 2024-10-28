@@ -233,8 +233,6 @@ export const SaveProcessModal = ({
     }
 
     try {
-      console.log(`execute queries`, queries);
-
       // Define the order of execution
       const executionOrder: (
         | keyof StoryFragmentQueries

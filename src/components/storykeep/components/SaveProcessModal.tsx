@@ -301,11 +301,11 @@ export const SaveProcessModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+    <div className="fixed inset-0 z-[10101] bg-mydarkgrey bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
         <h2 className="text-2xl font-bold mb-4">Saving Changes</h2>
         <div className="mb-4">
-          <div className="h-2 bg-gray-200 rounded-full">
+          <div className="h-2 bg-mylightgrey rounded-full">
             <div
               className={classNames(
                 "h-full rounded-full",
@@ -330,7 +330,7 @@ export const SaveProcessModal = ({
         {stage === "COMPLETED" && (
           <button
             onClick={() => onClose(slug)}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-mygreen text-black px-4 py-2 rounded hover:bg-myorange"
           >
             Close
           </button>

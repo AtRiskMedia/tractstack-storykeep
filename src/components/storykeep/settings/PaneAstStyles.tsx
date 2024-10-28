@@ -1097,6 +1097,7 @@ export const PaneAstStyles = (props: {
                   setLinkTargetKey(``);
                   setLinkMode(null);
                   setSelectedStyle(null);
+                  setAddClass(false);
                 }}
                 className={classNames(
                   tab.tag === activeTag
@@ -1118,6 +1119,7 @@ export const PaneAstStyles = (props: {
                   setLinkTargetKey(``);
                   setLinkMode(null);
                   setSelectedStyle(null);
+                  setAddClass(false);
                 }}
                 className="bg-mygreen/50 hover:bg-myorange text-black px-2 py-1 rounded"
                 disabled={
@@ -1298,21 +1300,29 @@ export const PaneAstStyles = (props: {
                 </button>
               )
             )}
-          <button
-            onClick={() => {
-              handleAddLayer(false);
-            }}
-            title="Insert layer after"
-            className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
-          >
-            +
-          </button>
+          {parentClassNamesPayload?.classes &&
+            Array.isArray(parentClassNamesPayload?.classes) &&
+            parentClassNamesPayload?.classes[parentLayer] &&
+            typeof Object.keys(parentClassNamesPayload?.classes[parentLayer])
+              .length === `number` && (
+              <button
+                onClick={() => {
+                  handleAddLayer(false);
+                }}
+                title="Insert layer after"
+                className="py-1 px-1.5 rounded-md text-sm text-mydarkgrey hover:text-black hover:bg-myorange/20"
+              >
+                +
+              </button>
+            )}
         </div>
         <hr />
         <div className="my-4 flex flex-wrap gap-x-1.5 gap-y-3.5">
           {parentClassNamesPayload?.classes &&
           Array.isArray(parentClassNamesPayload?.classes) &&
-          Object.keys(parentClassNamesPayload?.classes[parentLayer]).length ? (
+          parentClassNamesPayload?.classes[parentLayer] &&
+          typeof Object.keys(parentClassNamesPayload?.classes[parentLayer])
+            .length === `number` ? (
             Object.keys(parentClassNamesPayload?.classes[parentLayer]).map(
               className => ClassTag(className)
             )

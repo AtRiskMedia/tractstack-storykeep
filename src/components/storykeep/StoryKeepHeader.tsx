@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, memo } from "react";
+import { navigate } from "astro:transitions/client";
 import { useStore } from "@nanostores/react";
 import {
   RectangleGroupIcon,
@@ -205,9 +206,8 @@ export const StoryKeepHeader = memo(
     const handleSaveComplete = (slug: string) => {
       setIsSaving(false);
       // reload to re-bootstrap from turso (& keep things clean)
-      if (id === `create` && !isContext) location.href = `/${slug}/edit`;
-      else if (id === `create`) location.href = `/context/${slug}/edit`;
-      else location.reload();
+      if(!isContext) navigate(`/${slug}/edit`)
+      else navigate(`/context/${slug}/edit`)
     };
 
     useEffect(() => {

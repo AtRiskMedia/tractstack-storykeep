@@ -248,6 +248,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   );
 
   const handleSave = useCallback(() => {
+    console.log(`must push to concierge`);
     envSettings.set({
       current: localSettings,
       original: localSettings,

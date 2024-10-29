@@ -45,7 +45,12 @@ const gtagUrl =
     ? `https://www.googletagmanager.com/gtag/js?id=${googleSiteVerification}`
     : null;
 
-const contentMap: ContentMap[] = await getContentMap();
+const hasTurso = [
+  import.meta.env.TURSO_DATABASE_URL,
+  import.meta.env.TURSO_AUTH_TOKEN,
+].every(x => typeof x === "string" && x.length > 0);
+
+const contentMap: ContentMap[] = hasTurso ? await getContentMap() : [];
 ---
 
 <!doctype html>

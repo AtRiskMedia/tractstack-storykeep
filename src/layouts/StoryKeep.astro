@@ -38,7 +38,13 @@ const socialImageURL = `${website}/${ogImage ?? SITE.ogImage ?? `og.png`}`;
 const socialLogoURL = `${website}/${ogLogo ?? SITE.ogLogo ?? `logo.png`}`;
 //const storykeepCss = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/storykeep.css`;
 const storykeepCss = `/styles/storykeep.css`;
-const contentMap: ContentMap[] = await getContentMap();
+
+const hasTurso = [
+  import.meta.env.TURSO_DATABASE_URL,
+  import.meta.env.TURSO_AUTH_TOKEN,
+].every(x => typeof x === "string" && x.length > 0);
+
+const contentMap: ContentMap[] = hasTurso ? await getContentMap() : [];
 ---
 
 <!doctype html>

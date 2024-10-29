@@ -48,11 +48,13 @@ const baseUrl = new URL(Astro.url.pathname, Astro.site);
 const canonicalURL = new URL(`/storykeep`, baseUrl).href;
 
 // get storykeep datum
-const payload = await getFullContentMap();
-const filterPayload = payload.filter(
-  (e: FullContentMap) =>
-    e.type === `StoryFragment` || (e.type === `Pane` && e.isContext)
-);
+const payload = hasTurso ? await getFullContentMap() : [];
+const filterPayload = hasTurso
+  ? payload.filter(
+      (e: FullContentMap) =>
+        e.type === `StoryFragment` || (e.type === `Pane` && e.isContext)
+    )
+  : [];
 if (!payload) {
   return Astro.redirect("/404");
 }
@@ -116,7 +118,12 @@ const impressions = user.isOpenDemo
     user={user}
     isStoryKeep={true}
   />
-  <StoryKeepDashboardStore client:load />
+  {
+    hasConcierge && hasTurso && hasContent && hasBranding ? (
+      <StoryKeepDashboardStore client:load />
+    ) : null
+  }
+  }
   {
     hasConcierge && hasTurso && hasContent && hasBranding ? (
       <main id="main-content" class="min-h-screen">

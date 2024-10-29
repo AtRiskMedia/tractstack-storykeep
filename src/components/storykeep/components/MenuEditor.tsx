@@ -1,20 +1,62 @@
 import { useState, useCallback } from "react";
-import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
-import type { MenuDatum, MenuLink } from "../../../types";
+import { navigate } from "astro:transitions/client";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
+import { tursoClient } from "../../../api/tursoClient";
+import { cleanString } from "../../../utils/helpers";
+import type { MenuDatum, MenuLink, TursoQuery } from "../../../types";
 
 interface MenuEditorProps {
   menu: MenuDatum;
-  onCancel: () => void;
-  onSave: (updatedMenu: MenuDatum) => void;
+  create: boolean;
 }
 
-export default function MenuEditor({
-  menu,
-  onCancel,
-  onSave,
-}: MenuEditorProps) {
+function createMenuInsertQuery(menu: MenuDatum): TursoQuery {
+  return {
+    sql: `INSERT INTO menu (
+            id,
+            title,
+            theme,
+            options_payload
+          ) VALUES (?, ?, ?, ?)`,
+    args: [
+      menu.id,
+      menu.title,
+      menu.theme,
+      JSON.stringify(menu.optionsPayload),
+    ],
+  };
+}
+
+function createMenuUpdateQuery(id: string, menu: MenuDatum): TursoQuery {
+  return {
+    sql: `UPDATE menu 
+          SET title = ?, 
+              theme = ?, 
+              options_payload = ?
+          WHERE id = ?`,
+    args: [menu.title, menu.theme, JSON.stringify(menu.optionsPayload), id],
+  };
+}
+
+function compareMenuFields(current: MenuDatum, original: MenuDatum): boolean {
+  return (
+    current.title !== original.title ||
+    current.theme !== original.theme ||
+    JSON.stringify(current.optionsPayload) !==
+      JSON.stringify(original.optionsPayload)
+  );
+}
+
+export default function MenuEditor({ menu, create }: MenuEditorProps) {
   const [localMenu, setLocalMenu] = useState<MenuDatum>(menu);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const handleChange = useCallback((field: keyof MenuDatum, value: any) => {
@@ -61,10 +103,36 @@ export default function MenuEditor({
     setUnsavedChanges(true);
   }, []);
 
-  const handleSave = useCallback(() => {
-    onSave(localMenu);
-    setUnsavedChanges(false);
-  }, [localMenu, onSave]);
+  const handleSave = useCallback(async () => {
+    if (!unsavedChanges || isSaving) return;
+    try {
+      setIsSaving(true);
+      const queries: TursoQuery[] = [];
+      if (create) {
+        queries.push(createMenuInsertQuery(localMenu));
+      } else if (compareMenuFields(localMenu, menu)) {
+        queries.push(createMenuUpdateQuery(menu.id, localMenu));
+      }
+      if (queries.length > 0) {
+        const result = await tursoClient.execute(queries);
+        if (!result) {
+          throw new Error("Failed to save menu changes");
+        }
+      }
+      setUnsavedChanges(false);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        if (create) {
+          navigate(`/storykeep/manage/menu/${localMenu.id}`);
+        }
+      }, 7000);
+    } catch (error) {
+      console.error("Error saving menu:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [localMenu, menu, unsavedChanges, isSaving, create]);
 
   const handleCancel = useCallback(() => {
     if (unsavedChanges) {
@@ -73,19 +141,50 @@ export default function MenuEditor({
           "You have unsaved changes. Are you sure you want to cancel?"
         )
       ) {
-        onCancel();
+        navigate(`/storykeep`);
       }
     } else {
-      onCancel();
+      navigate(`/storykeep`);
     }
-  }, [unsavedChanges, onCancel]);
+  }, []);
 
   return (
     <div className="space-y-6">
+      {(unsavedChanges || saveSuccess) && (
+        <div
+          className={`p-4 rounded-md mb-4 ${unsavedChanges ? "bg-myorange/10" : "bg-mygreen/10"}`}
+        >
+          {unsavedChanges ? (
+            <>
+              <p className="text-black font-bold">
+                <ExclamationTriangleIcon className="inline-block h-5 w-5 mr-2" />
+                Unsaved Changes
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={handleCancel}
+                  className="px-4 py-2 bg-mydarkgrey text-white rounded hover:bg-mydarkgrey/80"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-myorange text-black rounded hover:bg-black hover:text-white"
+                >
+                  Save
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-black font-bold">
+              <CheckCircleIcon className="inline-block h-5 w-5 mr-2" />
+              Save successful
+            </p>
+          )}
+        </div>
+      )}
       <div>
-        <label className="block text-sm font-medium text-mydarkgrey">
-          Title
-        </label>
+        <label className="block text-sm font-bold text-mydarkgrey">Title</label>
         <input
           type="text"
           value={localMenu.title}
@@ -95,23 +194,21 @@ export default function MenuEditor({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-mydarkgrey">
-          Theme
-        </label>
+        <label className="block text-sm font-bold text-mydarkgrey">Theme</label>
         <input
           type="text"
           value={localMenu.theme}
-          onChange={e => handleChange("theme", e.target.value)}
+          onChange={e => handleChange("theme", cleanString(e.target.value))}
           className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
         />
       </div>
 
       <div>
-        <h3 className="text-lg font-medium text-mydarkgrey mb-2">Menu Links</h3>
+        <h3 className="text-lg font-bold text-mydarkgrey mb-2">Menu Links</h3>
         {localMenu.optionsPayload.map((link, index) => (
           <div key={index} className="border-b border-mylightgrey/20 pb-4 mb-4">
             <div className="flex items-center justify-between mb-2">
-              <h4 className="text-md font-medium text-mydarkgrey">
+              <h4 className="text-md font-bold text-mydarkgrey">
                 Link {index + 1}
               </h4>
               <button
@@ -123,7 +220,7 @@ export default function MenuEditor({
             </div>
             {Object.entries(link).map(([key, value]) => (
               <div key={key} className="mb-2">
-                <label className="block text-sm font-medium text-mydarkgrey">
+                <label className="block text-sm font-bold text-mydarkgrey">
                   {key.charAt(0).toUpperCase() + key.slice(1)}
                 </label>
                 {typeof value === "boolean" ? (
@@ -171,15 +268,16 @@ export default function MenuEditor({
           onClick={handleCancel}
           className="px-4 py-2 bg-mydarkgrey text-white rounded hover:bg-mydarkgrey/80"
         >
-          Cancel
+          {unsavedChanges ? `Cancel` : `Close`}
         </button>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-myblue text-white rounded hover:bg-myblue/80"
-          disabled={!unsavedChanges}
-        >
-          Save
-        </button>
+        {unsavedChanges && (
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-myblue text-white rounded hover:bg-myblue/80"
+          >
+            Save
+          </button>
+        )}
       </div>
     </div>
   );

@@ -7,10 +7,12 @@ import { cleanTursoStoryFragment } from "../utils/compositor/tursoStoryFragment"
 import { cleanTursoContextPane } from "../utils/compositor/tursoContextPane";
 import { cleanTursoFile } from "../utils/compositor/tursoFile";
 import { cleanTursoMenu } from "../utils/compositor/tursoMenu";
+import { cleanTursoTractStack } from "../utils/compositor/tursoTractStack";
 import { cleanPaneDesigns } from "../utils/compositor/paneDesigns";
 import { getTailwindWhitelist } from "../utils/compositor/tursoTailwindWhitelist";
 import type {
   ResourceDatum,
+  TractStackDatum,
   StoryFragmentDatum,
   ContextPaneDatum,
   ContentMap,
@@ -190,6 +192,33 @@ export async function getResourcesByCategorySlug(
     return resources;
   } catch (error) {
     console.error("Error fetching ResourceByCategorySlug:", error);
+    throw error;
+  }
+}
+
+export async function getAllTractStack(): Promise<TractStackDatum[]> {
+  try {
+    const { rows } = await turso.execute(`
+SELECT id, title, slug, social_image_path FROM tractstack
+    `);
+    return cleanTursoTractStack(rows);
+  } catch (error) {
+    console.error("Error fetching all file data:", error);
+    throw error;
+  }
+}
+
+export async function getTractStackBySlug(
+  slug: string
+): Promise<TractStackDatum[] | null> {
+  try {
+    const { rows } = await turso.execute({
+      sql: `SELECT id, title, slug, social_image_path FROM tractstack WHERE slug = ?`,
+      args: [slug],
+    });
+    return cleanTursoTractStack(rows);
+  } catch (error) {
+    console.error("Error fetching TractStackIdBySlug:", error);
     throw error;
   }
 }
@@ -468,6 +497,19 @@ export async function getFileById(id: string): Promise<FileDatum | null> {
     const files = cleanTursoFile(rows);
     if (files.length > 0) {
       const file = files[0];
+      if (file.src_set)
+        return {
+          id: file.id,
+          filename: file.filename,
+          altDescription: file.alt_description,
+          paneId: file.paneId,
+          markdown: file.markdown,
+          src: `${import.meta.env.PUBLIC_IMAGE_URL}${file.url}`.replace(
+            /(\.[^.]+)$/,
+            "_1920px$1"
+          ),
+          srcSet: false,
+        };
       return {
         id: file.id,
         filename: file.filename,
@@ -475,7 +517,7 @@ export async function getFileById(id: string): Promise<FileDatum | null> {
         paneId: file.paneId,
         markdown: file.markdown,
         src: `${import.meta.env.PUBLIC_IMAGE_URL}${file.url}`,
-        srcSet: file.src_set,
+        srcSet: false,
       };
     }
     return null;

@@ -498,12 +498,31 @@ const stopWords = new Set([
 ]);
 
 export function cleanString(s: string): string {
+  if (!s) return s;
   s = s.toLowerCase();
-  s = s.replace(/[^a-z0-9\s]/g, "");
-  let words = s.split(/\s+/);
-  words = words.filter(word => !stopWords.has(word));
-  s = words.join("-");
+  s = s.replace(/[^a-z0-9\s-_]/g, "");
+  s = s.replace(/\s+/g, "-");
+  const words = s.split(/[-_]/);
+  if (words.length > 1) {
+    s = words.filter(word => !stopWords.has(word)).join("-");
+  }
+  s = s.replace(/^[^a-z]+/, "");
+  s = s.replace(/[-_]{2,}/g, "-");
+  s = s.replace(/^[-_]+|[-_]+$/g, "");
+  if (!s.match(/^[a-z][a-z0-9-_]*[a-z0-9]$/)) {
+    s = s.replace(/[^a-z0-9]/g, "");
+  }
   return s;
+}
+
+export function cleanStringUpper(s: string): string {
+  if (!s) return s;
+  return s
+    .toUpperCase()
+    .replace(/[\d\-_]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "");
 }
 
 export function sortULIDs(ulids: string[]) {

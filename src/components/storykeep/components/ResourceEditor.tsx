@@ -1,37 +1,143 @@
-import { useState, useCallback, useEffect } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useCallback } from "react";
+import { navigate } from "astro:transitions/client";
 import { Switch } from "@headlessui/react";
-import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XMarkIcon,
+  PlusIcon,
+} from "@heroicons/react/24/outline";
+import { tursoClient } from "../../../api/tursoClient";
+import { cleanString } from "../../../utils/helpers";
 import { getResourceSetting, processResourceValue } from "../../../constants";
-import type { ResourceDatum, ResourceSetting } from "../../../types";
+import type {
+  ResourceDatum,
+  ResourceSetting,
+  TursoQuery,
+} from "../../../types";
 
 interface ResourceEditorProps {
   resource: ResourceDatum;
-  onCancel: () => void;
-  onSave: (updatedResource: ResourceDatum) => void;
+  create: boolean;
 }
+
+function createResourceUpdateQuery(
+  id: string,
+  resource: ResourceDatum
+): TursoQuery {
+  return {
+    sql: `UPDATE resource 
+          SET title = ?, 
+              slug = ?, 
+              category_slug = ?,
+              oneliner = ?,
+              options_payload = ?,
+              action_lisp = ?
+          WHERE id = ?`,
+    args: [
+      resource.title,
+      resource.slug,
+      resource.category || null,
+      resource.oneliner,
+      JSON.stringify(resource.optionsPayload),
+      resource.actionLisp || null,
+      id,
+    ],
+  };
+}
+
+function createResourceInsertQuery(resource: ResourceDatum): TursoQuery {
+  return {
+    sql: `INSERT INTO resource (
+            id,
+            title,
+            slug,
+            category_slug,
+            oneliner,
+            options_payload,
+            action_lisp
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      resource.id,
+      resource.title,
+      resource.slug,
+      resource.category || null,
+      resource.oneliner,
+      JSON.stringify(resource.optionsPayload),
+      resource.actionLisp || null,
+    ],
+  };
+}
+
+function compareResourceFields(
+  current: ResourceDatum,
+  original: ResourceDatum
+): boolean {
+  return (
+    current.title !== original.title ||
+    current.slug !== original.slug ||
+    current.category !== original.category ||
+    current.oneliner !== original.oneliner ||
+    current.actionLisp !== original.actionLisp ||
+    JSON.stringify(current.optionsPayload) !==
+      JSON.stringify(original.optionsPayload)
+  );
+}
+
+const EditableKey = ({
+  originalKey,
+  onKeyChange,
+}: {
+  originalKey: string;
+  onKeyChange: (oldKey: string, newKey: string) => void;
+}) => {
+  const [editingKey, setEditingKey] = useState(originalKey);
+
+  const handleKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value.replace(/[^a-zA-Z]/g, "");
+    setEditingKey(newValue);
+  };
+
+  const handleKeyBlur = () => {
+    if (editingKey !== originalKey && editingKey.length > 0) {
+      onKeyChange(originalKey, editingKey);
+    } else if (editingKey.length === 0) {
+      setEditingKey(originalKey); // Reset to original if empty
+    }
+  };
+
+  return (
+    <input
+      type="text"
+      value={editingKey}
+      onChange={handleKeyChange}
+      onBlur={handleKeyBlur}
+      pattern="[A-Za-z]+"
+      className="w-1/3 rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+    />
+  );
+};
 
 export default function ResourceEditor({
   resource,
-  onCancel,
-  onSave,
+  create,
 }: ResourceEditorProps) {
   const [localResource, setLocalResource] = useState<ResourceDatum>(resource);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [resourceSetting, setResourceSetting] = useState<
     ResourceSetting | undefined
-  >(undefined);
+  >(getResourceSetting(resource.category || ""));
 
-  useEffect(() => {
-    const setting = getResourceSetting(resource.category || "");
-    setResourceSetting(setting);
-  }, [resource.category]);
-
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   const handleChange = useCallback((field: keyof ResourceDatum, value: any) => {
     setLocalResource(prev => {
-      const newResource = { ...prev, [field]: value };
+      const processedValue =
+        field === "slug" || field === "category" ? cleanString(value) : value;
+      const newResource = { ...prev, [field]: processedValue };
       if (field === "category") {
-        const newSetting = getResourceSetting(value);
+        const newSetting = getResourceSetting(processedValue);
         setResourceSetting(newSetting);
         if (newSetting) {
           Object.keys(newSetting).forEach(key => {
@@ -46,8 +152,18 @@ export default function ResourceEditor({
     setUnsavedChanges(true);
   }, []);
 
+  const handleKeyChange = useCallback((oldKey: string, newKey: string) => {
+    setLocalResource(prev => {
+      const newOptionsPayload = { ...prev.optionsPayload };
+      const value = newOptionsPayload[oldKey];
+      delete newOptionsPayload[oldKey];
+      newOptionsPayload[newKey] = value;
+      return { ...prev, optionsPayload: newOptionsPayload };
+    });
+    setUnsavedChanges(true);
+  }, []);
+
   const handleOptionsPayloadChange = useCallback(
-    /* eslint-disable @typescript-eslint/no-explicit-any */
     (key: string, value: any) => {
       setLocalResource(prev => ({
         ...prev,
@@ -77,10 +193,36 @@ export default function ResourceEditor({
     setUnsavedChanges(true);
   }, []);
 
-  const handleSave = useCallback(() => {
-    onSave(localResource);
-    setUnsavedChanges(false);
-  }, [localResource, onSave]);
+  const handleSave = useCallback(async () => {
+    if (!unsavedChanges || isSaving) return;
+    try {
+      setIsSaving(true);
+      const queries: TursoQuery[] = [];
+      if (create) {
+        queries.push(createResourceInsertQuery(localResource));
+      } else if (compareResourceFields(localResource, resource)) {
+        queries.push(createResourceUpdateQuery(resource.id, localResource));
+      }
+      if (queries.length > 0) {
+        const result = await tursoClient.execute(queries);
+        if (!result) {
+          throw new Error("Failed to save resource changes");
+        }
+      }
+      setUnsavedChanges(false);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        if (create) {
+          navigate(`/storykeep/manage/resource/${localResource.slug}`);
+        }
+      }, 7000);
+    } catch (error) {
+      console.error("Error saving resource:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [localResource, resource, unsavedChanges, isSaving, create]);
 
   const handleCancel = useCallback(() => {
     if (unsavedChanges) {
@@ -89,108 +231,128 @@ export default function ResourceEditor({
           "You have unsaved changes. Are you sure you want to cancel?"
         )
       ) {
-        onCancel();
+        navigate(`/storykeep`);
       }
     } else {
-      onCancel();
+      navigate(`/storykeep`);
     }
-  }, [unsavedChanges, onCancel]);
+  }, [unsavedChanges]);
 
-  const renderField = (field: keyof ResourceDatum, label: string) => {
-    const value = localResource[field];
+  const renderOptionField = useCallback(
+    (key: string, value: any) => {
+      const setting = resourceSetting && resourceSetting[key];
+      const type = setting ? setting.type : typeof value;
 
-    return (
-      <div key={field}>
-        <label className="block text-sm font-medium text-mydarkgrey">
-          {label}
-        </label>
-        <input
-          type="text"
-          value={value === null || value === undefined ? "" : String(value)}
-          onChange={e => handleChange(field, e.target.value)}
-          className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-        />
-      </div>
-    );
-  };
-
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const renderOptionField = (key: string, value: any) => {
-    const setting = resourceSetting && resourceSetting[key];
-    const type = setting ? setting.type : typeof value;
-
-    switch (type) {
-      case "boolean":
-        return (
-          <Switch
-            checked={value}
-            onChange={newValue => handleOptionsPayloadChange(key, newValue)}
-            className={`${
-              value ? "bg-myorange" : "bg-mydarkgrey"
-            } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
-          >
-            <span
+      switch (type) {
+        case "boolean":
+          return (
+            <Switch
+              checked={value}
+              onChange={newValue => handleOptionsPayloadChange(key, newValue)}
               className={`${
-                value ? "translate-x-6" : "translate-x-1"
-              } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                value ? "bg-myorange" : "bg-mydarkgrey"
+              } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+            >
+              <span
+                className={`${
+                  value ? "translate-x-6" : "translate-x-1"
+                } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+              />
+            </Switch>
+          );
+        case "date":
+          return (
+            <input
+              type="datetime-local"
+              value={
+                value ? new Date(value * 1000).toISOString().slice(0, -8) : ""
+              }
+              onChange={e => {
+                const date = new Date(e.target.value);
+                handleOptionsPayloadChange(
+                  key,
+                  Math.floor(date.getTime() / 1000)
+                );
+              }}
+              className="w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
             />
-          </Switch>
-        );
-      case "date":
-        return (
-          <input
-            type="datetime-local"
-            value={
-              value ? new Date(value * 1000).toISOString().slice(0, -8) : ""
-            }
-            onChange={e => {
-              const date = new Date(e.target.value);
-              handleOptionsPayloadChange(
-                key,
-                Math.floor(date.getTime() / 1000)
-              );
-            }}
-            className="w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-          />
-        );
-      default:
-        return (
-          <input
-            type="text"
-            value={value === null || value === undefined ? "" : String(value)}
-            onChange={e => handleOptionsPayloadChange(key, e.target.value)}
-            className="w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-          />
-        );
-    }
-  };
+          );
+        default:
+          return (
+            <input
+              type="text"
+              value={value === null || value === undefined ? "" : String(value)}
+              onChange={e => handleOptionsPayloadChange(key, e.target.value)}
+              className="w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+            />
+          );
+      }
+    },
+    [resourceSetting, handleOptionsPayloadChange]
+  );
 
   return (
     <div className="space-y-6">
-      {renderField("title", "Title")}
-      {renderField("slug", "Slug")}
-      {renderField("category", "Category")}
-      {renderField("oneliner", "Oneliner")}
-      {renderField("actionLisp", "Action Lisp")}
+      {(unsavedChanges || saveSuccess) && (
+        <div
+          className={`p-4 rounded-md mb-4 ${
+            unsavedChanges ? "bg-myorange/10" : "bg-mygreen/10"
+          }`}
+        >
+          {unsavedChanges ? (
+            <>
+              <p className="text-black font-bold">
+                <ExclamationTriangleIcon className="inline-block h-5 w-5 mr-2" />
+                Unsaved Changes
+              </p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={handleCancel}
+                  className="px-4 py-2 bg-mydarkgrey text-white rounded hover:bg-mydarkgrey/80"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 bg-myorange text-black rounded hover:bg-black hover:text-white"
+                >
+                  Save
+                </button>
+              </div>
+            </>
+          ) : (
+            <p className="text-black font-bold">
+              <CheckCircleIcon className="inline-block h-5 w-5 mr-2" />
+              Save successful
+            </p>
+          )}
+        </div>
+      )}
+
+      {["title", "slug", "category", "oneliner", "actionLisp"].map(field => (
+        <div key={field}>
+          <label className="block text-sm font-medium text-mydarkgrey">
+            {field.charAt(0).toUpperCase() + field.slice(1)}
+          </label>
+          <input
+            type="text"
+            value={localResource[field as keyof ResourceDatum] || ""}
+            onChange={e =>
+              handleChange(field as keyof ResourceDatum, e.target.value)
+            }
+            className="mt-1 block w-full rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
+          />
+        </div>
+      ))}
 
       <div>
-        <h3 className="text-lg font-medium text-mydarkgrey mb-2">
+        <h3 className="text-lg font-bold text-mydarkgrey mb-2">
           Options Payload
         </h3>
         {Object.entries(localResource.optionsPayload || {}).map(
           ([key, value]) => (
             <div key={key} className="flex items-center space-x-2 mb-2">
-              <input
-                type="text"
-                value={key}
-                onChange={e => {
-                  const newOptionsPayload = { ...localResource.optionsPayload };
-                  delete newOptionsPayload[key];
-                  newOptionsPayload[e.target.value] = value;
-                  handleChange("optionsPayload", newOptionsPayload);
-                }}
-                className="w-1/3 rounded-md border-mydarkgrey shadow-sm focus:border-myblue focus:ring-myblue sm:text-sm"
-              />
+              <EditableKey originalKey={key} onKeyChange={handleKeyChange} />
               {renderOptionField(key, value)}
               <button
                 onClick={() => handleRemoveOptionPayloadField(key)}
@@ -215,15 +377,17 @@ export default function ResourceEditor({
           onClick={handleCancel}
           className="px-4 py-2 bg-mydarkgrey text-white rounded hover:bg-mydarkgrey/80"
         >
-          Cancel
+          {unsavedChanges ? `Cancel` : `Close`}
         </button>
-        <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-myblue text-white rounded hover:bg-myblue/80"
-          disabled={!unsavedChanges}
-        >
-          Save
-        </button>
+        {unsavedChanges && (
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="px-4 py-2 bg-myblue text-white rounded hover:bg-myblue/80"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+        )}
       </div>
     </div>
   );

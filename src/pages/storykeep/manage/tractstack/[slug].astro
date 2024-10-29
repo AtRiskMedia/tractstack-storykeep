@@ -2,36 +2,33 @@
 import StoryKeep from "@layouts/StoryKeep.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
-import ResourceEditor from "@components/storykeep/components/ResourceEditor";
-import { getResourcesBySlug } from "../../../../api/turso";
+import TractStackEditor from "@components/storykeep/components/TractStackEditor";
+import { getTractStackBySlug } from "../../../../api/turso";
 import { ulid } from "ulid";
-import type { AuthStatus, MenuDatum, ResourceDatum } from "../../../../types";
+import type { AuthStatus, MenuDatum, TractStackDatum } from "../../../../types";
 
 const { slug } = Astro.params;
 const create = slug === "create";
 
 const user = Astro.locals.user as AuthStatus;
-const canonicalURL = new URL(`/storykeep/manage/resource/${slug}`, Astro.site)
+const canonicalURL = new URL(`/storykeep/manage/tractstack/${slug}`, Astro.site)
   .href;
 
-let resource: ResourceDatum;
+let tractstack: TractStackDatum | undefined = undefined;
 
 if (create) {
-  resource = {
+  tractstack = {
     id: ulid(),
     title: "",
     slug: "",
-    category: null,
-    actionLisp: "",
-    oneliner: "",
-    optionsPayload: {},
+    socialImagePath: "",
   };
 } else {
   if (!slug) return Astro.redirect("/404");
-  const resources = await getResourcesBySlug([slug]);
-  resource = resources[0];
-  if (!resource) return Astro.redirect("/404");
+  const tractstacks = await getTractStackBySlug(slug);
+  tractstack = tractstacks?.at(0);
 }
+if (!tractstack) return Astro.redirect("/404");
 
 const menuPayload: MenuDatum = {
   id: `storykeep`,
@@ -59,13 +56,17 @@ const menuPayload: MenuDatum = {
 ---
 
 <StoryKeep
-  title={create ? "Create New Resource" : `Edit Resource: ${resource.title}`}
+  title={create
+    ? "Create New TractStack"
+    : `Edit TractStack: ${tractstack.title}`}
   canonicalURL={canonicalURL}
 >
   <Header
-    title={create ? "Create New Resource" : `Edit Resource: ${resource.title}`}
+    title={create
+      ? "Create New TractStack"
+      : `Edit TractStack: ${tractstack.title}`}
     menu={menuPayload}
-    slug={`storykeep-manage-resource-${slug}`}
+    slug={`storykeep-manage-tractstack-${slug}`}
     isContext={false}
     user={user}
     isStoryKeep={true}
@@ -74,14 +75,14 @@ const menuPayload: MenuDatum = {
   <main id="main-content" class="min-h-screen">
     <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
       <div class="py-1.5 bg-white px-3.5">
-        <ResourceEditor resource={resource} create={create} client:load />
+        <TractStackEditor tractstack={tractstack} create={create} client:load />
       </div>
     </div>
   </main>
   <Footer
     menu={menuPayload}
     backToTop={true}
-    slug={`storykeep-manage-resource-${slug}`}
+    slug={`storykeep-manage-tractstack-${slug}`}
     isContext={false}
   />
 </StoryKeep>

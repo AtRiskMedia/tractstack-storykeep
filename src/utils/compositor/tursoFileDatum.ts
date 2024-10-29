@@ -32,7 +32,7 @@ export function cleanTursoFileDatum(rows: TursoFileNode[]): FileDatum[] {
         url: r.url,
         src: `${import.meta.env.PUBLIC_IMAGE_URL}${r.url}`.replace(
           /(\.[^.]+)$/,
-          "_600px$1"
+          "_1920px$1"
         ),
         srcSet: false,
         paneId: r.paneId,

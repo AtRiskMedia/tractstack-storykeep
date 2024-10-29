@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { memo, useState, useEffect, useCallback, useMemo } from "react";
 import { Switch, Combobox } from "@headlessui/react";
 import {
   CheckIcon,
@@ -13,6 +13,7 @@ import ContentEditableField from "../components/ContentEditableField";
 import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import { knownEnvSettings } from "../../../constants";
 import { socialIconKeys } from "../../../assets/socialIcons";
+import type { ChangeEvent } from "react";
 import type { ContentMap, EnvSettingDatum } from "../../../types";
 
 interface EnvironmentSettingsProps {
@@ -34,7 +35,9 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
-    {}
+    {
+      Brand: true,
+    }
   );
   const [isGeneratingSnapshots, setIsGeneratingSnapshots] = useState(false);
 
@@ -90,15 +93,6 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     []
   );
 
-  const handleSettingEditingChange = useCallback(
-    (editing: boolean) => {
-      if (!editing) {
-        console.log("must update envSettings", localSettings);
-      }
-    },
-    [localSettings]
-  );
-
   const toggleBooleanSetting = useCallback((index: number) => {
     setLocalSettings(prev => {
       const newSettings = [...prev];
@@ -112,7 +106,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const addSocialValue = useCallback((index: number) => {
     setLocalSettings(prev => {
       const newSettings = [...prev];
-      const currentValues = newSettings[index].value.split(",");
+      const currentValues = newSettings[index].value.split(",").filter(Boolean);
       const usedPlatforms = currentValues.map(value => value.split("|")[0]);
       const availablePlatforms = socialIconKeys.filter(
         key => !usedPlatforms.includes(key)
@@ -131,7 +125,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const removeSocialValue = useCallback((index: number, valueIndex: number) => {
     setLocalSettings(prev => {
       const newSettings = [...prev];
-      const currentValues = newSettings[index].value.split(",");
+      const currentValues = newSettings[index].value.split(",").filter(Boolean);
       currentValues.splice(valueIndex, 1);
       newSettings[index].value = currentValues.join(",");
       return newSettings;
@@ -139,96 +133,121 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     setHasUnsavedChanges(true);
   }, []);
 
-  const SocialMediaInput = ({
-    value,
-    onChange,
-    onRemove,
-    availablePlatforms,
-  }: SocialMediaInputProps) => {
-    const [platform, url] = value.split("|");
+  const SocialMediaInput = memo(
+    ({
+      value,
+      onChange,
+      onRemove,
+      availablePlatforms,
+    }: SocialMediaInputProps) => {
+      const [platform, url] = value.split("|");
+      const [localUrl, setLocalUrl] = useState(url || "");
+      const [isEditing, setIsEditing] = useState(false);
 
-    if (!isLoaded) return <div>Loading...</div>;
+      // Update local state when prop changes, but only if we're not editing
+      useEffect(() => {
+        if (!isEditing) {
+          setLocalUrl(url || "");
+        }
+      }, [url, isEditing]);
 
-    return (
-      <div className="flex items-center space-x-2">
-        <Combobox
-          value={platform}
-          onChange={(newPlatform: string) =>
-            onChange(`${newPlatform}|${url || "https://"}`)
-          }
-        >
-          <div className="relative mt-1">
-            <div className="relative w-full cursor-default overflow-hidden rounded-md bg-white text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
-              <Combobox.Input
-                className={`${commonInputClass} pr-10`}
-                displayValue={(platformValue: string) => platformValue}
-                onChange={event =>
-                  onChange(`${event.target.value}|${url || "https://"}`)
-                }
-              />
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                <ChevronUpDownIcon
-                  className="h-5 w-5 text-mydarkgrey"
-                  aria-hidden="true"
+      const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setIsEditing(true);
+        const newUrl = e.target.value;
+        setLocalUrl(newUrl);
+      };
+
+      const handleUrlBlur = () => {
+        setIsEditing(false);
+        onChange(`${platform}|${localUrl}`);
+      };
+
+      if (!isLoaded) return <div>Loading...</div>;
+
+      return (
+        <div className="flex items-center space-x-2">
+          <Combobox
+            value={platform}
+            onChange={(newPlatform: string) => {
+              onChange(`${newPlatform}|${localUrl}`);
+            }}
+          >
+            <div className="relative mt-1">
+              <div className="relative w-full cursor-default overflow-hidden rounded-md bg-white text-left shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-myorange sm:text-sm">
+                <Combobox.Input
+                  className={`${commonInputClass} pr-10`}
+                  displayValue={(platformValue: string) => platformValue}
+                  onChange={event => {
+                    const newPlatform = event.target.value;
+                    onChange(`${newPlatform}|${localUrl}`);
+                  }}
                 />
-              </Combobox.Button>
-            </div>
-            <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-              {availablePlatforms.map(key => (
-                <Combobox.Option
-                  key={key}
-                  className={({ active }) =>
-                    `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                      active ? "bg-myorange/10 text-myblack" : "text-mydarkgrey"
-                    }`
-                  }
-                  value={key}
-                >
-                  {({ selected, active }) => (
-                    <>
-                      <span
-                        className={`block truncate ${
-                          selected ? "font-bold" : "font-normal"
-                        }`}
-                      >
-                        {key}
-                      </span>
-                      {selected ? (
+                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon
+                    className="h-5 w-5 text-mydarkgrey"
+                    aria-hidden="true"
+                  />
+                </Combobox.Button>
+              </div>
+              <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {availablePlatforms.map(key => (
+                  <Combobox.Option
+                    key={key}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active
+                          ? "bg-myorange/10 text-myblack"
+                          : "text-mydarkgrey"
+                      }`
+                    }
+                    value={key}
+                  >
+                    {({ selected, active }) => (
+                      <>
                         <span
-                          className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                            active ? "text-myorange" : "text-myorange"
+                          className={`block truncate ${
+                            selected ? "font-bold" : "font-normal"
                           }`}
                         >
-                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          {key}
                         </span>
-                      ) : null}
-                    </>
-                  )}
-                </Combobox.Option>
-              ))}
-            </Combobox.Options>
-          </div>
-        </Combobox>
-        <input
-          type="text"
-          value={url}
-          onChange={e => onChange(`${platform}|${e.target.value}`)}
-          placeholder="https://"
-          className={commonInputClass}
-        />
-        <button
-          onClick={onRemove}
-          className="text-myorange hover:text-black"
-          title="Remove social media"
-        >
-          <XMarkIcon className="h-5 w-5" />
-        </button>
-      </div>
-    );
-  };
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? "text-myorange" : "text-myorange"
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </div>
+          </Combobox>
+          <input
+            type="text"
+            value={localUrl}
+            onChange={handleUrlChange}
+            onBlur={handleUrlBlur}
+            placeholder="https://"
+            className={commonInputClass}
+          />
+          <button
+            onClick={onRemove}
+            className="text-myorange hover:text-black"
+            title="Remove social media"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
+        </div>
+      );
+    }
+  );
 
-  const handlePublish = useCallback(() => {
-    console.log("Publishing changes:", localSettings);
+  const handleSave = useCallback(() => {
     envSettings.set({
       current: localSettings,
       original: localSettings,
@@ -252,10 +271,15 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   }, [localSettings]);
 
   useEffect(() => {
-    uncleanGroups.forEach(group => {
-      setExpandedGroups(prev => ({ ...prev, [group]: true }));
-    });
-    if (uncleanGroups.length === 0) setExpandedGroups({ Brand: true });
+    if (uncleanGroups.length > 0) {
+      setExpandedGroups(prev => {
+        const newGroups = { ...prev };
+        uncleanGroups.forEach(group => {
+          newGroups[group] = true;
+        });
+        return newGroups;
+      });
+    }
   }, [uncleanGroups]);
 
   const renderSetting = (setting: EnvSettingDatum, index: number) => {
@@ -484,7 +508,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
                       newValues.join("|")
                     );
                   }}
-                  onEditingChange={handleSettingEditingChange}
+                  onEditingChange={() => {}}
                   placeholder={setting.value}
                   className={commonInputClass}
                   aria-labelledby={`${settingId}-label`}
@@ -516,7 +540,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
               onChange={newValue =>
                 handleSettingChange(index, "value", newValue)
               }
-              onEditingChange={handleSettingEditingChange}
+              onEditingChange={() => {}}
               placeholder={setting.defaultValue}
               className={commonInputClass}
               aria-labelledby={`${settingId}-label`}
@@ -564,19 +588,6 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
         >
           Regenerate Design Previews
         </button>
-        <a
-          className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
-          href="/storykeep"
-        >
-          Cancel
-        </a>
-        <button
-          onClick={handlePublish}
-          className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
-          disabled={hasUncleanData}
-        >
-          Publish Changes
-        </button>
       </div>
       {hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
@@ -596,11 +607,18 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
               Cancel
             </a>
             <button
-              onClick={handlePublish}
+              onClick={handleSave}
               className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
               disabled={hasUncleanData}
             >
-              Publish Changes
+              Save Changes Only
+            </button>
+            <button
+              onClick={() => console.log(`not yet implemented`)}
+              className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+              disabled={hasUncleanData}
+            >
+              Save and Re-Publish Website
             </button>
           </div>
         </div>

@@ -206,8 +206,8 @@ export const StoryKeepHeader = memo(
     const handleSaveComplete = (slug: string) => {
       setIsSaving(false);
       // reload to re-bootstrap from turso (& keep things clean)
-      if(!isContext) navigate(`/${slug}/edit`)
-      else navigate(`/context/${slug}/edit`)
+      if (!isContext) navigate(`/${slug}/edit`);
+      else navigate(`/context/${slug}/edit`);
     };
 
     useEffect(() => {

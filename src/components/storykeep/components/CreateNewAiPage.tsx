@@ -318,7 +318,7 @@ const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
                         <>
                           <span
                             className={`block truncate ${
-                              selected ? "font-medium" : "font-normal"
+                              selected ? "font-bold" : "font-normal"
                             }`}
                           >
                             {type.name}

@@ -349,7 +349,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
                       <>
                         <span
                           className={`block truncate ${
-                            selected ? "font-medium" : "font-normal"
+                            selected ? "font-bold" : "font-normal"
                           }`}
                         >
                           {option}

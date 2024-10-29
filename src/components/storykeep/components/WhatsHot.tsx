@@ -118,7 +118,7 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
                     {item.total_events}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                   <a
                     href={`/${item.slug}`}
                     className="text-myblue hover:text-myorange mr-3 inline-block"

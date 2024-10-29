@@ -54,7 +54,7 @@ export default function ResourcesTable({ resources }: ResourcesTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-mydarkgrey">
                   {resource.category || "N/A"}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                   <a
                     href={`/storykeep/manage/resource/${resource.slug}`}
                     className="text-myblue hover:text-myorange"

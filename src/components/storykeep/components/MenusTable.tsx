@@ -48,7 +48,7 @@ export default function MenusTable({ menus }: MenusTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-mydarkgrey">
                   {menu.theme}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                   <a
                     href={`/storykeep/manage/menu/${menu.id}`}
                     className="text-myblue hover:text-myorange"

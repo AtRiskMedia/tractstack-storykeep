@@ -9,6 +9,32 @@ import type { AuthStatus, MenuDatum } from "../../../../types";
 const { id } = Astro.params;
 if (!id) return Astro.redirect("/404");
 
+// confirm set-up
+const hasConcierge = [
+  import.meta.env.PUBLIC_CONCIERGE_STYLES_URL,
+  import.meta.env.PRIVATE_CONCIERGE_BASE_URL,
+  import.meta.env.PUBLIC_IMAGE_URL,
+  import.meta.env.PRIVATE_CONCIERGE_SECRET,
+  import.meta.env.PRIVATE_AUTH_SECRET,
+].every(x => typeof x === "string" && x.length > 0);
+const hasTurso = [
+  import.meta.env.TURSO_DATABASE_URL,
+  import.meta.env.TURSO_AUTH_TOKEN,
+].every(x => typeof x === "string" && x.length > 0);
+const hasBranding = [
+  import.meta.env.PUBLIC_THEME,
+  import.meta.env.PUBLIC_FOOTER,
+  import.meta.env.PUBLIC_SLOGAN,
+  import.meta.env.PUBLIC_SITE_URL,
+].every(x => typeof x === "string" && x.length > 0);
+const hasContent = [
+  import.meta.env.PUBLIC_HOME,
+  import.meta.env.PUBLIC_TRACTSTACK,
+].every(x => typeof x === "string" && x.length > 0);
+if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+  return Astro.redirect("/storykeep");
+}
+
 const user = Astro.locals.user as AuthStatus;
 const canonicalURL = new URL(`/storykeep/manage/image/${id}`, Astro.site).href;
 

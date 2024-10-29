@@ -5,6 +5,7 @@ import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import { ContentSearchWrapper } from "../components/storykeep/components/ContentSearchWrapper";
 import PageViewStats from "../components/storykeep/components/PageViewStats";
+import SiteWizard from "../components/storykeep/settings/SiteWizard";
 import DashboardActivity from "../components/storykeep/nivo/DashboardActivity";
 import WhatsHot from "../components/storykeep/components/WhatsHot";
 import StoryKeepDashboardStore from "../components/storykeep/StoryKeepDashboardStore";
@@ -18,6 +19,29 @@ import type {
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
+
+// confirm set-up
+const hasConcierge = [
+  import.meta.env.PUBLIC_CONCIERGE_STYLES_URL,
+  import.meta.env.PRIVATE_CONCIERGE_BASE_URL,
+  import.meta.env.PUBLIC_IMAGE_URL,
+  import.meta.env.PRIVATE_CONCIERGE_SECRET,
+  import.meta.env.PRIVATE_AUTH_SECRET,
+].every(x => typeof x === "string" && x.length > 0);
+const hasTurso = [
+  import.meta.env.TURSO_DATABASE_URL,
+  import.meta.env.TURSO_AUTH_TOKEN,
+].every(x => typeof x === "string" && x.length > 0);
+const hasBranding = [
+  import.meta.env.PUBLIC_THEME,
+  import.meta.env.PUBLIC_FOOTER,
+  import.meta.env.PUBLIC_SLOGAN,
+  import.meta.env.PUBLIC_SITE_URL,
+].every(x => typeof x === "string" && x.length > 0);
+const hasContent = [
+  import.meta.env.PUBLIC_HOME,
+  import.meta.env.PUBLIC_TRACTSTACK,
+].every(x => typeof x === "string" && x.length > 0);
 
 // set the canonicalUrl to the actual storyfragment
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
@@ -93,167 +117,176 @@ const impressions = user.isOpenDemo
     isStoryKeep={true}
   />
   <StoryKeepDashboardStore client:load />
-  <main id="main-content" class="min-h-screen">
-    <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
-      <div class="py-1.5 bg-white px-3.5 flex gap-y-12 flex-col">
-        <PageViewStats client:load />
-        <ContentSearchWrapper contentMap={filterPayload} client:load />
-        <div class="flex flex-col md:flex-row gap-6">
-          <div class="rounded-md bg-mywhite shadow-inner w-full md:w-1/2 py-7">
-            <div class="px-3.5 py-1.5 space-y-6">
-              <h2
-                id="create-new-page-heading"
-                class="block text-xl leading-6 text-black"
-              >
-                Create new page * AI powered
-              </h2>
-              <div
-                class="mt-1 flex flex-col gap-4"
-                role="group"
-                aria-labelledby="create-new-page-heading"
-              >
-                <a
-                  href="/storykeep/create/ai/storyfragment"
-                  class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                  title="Add an interactive page to your website"
-                >
-                  Web Page
-                </a>
-                <a
-                  href="/storykeep/create/ai/context"
-                  class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                  title="Add a short 'for-further-reading' page"
-                >
-                  Short Context Page
-                </a>
+  {
+    hasConcierge && hasTurso && hasContent && hasBranding ? (
+      <main id="main-content" class="min-h-screen">
+        <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
+          <div class="py-1.5 bg-white px-3.5 flex gap-y-12 flex-col">
+            <PageViewStats client:load />
+            <ContentSearchWrapper contentMap={filterPayload} client:load />
+            <div class="flex flex-col md:flex-row gap-6">
+              <div class="rounded-md bg-mywhite shadow-inner w-full md:w-1/2 py-7">
+                <div class="px-3.5 py-1.5 space-y-6">
+                  <h2
+                    id="create-new-page-heading"
+                    class="block text-xl leading-6 text-black"
+                  >
+                    Create new page * AI powered
+                  </h2>
+                  <div
+                    class="mt-1 flex flex-col gap-4"
+                    role="group"
+                    aria-labelledby="create-new-page-heading"
+                  >
+                    <a
+                      href="/storykeep/create/ai/storyfragment"
+                      class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                      role="button"
+                      title="Add an interactive page to your website"
+                    >
+                      Web Page
+                    </a>
+                    <a
+                      href="/storykeep/create/ai/context"
+                      class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                      role="button"
+                      title="Add a short 'for-further-reading' page"
+                    >
+                      Short Context Page
+                    </a>
+                  </div>
+                  <h2
+                    id="create-new-page-heading"
+                    class="block text-xl leading-6 text-black mt-4"
+                  >
+                    Create new page (manual)
+                  </h2>
+                  <div
+                    class="mt-1 flex flex-col gap-4"
+                    role="group"
+                    aria-labelledby="create-new-page-heading"
+                  >
+                    <a
+                      href="/storykeep/create/storyfragment"
+                      class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                      role="button"
+                      title="Add an interactive page to your website"
+                    >
+                      Web Page
+                    </a>
+                    <a
+                      href="/storykeep/create/context"
+                      class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                      role="button"
+                      title="Add a short 'for-further-reading' page"
+                    >
+                      Short Context Page
+                    </a>
+                  </div>
+                </div>
               </div>
-              <h2
-                id="create-new-page-heading"
-                class="block text-xl leading-6 text-black mt-4"
-              >
-                Create new page (manual)
-              </h2>
-              <div
-                class="mt-1 flex flex-col gap-4"
-                role="group"
-                aria-labelledby="create-new-page-heading"
-              >
-                <a
-                  href="/storykeep/create/storyfragment"
-                  class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                  title="Add an interactive page to your website"
-                >
-                  Web Page
-                </a>
-                <a
-                  href="/storykeep/create/context"
-                  class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                  role="button"
-                  title="Add a short 'for-further-reading' page"
-                >
-                  Short Context Page
-                </a>
-              </div>
+
+              {user?.isAuthenticated && (
+                <div class="flex flex-col gap-6 w-full md:w-1/2">
+                  <div class="rounded-md bg-mywhite shadow-inner w-full py-3.5">
+                    <div class="px-3.5 py-1.5">
+                      <h2
+                        id="create-new-page-heading-2"
+                        class="block text-lg leading-6 text-black mb-2"
+                      >
+                        Create...
+                      </h2>
+                      <div
+                        class="mt-1 flex flex-wrap gap-2"
+                        role="group"
+                        aria-labelledby="create-new-page-heading-2"
+                      >
+                        <a
+                          href="/storykeep/manage/resource/create"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Resource
+                        </a>
+                        <a
+                          href="/storykeep/manage/menu/create"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Menu
+                        </a>
+                        <a
+                          href="/storykeep/manage/tractstack/create"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Tract Stack
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="rounded-md bg-mywhite shadow-inner w-full py-3.5">
+                    <div class="px-3.5 py-1.5">
+                      <h2
+                        id="create-new-page-heading-3"
+                        class="block text-lg leading-6 text-black mb-2"
+                      >
+                        Manage / Browse
+                      </h2>
+                      <div
+                        class="mt-1 flex flex-wrap gap-2"
+                        role="group"
+                        aria-labelledby="create-new-page-heading-3"
+                      >
+                        <a
+                          href="/storykeep/manage/image"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Images
+                        </a>
+                        <a
+                          href="/storykeep/manage/resources"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Resources
+                        </a>
+                        <a
+                          href="/storykeep/manage/menu"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Menus
+                        </a>
+                        <a
+                          href="/storykeep/manage/tractstack"
+                          class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
+                          role="button"
+                        >
+                          Tract Stacks
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+            <DashboardActivity client:only="react" />
+            <WhatsHot contentMap={payload} client:load />
           </div>
-
-          {
-            user?.isAuthenticated && (
-              <div class="flex flex-col gap-6 w-full md:w-1/2">
-                <div class="rounded-md bg-mywhite shadow-inner w-full py-3.5">
-                  <div class="px-3.5 py-1.5">
-                    <h2
-                      id="create-new-page-heading-2"
-                      class="block text-lg leading-6 text-black mb-2"
-                    >
-                      Create...
-                    </h2>
-                    <div
-                      class="mt-1 flex flex-wrap gap-2"
-                      role="group"
-                      aria-labelledby="create-new-page-heading-2"
-                    >
-                      <a
-                        href="/storykeep/manage/resource/create"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Resource
-                      </a>
-                      <a
-                        href="/storykeep/manage/menu/create"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Menu
-                      </a>
-                      <a
-                        href="/storykeep/manage/tractstack/create"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Tract Stack
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="rounded-md bg-mywhite shadow-inner w-full py-3.5">
-                  <div class="px-3.5 py-1.5">
-                    <h2
-                      id="create-new-page-heading-3"
-                      class="block text-lg leading-6 text-black mb-2"
-                    >
-                      Manage / Browse
-                    </h2>
-                    <div
-                      class="mt-1 flex flex-wrap gap-2"
-                      role="group"
-                      aria-labelledby="create-new-page-heading-3"
-                    >
-                      <a
-                        href="/storykeep/manage/image"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Images
-                      </a>
-                      <a
-                        href="/storykeep/manage/resources"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Resources
-                      </a>
-                      <a
-                        href="/storykeep/manage/menu"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Menus
-                      </a>
-                      <a
-                        href="/storykeep/manage/tractstack"
-                        class="flex items-center justify-center px-6 py-3 rounded-md text-lg bg-white text-mydarkgrey border border-mydarkgrey hover:bg-myorange/50"
-                        role="button"
-                      >
-                        Tract Stacks
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )
-          }
         </div>
-        <DashboardActivity client:only="react" />
-        <WhatsHot contentMap={payload} client:load />
-      </div>
-    </div>
-  </main>
+      </main>
+    ) : (
+      <SiteWizard
+        hasConcierge={hasConcierge}
+        hasTurso={hasTurso}
+        hasBranding={hasBranding}
+        hasContent={hasContent}
+      />
+    )
+  }
   {
     impressions?.length ? (
       <ImpressionWrapper

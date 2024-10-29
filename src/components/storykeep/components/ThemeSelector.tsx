@@ -55,7 +55,7 @@ const ThemeSelector = ({
                   <>
                     <span
                       className={`block truncate ${
-                        selected ? "font-medium" : "font-normal"
+                        selected ? "font-bold" : "font-normal"
                       }`}
                     >
                       {theme.label}

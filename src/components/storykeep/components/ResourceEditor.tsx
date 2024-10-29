@@ -331,7 +331,7 @@ export default function ResourceEditor({
 
       {["title", "slug", "category", "oneliner", "actionLisp"].map(field => (
         <div key={field}>
-          <label className="block text-sm font-medium text-mydarkgrey">
+          <label className="block text-sm font-bold text-mydarkgrey">
             {field.charAt(0).toUpperCase() + field.slice(1)}
           </label>
           <input

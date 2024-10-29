@@ -60,7 +60,7 @@ export default function ImagesTable({ images }: ImagesTableProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-mydarkgrey">
                   {image.altDescription}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
                   <a
                     href={`/storykeep/manage/image/${image.id}`}
                     className="text-myblue hover:text-myorange"

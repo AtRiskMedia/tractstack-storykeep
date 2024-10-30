@@ -54,6 +54,8 @@ const TursoConnectionForm = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          // Add this header to bypass Astro's view transitions
+          "x-astro-bypass": "true",
         },
         body: JSON.stringify(formData),
       });
@@ -119,7 +121,6 @@ const TursoConnectionForm = () => {
               placeholder="libsql://your-database-url"
               className={commonInputClass}
               autoComplete="off"
-              autoComplete="new-password"
             />
             {errors.TURSO_DATABASE_URL && (
               <p className="text-sm text-myorange mt-1">
@@ -146,7 +147,6 @@ const TursoConnectionForm = () => {
               placeholder="eyJhb...your-token"
               className={commonInputClass}
               autoComplete="off"
-              autoComplete="new-password"
             />
             {errors.TURSO_AUTH_TOKEN && (
               <p className="text-sm text-myorange mt-1">

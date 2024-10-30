@@ -139,10 +139,6 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     .filter(item => item.type === "StoryFragment")
     .map(item => ({ slug: item.slug, title: item.title }));
 
-  useEffect(() => {
-    fetchEnv();
-  }, []);
-
   async function fetchEnv() {
     try {
       const response = await fetch(`/api/concierge/storykeep/env`);
@@ -168,6 +164,10 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
       console.error("Error fetching env:", error);
     }
   }
+
+  useEffect(() => {
+    fetchEnv();
+  }, []);
 
   const handleSettingChange = useCallback(
     (

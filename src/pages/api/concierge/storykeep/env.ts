@@ -39,6 +39,7 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async context => {
+  console.log(`POST`, `${BACKEND_URL}/storykeep/env`);
   try {
     const body = await context.request.json();
 

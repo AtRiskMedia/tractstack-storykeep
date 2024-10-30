@@ -11,15 +11,24 @@ const RebuildProgressModal = ({
   const [progress, setProgress] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastBuild, setLastBuild] = useState(0);
+  const [currentBuild, setCurrentBuild] = useState(0);
 
   const checkSite = useCallback(async () => {
+    if (lastBuild === currentBuild) {
+      return false;
+    }
+    if (!import.meta.env.PROD) {
+      console.log(`DEV MODE: skipping site check`);
+      return true;
+    }
     try {
       const response = await fetch(import.meta.env.PUBLIC_SITE_URL);
       return response.ok;
     } catch (err) {
       return false;
     }
-  }, []);
+  }, [lastBuild, currentBuild]);
 
   const triggerRebuild = useCallback(async () => {
     try {
@@ -28,7 +37,7 @@ const RebuildProgressModal = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ target: "site" }),
+        body: JSON.stringify({ target: "all" }),
       });
       const data = await response.json();
       if (!data.success) {
@@ -41,12 +50,32 @@ const RebuildProgressModal = ({
     return true;
   }, []);
 
+  async function fetchLastBuild() {
+    try {
+      const response = await fetch(`/api/concierge/storykeep/status`);
+      const data = await response.json();
+      if (data.success) {
+        const newData = JSON.parse(data.data);
+        if (typeof newData?.lastBuild === `number`) {
+          if (lastBuild === 0) setLastBuild(newData.lastBuild);
+          setCurrentBuild(newData.lastBuild);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching last build status:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchLastBuild();
+  }, []);
+
   useEffect(() => {
     if (!isOpen) return;
 
     let intervalId: number;
     let attemptCount = 0;
-    const maxAttempts = 45; // 90 seconds total with 2-second intervals
+    const maxAttempts = 90; // 180 seconds total with 2-second intervals
 
     const runRebuild = async () => {
       const rebuildStarted = await triggerRebuild();
@@ -54,6 +83,7 @@ const RebuildProgressModal = ({
 
       intervalId = window.setInterval(async () => {
         attemptCount++;
+        fetchLastBuild();
 
         // Cycle progress between 8 and 10 segments
         setProgress(prev => (prev >= 10 ? 8 : prev + 1));
@@ -79,13 +109,13 @@ const RebuildProgressModal = ({
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [isOpen, checkSite, triggerRebuild]);
+  }, [isOpen, checkSite, triggerRebuild, lastBuild, currentBuild]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <div className="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
         <div className="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
           <div>
             <div className="mt-3 text-center sm:mt-5">
@@ -114,7 +144,7 @@ const RebuildProgressModal = ({
                     ? error
                     : isComplete
                       ? "Redirecting to dashboard..."
-                      : "This may take up to 90 seconds..."}
+                      : "This may take up to 90-120 seconds..."}
                 </p>
               </div>
             </div>

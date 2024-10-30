@@ -375,7 +375,7 @@ export const knownEnvSettings: EnvSetting[] = [
     defaultValue: "false",
     type: "boolean",
     description:
-      "Allow visitors to make temporary changes to your site (DEMO MODE)",
+      "Place your site in DEMO MODE -- allows temporary, non-persisting edits by anonymous users",
     group: "Core",
     priority: false,
     required: false,

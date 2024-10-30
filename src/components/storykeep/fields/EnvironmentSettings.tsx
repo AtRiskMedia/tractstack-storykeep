@@ -14,7 +14,11 @@ import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import { knownEnvSettings } from "../../../constants";
 import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ChangeEvent } from "react";
-import type { ContentMap, EnvSettingDatum } from "../../../types";
+import type {
+  ContentMap,
+  EnvSettingType,
+  EnvSettingDatum,
+} from "../../../types";
 
 interface EnvironmentSettingsProps {
   contentMap: ContentMap[];
@@ -27,13 +31,101 @@ interface SocialMediaInputProps {
   availablePlatforms: string[];
 }
 
+function processEnvSettingValue(setting: EnvSettingDatum): string | null {
+  if (!setting.value && !setting.required) {
+    return null;
+  }
+  switch (setting.type) {
+    case "boolean":
+      return setting.value === "true" ? "true" : "false";
+    case "number": {
+      const num = parseFloat(setting.value);
+      return isNaN(num) ? "0" : num.toString();
+    }
+    case "string[]":
+      return setting.value
+        .split(",")
+        .map(v => v.trim())
+        .filter(Boolean)
+        .join(",");
+    case "string":
+      return setting.value || (setting.required ? "" : null);
+    default:
+      return setting.value || (setting.required ? "" : null);
+  }
+}
+
+async function saveEnvSettings(
+  currentSettings: EnvSettingDatum[],
+  originalSettings: EnvSettingDatum[]
+): Promise<boolean> {
+  try {
+    const originalValues = originalSettings.reduce(
+      (acc, setting) => {
+        acc[setting.name] = processEnvSettingValue(setting);
+        return acc;
+      },
+      {} as Record<string, string | null>
+    );
+    // Filter and process only changed settings
+    const processedSettings = currentSettings
+      .map(setting => {
+        const processedValue = processEnvSettingValue(setting);
+        const originalValue = originalValues[setting.name];
+        if (processedValue !== originalValue) {
+          return {
+            name: setting.name,
+            value: processedValue,
+          };
+        }
+        return null;
+      })
+      .filter(
+        (s): s is NonNullable<typeof s> => s !== null && s.value !== null
+      );
+    // Only proceed if there are actual changes
+    if (processedSettings.length === 0) {
+      return true; // No changes needed
+    }
+    const payload: { settings: Record<string, string> } = {
+      settings: processedSettings.reduce(
+        (acc, setting) => {
+          acc[setting.name] = setting.value ?? ``;
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
+    };
+    console.log(payload.settings);
+    const saveResponse = await fetch(`/api/concierge/storykeep/env`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload.settings),
+    });
+    const saveData = await saveResponse.json();
+    if (!saveData.success) {
+      throw new Error(saveData.error || "Failed to save environment settings");
+    }
+    return true;
+  } catch (error) {
+    console.error("Error saving environment settings:", error);
+    return false;
+  }
+}
+
 const groupOrder = ["Brand", "Core", "Options", "Integrations", "Backend"];
 const wordmarkModeOptions = ["default", "logo", "wordmark"];
 
 const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
+  const [originalSettings, setOriginalSettings] = useState<EnvSettingDatum[]>(
+    []
+  );
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
     {
       Brand: true,
@@ -59,15 +151,17 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
       if (data.success) {
         const newData = JSON.parse(data.data);
         const initialSettings = knownEnvSettings.map(setting => {
+          let value = newData[setting.name] ?? "";
+          if (setting.type === "boolean") {
+            value = value === "1" || value === true ? "true" : "false";
+          }
           return {
             ...setting,
-            value:
-              newData[setting.name] && setting.type === `boolean`
-                ? `false`
-                : (newData[setting.name] ?? ""),
+            value,
           };
         });
         setLocalSettings(initialSettings);
+        setOriginalSettings(initialSettings);
         setHasUnsavedChanges(false);
         setIsLoaded(true);
       }
@@ -143,25 +237,20 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
       const [platform, url] = value.split("|");
       const [localUrl, setLocalUrl] = useState(url || "");
       const [isEditing, setIsEditing] = useState(false);
-
-      // Update local state when prop changes, but only if we're not editing
       useEffect(() => {
         if (!isEditing) {
           setLocalUrl(url || "");
         }
       }, [url, isEditing]);
-
       const handleUrlChange = (e: ChangeEvent<HTMLInputElement>) => {
         setIsEditing(true);
         const newUrl = e.target.value;
         setLocalUrl(newUrl);
       };
-
       const handleUrlBlur = () => {
         setIsEditing(false);
         onChange(`${platform}|${localUrl}`);
       };
-
       if (!isLoaded) return <div>Loading...</div>;
 
       return (
@@ -247,15 +336,26 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     }
   );
 
-  const handleSave = useCallback(() => {
-    console.log(`must push to concierge`);
-    envSettings.set({
-      current: localSettings,
-      original: localSettings,
-      history: [],
-    });
-    setHasUnsavedChanges(false);
-  }, [localSettings]);
+  const handleSave = useCallback(async () => {
+    try {
+      const success = await saveEnvSettings(localSettings, originalSettings);
+      if (success) {
+        envSettings.set({
+          current: localSettings,
+          original: localSettings,
+          history: [],
+        });
+        setOriginalSettings(localSettings);
+        setHasUnsavedChanges(false);
+        setSaveSuccess(true);
+        setTimeout(() => {
+          setSaveSuccess(false);
+        }, 7000);
+      }
+    } catch (error) {
+      console.error("Error in handleSave:", error);
+    }
+  }, [localSettings, originalSettings]);
 
   const toggleGroup = useCallback((group: string) => {
     setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
@@ -308,6 +408,33 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
         )}
       </label>
     );
+
+    if (setting.type === "boolean") {
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          {renderLabel()}
+          <Switch
+            checked={setting.value === "1" || setting.value === "true"}
+            onChange={() => toggleBooleanSetting(index)}
+            className={`${
+              setting.value === "1" || setting.value === "true"
+                ? "bg-myorange"
+                : "bg-mydarkgrey"
+            } relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-myorange focus:ring-offset-2`}
+            id={settingId}
+            aria-labelledby={`${settingId}-label`}
+          >
+            <span
+              className={`${
+                setting.value === "1" || setting.value === "true"
+                  ? "translate-x-6"
+                  : "translate-x-1"
+              } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+            />
+          </Switch>
+        </div>
+      );
+    }
 
     if (setting.name === "PUBLIC_WORDMARK_MODE") {
       return (
@@ -477,7 +604,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     return (
       <div key={setting.name} className="space-y-2 mb-4">
         {renderLabel()}
-        {setting.type === "boolean" ? (
+        {setting.type === ("boolean" as EnvSettingType) ? (
           <Switch
             checked={setting.value === "true"}
             onChange={() => toggleBooleanSetting(index)}
@@ -573,6 +700,14 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
 
   return (
     <div className="space-y-8">
+      {saveSuccess && (
+        <div className="bg-mygreen/10 p-4 rounded-md mb-4">
+          <p className="text-black font-bold">
+            <CheckIcon className="inline-block h-5 w-5 mr-2" />
+            Save successful
+          </p>
+        </div>
+      )}
       {hasUncleanData && (
         <div className="bg-myorange/10 p-4 rounded-md mb-4">
           <p className="text-black font-bold">

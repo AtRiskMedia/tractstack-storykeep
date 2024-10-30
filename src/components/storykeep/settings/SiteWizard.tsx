@@ -123,7 +123,7 @@ export default function SiteWizard({
         <div className="flex flex-col space-y-8">
           <div className="relative">
             <h2 className="inline-block font-action text-myblue text-2xl md:text-3xl">
-              Welcome to your Story Keep
+              Hello world!
             </h2>
           </div>
 

@@ -8,6 +8,7 @@ import { ConfigureStoryKeep } from "./other/ConfigureStoryKeep";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import { CartIcon } from "./other/CartIcon";
 import { WORDMARK_MODE } from "../constants";
+import { getSetupChecks } from "../utils/setupChecks";
 import type { AuthStatus, MenuDatum, ImpressionDatum } from "../types";
 
 export interface Props {
@@ -33,6 +34,7 @@ const {
 } = Astro.props;
 const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
+const { hasTurso } = getSetupChecks();
 ---
 
 <header class="relative bg-white shadow-inner">
@@ -83,7 +85,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
     <h1 class="text-mydarkgrey truncate text-xl" title={title}>{title}</h1>
     <div class="flex flex-row flex-nowrap gap-x-2">
       {
-        !isHome && !isStoryKeep ? (
+        hasTurso && !isHome && !isStoryKeep ? (
           <a
             href="/"
             class="text-myblue/80 hover:text-myblue hover:rotate-6"
@@ -91,7 +93,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           >
             <Home classes="w-6 h-6" />
           </a>
-        ) : !isHome && isStoryKeep ? (
+        ) : hasTurso && !isHome && isStoryKeep ? (
           <a
             data-astro-reload
             href="/"
@@ -102,9 +104,11 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           </a>
         ) : null
       }
-      {!disableFastTravel && <StorySteps client:load />}
+      {hasTurso && !disableFastTravel && <StorySteps client:load />}
       {
-        slug !== `storykeep` && (user?.isAuthenticated || user?.isOpenDemo) ? (
+        hasTurso &&
+        slug !== `storykeep` &&
+        (user?.isAuthenticated || user?.isOpenDemo) ? (
           <OpenStoryKeep
             slug={slug}
             isContext={isContext}
@@ -112,14 +116,14 @@ px-4 md:px-8 bg-mywhite shadow-inner"
             isEditable={isEditable}
             client:load
           />
-        ) : slug === `storykeep` && user?.isAuthenticated ? (
+        ) : hasTurso && slug === `storykeep` && user?.isAuthenticated ? (
           <ConfigureStoryKeep client:load />
         ) : null
       }
       <RememberMe client:load />
       <CartIcon client:load />
       {
-        impressions?.length ? (
+        hasTurso && impressions?.length ? (
           <ImpressionWrapper
             payload={impressions}
             icon={true}

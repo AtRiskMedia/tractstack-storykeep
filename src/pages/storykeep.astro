@@ -41,21 +41,21 @@ if (!payload) {
 }
 
 // menu
-const links = [
-  {
-    name: "Logout",
-    description: "Close this session",
-    featured: true,
-    actionLisp: "(goto (storykeep logout))",
-  },
-];
-if (user?.isAuthenticated)
+const links = [];
+if (hasTurso && user?.isAuthenticated) {
   links.unshift({
     name: "Settings",
     description: "Your Story Keep Settings",
     featured: true,
     actionLisp: "(goto (storykeep settings))",
   });
+  links.unshift({
+    name: "Logout",
+    description: "Close this session",
+    featured: true,
+    actionLisp: "(goto (storykeep logout))",
+  });
+}
 const menuPayload = {
   id: `storykeep`,
   title: "Story Keep Menu",
@@ -64,24 +64,25 @@ const menuPayload = {
 } as MenuDatum;
 
 // impression
-const impressions = user.isOpenDemo
-  ? [
-      {
-        id: `storykeep`,
-        parentId: `storykeep`,
-        title: "Would you like your website to be built with Tract Stack?",
-        body: "We offer Tract Stack as a service with premium agency support.",
-        actionLisp: "",
-        buttonText: "Interested!",
-        actionsLisp: "(goto (url https://tractstack.com/#pricing))",
-      },
-    ]
-  : ([] as ImpressionDatum[]);
+const impressions =
+  hasTurso && user.isOpenDemo
+    ? [
+        {
+          id: `storykeep`,
+          parentId: `storykeep`,
+          title: "Would you like your website to be built with Tract Stack?",
+          body: "We offer Tract Stack as a service with premium agency support.",
+          actionLisp: "",
+          buttonText: "Interested!",
+          actionsLisp: "(goto (url https://tractstack.com/#pricing))",
+        },
+      ]
+    : ([] as ImpressionDatum[]);
 ---
 
 <StoryKeep title="Welcome to your Story Keep" canonicalURL={canonicalURL}>
   {
-    user.isOpenDemo ? (
+    hasTurso && user.isOpenDemo ? (
       <div class="my-1 pt-2 shadow-inner px-1">
         <span class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black w-full justify-center">
           <span class="font-bold">You are in Demo Mode:</span> &nbsp; Reload to

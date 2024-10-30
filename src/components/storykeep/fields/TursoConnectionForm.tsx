@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
-import type { ChangeEvent } from "react";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
+import RebuildProgressModal from "../components/RebuildProgressModal";
+import type { ChangeEvent } from "react";
 
 const TursoConnectionForm = () => {
+  const [showRebuildModal, setShowRebuildModal] = useState(false);
   const [formData, setFormData] = useState({
     TURSO_DATABASE_URL: "",
     TURSO_AUTH_TOKEN: "",
@@ -44,7 +46,6 @@ const TursoConnectionForm = () => {
 
   const handleSave = async () => {
     if (!validate() || isSaving) return;
-
     try {
       setIsSaving(true);
       const response = await fetch("/api/concierge/storykeep/env", {
@@ -54,16 +55,12 @@ const TursoConnectionForm = () => {
         },
         body: JSON.stringify(formData),
       });
-
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.error || "Failed to save Turso settings");
       }
-
       setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-      }, 7000);
+      setShowRebuildModal(true);
     } catch (error) {
       console.error("Error saving Turso settings:", error);
       setErrors(prev => ({
@@ -80,6 +77,10 @@ const TursoConnectionForm = () => {
 
   return (
     <div className="space-y-6">
+      <RebuildProgressModal
+        isOpen={showRebuildModal}
+        onClose={() => setShowRebuildModal(false)}
+      />
       {saveSuccess && (
         <div className="bg-mygreen/10 p-4 rounded-md">
           <p className="text-black font-bold">
@@ -115,6 +116,7 @@ const TursoConnectionForm = () => {
               onChange={handleChange}
               placeholder="libsql://your-database-url"
               className={commonInputClass}
+              autoComplete="off"
             />
             {errors.TURSO_DATABASE_URL && (
               <p className="text-sm text-myorange mt-1">
@@ -140,6 +142,7 @@ const TursoConnectionForm = () => {
               onChange={handleChange}
               placeholder="eyJhb...your-token"
               className={commonInputClass}
+              autoComplete="off"
             />
             {errors.TURSO_AUTH_TOKEN && (
               <p className="text-sm text-myorange mt-1">

@@ -45,6 +45,7 @@ const TursoConnectionForm = () => {
   };
 
   const handleSave = async () => {
+    console.log(`save`,formData)
     if (!validate() || isSaving) return;
     try {
       setIsSaving(true);
@@ -74,7 +75,7 @@ const TursoConnectionForm = () => {
 
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
-  console.log(formData);
+
   return (
     <div className="space-y-6">
       <RebuildProgressModal
@@ -117,6 +118,7 @@ const TursoConnectionForm = () => {
               placeholder="libsql://your-database-url"
               className={commonInputClass}
               autoComplete="off"
+              autoComplete="new-password"
             />
             {errors.TURSO_DATABASE_URL && (
               <p className="text-sm text-myorange mt-1">
@@ -143,6 +145,7 @@ const TursoConnectionForm = () => {
               placeholder="eyJhb...your-token"
               className={commonInputClass}
               autoComplete="off"
+              autoComplete="new-password"
             />
             {errors.TURSO_AUTH_TOKEN && (
               <p className="text-sm text-myorange mt-1">

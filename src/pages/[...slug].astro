@@ -5,6 +5,7 @@ import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import HeaderWidget from "../custom/HeaderWidget.astro";
 import Footer from "@components/Footer.astro";
+import { getSetupChecks } from "../utils/setupChecks";
 import { getStoryFragmentBySlug } from "../api/turso";
 import { ENABLE_HEADER_WIDGET } from "../constants";
 import type { AuthStatus, Current, StylesVersion } from "../types";
@@ -13,27 +14,7 @@ import type { AuthStatus, Current, StylesVersion } from "../types";
 const user = Astro.locals.user as AuthStatus;
 
 // confirm set-up
-const hasConcierge = [
-  import.meta.env.PUBLIC_CONCIERGE_STYLES_URL,
-  import.meta.env.PRIVATE_CONCIERGE_BASE_URL,
-  import.meta.env.PUBLIC_IMAGE_URL,
-  import.meta.env.PRIVATE_CONCIERGE_SECRET,
-  import.meta.env.PRIVATE_AUTH_SECRET,
-].every(x => typeof x === "string" && x.length > 0);
-const hasTurso = [
-  import.meta.env.TURSO_DATABASE_URL,
-  import.meta.env.TURSO_AUTH_TOKEN,
-].every(x => typeof x === "string" && x.length > 0);
-const hasBranding = [
-  import.meta.env.PUBLIC_THEME,
-  import.meta.env.PUBLIC_FOOTER,
-  import.meta.env.PUBLIC_SLOGAN,
-  import.meta.env.PUBLIC_SITE_URL,
-].every(x => typeof x === "string" && x.length > 0);
-const hasContent = [
-  import.meta.env.PUBLIC_HOME,
-  import.meta.env.PUBLIC_TRACTSTACK,
-].every(x => typeof x === "string" && x.length > 0);
+const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
 if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
   return Astro.redirect("/storykeep");
 }

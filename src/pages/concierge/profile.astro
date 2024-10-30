@@ -5,33 +5,14 @@ import Footer from "@components/Footer.astro";
 import { InformationCircle } from "../../components/icons/InformationCircle";
 import { RememberMeToggle } from "../../components/other/RememberMeToggle";
 import { ProfileSwitch } from "../../components/other/ProfileSwitch";
+import { getSetupChecks } from "../../utils/setupChecks";
 import type { AuthStatus, StylesVersion } from "../../types";
 
 // user authenticated?
 const user = Astro.locals.user as AuthStatus;
 
 // confirm set-up
-const hasConcierge = [
-  import.meta.env.PUBLIC_CONCIERGE_STYLES_URL,
-  import.meta.env.PRIVATE_CONCIERGE_BASE_URL,
-  import.meta.env.PUBLIC_IMAGE_URL,
-  import.meta.env.PRIVATE_CONCIERGE_SECRET,
-  import.meta.env.PRIVATE_AUTH_SECRET,
-].every(x => typeof x === "string" && x.length > 0);
-const hasTurso = [
-  import.meta.env.TURSO_DATABASE_URL,
-  import.meta.env.TURSO_AUTH_TOKEN,
-].every(x => typeof x === "string" && x.length > 0);
-const hasBranding = [
-  import.meta.env.PUBLIC_THEME,
-  import.meta.env.PUBLIC_FOOTER,
-  import.meta.env.PUBLIC_SLOGAN,
-  import.meta.env.PUBLIC_SITE_URL,
-].every(x => typeof x === "string" && x.length > 0);
-const hasContent = [
-  import.meta.env.PUBLIC_HOME,
-  import.meta.env.PUBLIC_TRACTSTACK,
-].every(x => typeof x === "string" && x.length > 0);
+const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
 if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
   return Astro.redirect("/storykeep");
 }

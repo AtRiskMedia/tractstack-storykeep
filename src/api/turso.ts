@@ -29,19 +29,22 @@ let tursoClient: ReturnType<typeof createClient> | null = null;
 
 function getTursoClient() {
   if (
-    !import.meta.env.TURSO_DATABASE_URL ||
-    !import.meta.env.TURSO_AUTH_TOKEN
+    !import.meta.env.TURSO_DATABASE_URL?.trim() ||
+    !import.meta.env.TURSO_AUTH_TOKEN?.trim()
   ) {
     throw new Error("Turso credentials not configured");
   }
-
+  try {
+    new URL(import.meta.env.TURSO_DATABASE_URL);
+  } catch (e) {
+    throw new Error("Invalid Turso database URL format");
+  }
   if (!tursoClient) {
     tursoClient = createClient({
       url: import.meta.env.TURSO_DATABASE_URL,
       authToken: import.meta.env.TURSO_AUTH_TOKEN,
     });
   }
-
   return tursoClient;
 }
 

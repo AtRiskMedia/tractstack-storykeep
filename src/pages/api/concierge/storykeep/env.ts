@@ -39,6 +39,7 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async context => {
+  console.log(`POST`);
   try {
     const body = await context.request.json();
     console.log(body);

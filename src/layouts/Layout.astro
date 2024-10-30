@@ -3,6 +3,7 @@ import { LOCALE, SITE } from "@config";
 import { ViewTransitions } from "astro:transitions";
 import SetContentMap from "../components/SetContentMap";
 import { getContentMap } from "../api/turso";
+import { getSetupChecks } from "../utils/setupChecks";
 import type { ContentMap } from "../types";
 
 export interface Props {
@@ -45,11 +46,7 @@ const gtagUrl =
     ? `https://www.googletagmanager.com/gtag/js?id=${googleSiteVerification}`
     : null;
 
-const hasTurso = [
-  import.meta.env.TURSO_DATABASE_URL,
-  import.meta.env.TURSO_AUTH_TOKEN,
-].every(x => typeof x === "string" && x.length > 0);
-
+const { hasTurso } = getSetupChecks();
 const contentMap: ContentMap[] = hasTurso ? await getContentMap() : [];
 ---
 

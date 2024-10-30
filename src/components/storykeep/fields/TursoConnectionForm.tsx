@@ -45,17 +45,13 @@ const TursoConnectionForm = () => {
   };
 
   const handleSave = async () => {
-    console.log(`save`, formData);
     if (!validate() || isSaving) return;
     try {
       setIsSaving(true);
-      console.log("Making fetch request to env endpoint");
       const response = await fetch("/api/concierge/storykeep/env", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Add this header to bypass Astro's view transitions
-          "x-astro-bypass": "true",
         },
         body: JSON.stringify(formData),
       });
@@ -120,7 +116,7 @@ const TursoConnectionForm = () => {
               onChange={handleChange}
               placeholder="libsql://your-database-url"
               className={commonInputClass}
-              autoComplete="off"
+              autoComplete="new-password"
             />
             {errors.TURSO_DATABASE_URL && (
               <p className="text-sm text-myorange mt-1">
@@ -146,7 +142,7 @@ const TursoConnectionForm = () => {
               onChange={handleChange}
               placeholder="eyJhb...your-token"
               className={commonInputClass}
-              autoComplete="off"
+              autoComplete="new-password"
             />
             {errors.TURSO_AUTH_TOKEN && (
               <p className="text-sm text-myorange mt-1">

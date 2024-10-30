@@ -96,7 +96,6 @@ async function saveEnvSettings(
         {} as Record<string, string>
       ),
     };
-    console.log(payload.settings);
     const saveResponse = await fetch(`/api/concierge/storykeep/env`, {
       method: "POST",
       headers: {

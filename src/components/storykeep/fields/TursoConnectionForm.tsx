@@ -1,105 +1,168 @@
-import { useState } from "react";
-import { ChevronUpIcon } from "@heroicons/react/24/outline";
-import { Disclosure } from "@headlessui/react";
+import { useState, useCallback } from "react";
+import type { ChangeEvent } from "react";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 
 const TursoConnectionForm = () => {
-  const [credentials, setCredentials] = useState({
-    databaseUrl: "",
-    authToken: "",
+  const [formData, setFormData] = useState({
+    TURSO_DATABASE_URL: "",
+    TURSO_AUTH_TOKEN: "",
   });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: "databaseUrl" | "authToken", value: string) => {
-    setCredentials(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+  const validateUrl = (url: string) => {
+    if (!url.startsWith("libsql://")) {
+      return "Database URL must start with libsql://";
+    }
+    return "";
   };
 
-  const handleSubmit = () => {
-    console.log("Turso Credentials:", credentials);
+  const validateToken = (token: string) => {
+    if (!token.startsWith("ey")) {
+      return 'Auth token must start with "ey"';
+    }
+    return "";
   };
 
-  const isValid =
-    credentials.databaseUrl.trim() !== "" &&
-    credentials.authToken.trim() !== "";
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrors(prev => ({ ...prev, [name]: "" }));
+  }, []);
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    newErrors.TURSO_DATABASE_URL = validateUrl(formData.TURSO_DATABASE_URL);
+    newErrors.TURSO_AUTH_TOKEN = validateToken(formData.TURSO_AUTH_TOKEN);
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error);
+  };
+
+  const handleSave = async () => {
+    if (!validate() || isSaving) return;
+
+    try {
+      setIsSaving(true);
+      const response = await fetch("/api/concierge/storykeep/env", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || "Failed to save Turso settings");
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 7000);
+    } catch (error) {
+      console.error("Error saving Turso settings:", error);
+      setErrors(prev => ({
+        ...prev,
+        submit: "Failed to save settings. Please try again.",
+      }));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const commonInputClass =
+    "block w-full rounded-md border-0 px-2.5 py-1.5 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
 
   return (
-    <div className="border rounded-lg transition-colors border-mylightgrey/20 bg-white">
-      <Disclosure defaultOpen>
-        {({ open }) => (
-          <>
-            <Disclosure.Button className="flex w-full justify-between rounded-lg px-4 py-4 text-left hover:bg-mylightgrey/10">
-              <div className="flex items-center space-x-3">
-                <span className="text-lg font-bold text-mydarkgrey">
-                  Connect your database
-                </span>
-              </div>
-              <ChevronUpIcon
-                className={`${
-                  open ? "rotate-180 transform" : ""
-                } h-5 w-5 text-mydarkgrey`}
-              />
-            </Disclosure.Button>
+    <div className="space-y-6">
+      {saveSuccess && (
+        <div className="bg-mygreen/10 p-4 rounded-md">
+          <p className="text-black font-bold">
+            <CheckCircleIcon className="inline-block h-5 w-5 mr-2" />
+            Connection settings saved successfully
+          </p>
+        </div>
+      )}
 
-            <Disclosure.Panel className="px-4 pb-4 pt-2">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-mydarkgrey mb-1">
-                    Turso Database URL
-                  </label>
-                  <input
-                    type="text"
-                    value={credentials.databaseUrl}
-                    onChange={e => handleChange("databaseUrl", e.target.value)}
-                    placeholder="libsql://your-database.turso.io"
-                    className="w-full rounded-md border-mylightgrey/20 shadow-sm focus:border-myblue focus:ring-myblue"
-                  />
-                </div>
+      {errors.submit && (
+        <div className="bg-myorange/10 p-4 rounded-md">
+          <p className="text-black font-bold">
+            <ExclamationTriangleIcon className="inline-block h-5 w-5 mr-2" />
+            {errors.submit}
+          </p>
+        </div>
+      )}
 
-                <div>
-                  <label className="block text-sm font-bold text-mydarkgrey mb-1">
-                    Turso Auth Token
-                  </label>
-                  <input
-                    type="password"
-                    value={credentials.authToken}
-                    onChange={e => handleChange("authToken", e.target.value)}
-                    placeholder="Enter your Turso auth token"
-                    className="w-full rounded-md border-mylightgrey/20 shadow-sm focus:border-myblue focus:ring-myblue"
-                  />
-                </div>
+      <div className="space-y-4">
+        <div>
+          <label
+            htmlFor="TURSO_DATABASE_URL"
+            className="block text-sm font-bold text-mydarkgrey mb-1"
+          >
+            Turso Database URL
+          </label>
+          <div className="relative">
+            <input
+              id="TURSO_DATABASE_URL"
+              name="TURSO_DATABASE_URL"
+              type="text"
+              value={formData.TURSO_DATABASE_URL}
+              onChange={handleChange}
+              placeholder="libsql://your-database-url"
+              className={commonInputClass}
+            />
+            {errors.TURSO_DATABASE_URL && (
+              <p className="text-sm text-myorange mt-1">
+                {errors.TURSO_DATABASE_URL}
+              </p>
+            )}
+          </div>
+        </div>
 
-                <div className="pt-4">
-                  <button
-                    onClick={handleSubmit}
-                    disabled={!isValid}
-                    className={`w-full rounded-md px-4 py-2 text-white ${
-                      isValid
-                        ? "bg-myorange hover:bg-myblue"
-                        : "bg-mydarkgrey/50 cursor-not-allowed"
-                    }`}
-                  >
-                    Connect Database
-                  </button>
-                </div>
+        <div>
+          <label
+            htmlFor="TURSO_AUTH_TOKEN"
+            className="block text-sm font-bold text-mydarkgrey mb-1"
+          >
+            Turso Auth Token
+          </label>
+          <div className="relative">
+            <input
+              id="TURSO_AUTH_TOKEN"
+              name="TURSO_AUTH_TOKEN"
+              type="password"
+              value={formData.TURSO_AUTH_TOKEN}
+              onChange={handleChange}
+              placeholder="eyJhb...your-token"
+              className={commonInputClass}
+            />
+            {errors.TURSO_AUTH_TOKEN && (
+              <p className="text-sm text-myorange mt-1">
+                {errors.TURSO_AUTH_TOKEN}
+              </p>
+            )}
+          </div>
+        </div>
 
-                <p className="text-sm text-mydarkgrey mt-2">
-                  Need help? Visit{" "}
-                  <a
-                    href="https://docs.turso.tech/reference/turso-cli"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-myblue hover:text-myorange"
-                  >
-                    Turso documentation
-                  </a>{" "}
-                  to learn how to get your credentials.
-                </p>
-              </div>
-            </Disclosure.Panel>
-          </>
-        )}
-      </Disclosure>
+        <div className="flex justify-end space-x-4 pt-4">
+          <button
+            onClick={handleSave}
+            disabled={
+              isSaving ||
+              !formData.TURSO_DATABASE_URL ||
+              !formData.TURSO_AUTH_TOKEN
+            }
+            className="px-4 py-2 text-black bg-myorange rounded hover:bg-myblue hover:text-white disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+          >
+            {isSaving ? "Saving..." : "Save Connection Settings"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

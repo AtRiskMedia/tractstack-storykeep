@@ -39,10 +39,10 @@ export const GET: APIRoute = async () => {
 };
 
 export const POST: APIRoute = async context => {
-  console.log(`POST`);
+  process.stdout.write("POST to env endpoint\n"); // Change to use process.stdout
   try {
     const body = await context.request.json();
-    console.log(body);
+    process.stdout.write(`Body received: ${JSON.stringify(body)}\n`);
 
     const { response } = await proxyRequestToConcierge(
       `${BACKEND_URL}/storykeep/env`,

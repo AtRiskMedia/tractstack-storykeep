@@ -45,11 +45,11 @@ const TursoConnectionForm = () => {
   };
 
   const handleSave = async () => {
-    console.log(`save`,formData)
+    console.log(`save`, formData);
     if (!validate() || isSaving) return;
     try {
       setIsSaving(true);
-       console.log('Making fetch request to env endpoint');
+      console.log("Making fetch request to env endpoint");
       const response = await fetch("/api/concierge/storykeep/env", {
         method: "POST",
         headers: {

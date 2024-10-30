@@ -40,8 +40,18 @@ if (!payload) {
   return Astro.redirect("/404");
 }
 
+const hasAuth = user?.isAuthenticated ?? false;
+
 // menu
 const links = [];
+if (hasTurso && !user?.isAuthenticated) {
+  links.unshift({
+    name: "Login",
+    description: "Enter your Story Keep",
+    featured: true,
+    actionLisp: "(goto (storykeep login))",
+  });
+}
 if (hasTurso && user?.isAuthenticated) {
   links.unshift({
     name: "Settings",
@@ -82,7 +92,7 @@ const impressions =
 
 <StoryKeep title="Welcome to your Story Keep" canonicalURL={canonicalURL}>
   {
-    hasTurso && user.isOpenDemo ? (
+    hasTurso && hasBranding && hasContent && user.isOpenDemo ? (
       <div class="my-1 pt-2 shadow-inner px-1">
         <span class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black w-full justify-center">
           <span class="font-bold">You are in Demo Mode:</span> &nbsp; Reload to
@@ -273,6 +283,7 @@ const impressions =
         hasTurso={hasTurso}
         hasBranding={hasBranding}
         hasContent={hasContent}
+        hasAuth={hasAuth}
         client:load
       />
     )

@@ -32,6 +32,19 @@ const NeedsBranding = () => (
   <div>Customize your branding, themes, and appearance.</div>
 );
 
+const Login = () => (
+  <div className="text-xl md:text-2xl">
+    Amazing! You are ready to{" "}
+    <a
+      className="font-bold underline hover:text-myorange"
+      href="/storykeep/login?force=true"
+    >
+      Login-in
+    </a>{" "}
+    to continue.
+  </div>
+);
+
 const NeedsContent = () => (
   <div>Create and publish your first piece of content.</div>
 );
@@ -41,6 +54,7 @@ interface SiteWizardProps {
   hasTurso: boolean;
   hasBranding: boolean;
   hasContent: boolean;
+  hasAuth: boolean;
 }
 
 type StepStatus = "completed" | "current" | "locked";
@@ -58,9 +72,16 @@ export default function SiteWizard({
   hasTurso,
   hasBranding,
   hasContent,
+  hasAuth,
 }: SiteWizardProps) {
   const getStepStatus = (index: number): StepStatus => {
-    const completionStates = [hasConcierge, hasTurso, hasBranding, hasContent];
+    const completionStates = [
+      hasConcierge,
+      hasTurso,
+      hasAuth,
+      hasBranding,
+      hasContent,
+    ];
     const isCompleted = completionStates[index];
     const allPreviousCompleted = completionStates
       .slice(0, index)
@@ -86,18 +107,25 @@ export default function SiteWizard({
       defaultOpen: !hasTurso && hasConcierge,
     },
     {
+      title: "Login",
+      description: <Login />,
+      isComplete: hasAuth,
+      status: getStepStatus(2),
+      defaultOpen: hasTurso && !hasAuth,
+    },
+    {
       title: "Make it your own",
       description: <NeedsBranding />,
       isComplete: hasBranding,
-      status: getStepStatus(2),
-      defaultOpen: !hasBranding && hasTurso,
+      status: getStepStatus(3),
+      defaultOpen: !hasBranding && hasTurso && hasAuth,
     },
     {
       title: "Publish your first page!",
       description: <NeedsContent />,
       isComplete: hasContent,
-      status: getStepStatus(3),
-      defaultOpen: !hasContent && hasBranding,
+      status: getStepStatus(4),
+      defaultOpen: !hasContent && hasBranding && hasAuth,
     },
   ];
 

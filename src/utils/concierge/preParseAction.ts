@@ -25,6 +25,8 @@ export const preParseAction = (
                 return `/storykeep`;
               case `settings`:
                 return `/storykeep/settings`;
+              case `login`:
+                return `/storykeep/login?force=true`;
               case `logout`:
                 return `/storykeep/logout`;
               default:

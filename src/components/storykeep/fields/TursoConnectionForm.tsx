@@ -48,12 +48,11 @@ const TursoConnectionForm = () => {
     if (!validate() || isSaving) return;
     try {
       setIsSaving(true);
-      const response = await fetch("/api/concierge/storykeep/env", {
+      const response = await fetch(`/api/concierge/storykeep/env`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify(formData),
       });
       const data = await response.json();

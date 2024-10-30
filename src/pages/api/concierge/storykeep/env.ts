@@ -41,6 +41,7 @@ export const GET: APIRoute = async () => {
 export const POST: APIRoute = async context => {
   try {
     const body = await context.request.json();
+    console.log(body);
 
     const { response } = await proxyRequestToConcierge(
       `${BACKEND_URL}/storykeep/env`,

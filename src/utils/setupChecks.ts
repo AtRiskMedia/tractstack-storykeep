@@ -21,7 +21,7 @@ export function getSetupChecks(): SetupChecks {
     x =>
       typeof x === "string" &&
       x.trim().length > 0 &&
-      (x.startsWith("libsql://") || x.startsWith("file:"))
+      (x.startsWith("libsql://") || x.startsWith("ey"))
   );
 
   const hasBranding = [

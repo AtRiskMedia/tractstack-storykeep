@@ -34,7 +34,7 @@ const {
 } = Astro.props;
 const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
-const { hasTurso } = getSetupChecks();
+const { hasTurso, hasBranding, hasContent } = getSetupChecks();
 ---
 
 <header class="relative bg-white shadow-inner">
@@ -85,7 +85,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
     <h1 class="text-mydarkgrey truncate text-xl" title={title}>{title}</h1>
     <div class="flex flex-row flex-nowrap gap-x-2">
       {
-        hasTurso && !isHome && !isStoryKeep ? (
+        hasTurso && hasBranding && hasContent && !isHome && !isStoryKeep ? (
           <a
             href="/"
             class="text-myblue/80 hover:text-myblue hover:rotate-6"
@@ -93,7 +93,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           >
             <Home classes="w-6 h-6" />
           </a>
-        ) : hasTurso && !isHome && isStoryKeep ? (
+        ) : hasTurso && hasBranding && hasContent && !isHome && isStoryKeep ? (
           <a
             data-astro-reload
             href="/"
@@ -104,9 +104,15 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           </a>
         ) : null
       }
-      {hasTurso && !disableFastTravel && <StorySteps client:load />}
+      {
+        hasTurso && hasBranding && hasContent && !disableFastTravel && (
+          <StorySteps client:load />
+        )
+      }
       {
         hasTurso &&
+        hasBranding &&
+        hasContent &&
         slug !== `storykeep` &&
         (user?.isAuthenticated || user?.isOpenDemo) ? (
           <OpenStoryKeep
@@ -116,14 +122,18 @@ px-4 md:px-8 bg-mywhite shadow-inner"
             isEditable={isEditable}
             client:load
           />
-        ) : hasTurso && slug === `storykeep` && user?.isAuthenticated ? (
+        ) : hasTurso &&
+          hasBranding &&
+          hasContent &&
+          slug === `storykeep` &&
+          user?.isAuthenticated ? (
           <ConfigureStoryKeep client:load />
         ) : null
       }
       <RememberMe client:load />
       <CartIcon client:load />
       {
-        hasTurso && impressions?.length ? (
+        hasTurso && hasBranding && hasContent && impressions?.length ? (
           <ImpressionWrapper
             payload={impressions}
             icon={true}

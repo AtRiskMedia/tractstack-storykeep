@@ -578,17 +578,20 @@ export async function getFullContentMap(): Promise<FullContentMap[]> {
   try {
     const turso = getTursoClient();
     const { rows } = await turso.execute(`
-      SELECT id, id as slug, title, 'Menu' as type, theme, NULL as is_context_pane, NULL as category_slug
+      SELECT id, id as slug, title, 'Menu' as type
       FROM menu
       UNION ALL
-      SELECT id, slug, title, 'Pane' as type, NULL as theme, is_context_pane, NULL as category_slug
+      SELECT id, slug, title, 'Pane' as type
       FROM pane
       UNION ALL
-      SELECT id, slug, title, 'Resource' as type, NULL as theme, NULL as is_context_pane, category_slug
+      SELECT id, slug, title, 'Resource' as type
       FROM resource
       UNION ALL
-      SELECT id, slug, title, 'StoryFragment' as type, NULL as theme, NULL as is_context_pane, NULL as category_slug
+      SELECT id, slug, title, 'StoryFragment' as type
       FROM storyfragment
+      UNION ALL
+      SELECT id, slug, title, 'TractStack' as type
+      FROM tractstack
       ORDER BY title
     `);
 
@@ -622,6 +625,11 @@ export async function getFullContentMap(): Promise<FullContentMap[]> {
           return {
             ...base,
             type: "StoryFragment",
+          };
+        case "TractStack":
+          return {
+            ...base,
+            type: "TractStack",
           };
         default:
           throw new Error(`Unknown type: ${row.type}`);

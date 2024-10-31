@@ -6,7 +6,9 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import TursoConnectionForm from "../fields/TursoConnectionForm";
+import EnvironmentSettings from "../fields/EnvironmentSettings";
 import type { ReactNode } from "react";
+import type { FullContentMap } from "../../../types";
 
 const NeedsConcierge = () => (
   <div className="space-y-4">
@@ -27,10 +29,6 @@ const NeedsConcierge = () => (
 );
 
 const NeedsTurso = () => <TursoConnectionForm />;
-
-const NeedsBranding = () => (
-  <div>Customize your branding, themes, and appearance.</div>
-);
 
 const Login = () => (
   <div className="text-xl md:text-2xl">
@@ -55,6 +53,7 @@ interface SiteWizardProps {
   hasBranding: boolean;
   hasContent: boolean;
   hasAuth: boolean;
+  contentMap: FullContentMap[];
 }
 
 type StepStatus = "completed" | "current" | "locked";
@@ -73,6 +72,7 @@ export default function SiteWizard({
   hasBranding,
   hasContent,
   hasAuth,
+  contentMap,
 }: SiteWizardProps) {
   const getStepStatus = (index: number): StepStatus => {
     const completionStates = [
@@ -115,7 +115,9 @@ export default function SiteWizard({
     },
     {
       title: "Make it your own",
-      description: <NeedsBranding />,
+      description: (
+        <EnvironmentSettings contentMap={contentMap} showOnlyGroup="Brand" />
+      ),
       isComplete: hasBranding,
       status: getStepStatus(3),
       defaultOpen: !hasBranding && hasTurso && hasAuth,

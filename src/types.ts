@@ -677,7 +677,7 @@ export type ContentMapBase = {
   id: string;
   title: string;
   slug: string;
-  type: "Menu" | "Pane" | "Resource" | "StoryFragment";
+  type: "Menu" | "Pane" | "Resource" | "StoryFragment" | "TractStack";
 };
 
 export type MenuContentMap = ContentMapBase & {
@@ -699,11 +699,16 @@ export type StoryFragmentContentMap = ContentMapBase & {
   type: "StoryFragment";
 };
 
+export type TractStackContentMap = ContentMapBase & {
+  type: "TractStack";
+};
+
 export type FullContentMap =
   | MenuContentMap
   | ResourceContentMap
   | PaneContentMap
-  | StoryFragmentContentMap;
+  | StoryFragmentContentMap
+  | TractStackContentMap;
 
 export interface TursoStoryFragmentMap {
   id: string;

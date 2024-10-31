@@ -39,7 +39,6 @@ const filterPayload = hasTurso
 if (!payload) {
   return Astro.redirect("/404");
 }
-
 const hasAuth = user?.isAuthenticated ?? false;
 
 // menu
@@ -284,6 +283,7 @@ const impressions =
         hasBranding={hasBranding}
         hasContent={hasContent}
         hasAuth={hasAuth}
+        contentMap={payload}
         client:load
       />
     )

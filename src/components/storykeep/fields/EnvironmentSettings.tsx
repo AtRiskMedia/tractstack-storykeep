@@ -11,17 +11,20 @@ import {
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
 import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
+import RebuildProgressModal from "../components/RebuildProgressModal";
 import { knownEnvSettings } from "../../../constants";
+import { getSetupChecks } from "../../../utils/setupChecks";
 import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ChangeEvent } from "react";
 import type {
-  ContentMap,
+  FullContentMap,
   EnvSettingType,
   EnvSettingDatum,
 } from "../../../types";
 
 interface EnvironmentSettingsProps {
-  contentMap: ContentMap[];
+  contentMap: FullContentMap[];
+  showOnlyGroup?: string;
 }
 
 interface SocialMediaInputProps {
@@ -117,7 +120,12 @@ async function saveEnvSettings(
 const groupOrder = ["Brand", "Core", "Options", "Integrations", "Backend"];
 const wordmarkModeOptions = ["default", "logo", "wordmark"];
 
-const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
+const EnvironmentSettings = ({
+  contentMap,
+  showOnlyGroup,
+}: EnvironmentSettingsProps) => {
+  const [showRebuildModal, setShowRebuildModal] = useState(false);
+  const { hasContent, hasBranding } = getSetupChecks();
   const [isLoaded, setIsLoaded] = useState(false);
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [originalSettings, setOriginalSettings] = useState<EnvSettingDatum[]>(
@@ -135,9 +143,26 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
 
-  const usedSlugs = contentMap
-    .filter(item => item.type === "StoryFragment")
-    .map(item => ({ slug: item.slug, title: item.title }));
+  const storyFragmentItems = useMemo(
+    () =>
+      contentMap
+        .filter(item => item.type === "StoryFragment")
+        .map(item => ({
+          slug: item.slug,
+          title: item.title,
+        })),
+    [contentMap]
+  );
+  const tractStackItems = useMemo(
+    () =>
+      contentMap
+        .filter(item => item.type === "TractStack")
+        .map(item => ({
+          slug: item.slug,
+          title: item.title,
+        })),
+    [contentMap]
+  );
 
   async function fetchEnv() {
     try {
@@ -356,6 +381,35 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
     }
   }, [localSettings, originalSettings]);
 
+  const handleSavePublish = useCallback(async () => {
+    try {
+      // First save settings
+      const success = await saveEnvSettings(localSettings, originalSettings);
+      if (!success) {
+        throw new Error("Failed to save environment settings");
+      }
+
+      // Update local state
+      envSettings.set({
+        current: localSettings,
+        original: localSettings,
+        history: [],
+      });
+      setOriginalSettings(localSettings);
+      setHasUnsavedChanges(false);
+      setSaveSuccess(true);
+
+      // Show rebuild modal
+      setShowRebuildModal(true);
+
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 7000);
+    } catch (error) {
+      console.error("Error in handleSavePublish:", error);
+    }
+  }, [localSettings, originalSettings]);
+
   const toggleGroup = useCallback((group: string) => {
     setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));
   }, []);
@@ -537,7 +591,8 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
           </div>
         </div>
       );
-    } else if (setting.name === "PUBLIC_HOME") {
+    } else if (setting.name === "PUBLIC_TRACTSTACK") {
+      if (!hasContent || !hasBranding) return null;
       return (
         <div key={setting.name} className="space-y-2 mb-4">
           {renderLabel()}
@@ -563,9 +618,9 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
                 </Combobox.Button>
               </div>
               <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                {usedSlugs.map(slug => (
+                {tractStackItems.map(tractStack => (
                   <Combobox.Option
-                    key={slug.slug}
+                    key={tractStack.slug}
                     className={({ active }) =>
                       `relative cursor-default select-none py-2 pl-10 pr-4 ${
                         active
@@ -573,12 +628,75 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
                           : "text-mydarkgrey"
                       }`
                     }
-                    value={slug.slug}
+                    value={tractStack.slug}
                   >
                     {({ selected, active }) => (
                       <>
                         <span className={`block truncate`}>
-                          <strong>{slug.slug}</strong> | {slug.title}
+                          <strong>{tractStack.slug}</strong> |{" "}
+                          {tractStack.title}
+                        </span>
+                        {selected ? (
+                          <span
+                            className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                              active ? "text-white" : "text-myorange"
+                            }`}
+                          >
+                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+                        ) : null}
+                      </>
+                    )}
+                  </Combobox.Option>
+                ))}
+              </Combobox.Options>
+            </div>
+          </Combobox>
+        </div>
+      );
+    } else if (setting.name === "PUBLIC_HOME") {
+      if (!hasContent || !hasBranding) return null;
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          {renderLabel()}
+          <Combobox
+            value={setting.value}
+            onChange={newValue => handleSettingChange(index, "value", newValue)}
+          >
+            <div className="relative mt-1">
+              <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
+                <Combobox.Input
+                  className={`${commonInputClass}`}
+                  displayValue={(slug: string) => slug}
+                  onChange={event =>
+                    handleSettingChange(index, "value", event.target.value)
+                  }
+                  autoComplete="off"
+                />
+                <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                  <ChevronUpDownIcon
+                    className="h-5 w-5 text-gray-400"
+                    aria-hidden="true"
+                  />
+                </Combobox.Button>
+              </div>
+              <Combobox.Options className="z-20 absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                {storyFragmentItems.map(item => (
+                  <Combobox.Option
+                    key={item.slug}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active
+                          ? "bg-myorange/10 text-myblack"
+                          : "text-mydarkgrey"
+                      }`
+                    }
+                    value={item.slug}
+                  >
+                    {({ selected, active }) => (
+                      <>
+                        <span className={`block truncate`}>
+                          <strong>{item.slug}</strong> | {item.title}
                         </span>
                         {selected ? (
                           <span
@@ -699,6 +817,10 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
 
   return (
     <div className="space-y-8">
+      <RebuildProgressModal
+        isOpen={showRebuildModal}
+        onClose={() => setShowRebuildModal(false)}
+      />
       {saveSuccess && (
         <div className="bg-mygreen/10 p-4 rounded-md mb-4">
           <p className="text-black font-bold">
@@ -716,15 +838,7 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
           </p>
         </div>
       )}
-      <div className="flex justify-end space-x-2 mt-6">
-        <button
-          onClick={() => setIsGeneratingSnapshots(true)}
-          className="px-4 py-2 text-white bg-myblack rounded hover:bg-myblue"
-        >
-          Regenerate Design Previews
-        </button>
-      </div>
-      {hasUnsavedChanges && !hasUncleanData && (
+      {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
           <p className="text-myblue font-bold">
             Be very careful adjusting any technical settings. When ready hit{" "}
@@ -749,9 +863,8 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
               Save Changes Only
             </button>
             <button
-              onClick={() => console.log(`not yet implemented`)}
-              className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white disabled:bg-mydarkgrey disabled:cursor-not-allowed"
-              disabled={hasUncleanData}
+              onClick={handleSavePublish}
+              className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
             >
               Save and Re-Publish Website
             </button>
@@ -759,21 +872,26 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
         </div>
       )}
       {groupOrder.map(group => {
+        // Skip groups that don't match showOnlyGroup if it's set
+        if (showOnlyGroup && group !== showOnlyGroup) return null;
+
         const settings = groupedSettings[group];
         if (!settings) return null;
 
         return (
           <div key={group} className="rounded-md bg-mywhite shadow-inner">
             <div className="px-3.5 py-3">
-              <button
-                onClick={() => toggleGroup(group)}
-                className="flex items-center justify-between w-full text-left"
-              >
-                <h2 className="text-lg font-bold text-black">{group}</h2>
-                <ChevronUpDownIcon className="h-5 w-5 text-mydarkgrey" />
-              </button>
-              {expandedGroups[group] && (
-                <div className="mt-4 space-y-4">
+              {!showOnlyGroup && (
+                <button
+                  onClick={() => toggleGroup(group)}
+                  className="flex items-center justify-between w-full text-left"
+                >
+                  <h2 className="text-lg font-bold text-black">{group}</h2>
+                  <ChevronUpDownIcon className="h-5 w-5 text-mydarkgrey" />
+                </button>
+              )}
+              {(expandedGroups[group] || showOnlyGroup) && (
+                <div className={`${showOnlyGroup ? "" : "mt-4"} space-y-4`}>
                   {settings.map(setting =>
                     renderSetting(setting, localSettings.indexOf(setting))
                   )}
@@ -783,8 +901,37 @@ const EnvironmentSettings = ({ contentMap }: EnvironmentSettingsProps) => {
           </div>
         );
       })}
+      {showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
+        <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
+          <p className="text-myblue font-bold">
+            When ready hit <strong>publish</strong> to push these changes to
+            your site.
+          </p>
+          <div className="flex justify-end space-x-2 mt-6">
+            <button
+              onClick={handleSavePublish}
+              className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue"
+            >
+              Save and Re-Publish Website
+            </button>
+          </div>
+        </div>
+      )}
       {isGeneratingSnapshots && (
         <DesignSnapshotModal onClose={() => setIsGeneratingSnapshots(false)} />
+      )}
+      {!showOnlyGroup && (
+        <div className="pt-12">
+          <div className="flex justify-start space-x-2">
+            <h3 className="text-lg font-bold font-action">Special Actions:</h3>
+            <button
+              onClick={() => setIsGeneratingSnapshots(true)}
+              className="px-4 py-2 text-white bg-myblack rounded hover:bg-myblue"
+            >
+              Regenerate Design Previews
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

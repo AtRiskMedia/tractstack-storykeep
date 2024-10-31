@@ -271,6 +271,15 @@ export const knownEnvSettings: EnvSetting[] = [
     required: true,
   },
   {
+    name: "PUBLIC_TRACTSTACK",
+    defaultValue: "",
+    type: "string",
+    description: "Use this as default Tract Stack",
+    group: "Brand",
+    priority: true,
+    required: true,
+  },
+  {
     name: "PUBLIC_HOME",
     defaultValue: "home",
     type: "string",

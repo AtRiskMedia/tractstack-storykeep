@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {ulid} from "ulid";
+import { ulid } from "ulid";
 import { navigate } from "astro:transitions/client";
 import { tursoClient } from "../../../api/tursoClient";
 

@@ -1,5 +1,6 @@
 import { defineMiddleware } from "astro:middleware";
 import { isAuthenticated, isOpenDemoMode } from "./utils/session";
+import { getSetupChecks } from "./utils/setupChecks";
 import type { AuthStatus } from "./types";
 
 /*
@@ -11,7 +12,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const auth = await isAuthenticated(context as any);
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const isOpenDemo = await isOpenDemoMode(context as any);
+  const { hasTurso } = getSetupChecks();
+  const isOpenDemo = hasTurso ? await isOpenDemoMode(context as any) : true;
   context.locals.user = { isAuthenticated: auth, isOpenDemo } as AuthStatus;
 
   const protectedRoutes = [

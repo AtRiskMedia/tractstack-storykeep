@@ -30,6 +30,7 @@ export function getSetupChecks(): SetupChecks {
     import.meta.env.PUBLIC_SLOGAN,
     import.meta.env.PUBLIC_SITE_URL,
   ].every(x => typeof x === "string" && x.trim().length > 0);
+  console.log(hasBranding);
 
   const hasContent = [
     import.meta.env.PUBLIC_HOME,

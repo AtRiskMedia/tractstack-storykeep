@@ -1,5 +1,5 @@
 ---
-import { getContentMap } from "../../api/turso";
+import { getFullContentMap } from "../../api/turso";
 import StoryKeep from "@layouts/StoryKeep.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
@@ -7,7 +7,7 @@ import ImpressionWrapper from "@components/ImpressionWrapper";
 import EnvironmentSettings from "../../components/storykeep/fields/EnvironmentSettings";
 import { getSetupChecks } from "../../utils/setupChecks";
 import type {
-  ContentMap,
+  FullContentMap,
   AuthStatus,
   ImpressionDatum,
   MenuDatum,
@@ -61,7 +61,7 @@ const impressions = user.isOpenDemo
     ]
   : ([] as ImpressionDatum[]);
 
-const contentMap: ContentMap[] = await getContentMap();
+const contentMap: FullContentMap[] = await getFullContentMap();
 ---
 
 <StoryKeep title="Advanced Settings" canonicalURL={canonicalURL}>

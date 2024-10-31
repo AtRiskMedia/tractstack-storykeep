@@ -69,7 +69,8 @@ const impressions = user.isOpenDemo
     ]
   : ([] as ImpressionDatum[]);
 
-const contentMap: FullContentMap[] = await getFullContentMap();
+const contentMap: FullContentMap[] =
+  hasTurso && hasTursoReady ? await getFullContentMap() : [];
 ---
 
 <StoryKeep title="Advanced Settings" canonicalURL={canonicalURL}>

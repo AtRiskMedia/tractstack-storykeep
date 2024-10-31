@@ -9,7 +9,13 @@ import CreateNewAiPage from "@components/storykeep/components/CreateNewAiPage";
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent
+) {
   return Astro.redirect("/storykeep");
 }
 

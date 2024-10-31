@@ -30,7 +30,7 @@ const baseUrl = new URL(Astro.url.pathname, Astro.site);
 const canonicalURL = new URL(`/storykeep`, baseUrl).href;
 
 // get storykeep datum
-const payload = hasTurso ? await getFullContentMap() : [];
+const payload = hasTurso && hasTursoReady ? await getFullContentMap() : [];
 const filterPayload = hasTurso
   ? payload.filter(
       (e: FullContentMap) =>

@@ -81,9 +81,9 @@ export default function SiteWizard({
   const getStepStatus = (index: number): StepStatus => {
     const completionStates = [
       hasConcierge,
+      hasAuth,
       hasTurso,
       hasTursoReady,
-      hasAuth,
       hasBranding,
       hasContent,
     ];
@@ -105,25 +105,25 @@ export default function SiteWizard({
       defaultOpen: !hasConcierge,
     },
     {
+      title: "Login",
+      description: <Login />,
+      isComplete: hasAuth,
+      status: getStepStatus(1),
+      defaultOpen: hasConcierge && !hasAuth,
+    },
+    {
       title: "Connect your Turso database",
       description: <NeedsTurso />,
       isComplete: hasTurso,
-      status: getStepStatus(1),
-      defaultOpen: !hasTurso && hasConcierge,
+      status: getStepStatus(2),
+      defaultOpen: !hasTurso && hasConcierge && hasAuth,
     },
     {
       title: "Boostrap your database",
       description: <NeedsTursoTables />,
       isComplete: hasTursoReady,
       status: getStepStatus(2),
-      defaultOpen: !hasTursoReady && hasTurso && hasConcierge,
-    },
-    {
-      title: "Login",
-      description: <Login />,
-      isComplete: hasAuth,
-      status: getStepStatus(3),
-      defaultOpen: hasTurso && hasTursoReady && !hasAuth,
+      defaultOpen: !hasTursoReady && hasTurso && hasConcierge && hasAuth,
     },
     {
       title: "Make it your own",

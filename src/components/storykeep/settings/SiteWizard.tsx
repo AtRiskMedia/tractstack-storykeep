@@ -6,6 +6,7 @@ import {
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import TursoConnectionForm from "../fields/TursoConnectionForm";
+import DatabaseBootstrap from "../components/DatabaseBootstrap";
 import EnvironmentSettings from "../fields/EnvironmentSettings";
 import type { ReactNode } from "react";
 import type { FullContentMap } from "../../../types";
@@ -29,7 +30,7 @@ const NeedsConcierge = () => (
 );
 
 const NeedsTurso = () => <TursoConnectionForm />;
-const NeedsTursoTables = () => <div>to be implemented</div>;
+const NeedsTursoTables = () => <DatabaseBootstrap />;
 
 const Login = () => (
   <div className="text-xl md:text-2xl">
@@ -104,7 +105,7 @@ export default function SiteWizard({
       defaultOpen: !hasConcierge,
     },
     {
-      title: "Connect your database",
+      title: "Connect your Turso database",
       description: <NeedsTurso />,
       isComplete: hasTurso,
       status: getStepStatus(1),

@@ -428,7 +428,12 @@ const EnvironmentSettings = ({
   }, []);
 
   const hasUncleanData = useMemo(() => {
-    return localSettings.some(setting => setting.required && !setting.value);
+    return localSettings.some(
+      setting =>
+        setting.required &&
+        !setting.value &&
+        (showOnlyGroup ? setting.group === showOnlyGroup : true)
+    );
   }, [localSettings]);
 
   const uncleanGroups = useMemo(() => {

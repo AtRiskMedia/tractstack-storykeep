@@ -3,11 +3,15 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-import RebuildProgressModal from "../components/RebuildProgressModal";
+//import RebuildProgressModal from "../components/RebuildProgressModal";
 import type { ChangeEvent } from "react";
 
-const TursoConnectionForm = () => {
-  const [showRebuildModal, setShowRebuildModal] = useState(false);
+interface TursoConnectionFormProps {
+  setGotTurso: (value: boolean) => void;
+}
+
+const TursoConnectionForm = ({ setGotTurso }: TursoConnectionFormProps) => {
+  //const [showRebuildModal, setShowRebuildModal] = useState(false);
   const [formData, setFormData] = useState({
     TURSO_DATABASE_URL: "",
     TURSO_AUTH_TOKEN: "",
@@ -60,7 +64,9 @@ const TursoConnectionForm = () => {
         throw new Error(data.error || "Failed to save Turso settings");
       }
       setSaveSuccess(true);
-      setShowRebuildModal(true);
+      setTimeout(() => {
+        setGotTurso(true);
+      }, 1000);
     } catch (error) {
       console.error("Error saving Turso settings:", error);
       setErrors(prev => ({
@@ -75,12 +81,12 @@ const TursoConnectionForm = () => {
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
 
+  //<RebuildProgressModal
+  //  isOpen={showRebuildModal}
+  //  onClose={() => setShowRebuildModal(false)}
+  ///>
   return (
     <div className="space-y-6">
-      <RebuildProgressModal
-        isOpen={showRebuildModal}
-        onClose={() => setShowRebuildModal(false)}
-      />
       {saveSuccess && (
         <div className="bg-mygreen/10 p-4 rounded-md">
           <p className="text-black font-bold">
@@ -99,73 +105,75 @@ const TursoConnectionForm = () => {
         </div>
       )}
 
-      <div className="space-y-4">
-        <div>
-          <label
-            htmlFor="TURSO_DATABASE_URL"
-            className="block text-sm font-bold text-mydarkgrey mb-1"
-          >
-            Turso Database URL
-          </label>
-          <div className="relative">
-            <input
-              id="TURSO_DATABASE_URL"
-              name="TURSO_DATABASE_URL"
-              type="text"
-              value={formData.TURSO_DATABASE_URL}
-              onChange={handleChange}
-              placeholder="libsql://your-database-url"
-              className={commonInputClass}
-              autoComplete="new-password"
-            />
-            {errors.TURSO_DATABASE_URL && (
-              <p className="text-sm text-myorange mt-1">
-                {errors.TURSO_DATABASE_URL}
-              </p>
-            )}
+      {!saveSuccess && (
+        <div className="space-y-4">
+          <div>
+            <label
+              htmlFor="TURSO_DATABASE_URL"
+              className="block text-sm font-bold text-mydarkgrey mb-1"
+            >
+              Turso Database URL
+            </label>
+            <div className="relative">
+              <input
+                id="TURSO_DATABASE_URL"
+                name="TURSO_DATABASE_URL"
+                type="text"
+                value={formData.TURSO_DATABASE_URL}
+                onChange={handleChange}
+                placeholder="libsql://your-database-url"
+                className={commonInputClass}
+                autoComplete="new-password"
+              />
+              {errors.TURSO_DATABASE_URL && (
+                <p className="text-sm text-myorange mt-1">
+                  {errors.TURSO_DATABASE_URL}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label
+              htmlFor="TURSO_AUTH_TOKEN"
+              className="block text-sm font-bold text-mydarkgrey mb-1"
+            >
+              Turso Auth Token
+            </label>
+            <div className="relative">
+              <input
+                id="TURSO_AUTH_TOKEN"
+                name="TURSO_AUTH_TOKEN"
+                type="password"
+                value={formData.TURSO_AUTH_TOKEN}
+                onChange={handleChange}
+                placeholder="eyJhb...your-token"
+                className={commonInputClass}
+                autoComplete="new-password"
+              />
+              {errors.TURSO_AUTH_TOKEN && (
+                <p className="text-sm text-myorange mt-1">
+                  {errors.TURSO_AUTH_TOKEN}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-4 pt-4">
+            <button
+              onClick={handleSave}
+              disabled={
+                isSaving ||
+                !formData.TURSO_DATABASE_URL ||
+                !formData.TURSO_AUTH_TOKEN
+              }
+              className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+            >
+              {isSaving ? "Saving..." : "Save Connection Settings"}
+            </button>
           </div>
         </div>
-
-        <div>
-          <label
-            htmlFor="TURSO_AUTH_TOKEN"
-            className="block text-sm font-bold text-mydarkgrey mb-1"
-          >
-            Turso Auth Token
-          </label>
-          <div className="relative">
-            <input
-              id="TURSO_AUTH_TOKEN"
-              name="TURSO_AUTH_TOKEN"
-              type="password"
-              value={formData.TURSO_AUTH_TOKEN}
-              onChange={handleChange}
-              placeholder="eyJhb...your-token"
-              className={commonInputClass}
-              autoComplete="new-password"
-            />
-            {errors.TURSO_AUTH_TOKEN && (
-              <p className="text-sm text-myorange mt-1">
-                {errors.TURSO_AUTH_TOKEN}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-4 pt-4">
-          <button
-            onClick={handleSave}
-            disabled={
-              isSaving ||
-              !formData.TURSO_DATABASE_URL ||
-              !formData.TURSO_AUTH_TOKEN
-            }
-            className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
-          >
-            {isSaving ? "Saving..." : "Save Connection Settings"}
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

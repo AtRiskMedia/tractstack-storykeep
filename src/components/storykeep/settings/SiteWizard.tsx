@@ -29,6 +29,7 @@ const NeedsConcierge = () => (
 );
 
 const NeedsTurso = () => <TursoConnectionForm />;
+const NeedsTursoTables = () => <div>to be implemented</div>;
 
 const Login = () => (
   <div className="text-xl md:text-2xl">
@@ -50,6 +51,7 @@ const NeedsContent = () => (
 interface SiteWizardProps {
   hasConcierge: boolean;
   hasTurso: boolean;
+  hasTursoReady: boolean;
   hasBranding: boolean;
   hasContent: boolean;
   hasAuth: boolean;
@@ -69,6 +71,7 @@ interface SetupStep {
 export default function SiteWizard({
   hasConcierge,
   hasTurso,
+  hasTursoReady,
   hasBranding,
   hasContent,
   hasAuth,
@@ -78,6 +81,7 @@ export default function SiteWizard({
     const completionStates = [
       hasConcierge,
       hasTurso,
+      hasTursoReady,
       hasAuth,
       hasBranding,
       hasContent,
@@ -107,11 +111,18 @@ export default function SiteWizard({
       defaultOpen: !hasTurso && hasConcierge,
     },
     {
+      title: "Boostrap your database",
+      description: <NeedsTursoTables />,
+      isComplete: hasTursoReady,
+      status: getStepStatus(2),
+      defaultOpen: !hasTursoReady && hasTurso && hasConcierge,
+    },
+    {
       title: "Login",
       description: <Login />,
       isComplete: hasAuth,
-      status: getStepStatus(2),
-      defaultOpen: hasTurso && !hasAuth,
+      status: getStepStatus(3),
+      defaultOpen: hasTurso && hasTursoReady && !hasAuth,
     },
     {
       title: "Make it your own",
@@ -119,15 +130,16 @@ export default function SiteWizard({
         <EnvironmentSettings contentMap={contentMap} showOnlyGroup="Brand" />
       ),
       isComplete: hasBranding,
-      status: getStepStatus(3),
-      defaultOpen: !hasBranding && hasTurso && hasAuth,
+      status: getStepStatus(4),
+      defaultOpen: !hasBranding && hasTurso && hasTursoReady && hasAuth,
     },
     {
       title: "Publish your first page!",
       description: <NeedsContent />,
       isComplete: hasContent,
-      status: getStepStatus(4),
-      defaultOpen: !hasContent && hasBranding && hasAuth,
+      status: getStepStatus(5),
+      defaultOpen:
+        !hasContent && hasBranding && hasTurso && hasTursoReady && hasAuth,
     },
   ];
 

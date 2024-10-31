@@ -574,6 +574,33 @@ export async function getAllFileDatum(): Promise<TursoFileNode[]> {
   }
 }
 
+export async function isTursoReady(): Promise<boolean> {
+  try {
+    const turso = getTursoClient();
+    const { rows } = await turso.execute(`
+      SELECT COUNT(*) as table_count 
+      FROM sqlite_master 
+      WHERE type='table' 
+      AND name IN (
+        'tractstack',
+        'menu',
+        'resource',
+        'file',
+        'markdown',
+        'storyfragment',
+        'pane',
+        'storyfragment_pane',
+        'file_pane',
+        'file_markdown'
+      )
+    `);
+    return rows[0].table_count === 10;
+  } catch (error) {
+    console.error("Error checking database readiness:", error);
+    return false;
+  }
+}
+
 export async function getFullContentMap(): Promise<FullContentMap[]> {
   try {
     const turso = getTursoClient();

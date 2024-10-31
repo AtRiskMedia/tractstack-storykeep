@@ -9,7 +9,7 @@ import SiteWizard from "@components/storykeep/settings/SiteWizard";
 import DashboardActivity from "@components/storykeep/nivo/DashboardActivity";
 import WhatsHot from "@components/storykeep/components/WhatsHot";
 import StoryKeepDashboardStore from "@components/storykeep/StoryKeepDashboardStore";
-import { getFullContentMap } from "../api/turso";
+import { getFullContentMap, isTursoReady } from "../api/turso";
 import { getSetupChecks } from "../utils/setupChecks";
 import type {
   FullContentMap,
@@ -23,6 +23,7 @@ const user = Astro.locals.user as AuthStatus;
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
 
 // set the canonicalUrl to the actual storyfragment
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
@@ -280,6 +281,7 @@ const impressions =
       <SiteWizard
         hasConcierge={hasConcierge}
         hasTurso={hasTurso}
+        hasTursoReady={hasTursoReady}
         hasBranding={hasBranding}
         hasContent={hasContent}
         hasAuth={hasAuth}

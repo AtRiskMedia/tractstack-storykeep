@@ -160,7 +160,7 @@ const TursoConnectionForm = () => {
               !formData.TURSO_DATABASE_URL ||
               !formData.TURSO_AUTH_TOKEN
             }
-            className="px-4 py-2 text-black bg-myorange rounded hover:bg-myblue hover:text-white disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+            className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
           >
             {isSaving ? "Saving..." : "Save Connection Settings"}
           </button>

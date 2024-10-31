@@ -13,7 +13,6 @@ import ContentEditableField from "../components/ContentEditableField";
 import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import RebuildProgressModal from "../components/RebuildProgressModal";
 import { knownEnvSettings } from "../../../constants";
-import { getSetupChecks } from "../../../utils/setupChecks";
 import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ChangeEvent } from "react";
 import type {
@@ -117,7 +116,7 @@ async function saveEnvSettings(
   }
 }
 
-const groupOrder = ["Brand", "Core", "Options", "Integrations", "Backend"];
+const groupOrder = ["Brand","Home", "Core", "Options", "Integrations", "Backend"];
 const wordmarkModeOptions = ["default", "logo", "wordmark"];
 
 const EnvironmentSettings = ({
@@ -125,7 +124,6 @@ const EnvironmentSettings = ({
   showOnlyGroup,
 }: EnvironmentSettingsProps) => {
   const [showRebuildModal, setShowRebuildModal] = useState(false);
-  const { hasContent, hasBranding } = getSetupChecks();
   const [isLoaded, setIsLoaded] = useState(false);
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
   const [originalSettings, setOriginalSettings] = useState<EnvSettingDatum[]>(
@@ -592,7 +590,6 @@ const EnvironmentSettings = ({
         </div>
       );
     } else if (setting.name === "PUBLIC_TRACTSTACK") {
-      if (!hasContent || !hasBranding) return null;
       return (
         <div key={setting.name} className="space-y-2 mb-4">
           {renderLabel()}
@@ -655,7 +652,6 @@ const EnvironmentSettings = ({
         </div>
       );
     } else if (setting.name === "PUBLIC_HOME") {
-      if (!hasContent || !hasBranding) return null;
       return (
         <div key={setting.name} className="space-y-2 mb-4">
           {renderLabel()}

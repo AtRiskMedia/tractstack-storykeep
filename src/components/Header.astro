@@ -9,6 +9,7 @@ import ImpressionWrapper from "@components/ImpressionWrapper";
 import { CartIcon } from "./other/CartIcon";
 import { WORDMARK_MODE } from "../constants";
 import { getSetupChecks } from "../utils/setupChecks";
+import { isTursoReady } from "../api/turso";
 import type { AuthStatus, MenuDatum, ImpressionDatum } from "../types";
 
 export interface Props {
@@ -35,6 +36,7 @@ const {
 const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
 const { hasTurso, hasBranding, hasContent } = getSetupChecks();
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
 ---
 
 <header class="relative bg-white shadow-inner">
@@ -85,7 +87,12 @@ px-4 md:px-8 bg-mywhite shadow-inner"
     <h1 class="text-mydarkgrey truncate text-xl" title={title}>{title}</h1>
     <div class="flex flex-row flex-nowrap gap-x-2">
       {
-        hasTurso && hasBranding && hasContent && !isHome && !isStoryKeep ? (
+        hasTurso &&
+        hasTursoReady &&
+        hasBranding &&
+        hasContent &&
+        !isHome &&
+        !isStoryKeep ? (
           <a
             href="/"
             class="text-myblue/80 hover:text-myblue hover:rotate-6"
@@ -93,7 +100,12 @@ px-4 md:px-8 bg-mywhite shadow-inner"
           >
             <Home classes="w-6 h-6" />
           </a>
-        ) : hasTurso && hasBranding && hasContent && !isHome && isStoryKeep ? (
+        ) : hasTurso &&
+          hasTursoReady &&
+          hasBranding &&
+          hasContent &&
+          !isHome &&
+          isStoryKeep ? (
           <a
             data-astro-reload
             href="/"
@@ -105,12 +117,15 @@ px-4 md:px-8 bg-mywhite shadow-inner"
         ) : null
       }
       {
-        hasTurso && hasBranding && hasContent && !disableFastTravel && (
-          <StorySteps client:load />
-        )
+        hasTurso &&
+          hasTursoReady &&
+          hasBranding &&
+          hasContent &&
+          !disableFastTravel && <StorySteps client:load />
       }
       {
         hasTurso &&
+        hasTursoReady &&
         hasBranding &&
         hasContent &&
         slug !== `storykeep` &&
@@ -123,6 +138,7 @@ px-4 md:px-8 bg-mywhite shadow-inner"
             client:load
           />
         ) : hasTurso &&
+          hasTursoReady &&
           hasBranding &&
           hasContent &&
           slug === `storykeep` &&

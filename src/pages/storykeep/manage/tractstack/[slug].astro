@@ -4,7 +4,7 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import TractStackEditor from "@components/storykeep/components/TractStackEditor";
 import { getSetupChecks } from "../../../../utils/setupChecks";
-import { getTractStackBySlug } from "../../../../api/turso";
+import { getTractStackBySlug, isTursoReady } from "../../../../api/turso";
 import { ulid } from "ulid";
 import type { AuthStatus, MenuDatum, TractStackDatum } from "../../../../types";
 
@@ -13,7 +13,14 @@ const create = slug === "create";
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent
+) {
   return Astro.redirect("/storykeep");
 }
 

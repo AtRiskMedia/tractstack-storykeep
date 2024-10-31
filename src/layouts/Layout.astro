@@ -2,7 +2,7 @@
 import { LOCALE, SITE } from "@config";
 import { ViewTransitions } from "astro:transitions";
 import SetContentMap from "../components/SetContentMap";
-import { getContentMap } from "../api/turso";
+import { getContentMap, isTursoReady } from "../api/turso";
 import { getSetupChecks } from "../utils/setupChecks";
 import type { ContentMap } from "../types";
 
@@ -47,7 +47,9 @@ const gtagUrl =
     : null;
 
 const { hasTurso } = getSetupChecks();
-const contentMap: ContentMap[] = hasTurso ? await getContentMap() : [];
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const contentMap: ContentMap[] =
+  hasTurso && hasTursoReady ? await getContentMap() : [];
 ---
 
 <!doctype html>

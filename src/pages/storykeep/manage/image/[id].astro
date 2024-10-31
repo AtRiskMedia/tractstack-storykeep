@@ -4,7 +4,7 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ImageEditor from "@components/storykeep/components/ImageEditor";
 import { getSetupChecks } from "../../../../utils/setupChecks";
-import { getFileById } from "../../../../api/turso";
+import { getFileById, isTursoReady } from "../../../../api/turso";
 import type { AuthStatus, MenuDatum } from "../../../../types";
 
 const { id } = Astro.params;
@@ -12,7 +12,14 @@ if (!id) return Astro.redirect("/404");
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent
+) {
   return Astro.redirect("/storykeep");
 }
 

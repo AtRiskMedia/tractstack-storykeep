@@ -11,6 +11,7 @@ import { StoryFragment } from "@components/storykeep/StoryFragment";
 import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
 import { StoryKeepHeader } from "@components/storykeep/StoryKeepHeader";
 import { getSetupChecks } from "../../utils/setupChecks";
+import { isTursoReady } from "../../api/turso";
 import type { AuthStatus, ContentMap } from "../../types";
 
 const user = Astro.locals.user as AuthStatus;
@@ -21,7 +22,14 @@ if (!slug) return Astro.redirect("/404");
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent
+) {
   return Astro.redirect("/storykeep");
 }
 

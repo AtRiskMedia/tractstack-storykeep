@@ -4,6 +4,7 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import { ShoppingCart } from "@components/ShoppingCart";
 import { getSetupChecks } from "../utils/setupChecks";
+import { isTursoReady } from "../api/turso";
 import type { StylesVersion, AuthStatus } from "../types";
 
 // user authenticated?
@@ -11,7 +12,14 @@ const user = Astro.locals.user as AuthStatus;
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent
+) {
   return Astro.redirect("/storykeep");
 }
 

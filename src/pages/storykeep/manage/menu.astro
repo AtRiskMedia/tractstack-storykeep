@@ -4,12 +4,19 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import MenusTable from "@components/storykeep/components/MenusTable";
 import { getSetupChecks } from "../../../utils/setupChecks";
-import { getAllMenus } from "../../../api/turso";
+import { getAllMenus, isTursoReady } from "../../../api/turso";
 import type { AuthStatus, MenuDatum } from "../../../types";
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent
+) {
   return Astro.redirect("/storykeep");
 }
 

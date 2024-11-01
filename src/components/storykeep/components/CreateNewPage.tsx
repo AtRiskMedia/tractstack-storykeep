@@ -27,11 +27,7 @@ interface CreateNewPageProps {
   tractStackId: string;
 }
 
-const CreateNewPage = ({
-  newId,
-  tractStackId,
-  mode,
-}: CreateNewPageProps) => {
+const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   const [selectedDesign, setSelectedDesign] = useState<PageDesign | null>(null);
   const [query, setQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);

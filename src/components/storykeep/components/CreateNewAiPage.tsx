@@ -35,11 +35,7 @@ const pageTypes = [
 ];
 const pageTypesContext = [{ id: 3, name: "Short context page" }];
 
-const CreateNewPage = ({
-  newId,
-  tractStackId,
-  mode,
-}: CreateNewPageProps) => {
+const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
   const [stage, setStage] = useState<GenerateStage>("GENERATING_COPY");
   const $theme = useStore(themeStore);
   const [missionInput, setMissionInput] = useState("");

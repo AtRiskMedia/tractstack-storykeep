@@ -11,7 +11,7 @@ import { StoryFragment } from "@components/storykeep/StoryFragment";
 import { StoryKeepStore } from "@components/storykeep/StoryKeepStore";
 import { StoryKeepHeader } from "@components/storykeep/StoryKeepHeader";
 import { getSetupChecks } from "../../utils/setupChecks";
-import { isTursoReady,isContentReady  } from "../../api/turso";
+import { isTursoReady, isContentReady } from "../../api/turso";
 import type { AuthStatus, ContentMap } from "../../types";
 
 const user = Astro.locals.user as AuthStatus;
@@ -82,7 +82,7 @@ const contentMap: ContentMap[] = await getContentMap();
         contentMap={contentMap}
         user={user}
         originalData={storyfragment}
-          hasContentReady={hasContentReady}
+        hasContentReady={hasContentReady}
       />
     </header>
 

@@ -297,7 +297,7 @@ export default function SiteWizard({
                           : "text-mydarkgrey"
                       }`}
                     >
-                      {step.description}
+                      <div className="p-4">{step.description}</div>
                       {step.status === "locked" && (
                         <p className="mt-2 text-sm italic">
                           Complete the previous steps to unlock this step.

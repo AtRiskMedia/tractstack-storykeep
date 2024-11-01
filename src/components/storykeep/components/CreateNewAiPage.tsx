@@ -27,6 +27,7 @@ interface CreateNewPageProps {
   mode: "storyfragment" | "context";
   newId: string;
   tractStackId: string;
+  first: boolean;
 }
 
 const pageTypes = [
@@ -35,7 +36,13 @@ const pageTypes = [
 ];
 const pageTypesContext = [{ id: 3, name: "Short context page" }];
 
-const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
+const CreateNewPage = ({
+  newId,
+  tractStackId,
+  mode,
+  first,
+}: CreateNewPageProps) => {
+  if (first) console.log(`FIRST PAGE!`);
   const [stage, setStage] = useState<GenerateStage>("GENERATING_COPY");
   const $theme = useStore(themeStore);
   const [missionInput, setMissionInput] = useState("");

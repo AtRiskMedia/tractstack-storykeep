@@ -48,12 +48,8 @@ const Completed = () => (
   </div>
 );
 
-interface NeedsContentProps {
-  hasAssemblyAI: boolean;
-}
-
 const NeedsContent = ({ hasAssemblyAI }: { hasAssemblyAI: boolean }) => (
-  <div className="space-x-12 text-xl md:text-2xl text-mydarkgrey">
+  <div className="space-x-6 text-xl md:text-2xl text-mydarkgrey">
     {hasAssemblyAI && (
       <a
         className="px-4 py-2 text-white bg-black rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"

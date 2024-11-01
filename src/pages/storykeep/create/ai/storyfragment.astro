@@ -9,13 +9,7 @@ import CreateNewAiPage from "@components/storykeep/components/CreateNewAiPage";
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
-if (
-  !hasConcierge ||
-  !hasTurso ||
-  !hasTursoReady ||
-  !hasBranding ||
-  !hasContent
-) {
+if (!hasConcierge || !hasTurso || !hasTursoReady || !hasBranding) {
   return Astro.redirect("/storykeep");
 }
 
@@ -43,6 +37,7 @@ if (!tractStackId) {
       mode="storyfragment"
       newId={newId}
       tractStackId={tractStackId}
+      first={!hasContent}
       client:load
     />
   </div>

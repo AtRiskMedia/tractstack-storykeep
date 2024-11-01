@@ -25,9 +25,16 @@ interface CreateNewPageProps {
   mode: "storyfragment" | "context";
   newId: string;
   tractStackId: string;
+  first: boolean;
 }
 
-const CreateNewPage = ({ newId, tractStackId, mode }: CreateNewPageProps) => {
+const CreateNewPage = ({
+  newId,
+  tractStackId,
+  mode,
+  first,
+}: CreateNewPageProps) => {
+  if (first) console.log(`FIRST PAGE!`);
   const [selectedDesign, setSelectedDesign] = useState<PageDesign | null>(null);
   const [query, setQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);

@@ -5,7 +5,7 @@ import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import { getSetupChecks } from "../../utils/setupChecks";
-import { getContextPaneBySlug } from "../../api/turso";
+import { getContextPaneBySlug, isContentReady } from "../../api/turso";
 import type { StylesVersion, Current, AuthStatus } from "../../types";
 
 // user authenticated?
@@ -13,7 +13,14 @@ const user = Astro.locals.user as AuthStatus;
 
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
-if (!hasConcierge || !hasTurso || !hasBranding || !hasContent) {
+const hasContentReady = hasTurso && hasContent ? await isContentReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasBranding ||
+  !hasContent ||
+  !hasContentReady
+) {
   return Astro.redirect("/storykeep");
 }
 

@@ -53,17 +53,17 @@ interface NeedsContentProps {
 }
 
 const NeedsContent = ({ hasAssemblyAI }: { hasAssemblyAI: boolean }) => (
-  <div className="space-x-4 text-xl md:text-2xl text-mydarkgrey">
+  <div className="space-x-12 text-xl md:text-2xl text-mydarkgrey">
     {hasAssemblyAI && (
       <a
-        className="font-bold underline hover:text-myorange"
+        className="px-4 py-2 text-white bg-black rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
         href="/storykeep/create/ai/storykeep"
       >
         Create New Web Page with AI!
       </a>
     )}
     <a
-      className="font-bold underline hover:text-myorange"
+      className="px-4 py-2 text-white bg-black rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
       href="/storykeep/create/storyfragment"
     >
       Create New Web Page
@@ -150,11 +150,12 @@ export default function SiteWizard({
     },
     {
       title: "Add your Integrations",
-      description: !gotIntegrations && !hasBranding ? (
-        <IntegrationsConnectionForm setGotIntegrations={setGotIntegrations} />
-      ) : (
-        <Completed />
-      ),
+      description:
+        !gotIntegrations && !hasBranding ? (
+          <IntegrationsConnectionForm setGotIntegrations={setGotIntegrations} />
+        ) : (
+          <Completed />
+        ),
       isComplete: gotIntegrations || hasBranding,
       status: getStepStatus(3),
     },

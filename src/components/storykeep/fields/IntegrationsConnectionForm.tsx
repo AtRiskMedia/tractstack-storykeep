@@ -190,7 +190,7 @@ const IntegrationsConnectionForm = ({
       )}
 
       {errors.submit && (
-        <div className="bg-myorange/10 p-4 rounded-md">
+        <div className="bg-black/10 p-4 rounded-md">
           <p className="text-black font-bold">
             <ExclamationTriangleIcon className="inline-block h-5 w-5 mr-2" />
             {errors.submit}
@@ -349,7 +349,7 @@ const IntegrationsConnectionForm = ({
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+              className="px-4 py-2 text-white bg-black rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
             >
               {isSaving ? "Saving..." : "Save Integration Settings"}
             </button>

@@ -57,16 +57,16 @@ const NeedsContent = ({ hasAssemblyAI }: { hasAssemblyAI: boolean }) => (
     {hasAssemblyAI && (
       <a
         className="font-bold underline hover:text-myorange"
-        href="/storykeep/login?force=true"
+        href="/storykeep/create/ai/storykeep"
       >
-        Login-in
+        Create New Web Page with AI!
       </a>
     )}
     <a
       className="font-bold underline hover:text-myorange"
-      href="/storykeep/login?force=true"
+      href="/storykeep/create/storyfragment"
     >
-      Login-in
+      Create New Web Page
     </a>
   </div>
 );
@@ -155,7 +155,7 @@ export default function SiteWizard({
       ) : (
         <Completed />
       ),
-      isComplete: gotIntegrations,
+      isComplete: gotIntegrations && !hasBranding,
       status: getStepStatus(3),
     },
     {

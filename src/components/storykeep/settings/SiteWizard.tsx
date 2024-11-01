@@ -47,20 +47,27 @@ const Completed = () => (
     Completed
   </div>
 );
-const NeedsContent = () => (
+
+interface NeedsContentProps {
+  hasAssemblyAI: boolean;
+}
+
+const NeedsContent = ({ hasAssemblyAI }: { hasAssemblyAI: boolean }) => (
   <div className="space-x-4 text-xl md:text-2xl text-mydarkgrey">
+    {hasAssemblyAI && (
+      <a
+        className="font-bold underline hover:text-myorange"
+        href="/storykeep/login?force=true"
+      >
+        Login-in
+      </a>
+    )}
     <a
       className="font-bold underline hover:text-myorange"
       href="/storykeep/login?force=true"
     >
       Login-in
-    </a>{" "}
-    <a
-      className="font-bold underline hover:text-myorange"
-      href="/storykeep/login?force=true"
-    >
-      Login-in
-    </a>{" "}
+    </a>
   </div>
 );
 
@@ -70,6 +77,7 @@ interface SiteWizardProps {
   hasTursoReady: boolean;
   hasBranding: boolean;
   hasContent: boolean;
+  hasAssemblyAI: boolean;
   hasAuth: boolean;
   contentMap: FullContentMap[];
 }
@@ -90,6 +98,7 @@ export default function SiteWizard({
   hasBranding,
   hasContent,
   hasAuth,
+  hasAssemblyAI,
   contentMap,
 }: SiteWizardProps) {
   const [gotTurso, setGotTurso] = useState(false);
@@ -165,7 +174,7 @@ export default function SiteWizard({
     },
     {
       title: "Publish your first page!",
-      description: <NeedsContent />,
+      description: <NeedsContent hasAssemblyAI={hasAssemblyAI} />,
       isComplete: hasContent,
       status: getStepStatus(6),
     },

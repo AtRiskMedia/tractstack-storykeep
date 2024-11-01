@@ -3,6 +3,7 @@ export interface SetupChecks {
   hasTurso: boolean;
   hasBranding: boolean;
   hasContent: boolean;
+  hasAssemblyAI: boolean;
 }
 
 export function getSetupChecks(): SetupChecks {
@@ -36,10 +37,15 @@ export function getSetupChecks(): SetupChecks {
     import.meta.env.PUBLIC_TRACTSTACK,
   ].every(x => typeof x === "string" && x.trim().length > 0);
 
+  const hasAssemblyAI = [import.meta.env.PRIVATE_ASSEMBLYAI_API_KEY].every(
+    x => typeof x === "string" && x.trim().length > 0
+  );
+
   return {
     hasConcierge,
     hasTurso,
     hasBranding,
     hasContent,
+    hasAssemblyAI,
   };
 }

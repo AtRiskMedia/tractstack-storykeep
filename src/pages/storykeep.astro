@@ -22,7 +22,8 @@ import type {
 const user = Astro.locals.user as AuthStatus;
 
 // confirm set-up
-const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
+const { hasConcierge, hasTurso, hasBranding, hasContent, hasAssemblyAI } =
+  getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
 
 // set the canonicalUrl to the actual storyfragment
@@ -288,6 +289,7 @@ const impressions =
         hasTursoReady={hasTursoReady}
         hasBranding={hasBranding}
         hasContent={hasContent}
+        hasAssemblyAI={hasAssemblyAI}
         hasAuth={hasAuth}
         contentMap={payload}
         client:load

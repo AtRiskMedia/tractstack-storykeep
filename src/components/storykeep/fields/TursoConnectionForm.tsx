@@ -1,9 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
-//import RebuildProgressModal from "../components/RebuildProgressModal";
 import type { ChangeEvent } from "react";
 
 interface TursoConnectionFormProps {
@@ -11,14 +10,39 @@ interface TursoConnectionFormProps {
 }
 
 const TursoConnectionForm = ({ setGotTurso }: TursoConnectionFormProps) => {
-  //const [showRebuildModal, setShowRebuildModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    TURSO_DATABASE_URL: string;
+    TURSO_AUTH_TOKEN: string;
+  }>({
     TURSO_DATABASE_URL: "",
     TURSO_AUTH_TOKEN: "",
   });
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  async function fetchSettings() {
+    try {
+      const response = await fetch(`/api/concierge/storykeep/env`);
+      const data = await response.json();
+      if (data.success) {
+        const newData = JSON.parse(data.data);
+        const settings = {
+          TURSO_DATABASE_URL: newData.TURSO_DATABASE_URL || "",
+          TURSO_AUTH_TOKEN: newData.TURSO_AUTH_TOKEN || "",
+        };
+        setFormData(settings);
+        setIsLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error fetching Turso settings:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   const validateUrl = (url: string) => {
     if (!url.startsWith("libsql://")) {
@@ -81,10 +105,8 @@ const TursoConnectionForm = ({ setGotTurso }: TursoConnectionFormProps) => {
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
 
-  //<RebuildProgressModal
-  //  isOpen={showRebuildModal}
-  //  onClose={() => setShowRebuildModal(false)}
-  ///>
+  if (!isLoaded) return <div>Loading...</div>;
+
   return (
     <div className="space-y-6">
       {saveSuccess && (

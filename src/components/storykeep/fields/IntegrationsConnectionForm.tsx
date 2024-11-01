@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
@@ -9,10 +9,18 @@ interface IntegrationsConnectionFormProps {
   setGotIntegrations: (value: boolean) => void;
 }
 
+interface IntegrationSettings {
+  PUBLIC_GOOGLE_SITE_VERIFICATION: string;
+  PRIVATE_ASSEMBLYAI_API_KEY: string;
+  PUBLIC_SHOPIFY_SHOP: string;
+  PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN: string;
+  PRIVATE_SHOPIFY_STOREFRONT_ACCESS_TOKEN: string;
+}
+
 const IntegrationsConnectionForm = ({
   setGotIntegrations,
 }: IntegrationsConnectionFormProps) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<IntegrationSettings>({
     PUBLIC_GOOGLE_SITE_VERIFICATION: "",
     PRIVATE_ASSEMBLYAI_API_KEY: "",
     PUBLIC_SHOPIFY_SHOP: "",
@@ -22,6 +30,35 @@ const IntegrationsConnectionForm = ({
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  async function fetchSettings() {
+    try {
+      const response = await fetch(`/api/concierge/storykeep/env`);
+      const data = await response.json();
+      if (data.success) {
+        const newData = JSON.parse(data.data);
+        const settings = {
+          PUBLIC_GOOGLE_SITE_VERIFICATION:
+            newData.PUBLIC_GOOGLE_SITE_VERIFICATION || "",
+          PRIVATE_ASSEMBLYAI_API_KEY: newData.PRIVATE_ASSEMBLYAI_API_KEY || "",
+          PUBLIC_SHOPIFY_SHOP: newData.PUBLIC_SHOPIFY_SHOP || "",
+          PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN:
+            newData.PUBLIC_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "",
+          PRIVATE_SHOPIFY_STOREFRONT_ACCESS_TOKEN:
+            newData.PRIVATE_SHOPIFY_STOREFRONT_ACCESS_TOKEN || "",
+        };
+        setFormData(settings);
+        setIsLoaded(true);
+      }
+    } catch (error) {
+      console.error("Error fetching integration settings:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
   const validateGoogleAnalytics = (value: string) => {
     if (value && !value.startsWith("G-")) {
@@ -60,7 +97,6 @@ const IntegrationsConnectionForm = ({
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    // Only validate fields that have values since all are optional
     if (formData.PUBLIC_GOOGLE_SITE_VERIFICATION) {
       newErrors.PUBLIC_GOOGLE_SITE_VERIFICATION = validateGoogleAnalytics(
         formData.PUBLIC_GOOGLE_SITE_VERIFICATION
@@ -97,7 +133,6 @@ const IntegrationsConnectionForm = ({
     try {
       setIsSaving(true);
 
-      // Only include fields that have values in the payload
       const payload = Object.entries(formData).reduce(
         (acc, [key, value]) => {
           if (value) acc[key] = value;
@@ -140,6 +175,8 @@ const IntegrationsConnectionForm = ({
 
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
+
+  if (!isLoaded) return <div>Loading...</div>;
 
   return (
     <div className="space-y-6">

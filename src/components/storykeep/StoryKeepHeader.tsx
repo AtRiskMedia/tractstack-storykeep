@@ -83,6 +83,7 @@ export const StoryKeepHeader = memo(
     user,
     isContext,
     originalData,
+    hasContentReady
   }: {
     id: string;
     slug: string;
@@ -90,6 +91,7 @@ export const StoryKeepHeader = memo(
     user: AuthStatus;
     isContext: boolean;
     originalData: StoryFragmentDatum | ContextPaneDatum | null;
+      hasContentReady: boolean;
   }) => {
     const [hasAnalytics, setHasAnalytics] = useState(false);
     const $creationState = useStore(creationStateStore);
@@ -253,9 +255,9 @@ export const StoryKeepHeader = memo(
         [`storyFragmentTitle`, `storyFragmentSlug`].includes(storeKey) &&
         [``, `create`].includes($storyFragmentSlug[thisId].current)
       ) {
-        const clean = cleanString(
+        const clean = hasContentReady ? cleanString(
           $storyFragmentTitle[thisId].current
-        ).substring(0, 20);
+        ).substring(0, 20) : `hello`;
         const newVal = !usedSlugs.includes(clean) ? clean : ``;
         temporaryErrorsStore.setKey(thisId, {
           ...(temporaryErrorsStore.get()[thisId] || {}),
@@ -465,7 +467,7 @@ export const StoryKeepHeader = memo(
                   updateStoreField={updateStoreField}
                   handleUndo={handleUndo}
                 />
-                {![`create`, ``].includes(
+                {hasContentReady && ![`create`, ``].includes(
                   $storyFragmentSlug[thisId]?.current
                 ) && (
                   <StoryFragmentSlug

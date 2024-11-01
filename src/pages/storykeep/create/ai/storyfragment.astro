@@ -3,11 +3,11 @@ import { ulid } from "ulid";
 import StoryKeep from "@layouts/StoryKeep.astro";
 import { getTractStackIdBySlug } from "../../../../api/turso";
 import { getSetupChecks } from "../../../../utils/setupChecks";
-import { isTursoReady } from "../../../../api/turso";
+import { isTursoReady} from "../../../../api/turso";
 import CreateNewAiPage from "@components/storykeep/components/CreateNewAiPage";
 
 // confirm set-up
-const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
+const { hasConcierge, hasTurso, hasBranding } = getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
 if (!hasConcierge || !hasTurso || !hasTursoReady || !hasBranding) {
   return Astro.redirect("/storykeep");
@@ -37,7 +37,6 @@ if (!tractStackId) {
       mode="storyfragment"
       newId={newId}
       tractStackId={tractStackId}
-      first={!hasContent}
       client:load
     />
   </div>

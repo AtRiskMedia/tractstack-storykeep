@@ -150,12 +150,12 @@ export default function SiteWizard({
     },
     {
       title: "Add your Integrations",
-      description: !gotIntegrations ? (
+      description: !gotIntegrations && !hasBranding ? (
         <IntegrationsConnectionForm setGotIntegrations={setGotIntegrations} />
       ) : (
         <Completed />
       ),
-      isComplete: gotIntegrations && !hasBranding,
+      isComplete: gotIntegrations || hasBranding,
       status: getStepStatus(3),
     },
     {

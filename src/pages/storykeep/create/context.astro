@@ -32,6 +32,12 @@ const canonicalURL = new URL(`/context/${slug}`, baseUrl).href;
   canonicalURL={canonicalURL}
 >
   <div id="storykeep-content">
-    <CreateNewPage mode="context" newId={newId} tractStackId={``} first={false} client:load />
+    <CreateNewPage
+      mode="context"
+      newId={newId}
+      tractStackId={``}
+      first={false}
+      client:load
+    />
   </div>
 </StoryKeep>

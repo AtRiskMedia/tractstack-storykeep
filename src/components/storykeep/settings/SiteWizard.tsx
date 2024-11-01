@@ -73,6 +73,7 @@ interface SiteWizardProps {
   hasTursoReady: boolean;
   hasBranding: boolean;
   hasContent: boolean;
+  hasContentReady: boolean;
   hasAssemblyAI: boolean;
   hasAuth: boolean;
   contentMap: FullContentMap[];
@@ -93,6 +94,7 @@ export default function SiteWizard({
   hasTursoReady,
   hasBranding,
   hasContent,
+  hasContentReady,
   hasAuth,
   hasAssemblyAI,
   contentMap,
@@ -109,7 +111,7 @@ export default function SiteWizard({
       gotIntegrations || hasBranding,
       hasBranding,
       hasTursoReady,
-      hasContent,
+      hasContentReady,
     ];
     const isCompleted = completionStates[index];
     const allPreviousCompleted = completionStates
@@ -172,12 +174,11 @@ export default function SiteWizard({
     {
       title: "Publish your first page!",
       description: <NeedsContent hasAssemblyAI={hasAssemblyAI} />,
-      isComplete: hasContent,
+      isComplete: hasContentReady,
       status: getStepStatus(6),
     },
   ];
 
-  // Effect to manage step visibility
   useEffect(() => {
     const completionStates = [
       hasConcierge,
@@ -186,7 +187,7 @@ export default function SiteWizard({
       gotIntegrations || hasBranding,
       hasBranding,
       hasTursoReady,
-      hasContent,
+      hasContent && hasContentReady,
     ];
 
     const newOpenSteps: Record<number, boolean> = {};
@@ -210,7 +211,7 @@ export default function SiteWizard({
     gotIntegrations,
     hasBranding,
     hasTursoReady,
-    hasContent,
+    hasContent && hasContentReady,
   ]);
 
   const getStepIcon = (step: SetupStep): ReactNode => {

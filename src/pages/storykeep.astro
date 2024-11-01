@@ -9,7 +9,7 @@ import SiteWizard from "@components/storykeep/settings/SiteWizard";
 import DashboardActivity from "@components/storykeep/nivo/DashboardActivity";
 import WhatsHot from "@components/storykeep/components/WhatsHot";
 import StoryKeepDashboardStore from "@components/storykeep/StoryKeepDashboardStore";
-import { getFullContentMap, isTursoReady } from "../api/turso";
+import { getFullContentMap, isTursoReady, isContentReady } from "../api/turso";
 import { getSetupChecks } from "../utils/setupChecks";
 import type {
   FullContentMap,
@@ -25,6 +25,7 @@ const user = Astro.locals.user as AuthStatus;
 const { hasConcierge, hasTurso, hasBranding, hasContent, hasAssemblyAI } =
   getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const hasContentReady = hasTurso && hasContent ? await isContentReady() : false;
 
 // set the canonicalUrl to the actual storyfragment
 const baseUrl = new URL(Astro.url.pathname, Astro.site);
@@ -97,6 +98,7 @@ const impressions =
     hasTursoReady &&
     hasBranding &&
     hasContent &&
+    hasContentReady &&
     user.isOpenDemo ? (
       <div class="my-1 pt-2 shadow-inner px-1">
         <span class="inline-flex items-center rounded-md bg-mygreen/20 px-4 py-1 text-lg text-black w-full justify-center">
@@ -116,13 +118,23 @@ const impressions =
     isStoryKeep={true}
   />
   {
-    hasConcierge && hasTurso && hasTursoReady && hasContent && hasBranding ? (
+    hasConcierge &&
+    hasTurso &&
+    hasTursoReady &&
+    hasContent &&
+    hasContentReady &&
+    hasBranding ? (
       <StoryKeepDashboardStore client:load />
     ) : null
   }
   }
   {
-    hasConcierge && hasTurso && hasTursoReady && hasContent && hasBranding ? (
+    hasConcierge &&
+    hasTurso &&
+    hasTursoReady &&
+    hasContent &&
+    hasContentReady &&
+    hasBranding ? (
       <main id="main-content" class="min-h-screen">
         <div class="px-1.5 pt-1.5 pb-0 pr-0 pl-1.5 py-1.5">
           <div class="py-1.5 bg-white px-3.5 flex gap-y-12 flex-col">
@@ -289,6 +301,7 @@ const impressions =
         hasTursoReady={hasTursoReady}
         hasBranding={hasBranding}
         hasContent={hasContent}
+        hasContentReady={hasContentReady}
         hasAssemblyAI={hasAssemblyAI}
         hasAuth={hasAuth}
         contentMap={payload}

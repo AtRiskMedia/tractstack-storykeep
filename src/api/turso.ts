@@ -574,6 +574,29 @@ export async function getAllFileDatum(): Promise<TursoFileNode[]> {
   }
 }
 
+export async function isContentReady(): Promise<boolean> {
+  try {
+    const turso = getTursoClient();
+    const { rows } = await turso.execute({
+      sql: `
+        SELECT 
+          EXISTS (
+            SELECT 1 
+            FROM storyfragment sf
+            JOIN tractstack ts ON sf.tractstack_id = ts.id
+            WHERE sf.slug = ? AND ts.slug = ?
+          ) as content_exists
+      `,
+      args: [import.meta.env.PUBLIC_HOME, import.meta.env.PUBLIC_TRACTSTACK],
+    });
+
+    return rows[0]?.content_exists === 1;
+  } catch (error) {
+    console.error("Error checking content readiness:", error);
+    return false;
+  }
+}
+
 export async function isTursoReady(): Promise<boolean> {
   try {
     const turso = getTursoClient();

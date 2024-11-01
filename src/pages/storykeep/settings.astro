@@ -5,7 +5,7 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import ImpressionWrapper from "@components/ImpressionWrapper";
 import EnvironmentSettings from "../../components/storykeep/fields/EnvironmentSettings";
-import { isTursoReady } from "../../api/turso";
+import { isTursoReady, isContentReady } from "../../api/turso";
 import { getSetupChecks } from "../../utils/setupChecks";
 import type {
   FullContentMap,
@@ -20,12 +20,14 @@ const user = Astro.locals.user as AuthStatus;
 // confirm set-up
 const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const hasContentReady = hasTurso && hasContent ? await isContentReady() : false;
 if (
   !hasConcierge ||
   !hasTurso ||
   !hasTursoReady ||
   !hasBranding ||
-  !hasContent
+  !hasContent ||
+  !hasContentReady
 ) {
   return Astro.redirect("/storykeep");
 }

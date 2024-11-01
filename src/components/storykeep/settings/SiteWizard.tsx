@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import {
   CheckCircleIcon,
-  XCircleIcon,
+  InformationCircleIcon,
   ChevronUpIcon,
   LockClosedIcon,
 } from "@heroicons/react/24/outline";
 import TursoConnectionForm from "../fields/TursoConnectionForm";
+import IntegrationsConnectionForm from "../fields/IntegrationsConnectionForm";
 import DatabaseBootstrap from "../components/DatabaseBootstrap";
 import EnvironmentSettings from "../fields/EnvironmentSettings";
 import type { ReactNode } from "react";
 import type { FullContentMap } from "../../../types";
 
-// Components remain unchanged
 const NeedsConcierge = () => (
-  <div className="space-y-4">
+  <div className="space-y-4 text-xl md:text-2xl text-mydarkgrey">
     <p>
       Set up your Story Keep installation to start building your digital story.
     </p>
@@ -31,8 +31,7 @@ const NeedsConcierge = () => (
 );
 
 const Login = () => (
-  <div className="text-xl md:text-2xl">
-    Amazing! You are ready to{" "}
+  <div className="text-xl md:text-2xl text-mydarkgrey">
     <a
       className="font-bold underline hover:text-myorange"
       href="/storykeep/login?force=true"
@@ -43,8 +42,26 @@ const Login = () => (
   </div>
 );
 
+const Completed = () => (
+  <div className="font-bold font-action text-xl md:text-2xl mt-2 text-mydarkgrey">
+    Completed
+  </div>
+);
 const NeedsContent = () => (
-  <div>Create and publish your first piece of content.</div>
+  <div className="space-x-4 text-xl md:text-2xl text-mydarkgrey">
+    <a
+      className="font-bold underline hover:text-myorange"
+      href="/storykeep/login?force=true"
+    >
+      Login-in
+    </a>{" "}
+    <a
+      className="font-bold underline hover:text-myorange"
+      href="/storykeep/login?force=true"
+    >
+      Login-in
+    </a>{" "}
+  </div>
 );
 
 interface SiteWizardProps {
@@ -76,6 +93,7 @@ export default function SiteWizard({
   contentMap,
 }: SiteWizardProps) {
   const [gotTurso, setGotTurso] = useState(false);
+  const [gotIntegrations, setGotIntegrations] = useState(false);
   const [openSteps, setOpenSteps] = useState<Record<number, boolean>>({});
 
   const getStepStatus = (index: number): StepStatus => {
@@ -83,6 +101,7 @@ export default function SiteWizard({
       hasConcierge,
       hasAuth,
       hasTurso || gotTurso,
+      gotIntegrations,
       hasBranding,
       hasTursoReady,
       hasContent,
@@ -97,25 +116,38 @@ export default function SiteWizard({
     return "current";
   };
 
-  // Setup steps configuration
   const setupSteps: SetupStep[] = [
     {
       title: "Install the Story Keep",
-      description: <NeedsConcierge />,
+      description: !hasConcierge ? <NeedsConcierge /> : <Completed />,
       isComplete: hasConcierge,
       status: getStepStatus(0),
     },
     {
       title: "Login",
-      description: <Login />,
+      description: !hasAuth ? <Login /> : <Completed />,
       isComplete: hasAuth,
       status: getStepStatus(1),
     },
     {
       title: "Connect your Turso database",
-      description: <TursoConnectionForm setGotTurso={setGotTurso} />,
+      description: !hasTurso ? (
+        <TursoConnectionForm setGotTurso={setGotTurso} />
+      ) : (
+        <Completed />
+      ),
       isComplete: hasTurso || gotTurso,
       status: getStepStatus(2),
+    },
+    {
+      title: "Add your Integrations",
+      description: !gotIntegrations ? (
+        <IntegrationsConnectionForm setGotIntegrations={setGotIntegrations} />
+      ) : (
+        <Completed />
+      ),
+      isComplete: gotIntegrations,
+      status: getStepStatus(3),
     },
     {
       title: "Make it your own",
@@ -123,19 +155,19 @@ export default function SiteWizard({
         <EnvironmentSettings contentMap={contentMap} showOnlyGroup="Brand" />
       ),
       isComplete: hasBranding,
-      status: getStepStatus(3),
+      status: getStepStatus(4),
     },
     {
       title: "Bootstrap your database",
-      description: <DatabaseBootstrap />,
+      description: !hasTursoReady ? <DatabaseBootstrap /> : <Completed />,
       isComplete: hasTursoReady,
-      status: getStepStatus(4),
+      status: getStepStatus(5),
     },
     {
       title: "Publish your first page!",
       description: <NeedsContent />,
       isComplete: hasContent,
-      status: getStepStatus(5),
+      status: getStepStatus(6),
     },
   ];
 
@@ -145,6 +177,7 @@ export default function SiteWizard({
       hasConcierge,
       hasAuth,
       hasTurso || gotTurso,
+      gotIntegrations,
       hasBranding,
       hasTursoReady,
       hasContent,
@@ -168,6 +201,7 @@ export default function SiteWizard({
     hasAuth,
     hasTurso,
     gotTurso,
+    gotIntegrations,
     hasBranding,
     hasTursoReady,
     hasContent,
@@ -180,7 +214,7 @@ export default function SiteWizard({
     if (step.isComplete) {
       return <CheckCircleIcon className="h-6 w-6 text-mygreen" />;
     }
-    return <XCircleIcon className="h-6 w-6 text-myorange" />;
+    return <InformationCircleIcon className="h-6 w-6 text-myorange" />;
   };
 
   const toggleStep = (index: number) => {

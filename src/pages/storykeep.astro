@@ -54,7 +54,7 @@ if (hasTurso && !user?.isAuthenticated) {
     actionLisp: "(goto (storykeep login))",
   });
 }
-if (hasTurso && hasContent && user?.isAuthenticated) {
+if (hasTurso && hasContent && hasContentReady && user?.isAuthenticated) {
   links.unshift({
     name: "Settings",
     description: "Your Story Keep Settings",

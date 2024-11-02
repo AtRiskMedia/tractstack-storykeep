@@ -1018,35 +1018,12 @@ const EnvironmentSettings = ({
     {} as Record<string, EnvSettingDatum[]>
   );
 
-  return (
-    <div className="space-y-8">
-      <RebuildProgressModal
-        isOpen={showRebuildModal}
-        onClose={() => setShowRebuildModal(false)}
-      />
-      {saveSuccess && (
-        <div className="bg-mygreen/10 p-4 rounded-md mb-4">
-          <p className="text-black font-bold">
-            <CheckIcon className="inline-block h-5 w-5 mr-2" />
-            Save successful
-          </p>
-        </div>
-      )}
-      {hasUncleanData && (
-        <div className="bg-myorange/10 p-4 rounded-md mb-4">
-          <p className="text-black font-bold">
-            <ExclamationTriangleIcon className="inline-block h-5 w-5 mr-2" />
-            Some required fields are empty. Please fill them out before
-            publishing.
-          </p>
-        </div>
-      )}
-      {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
-        <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
+  const MustSaveContainer = () => (
+<div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
           <p className="text-myblue font-bold">
             {hasBrandColorChanges
               ? "Brand colors have changed. This requires regenerating design previews."
-              : "Be very careful adjusting any technical settings. When ready hit publish to push these changes to your site."}
+              : "UNSAVED CHANGES! Be very careful adjusting any technical settings. When ready hit publish to push these changes to your site."}
           </p>
           {!hasBrandColorChanges && (
             <p className="text-mydarkgrey">
@@ -1087,6 +1064,33 @@ const EnvironmentSettings = ({
             )}
           </div>
         </div>
+  )
+
+  return (
+    <div className="space-y-8">
+      <RebuildProgressModal
+        isOpen={showRebuildModal}
+        onClose={() => setShowRebuildModal(false)}
+      />
+      {saveSuccess && (
+        <div className="bg-mygreen/10 p-4 rounded-md mb-4">
+          <p className="text-black font-bold">
+            <CheckIcon className="inline-block h-5 w-5 mr-2" />
+            Save successful
+          </p>
+        </div>
+      )}
+      {hasUncleanData && (
+        <div className="bg-myorange/10 p-4 rounded-md mb-4">
+          <p className="text-black font-bold">
+            <ExclamationTriangleIcon className="inline-block h-5 w-5 mr-2" />
+            Some required fields are empty. Please fill them out before
+            publishing.
+          </p>
+        </div>
+      )}
+      {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
+       <MustSaveContainer /> 
       )}
       {groupOrder.map(group => {
         // Skip groups that don't match showOnlyGroup if it's set
@@ -1118,6 +1122,9 @@ const EnvironmentSettings = ({
           </div>
         );
       })}
+      {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
+       <MustSaveContainer /> 
+      )}
       {showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
           <p className="text-myblue font-bold">

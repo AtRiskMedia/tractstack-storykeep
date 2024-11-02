@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import imageCompression from "browser-image-compression";
 import PreviewPage from "./PreviewPage";
 import type { PageDesign, Theme } from "../../../types";
 
@@ -14,13 +13,25 @@ interface DesignSnapshotProps {
 
 // ... [previous compress function remains the same]
 
-export default function DesignSnapshot({ design, theme, brandColors, onStart, onComplete }: DesignSnapshotProps) {
+export default function DesignSnapshot({
+  design,
+  theme,
+  brandColors,
+  onStart,
+  onComplete,
+}: DesignSnapshotProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
-    if (!previewRef.current || !contentRef.current || isCapturing || brandColors.length === 0) return;
+    if (
+      !previewRef.current ||
+      !contentRef.current ||
+      isCapturing ||
+      brandColors.length === 0
+    )
+      return;
 
     const capturePreview = async () => {
       try {
@@ -29,11 +40,11 @@ export default function DesignSnapshot({ design, theme, brandColors, onStart, on
 
         // Apply brand colors to the preview container
         const previewRoot = previewRef.current;
-        const styleSheet = document.createElement('style');
+        const styleSheet = document.createElement("style");
         styleSheet.textContent = brandColors
           .map((color, i) => `--brand-${i + 1}: ${color};`)
-          .join('\n');
-        previewRoot.appendChild(styleSheet);
+          .join("\n");
+        previewRoot?.appendChild(styleSheet);
 
         // Let component render
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -49,19 +60,17 @@ export default function DesignSnapshot({ design, theme, brandColors, onStart, on
           cacheBust: true,
           width: containerWidth,
           height: containerHeight,
-          backgroundColor: '#FFFFFF',
+          backgroundColor: "#FFFFFF",
           style: {
-            transform: 'scale(1)',
-            transformOrigin: 'top left',
+            transform: "scale(1)",
+            transformOrigin: "top left",
             width: `${containerWidth}px`,
-            height: `${containerHeight}px`
-          }
+            height: `${containerHeight}px`,
+          },
         });
 
-        const compressedImage = await compressImageData(pngImage) as string;
-        
         if (onComplete) {
-          onComplete(compressedImage);
+          onComplete(pngImage);
         }
 
         styleSheet.remove();
@@ -74,18 +83,18 @@ export default function DesignSnapshot({ design, theme, brandColors, onStart, on
     capturePreview();
   }, [design, theme, brandColors, onComplete, isCapturing, onStart]);
 
-// Return a fixed size container with isolated CSS scope
+  // Return a fixed size container with isolated CSS scope
   return (
     <div
       ref={previewRef}
       style={{
-        width: '1200px',
-        height: '900px',
-        backgroundColor: '#FFFFFF',
-        overflow: 'hidden',
-        transform: 'scale(0.25)',
-        transformOrigin: 'top left',
-        isolation: 'isolate' // Create new stacking context
+        width: "1200px",
+        height: "900px",
+        backgroundColor: "#FFFFFF",
+        overflow: "hidden",
+        transform: "scale(0.25)",
+        transformOrigin: "top left",
+        isolation: "isolate", // Create new stacking context
       }}
     >
       <PreviewPage

@@ -18,49 +18,46 @@ const themes: Theme[] = [
 ];
 
 const themeNames: Record<Theme, string> = {
-  "light": "Light",
+  light: "Light",
   "light-bw": "Light Black & White",
   "light-bold": "Light Bold",
-  "dark": "Dark",
+  dark: "Dark",
   "dark-bw": "Dark Black & White",
-  "dark-bold": "Dark Bold"
+  "dark-bold": "Dark Bold",
 };
 
-export default function ThemeVisualSelector({ value, onChange }: ThemeVisualSelectorProps) {
-  const [snapshots, setSnapshots] = useState<Record<Theme, string>>({});
+const initialSnapshots: Record<Theme, string> = {
+  light: "",
+  "light-bw": "",
+  "light-bold": "",
+  dark: "",
+  "dark-bw": "",
+  "dark-bold": "",
+};
+
+export default function ThemeVisualSelector({
+  value,
+  onChange,
+}: ThemeVisualSelectorProps) {
+  const [snapshots, setSnapshots] =
+    useState<Record<Theme, string>>(initialSnapshots);
   const [brandColors, setBrandColors] = useState<string[]>([]);
 
-  // Monitor brand color changes
   useEffect(() => {
-    const updateBrandColors = () => {
-      const style = getComputedStyle(document.documentElement);
-      const colors = Array.from({ length: 8 }, (_, i) => 
-        style.getPropertyValue(`--brand-${i + 1}`).trim()
-      );
-      setBrandColors(colors);
-      // Clear snapshots to force regeneration
-      setSnapshots({});
-    };
-
-    // Get initial colors
-    updateBrandColors();
-
-    // Create observer for CSS variable changes
-    const observer = new MutationObserver(updateBrandColors);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['style']
-    });
-
-    return () => observer.disconnect();
+    const colors = [];
+    for (let i = 1; i <= 8; i++) {
+      const color = getComputedStyle(document.documentElement)
+        .getPropertyValue(`--brand-${i}`)
+        .trim();
+      if (color) colors.push(color);
+    }
+    setBrandColors(colors);
   }, []);
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {themes.map((theme) => {
-        // Get design for this specific theme
+      {themes.map(theme => {
         const design = pageDesigns(theme).basic;
-        
         return (
           <button
             key={theme}
@@ -70,13 +67,13 @@ export default function ThemeVisualSelector({ value, onChange }: ThemeVisualSele
             }`}
           >
             <div className="relative aspect-[4/3] w-full">
-              {(!snapshots[theme] || brandColors.length === 0) ? (
+              {!snapshots[theme] || brandColors.length === 0 ? (
                 <div className="absolute inset-0">
                   <DesignSnapshot
                     design={design}
                     theme={theme}
                     brandColors={brandColors}
-                    onComplete={(imageData) => 
+                    onComplete={imageData =>
                       setSnapshots(prev => ({ ...prev, [theme]: imageData }))
                     }
                   />
@@ -93,7 +90,7 @@ export default function ThemeVisualSelector({ value, onChange }: ThemeVisualSele
               {themeNames[theme]}
             </div>
           </button>
-        )
+        );
       })}
     </div>
   );

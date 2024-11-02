@@ -101,41 +101,43 @@ const WhatsHot = ({ contentMap }: { contentMap: FullContentMap[] }) => {
             </tr>
           </thead>
           <tbody className="bg-mywhite divide-y divide-mylightgrey/10">
-            {hotStoryFragments.map(item => (
-              <tr key={item.id}>
-                <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-myblack truncate max-w-xs">
-                    {item.title}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-mydarkgrey truncate max-w-xs">
-                    {item.slug}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-mydarkgrey">
-                    {item.total_events}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
-                  <a
-                    href={`/${item.slug}`}
-                    className="text-myblue hover:text-myorange mr-3 inline-block"
-                    title="View"
-                  >
-                    <CursorArrowRippleIcon className="h-5 w-5" />
-                  </a>
-                  <a
-                    href={`/${item.slug}/edit`}
-                    className="text-myblue hover:text-myorange inline-block"
-                    title="Edit"
-                  >
-                    <BeakerIcon className="h-5 w-5" />
-                  </a>
-                </td>
-              </tr>
-            ))}
+            {hotStoryFragments
+              .filter(i => i.slug)
+              .map(item => (
+                <tr key={item.id}>
+                  <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-myblack truncate max-w-xs">
+                      {item.title}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-mydarkgrey truncate max-w-xs">
+                      {item.slug}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-mydarkgrey">
+                      {item.total_events}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-bold">
+                    <a
+                      href={`/${item.slug}`}
+                      className="text-myblue hover:text-myorange mr-3 inline-block"
+                      title="View"
+                    >
+                      <CursorArrowRippleIcon className="h-5 w-5" />
+                    </a>
+                    <a
+                      href={`/${item.slug}/edit`}
+                      className="text-myblue hover:text-myorange inline-block"
+                      title="Edit"
+                    >
+                      <BeakerIcon className="h-5 w-5" />
+                    </a>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

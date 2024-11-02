@@ -188,6 +188,10 @@ export const widgetMeta: WidgetMeta = {
   },
 };
 
+export const knownBrand: Record<string, string> = {
+  default: "10120d,fcfcfc,f58333,c8df8c,293f58,a7b1b7,393d34,e3e3e3",
+};
+
 export const knownEnvSettings: EnvSetting[] = [
   {
     name: "PRIVATE_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
@@ -249,7 +253,7 @@ export const knownEnvSettings: EnvSetting[] = [
     type: "string",
     description: "Brand color palette (hex codes without #)",
     group: "Brand",
-    priority: true,
+    priority: false,
     required: true,
   },
   {
@@ -294,7 +298,7 @@ export const knownEnvSettings: EnvSetting[] = [
     type: "string",
     description: "Select a default visual style",
     group: "Brand",
-    priority: true,
+    priority: false,
     required: true,
   },
   {

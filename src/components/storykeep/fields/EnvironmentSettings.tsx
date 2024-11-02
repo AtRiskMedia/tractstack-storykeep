@@ -14,13 +14,14 @@ import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import RebuildProgressModal from "../components/RebuildProgressModal";
 import BrandColorPicker from "./BrandColorPicker";
 import ThemeVisualSelector from "../components/ThemeVisualSelector";
-import { knownEnvSettings } from "../../../constants";
+import { knownEnvSettings, knownBrand } from "../../../constants";
 import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ChangeEvent } from "react";
 import type {
   FullContentMap,
   EnvSettingType,
   EnvSettingDatum,
+  Theme,
 } from "../../../types";
 
 interface EnvironmentSettingsProps {
@@ -127,23 +128,19 @@ const groupOrder = [
   "Backend",
 ];
 const wordmarkModeOptions = ["default", "logo", "wordmark"];
-const themeOptions = [
-  "light",
-  "light-bw",
-  "light-bold",
-  "dark",
-  "dark-bw",
-  "dark-bold",
-];
 
 const EnvironmentSettings = ({
   contentMap,
   showOnlyGroup,
 }: EnvironmentSettingsProps) => {
+  const [selectedBrandPreset, setSelectedBrandPreset] =
+    useState<string>("default");
+  const [customColors, setCustomColors] = useState<string | null>(null);
   const [
     isGeneratingSnapshotsThenPublish,
     setIsGeneratingSnapshotsThenPublish,
   ] = useState(false);
+  const [updateColours, setUpdateColours] = useState(false);
   const [isGeneratingSnapshots, setIsGeneratingSnapshots] = useState(false);
   const [showRebuildModal, setShowRebuildModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -183,33 +180,64 @@ const EnvironmentSettings = ({
     [contentMap]
   );
 
-  async function fetchEnv() {
-    try {
-      const response = await fetch(`/api/concierge/storykeep/env`);
-      const data = await response.json();
-      if (data.success) {
-        const newData = JSON.parse(data.data);
-        const initialSettings = knownEnvSettings.map(setting => {
-          let value = newData[setting.name] ?? "";
-          if (setting.type === "boolean") {
-            value = value === "1" || value === true ? "true" : "false";
-          }
-          return {
-            ...setting,
-            value,
-          };
+  useEffect(() => {
+    if (updateColours) {
+      const brandColors = localSettings
+        .find(s => s.name === "PUBLIC_BRAND")
+        ?.value.split(",")
+        .map(color => `#${color.trim()}`);
+      if (brandColors)
+        brandColors.forEach((color, index) => {
+          document.documentElement.style.setProperty(
+            `--brand-${index + 1}`,
+            color
+          );
         });
-        setLocalSettings(initialSettings);
-        setOriginalSettings(initialSettings);
-        setHasUnsavedChanges(false);
-        setIsLoaded(true);
-      }
-    } catch (error) {
-      console.error("Error fetching env:", error);
+      setUpdateColours(false);
     }
-  }
+  }, [updateColours]);
 
   useEffect(() => {
+    async function fetchEnv() {
+      try {
+        const response = await fetch(`/api/concierge/storykeep/env`);
+        const data = await response.json();
+        if (data.success) {
+          const newData = JSON.parse(data.data);
+          const initialSettings = knownEnvSettings.map(setting => {
+            let value = newData[setting.name] ?? "";
+            if (setting.type === "boolean") {
+              value = value === "1" || value === true ? "true" : "false";
+            }
+
+            // Special handling for PUBLIC_BRAND
+            if (setting.name === "PUBLIC_BRAND") {
+              const matchingPreset = Object.entries(knownBrand).find(
+                ([, presetValue]) => presetValue === value
+              )?.[0];
+
+              if (matchingPreset) {
+                setSelectedBrandPreset(matchingPreset);
+              } else {
+                setSelectedBrandPreset("custom");
+                setCustomColors(value);
+              }
+            }
+
+            return {
+              ...setting,
+              value,
+            };
+          });
+          setLocalSettings(initialSettings);
+          setOriginalSettings(initialSettings);
+          setHasUnsavedChanges(false);
+          setIsLoaded(true);
+        }
+      } catch (error) {
+        console.error("Error fetching env:", error);
+      }
+    }
     fetchEnv();
   }, []);
 
@@ -239,6 +267,34 @@ const EnvironmentSettings = ({
     });
     setHasUnsavedChanges(true);
   }, []);
+
+  const handleBrandPresetChange = useCallback(
+    (preset: string) => {
+      const settingIndex = localSettings.findIndex(
+        s => s.name === "PUBLIC_BRAND"
+      );
+      if (settingIndex === -1) return;
+      if (preset === "custom") {
+        const colorsToUse = customColors || localSettings[settingIndex].value;
+        handleSettingChange(settingIndex, "value", colorsToUse);
+        setSelectedBrandPreset("custom");
+        setUpdateColours(true);
+        return;
+      }
+      const currentColors = localSettings[settingIndex].value;
+      const isCurrentPreset = Object.entries(knownBrand).some(
+        ([, value]) => value === currentColors
+      );
+      if (!isCurrentPreset && currentColors) {
+        setCustomColors(currentColors);
+      }
+      const presetColors = knownBrand[preset];
+      handleSettingChange(settingIndex, "value", presetColors);
+      setSelectedBrandPreset(preset);
+      setUpdateColours(true);
+    },
+    [localSettings, customColors, handleSettingChange]
+  );
 
   const addSocialValue = useCallback((index: number) => {
     setLocalSettings(prev => {
@@ -599,16 +655,17 @@ const EnvironmentSettings = ({
         </div>
       );
     } else if (setting.name === "PUBLIC_THEME") {
-     return (
-    <div key={setting.name} className="space-y-2 mb-4">
-      {renderLabel()}
-      <ThemeVisualSelector
-        value={setting.value || "light-bold"}
-        onChange={newValue => handleSettingChange(index, "value", newValue)}
-        brandColors={localSettings.find(s => s.name === "PUBLIC_BRAND")?.value}
-      />
-    </div>
-  ) 
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          {renderLabel()}
+          <ThemeVisualSelector
+            value={(setting.value as Theme) || ("light-bold" as Theme)}
+            onChange={newValue => {
+              handleSettingChange(index, "value", newValue);
+            }}
+          />
+        </div>
+      );
     } else if (setting.name === "PUBLIC_SOCIALS") {
       const values = setting.value.split(",");
       const usedPlatforms = values.map(value => value.split("|")[0]);
@@ -713,11 +770,86 @@ const EnvironmentSettings = ({
       return (
         <div key={setting.name} className="space-y-2 mb-4">
           {renderLabel()}
-          <BrandColorPicker
-            value={setting.value}
-            onChange={newValue => handleSettingChange(index, "value", newValue)}
-            onEditingChange={() => setHasUnsavedChanges(true)}
-          />
+          <div className="space-y-4">
+            <Combobox
+              value={selectedBrandPreset}
+              onChange={handleBrandPresetChange}
+            >
+              <div className="relative max-w-xs">
+                <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-sm">
+                  <Combobox.Input
+                    className={`${commonInputClass} pr-10`}
+                    displayValue={(preset: string) =>
+                      preset.charAt(0).toUpperCase() + preset.slice(1)
+                    }
+                    onChange={event => {
+                      const value = event.target.value.toLowerCase();
+                      if (value === "custom" || value in knownBrand) {
+                        handleBrandPresetChange(value);
+                      }
+                    }}
+                  />
+                  <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                    <ChevronUpDownIcon
+                      className="h-5 w-5 text-mydarkgrey"
+                      aria-hidden="true"
+                    />
+                  </Combobox.Button>
+                </div>
+                <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                  {[...Object.keys(knownBrand), "custom"].map(preset => (
+                    <Combobox.Option
+                      key={preset}
+                      value={preset}
+                      className={({ active }) =>
+                        `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                          active
+                            ? "bg-myorange/10 text-myblack"
+                            : "text-mydarkgrey"
+                        }`
+                      }
+                    >
+                      {({ selected, active }) => (
+                        <>
+                          <span
+                            className={`block truncate ${selected ? "font-medium" : "font-normal"}`}
+                          >
+                            {preset.charAt(0).toUpperCase() + preset.slice(1)}
+                          </span>
+                          {selected ? (
+                            <span
+                              className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
+                                active ? "text-myorange" : "text-myorange"
+                              }`}
+                            >
+                              <CheckIcon
+                                className="h-5 w-5"
+                                aria-hidden="true"
+                              />
+                            </span>
+                          ) : null}
+                        </>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </Combobox.Options>
+              </div>
+            </Combobox>
+
+            <BrandColorPicker
+              value={setting.value}
+              onChange={newValue => {
+                handleSettingChange(index, "value", newValue);
+                setUpdateColours(true);
+                // Check if new value matches any preset
+                const matchingPreset = Object.entries(knownBrand).find(
+                  ([, presetValue]) => presetValue === newValue
+                )?.[0];
+                setSelectedBrandPreset(matchingPreset || "custom");
+              }}
+              onEditingChange={() => setHasUnsavedChanges(true)}
+            />
+          </div>
         </div>
       );
     } else if (setting.name === "PUBLIC_HOME") {
@@ -956,7 +1088,7 @@ const EnvironmentSettings = ({
                 </button>
               )}
               {(expandedGroups[group] || showOnlyGroup) && (
-                <div className={`${showOnlyGroup ? "" : "mt-4"} space-y-4`}>
+                <div className={`${showOnlyGroup ? "" : "mt-4"} space-y-8`}>
                   {settings.map(setting =>
                     renderSetting(setting, localSettings.indexOf(setting))
                   )}

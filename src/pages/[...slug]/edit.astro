@@ -52,7 +52,9 @@ const contentMap: ContentMap[] = await getContentMap();
   title={storyfragment?.title}
   pubDatetime={storyfragment?.created}
   modDatetime={storyfragment?.changed}
-  ogImage={storyfragment?.socialImagePath}
+  ogImage={typeof storyfragment?.socialImagePath === `string`
+    ? storyfragment.socialImagePath
+    : undefined}
   canonicalURL={canonicalURL}
 >
   <div

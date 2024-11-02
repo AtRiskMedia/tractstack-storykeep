@@ -8,25 +8,17 @@ import type { ContentMap } from "../types";
 
 export interface Props {
   title?: string;
-  author?: string;
-  description?: string;
-  ogImage?: string | null;
-  ogLogo?: string;
-  website?: string;
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
   stylesUrl?: string;
+  ogImage?: string;
 }
 
 const {
-  title = SITE.title,
-  author = SITE.author,
-  description = SITE.desc,
-  ogImage = SITE.ogImage,
-  ogLogo = SITE.ogLogo,
-  website = SITE.website,
+  title = ``,
+  ogImage,
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
   pubDatetime,
   modDatetime,
@@ -34,8 +26,25 @@ const {
   stylesUrl = ``,
 } = Astro.props;
 
-const socialImageURL = `${website}/${ogImage ?? SITE.ogImage ?? `og.png`}`;
-const socialLogoURL = `${website}/${ogLogo ?? SITE.ogLogo ?? `logo.png`}`;
+const siteTitle = SITE.title;
+const author = SITE.author;
+const description = SITE.desc;
+const website = SITE.website;
+
+const defaultSocialImageURL =
+  typeof import.meta.env.PUBLIC_OG === `string` && import.meta.env.PUBLIC_OG
+    ? import.meta.env.PUBLIC_OG
+    : `og.png`;
+const defaultSocialLogoURL =
+  typeof import.meta.env.PUBLIC_OGLOGO === `string` &&
+  import.meta.env.PUBLIC_OGLOGO
+    ? import.meta.env.PUBLIC_OGLOGO
+    : `logo.png`;
+const defaultSocialTitle = import.meta.env.PUBLIC_OGTITLE;
+const defaultSocialAuthor = import.meta.env.PUBLIC_OGAUTHOR;
+const defaultSocialDesc = import.meta.env.PUBLIC_OGDESC;
+const socialImageURL = `${website}/${ogImage ?? defaultSocialImageURL ?? `og.png`}`;
+const socialLogoURL = `${website}/${defaultSocialLogoURL ?? `logo.png`}`;
 
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 const gtagUrl =
@@ -66,16 +75,22 @@ const contentMap: ContentMap[] =
     <link rel="stylesheet" href={stylesUrl} />
 
     <!-- General Meta Tags -->
-    <title>{title}</title>
-    <meta name="title" content={title} />
-    <meta name="description" content={description} />
-    <meta name="author" content={author} />
+    <title>{title ?? defaultSocialTitle ?? siteTitle}</title>
+    <meta name="title" content={title ?? defaultSocialTitle ?? siteTitle} />
+    <meta name="description" content={defaultSocialDesc ?? description} />
+    <meta name="author" content={defaultSocialAuthor ?? author} />
     <link rel="sitemap" href="/sitemap.xml" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:title" content={title} />
+    <meta
+      property="og:title"
+      content={title ?? defaultSocialTitle ?? siteTitle}
+    />
     <meta property="og:type" content="website" />
-    <meta property="og:description" content={description} />
+    <meta
+      property="og:description"
+      content={defaultSocialDesc ?? description}
+    />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
     <meta property="og:logo" content={socialLogoURL} />
@@ -105,8 +120,14 @@ const contentMap: ContentMap[] =
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
+    <meta
+      property="twitter:title"
+      content={title ?? defaultSocialTitle ?? siteTitle}
+    />
+    <meta
+      property="twitter:description"
+      content={defaultSocialDesc ?? description}
+    />
     <meta property="twitter:image" content={socialImageURL} />
 
     <!-- Google Analytics -->

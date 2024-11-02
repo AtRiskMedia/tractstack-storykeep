@@ -176,7 +176,7 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
         return;
       }
 
-      await new Promise(resolve => setTimeout(resolve, 250));
+      await new Promise(resolve => setTimeout(resolve, 150));
 
       // First get PNG data
       const pngImage = await toPng(previewRef.current, {
@@ -210,7 +210,7 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
       const result = await saveFile(src, filename);
       if (!result) setStatusMsg(`Error generating file`);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 50));
     } catch (error) {
       setStatusMsg(`Error generating image: ${error}`);
     }

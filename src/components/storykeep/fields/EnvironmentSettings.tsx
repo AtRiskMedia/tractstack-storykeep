@@ -6,7 +6,6 @@ import {
   PlusIcon,
   ChevronUpDownIcon,
   ExclamationTriangleIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
@@ -240,6 +239,15 @@ const EnvironmentSettings = ({
     }
     fetchEnv();
   }, []);
+
+  const hasBrandColorChanges = useMemo(() => {
+    return originalSettings.some(
+      setting =>
+        setting.name === "PUBLIC_BRAND" &&
+        setting.value !==
+          localSettings.find(s => s.name === "PUBLIC_BRAND")?.value
+    );
+  }, [originalSettings, localSettings]);
 
   const handleSettingChange = useCallback(
     (
@@ -547,11 +555,9 @@ const EnvironmentSettings = ({
       >
         {setting.description}
         <div className="relative ml-1 group">
-          <InformationCircleIcon className="h-5 w-5 text-myblue cursor-help" />
           <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-white border border-mylightgrey rounded p-2 shadow-lg z-10 w-64">
             <p className="text-sm text-mydarkgrey">
               {setting.required ? "Required field. " : ""}
-              Use format: {setting.defaultValue}
             </p>
           </div>
         </div>
@@ -1038,13 +1044,16 @@ const EnvironmentSettings = ({
       {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
           <p className="text-myblue font-bold">
-            Be very careful adjusting any technical settings. When ready hit{" "}
-            <strong>publish</strong> to push these changes to your site.
+            {hasBrandColorChanges
+              ? "Brand colors have changed. This requires regenerating design previews."
+              : "Be very careful adjusting any technical settings. When ready hit publish to push these changes to your site."}
           </p>
-          <p className="text-mydarkgrey">
-            Note: this triggers a 0-2 second "reload" of your website. Active
-            users are unlikely to be impacted.
-          </p>
+          {!hasBrandColorChanges && (
+            <p className="text-mydarkgrey">
+              Note: this triggers a 0-2 second "reload" of your website. Active
+              users are unlikely to be impacted.
+            </p>
+          )}
           <div className="flex justify-end space-x-2 mt-6">
             <a
               className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
@@ -1052,19 +1061,30 @@ const EnvironmentSettings = ({
             >
               Cancel
             </a>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
-              disabled={hasUncleanData}
-            >
-              Save Changes Only
-            </button>
-            <button
-              onClick={handleSavePublish}
-              className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
-            >
-              Save and Re-Publish Website
-            </button>
+            {hasBrandColorChanges ? (
+              <button
+                onClick={handleSavePublish}
+                className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
+              >
+                Save and Rebuild Design Previews
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleSave}
+                  className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+                  disabled={hasUncleanData}
+                >
+                  Save Changes Only
+                </button>
+                <button
+                  onClick={handleSavePublish}
+                  className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
+                >
+                  Save and Re-Publish Website
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -1124,19 +1144,6 @@ const EnvironmentSettings = ({
             setShowRebuildModal(true);
           }}
         />
-      )}
-      {!showOnlyGroup && (
-        <div className="pt-12">
-          <div className="flex justify-start space-x-2">
-            <h3 className="text-lg font-bold font-action">Special Actions:</h3>
-            <button
-              onClick={() => setIsGeneratingSnapshots(true)}
-              className="px-4 py-2 text-white bg-myblack rounded hover:bg-myblue"
-            >
-              Regenerate Design Previews
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );

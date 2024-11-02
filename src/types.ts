@@ -957,8 +957,6 @@ export type Site = {
   author: string;
   desc: string;
   title: string;
-  ogImage?: string;
-  ogLogo?: string;
 };
 
 export interface Current {

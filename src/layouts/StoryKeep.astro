@@ -24,25 +24,37 @@ const {
   scrollSmooth = true,
 } = Astro.props;
 
-const siteTitle = SITE.title;
-const author = SITE.author;
-const description = SITE.desc;
 const website = SITE.website;
-
 const defaultSocialImageURL =
-  typeof import.meta.env.PUBLIC_OG === `string` && import.meta.env.PUBLIC_OG
-    ? import.meta.env.PUBLIC_OG
-    : `og.png`;
+  typeof ogImage === `string` && ogImage
+    ? ogImage
+    : typeof import.meta.env.PUBLIC_OG === `string` && import.meta.env.PUBLIC_OG
+      ? import.meta.env.PUBLIC_OG
+      : `og.png`;
 const defaultSocialLogoURL =
   typeof import.meta.env.PUBLIC_OGLOGO === `string` &&
   import.meta.env.PUBLIC_OGLOGO
     ? import.meta.env.PUBLIC_OGLOGO
     : `logo.png`;
-const defaultSocialTitle = import.meta.env.PUBLIC_OGTITLE;
-const defaultSocialAuthor = import.meta.env.PUBLIC_OGAUTHOR;
-const defaultSocialDesc = import.meta.env.PUBLIC_OGDESC;
-const socialImageURL = `${website}/${ogImage ?? defaultSocialImageURL ?? `og.png`}`;
-const socialLogoURL = `${website}/${defaultSocialLogoURL ?? `logo.png`}`;
+const defaultSocialTitle =
+  typeof title === `string` && title
+    ? title
+    : typeof import.meta.env.PUBLIC_OGTITLE === `string` &&
+        import.meta.env.PUBLIC_OGTITLE
+      ? import.meta.env.PUBLIC_OGTITLE
+      : SITE.title;
+const defaultSocialAuthor =
+  typeof import.meta.env.PUBLIC_OGAUTHOR === `string` &&
+  import.meta.env.PUBLIC_OGAUTHOR
+    ? import.meta.env.PUBLIC_OGAUTHOR
+    : SITE.author;
+const defaultSocialDesc =
+  typeof import.meta.env.PUBLIC_OGDESC === `string` &&
+  import.meta.env.PUBLIC_OGDESC
+    ? import.meta.env.PUBLIC_OGDESC
+    : SITE.desc;
+const socialImageURL = `${website}/${defaultSocialImageURL}`;
+const socialLogoURL = `${website}/${defaultSocialLogoURL}`;
 const storykeepCss = `/styles/storykeep.css`;
 
 const { hasTurso } = getSetupChecks();
@@ -68,25 +80,26 @@ const contentMap: ContentMap[] =
     <link rel="stylesheet" href={storykeepCss} />
 
     <!-- General Meta Tags -->
-    <title>{title ?? defaultSocialTitle ?? siteTitle}</title>
-    <meta name="title" content={title ?? defaultSocialTitle ?? siteTitle} />
-    <meta name="description" content={defaultSocialDesc ?? description} />
-    <meta name="author" content={defaultSocialAuthor ?? author} />
+    <title>{defaultSocialTitle}</title>
+    <meta name="title" content={defaultSocialTitle} />
+    <meta name="description" content={defaultSocialDesc} />
+    <meta name="author" content={defaultSocialAuthor} />
     <link rel="sitemap" href="/sitemap.xml" />
 
     <!-- Open Graph / Facebook -->
-    <meta
-      property="og:title"
-      content={title ?? defaultSocialTitle ?? siteTitle}
-    />
+    <meta property="og:title" content={defaultSocialTitle} />
     <meta property="og:type" content="website" />
-    <meta
-      property="og:description"
-      content={defaultSocialDesc ?? description}
-    />
+    <meta property="og:description" content={defaultSocialDesc} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
     <meta property="og:logo" content={socialLogoURL} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={defaultSocialTitle} />
+    <meta property="twitter:description" content={defaultSocialDesc} />
+    <meta property="twitter:image" content={socialImageURL} />
 
     <!-- Article Published/Modified time -->
     {
@@ -109,19 +122,6 @@ const contentMap: ContentMap[] =
         </>
       )
     }
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta
-      property="twitter:title"
-      content={title ?? defaultSocialTitle ?? siteTitle}
-    />
-    <meta
-      property="twitter:description"
-      content={defaultSocialDesc ?? description}
-    />
-    <meta property="twitter:image" content={socialImageURL} />
 
     <!-- Tract Stack Concierge -->
     <script>

@@ -12,6 +12,7 @@ import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
 import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import RebuildProgressModal from "../components/RebuildProgressModal";
+import BrandColorPicker from "./BrandColorPicker";
 import { knownEnvSettings } from "../../../constants";
 import { socialIconKeys } from "../../../assets/socialIcons";
 import type { ChangeEvent } from "react";
@@ -138,6 +139,11 @@ const EnvironmentSettings = ({
   contentMap,
   showOnlyGroup,
 }: EnvironmentSettingsProps) => {
+  const [
+    isGeneratingSnapshotsThenPublish,
+    setIsGeneratingSnapshotsThenPublish,
+  ] = useState(false);
+  const [isGeneratingSnapshots, setIsGeneratingSnapshots] = useState(false);
   const [showRebuildModal, setShowRebuildModal] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [localSettings, setLocalSettings] = useState<EnvSettingDatum[]>([]);
@@ -151,7 +157,6 @@ const EnvironmentSettings = ({
       Brand: true,
     }
   );
-  const [isGeneratingSnapshots, setIsGeneratingSnapshots] = useState(false);
 
   const commonInputClass =
     "block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-myorange/20 placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-myorange xs:text-md xs:leading-6";
@@ -396,13 +401,11 @@ const EnvironmentSettings = ({
 
   const handleSavePublish = useCallback(async () => {
     try {
-      // First save settings
       const success = await saveEnvSettings(localSettings, originalSettings);
       if (!success) {
         throw new Error("Failed to save environment settings");
       }
 
-      // Update local state
       envSettings.set({
         current: localSettings,
         original: localSettings,
@@ -412,8 +415,33 @@ const EnvironmentSettings = ({
       setHasUnsavedChanges(false);
       setSaveSuccess(true);
 
-      // Show rebuild modal
-      setShowRebuildModal(true);
+      // Check if brand colors changed
+      const brandChanged = originalSettings.some(
+        setting =>
+          setting.name === "PUBLIC_BRAND" &&
+          setting.value !==
+            localSettings.find(s => s.name === "PUBLIC_BRAND")?.value
+      );
+
+      if (brandChanged) {
+        // update the css var colours
+        const brandColors = localSettings
+          .find(s => s.name === "PUBLIC_BRAND")
+          ?.value.split(",")
+          .map(color => `#${color.trim()}`);
+        if (brandColors)
+          brandColors.forEach(
+            (color, index) => {
+              document.documentElement.style.setProperty(
+                `--brand-${index + 1}`,
+                color
+              );
+            }
+          );
+        setIsGeneratingSnapshotsThenPublish(true);
+      } else {
+        setShowRebuildModal(true);
+      }
 
       setTimeout(() => {
         setSaveSuccess(false);
@@ -735,6 +763,17 @@ const EnvironmentSettings = ({
           </Combobox>
         </div>
       );
+    } else if (setting.name === "PUBLIC_BRAND") {
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          {renderLabel()}
+          <BrandColorPicker
+            value={setting.value}
+            onChange={newValue => handleSettingChange(index, "value", newValue)}
+            onEditingChange={() => setHasUnsavedChanges(true)}
+          />
+        </div>
+      );
     } else if (setting.name === "PUBLIC_HOME") {
       return (
         <div key={setting.name} className="space-y-2 mb-4">
@@ -999,6 +1038,14 @@ const EnvironmentSettings = ({
       )}
       {isGeneratingSnapshots && (
         <DesignSnapshotModal onClose={() => setIsGeneratingSnapshots(false)} />
+      )}
+      {isGeneratingSnapshotsThenPublish && (
+        <DesignSnapshotModal
+          onClose={() => {
+            setIsGeneratingSnapshotsThenPublish(false);
+            setShowRebuildModal(true);
+          }}
+        />
       )}
       {!showOnlyGroup && (
         <div className="pt-12">

@@ -283,7 +283,17 @@ export const DesignSnapshotModal = ({ onClose }: DesignSnapshotModalProps) => {
           )}
         </div>
       </div>
-      <div className="w-full">
+      <div
+        className="fixed opacity-0 pointer-events-none"
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: "-9999px",
+          width: "1500px",
+          height: "auto",
+          overflow: "hidden",
+        }}
+      >
         {isGenerating && !isCompleted && getCurrentDesign() && (
           <div
             ref={previewRef}

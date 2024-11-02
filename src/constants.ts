@@ -244,6 +244,15 @@ export const knownEnvSettings: EnvSetting[] = [
     required: true,
   },
   {
+    name: "PUBLIC_BRAND",
+    defaultValue: "10120d,fcfcfc,f58333,c8df8c,293f58,a7b1b7,393d34,e3e3e3",
+    type: "string",
+    description: "Brand color palette (hex codes without #)",
+    group: "Brand",
+    priority: true,
+    required: true,
+  },
+  {
     name: "PUBLIC_IMAGE_URL",
     defaultValue: "https://example.com",
     type: "string",

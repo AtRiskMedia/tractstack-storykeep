@@ -10,7 +10,9 @@ export interface ColorPickerProps {
   id: string;
   defaultColor: string;
   onColorChange: (color: string) => void;
+  skipTailwind?: boolean;
 }
+
 interface ClosestColor {
   name: string;
   shade: number;
@@ -49,12 +51,11 @@ export const findClosestTailwindColor = (
 
   Object.entries(tailwindColors).forEach(([colorName, shades]) => {
     shades.forEach((shade, index) => {
-      if (!validShades.includes((index + 1) * 100)) return; // Skip invalid shades
+      if (!validShades.includes((index + 1) * 100)) return;
 
       const shadeColor = tinycolor(shade);
       const shadeHsl = shadeColor.toHsl();
 
-      // Calculate distance in HSL space
       const distanceH = Math.abs(targetHsl.h - shadeHsl.h);
       const distanceS = Math.abs(targetHsl.s - shadeHsl.s);
       const distanceL = Math.abs(targetHsl.l - shadeHsl.l);
@@ -71,7 +72,12 @@ export const findClosestTailwindColor = (
   return closestColor;
 };
 
-const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
+const ColorPicker = ({
+  id,
+  defaultColor,
+  onColorChange,
+  skipTailwind,
+}: ColorPickerProps) => {
   const [displayColorPicker, setDisplayColorPicker] = useState(false);
   const [color, setColor] = useState(getComputedColor(defaultColor));
   const lastSelectedColor = useRef(getComputedColor(defaultColor));
@@ -92,29 +98,38 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
     setDisplayColorPicker(false);
     if (color !== lastSelectedColor.current) {
       setColor(lastSelectedColor.current);
-      const closestColor = findClosestTailwindColor(lastSelectedColor.current);
-      if (closestColor) {
-        onColorChange(`${closestColor.name}-${closestColor.shade}`);
+      if (skipTailwind) {
+        onColorChange(lastSelectedColor.current);
       } else {
-        const customColorEntry = Object.entries(customColors).find(
-          /* eslint-disable @typescript-eslint/no-unused-vars */
-          ([_, value]) => getComputedColor(value) === lastSelectedColor.current
+        const closestColor = findClosestTailwindColor(
+          lastSelectedColor.current
         );
-        onColorChange(
-          customColorEntry ? customColorEntry[0] : lastSelectedColor.current
-        );
+        if (closestColor) {
+          onColorChange(`${closestColor.name}-${closestColor.shade}`);
+        } else {
+          const customColorEntry = Object.entries(customColors).find(
+            ([, value]) => getComputedColor(value) === lastSelectedColor.current
+          );
+          onColorChange(
+            customColorEntry ? customColorEntry[0] : lastSelectedColor.current
+          );
+        }
       }
     }
-  }, [color, onColorChange]);
+  }, [color, onColorChange, skipTailwind]);
 
   const handleColorChange = useCallback(
     (newColor: string) => {
       setColor(newColor);
       lastSelectedColor.current = newColor;
 
+      if (skipTailwind) {
+        onColorChange(newColor);
+        return;
+      }
+
       const customColorEntry = Object.entries(customColors).find(
-        /* eslint-disable @typescript-eslint/no-unused-vars */
-        ([_, value]) => getComputedColor(value) === newColor
+        ([, value]) => getComputedColor(value) === newColor
       );
 
       if (customColorEntry) {
@@ -128,7 +143,7 @@ const ColorPicker = ({ id, defaultColor, onColorChange }: ColorPickerProps) => {
         }
       }
     },
-    [onColorChange]
+    [onColorChange, skipTailwind]
   );
 
   const debouncedHandleColorChange = useCallback(

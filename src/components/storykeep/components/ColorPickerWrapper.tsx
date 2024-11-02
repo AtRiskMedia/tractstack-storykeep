@@ -2,11 +2,16 @@ import { useState, useEffect } from "react";
 import type { ColorPickerProps } from "./ColorPicker";
 import type { ComponentType } from "react";
 
+interface ColorPickerWrapperProps extends ColorPickerProps {
+  skipTailwind?: boolean;
+}
+
 const ColorPickerWrapper = ({
   id,
   defaultColor,
   onColorChange,
-}: ColorPickerProps) => {
+  skipTailwind,
+}: ColorPickerWrapperProps) => {
   const [ColorPicker, setColorPicker] =
     useState<ComponentType<ColorPickerProps> | null>(null);
   const [currentColor, setCurrentColor] = useState(defaultColor);
@@ -41,6 +46,7 @@ const ColorPickerWrapper = ({
       id={id}
       defaultColor={currentColor}
       onColorChange={handleColorChange}
+      skipTailwind={skipTailwind}
     />
   );
 };

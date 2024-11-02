@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { navigate } from "astro:transitions/client";
 
 const RebuildProgressModal = ({
   isOpen,
@@ -75,7 +74,7 @@ const RebuildProgressModal = ({
 
     let intervalId: number;
     let attemptCount = 0;
-    const maxAttempts = 90; // 180 seconds total with 2-second intervals
+    const maxAttempts = 36; // 180 seconds total with 5-second intervals
 
     const runRebuild = async () => {
       const rebuildStarted = await triggerRebuild();
@@ -95,13 +94,13 @@ const RebuildProgressModal = ({
           setIsComplete(true);
           clearInterval(intervalId);
           setTimeout(() => {
-            navigate("/storykeep");
+            window.location.href = "/storykeep";
           }, 1000);
         } else if (attemptCount >= maxAttempts) {
           setError("Rebuild timed out. Please check your site manually.");
           clearInterval(intervalId);
         }
-      }, 2000);
+      }, 5000);
     };
 
     runRebuild();

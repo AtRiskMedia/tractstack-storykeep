@@ -430,14 +430,12 @@ const EnvironmentSettings = ({
           ?.value.split(",")
           .map(color => `#${color.trim()}`);
         if (brandColors)
-          brandColors.forEach(
-            (color, index) => {
-              document.documentElement.style.setProperty(
-                `--brand-${index + 1}`,
-                color
-              );
-            }
-          );
+          brandColors.forEach((color, index) => {
+            document.documentElement.style.setProperty(
+              `--brand-${index + 1}`,
+              color
+            );
+          });
         setIsGeneratingSnapshotsThenPublish(true);
       } else {
         setShowRebuildModal(true);

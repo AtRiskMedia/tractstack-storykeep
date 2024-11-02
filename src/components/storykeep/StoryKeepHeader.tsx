@@ -112,6 +112,7 @@ export const StoryKeepHeader = memo(
       keys: [thisId],
     });
     const $paneFragmentIds = useStore(paneFragmentIds, { keys: [thisId] });
+    const isHome = slug && slug === import.meta.env.PUBLIC_HOME
 
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     const $viewportSet = useStore(viewportSetStore);
@@ -467,7 +468,7 @@ export const StoryKeepHeader = memo(
                   updateStoreField={updateStoreField}
                   handleUndo={handleUndo}
                 />
-                {hasContentReady &&
+                {!isHome && hasContentReady &&
                   ![`create`, ``].includes(
                     $storyFragmentSlug[thisId]?.current
                   ) && (

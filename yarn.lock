@@ -5153,15 +5153,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"drupal-jsonapi-params@npm:^2.3.1":
-  version: 2.3.1
-  resolution: "drupal-jsonapi-params@npm:2.3.1"
-  dependencies:
-    qs: "npm:^6.10.3"
-  checksum: 10c0/3a5a224922b6737dacc6fee6ffce5aaaadd866fd2faabd03ea8b73b1192f100eb1ea921a48584cba7725a62ff836e7e8f3ff591752cb5a6c426f77886b68590a
-  languageName: node
-  linkType: hard
-
 "dset@npm:^3.1.3":
   version: 3.1.3
   resolution: "dset@npm:3.1.3"
@@ -9714,15 +9705,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.10.3":
-  version: 6.12.0
-  resolution: "qs@npm:6.12.0"
-  dependencies:
-    side-channel: "npm:^1.0.6"
-  checksum: 10c0/e165a77ac5f3ca60c15c5f3d51b321ddec7aa438804436b29d160117bc6fb7bf7dab94abd0c7d7c0785890d3a75ae41e1d6346e158aaf1540c6fe53a31f11675
-  languageName: node
-  linkType: hard
-
 "queue-microtask@npm:^1.2.2":
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
@@ -11443,7 +11425,6 @@ __metadata:
     astro-eslint-parser: "npm:^1.0.3"
     browser-image-compression: "npm:^2.0.2"
     component-emitter: "npm:^1.3.1"
-    drupal-jsonapi-params: "npm:^2.3.1"
     eslint: "npm:^8.57.1"
     eslint-plugin-astro: "npm:^0.32.0"
     eslint-plugin-jsx-a11y: "npm:^6.10.0"

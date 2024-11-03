@@ -73,12 +73,14 @@ async function saveEnvSettings(
       },
       {} as Record<string, string | null>
     );
-    // Filter and process only changed settings
     const processedSettings = currentSettings
       .map(setting => {
         const processedValue = processEnvSettingValue(setting);
         const originalValue = originalValues[setting.name];
-        if (processedValue !== originalValue) {
+        if (
+          processedValue !== originalValue ||
+          (originalValue !== null && processedValue === null)
+        ) {
           return {
             name: setting.name,
             value: processedValue,
@@ -86,10 +88,7 @@ async function saveEnvSettings(
         }
         return null;
       })
-      .filter(
-        (s): s is NonNullable<typeof s> => s !== null && s.value !== null
-      );
-    // Only proceed if there are actual changes
+      .filter((s): s is NonNullable<typeof s> => s !== null);
     if (processedSettings.length === 0) {
       return true; // No changes needed
     }
@@ -124,14 +123,11 @@ const saveBrandImages = async (
   brandImages: Record<string, string>
 ): Promise<boolean> => {
   if (Object.keys(brandImages).length === 0) return true;
-
   try {
-    // First save the brand images to frontend
     const brandFiles = Object.entries(brandImages).map(([name, src]) => ({
       filename: name.replace("PUBLIC_", "").toLowerCase(),
       src,
     }));
-
     const uploadResponse = await fetch(
       `/api/concierge/storykeep/frontendFiles`,
       {
@@ -142,7 +138,6 @@ const saveBrandImages = async (
         body: JSON.stringify({ files: brandFiles }),
       }
     );
-
     const uploadData = await uploadResponse.json();
     if (!uploadData.success) {
       throw new Error(uploadData.error || "Failed to upload brand images");
@@ -961,14 +956,21 @@ const EnvironmentSettings = ({
             value={brandImages[setting.name] || ""}
             path={setting.value}
             onChange={(value: string, ext: string) => {
-              // Store the base64 in local state
-              setBrandImages(prev => ({ ...prev, [setting.name]: value }));
-              // Update the env setting with the path
-              handleSettingChange(
-                index,
-                "value",
-                `/custom/${config.filename}${ext}`
-              );
+              if (value) {
+                setBrandImages(prev => ({ ...prev, [setting.name]: value }));
+                handleSettingChange(
+                  index,
+                  "value",
+                  `/custom/${config.filename}${ext}`
+                );
+              } else {
+                setBrandImages(prev => {
+                  const next = { ...prev };
+                  delete next[setting.name];
+                  return next;
+                });
+                handleSettingChange(index, "value", "");
+              }
             }}
             height={config.height}
             width={config.width}

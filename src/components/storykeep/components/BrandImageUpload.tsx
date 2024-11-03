@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { XMarkIcon, ArrowUpTrayIcon } from "@heroicons/react/24/outline";
 import type { ChangeEvent } from "react";
 
@@ -22,6 +22,7 @@ const BrandImageUpload = ({
   allowedTypes,
 }: BrandImageUploadProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageError, setImageError] = useState(false);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -43,10 +44,11 @@ const BrandImageUpload = ({
   };
 
   const handleRemove = () => {
-    onChange("", "");
+    onChange("", ""); // This will trigger setting env var to empty string
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+    setImageError(false);
   };
 
   const style = {
@@ -54,8 +56,15 @@ const BrandImageUpload = ({
     width: width ? `${width}px` : undefined,
   };
 
-  // Only check value since path will always exist after first upload
-  if (!value) {
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
+  // Handle both uploaded images (value) and existing env var images (path)
+  const imageSrc = value || (path && path.startsWith("/custom/") ? path : "");
+  const showImage = imageSrc && !imageError;
+
+  if (!showImage) {
     return (
       <div>
         <button
@@ -83,7 +92,12 @@ const BrandImageUpload = ({
         className="relative bg-mylightgrey/5 rounded-md overflow-hidden"
         style={style}
       >
-        <img src={value} alt="" className="w-full h-full object-contain" />
+        <img
+          src={value || path}
+          alt=""
+          className="w-full h-full object-contain"
+          onError={handleImageError}
+        />
         <button
           onClick={handleRemove}
           className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-mylightgrey"

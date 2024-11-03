@@ -26,7 +26,11 @@ const {
   stylesUrl = ``,
 } = Astro.props;
 
-const website = SITE.website;
+const defaultFavIcon =
+  typeof import.meta.env.PUBLIC_FAVICON === `string` &&
+  import.meta.env.PUBLIC_FAVICON
+    ? import.meta.env.PUBLIC_FAVICON
+    : `favicon.ico`;
 const defaultSocialImageURL =
   typeof ogImage === `string` && ogImage
     ? ogImage
@@ -55,8 +59,8 @@ const defaultSocialDesc =
   import.meta.env.PUBLIC_OGDESC
     ? import.meta.env.PUBLIC_OGDESC
     : SITE.desc;
-const socialImageURL = `${website}/${defaultSocialImageURL}`;
-const socialLogoURL = `${website}/${defaultSocialLogoURL}`;
+const socialImageURL = `/${defaultSocialImageURL}`;
+const socialLogoURL = `/${defaultSocialLogoURL}`;
 
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 const gtagUrl =
@@ -78,7 +82,7 @@ const contentMap: ContentMap[] =
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={`/${defaultFavIcon}`} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 

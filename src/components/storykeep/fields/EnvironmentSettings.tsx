@@ -120,6 +120,41 @@ async function saveEnvSettings(
   }
 }
 
+const saveBrandImages = async (
+  brandImages: Record<string, string>
+): Promise<boolean> => {
+  if (Object.keys(brandImages).length === 0) return true;
+
+  try {
+    // First save the brand images to frontend
+    const brandFiles = Object.entries(brandImages).map(([name, src]) => ({
+      filename: name.replace("PUBLIC_", "").toLowerCase(),
+      src,
+    }));
+
+    const uploadResponse = await fetch(
+      `/api/concierge/storykeep/frontendFiles`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ files: brandFiles }),
+      }
+    );
+
+    const uploadData = await uploadResponse.json();
+    if (!uploadData.success) {
+      throw new Error(uploadData.error || "Failed to upload brand images");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error saving brand images:", error);
+    return false;
+  }
+};
+
 const groupOrder = [
   "Brand",
   "Home",
@@ -455,6 +490,14 @@ const EnvironmentSettings = ({
 
   const handleSave = useCallback(async () => {
     try {
+      if (Object.keys(brandImages).length > 0) {
+        const imageSuccess = await saveBrandImages(brandImages);
+        if (!imageSuccess) {
+          throw new Error("Failed to save brand images");
+        }
+        setBrandImages({}); // Clear images after successful upload
+      }
+
       const success = await saveEnvSettings(localSettings, originalSettings);
       if (success) {
         envSettings.set({
@@ -472,10 +515,18 @@ const EnvironmentSettings = ({
     } catch (error) {
       console.error("Error in handleSave:", error);
     }
-  }, [localSettings, originalSettings]);
+  }, [localSettings, originalSettings, brandImages]);
 
   const handleSavePublish = useCallback(async () => {
     try {
+      if (Object.keys(brandImages).length > 0) {
+        const imageSuccess = await saveBrandImages(brandImages);
+        if (!imageSuccess) {
+          throw new Error("Failed to save brand images");
+        }
+        setBrandImages({}); // Clear images after successful upload
+      }
+
       const success = await saveEnvSettings(localSettings, originalSettings);
       if (!success) {
         throw new Error("Failed to save environment settings");
@@ -522,7 +573,7 @@ const EnvironmentSettings = ({
     } catch (error) {
       console.error("Error in handleSavePublish:", error);
     }
-  }, [localSettings, originalSettings]);
+  }, [localSettings, originalSettings, brandImages]);
 
   const toggleGroup = useCallback((group: string) => {
     setExpandedGroups(prev => ({ ...prev, [group]: !prev[group] }));

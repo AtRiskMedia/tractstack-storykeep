@@ -27,6 +27,8 @@ export const onRequest = defineMiddleware(async (context, next) => {
     "/api/concierge/storykeep/analytics",
     "/api/concierge/storykeep/dashboardAnalytics",
     "/api/concierge/storykeep/env",
+    "/api/concierge/storykeep/files",
+    "/api/concierge/storykeep/frontendFiles",
   ];
   const openProtectedRoutes = [
     "/*/edit",

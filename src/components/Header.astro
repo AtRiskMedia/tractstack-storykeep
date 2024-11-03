@@ -37,6 +37,17 @@ const isHome = slug === import.meta.env.PUBLIC_HOME;
 const disableFastTravel = import.meta.env.PUBLIC_DISABLE_FAST_TRAVEL;
 const { hasTurso, hasBranding, hasContent } = getSetupChecks();
 const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const logo =
+  typeof import.meta.env.PUBLIC_LOGO === `string` && import.meta.env.PUBLIC_LOGO
+    ? import.meta.env.PUBLIC_LOGO
+    : `logo.svg`;
+const logoIsSvg = logo.includes(`svg`);
+const wordmark =
+  typeof import.meta.env.PUBLIC_WORDMARK === `string` &&
+  import.meta.env.PUBLIC_WORDMARK
+    ? import.meta.env.PUBLIC_WORDMARK
+    : `wordmark.svg`;
+const wordmarkIsSvg = wordmark.includes(`svg`);
 ---
 
 <header class="relative bg-white shadow-inner">
@@ -48,28 +59,44 @@ const hasTursoReady = hasTurso ? await isTursoReady() : false;
         {
           [`default`, `logo`].includes(WORDMARK_MODE) ? (
             <>
-              <object
-                type="image/svg+xml"
-                data="/custom/logo.svg"
-                class="h-8 w-auto pointer-events-none"
-                aria-label="Logo"
-              >
-                Logo
-              </object>
+              {logoIsSvg ? (
+                <object
+                  type="image/svg+xml"
+                  data={logo}
+                  class="h-8 w-auto pointer-events-none"
+                  aria-label="Logo"
+                >
+                  Logo
+                </object>
+              ) : (
+                <img
+                  src={logo}
+                  class="h-8 w-auto pointer-events-none"
+                  alt="Logo"
+                />
+              )}
               <span class="w-2" />
             </>
           ) : null
         }
         {
           [`default`, `wordmark`].includes(WORDMARK_MODE) ? (
-            <object
-              type="image/svg+xml"
-              data="/custom/wordmark.svg"
-              aria-label="Wordmark"
-              class="h-14 w-auto max-w-48 md:max-w-72 pointer-events-none"
-            >
-              Wordmark
-            </object>
+            wordmarkIsSvg ? (
+              <object
+                type="image/svg+xml"
+                data={wordmark}
+                aria-label="Wordmark"
+                class="h-14 w-auto max-w-48 md:max-w-72 pointer-events-none"
+              >
+                Wordmark
+              </object>
+            ) : (
+              <img
+                src={wordmark}
+                alt="Wordmark"
+                class="h-14 w-auto max-w-48 md:max-w-72 pointer-events-none"
+              />
+            )
           ) : null
         }
       </div>

@@ -94,7 +94,7 @@ const RebuildProgressModal = ({
           setIsComplete(true);
           clearInterval(intervalId);
           setTimeout(() => {
-            window.location.href = "/storykeep";
+            window.location.href = window.location.href + "?t=" + Date.now();
           }, 1000);
         } else if (attemptCount >= maxAttempts) {
           setError("Rebuild timed out. Please check your site manually.");

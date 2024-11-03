@@ -6,12 +6,14 @@ import {
   PlusIcon,
   ChevronUpDownIcon,
   ExclamationTriangleIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { envSettings } from "../../../store/storykeep";
 import ContentEditableField from "../components/ContentEditableField";
 import { DesignSnapshotModal } from "../components/DesignSnapshotModal";
 import RebuildProgressModal from "../components/RebuildProgressModal";
 import BrandColorPicker from "./BrandColorPicker";
+import BrandImageUpload from "../components/BrandImageUpload";
 import ThemeVisualSelector from "../components/ThemeVisualSelector";
 import { knownEnvSettings, knownBrand } from "../../../constants";
 import { socialIconKeys } from "../../../assets/socialIcons";
@@ -127,11 +129,19 @@ const groupOrder = [
   "Backend",
 ];
 const wordmarkModeOptions = ["default", "logo", "wordmark"];
+const showHelpInfo = [
+  `PUBLIC_LOGO`,
+  `PUBLIC_WORDMARK`,
+  `PUBLIC_OG`,
+  `PUBLIC_OGLOGO`,
+  `PUBLIC_FAVICON`,
+];
 
 const EnvironmentSettings = ({
   contentMap,
   showOnlyGroup,
 }: EnvironmentSettingsProps) => {
+  const [brandImages, setBrandImages] = useState<Record<string, string>>({});
   const [selectedBrandPreset, setSelectedBrandPreset] =
     useState<string>("default");
   const [customColors, setCustomColors] = useState<string | null>(null);
@@ -555,9 +565,12 @@ const EnvironmentSettings = ({
       >
         {setting.description}
         <div className="relative ml-1 group">
+          {showHelpInfo.includes(setting.name) && (
+            <InformationCircleIcon className="h-5 w-5 text-myblue cursor-help" />
+          )}
           <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block bg-white border border-mylightgrey rounded p-2 shadow-lg z-10 w-64">
             <p className="text-sm text-mydarkgrey">
-              {setting.required ? "Required field. " : ""}
+              {setting.description} {setting.defaultValue}
             </p>
           </div>
         </div>
@@ -858,6 +871,60 @@ const EnvironmentSettings = ({
           </div>
         </div>
       );
+    } else if (
+      setting.name === "PUBLIC_LOGO" ||
+      setting.name === "PUBLIC_WORDMARK" ||
+      setting.name === "PUBLIC_OG" ||
+      setting.name === "PUBLIC_OGLOGO" ||
+      setting.name === "PUBLIC_FAVICON"
+    ) {
+      const getImageConfig = (settingName: string) => {
+        const baseName = settingName.replace("PUBLIC_", "").toLowerCase();
+        return {
+          height:
+            settingName === "PUBLIC_WORDMARK"
+              ? undefined
+              : settingName === "PUBLIC_OG"
+                ? 500
+                : settingName === "PUBLIC_OGLOGO"
+                  ? 200
+                  : settingName === "PUBLIC_FAVICON"
+                    ? 48
+                    : 80,
+          width: settingName === "PUBLIC_WORDMARK" ? 200 : undefined,
+          types:
+            settingName === "PUBLIC_FAVICON"
+              ? [".ico", ".svg", ".png"]
+              : settingName === "PUBLIC_OG" || settingName === "PUBLIC_OGLOGO"
+                ? [".jpg", ".jpeg", ".png"]
+                : [".svg", ".png"],
+          filename: baseName,
+        };
+      };
+      const config = getImageConfig(setting.name);
+      return (
+        <div key={setting.name} className="space-y-2 mb-4">
+          {renderLabel()}
+          <BrandImageUpload
+            id={setting.name}
+            value={brandImages[setting.name] || ""}
+            path={setting.value}
+            onChange={(value: string, ext: string) => {
+              // Store the base64 in local state
+              setBrandImages(prev => ({ ...prev, [setting.name]: value }));
+              // Update the env setting with the path
+              handleSettingChange(
+                index,
+                "value",
+                `/custom/${config.filename}${ext}`
+              );
+            }}
+            height={config.height}
+            width={config.width}
+            allowedTypes={config.types}
+          />
+        </div>
+      );
     } else if (setting.name === "PUBLIC_HOME") {
       return (
         <div key={setting.name} className="space-y-2 mb-4">
@@ -1019,52 +1086,52 @@ const EnvironmentSettings = ({
   );
 
   const MustSaveContainer = () => (
-<div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
-          <p className="text-myblue font-bold">
-            {hasBrandColorChanges
-              ? "Brand colors have changed. This requires regenerating design previews."
-              : "UNSAVED CHANGES! Be very careful adjusting any technical settings. When ready hit publish to push these changes to your site."}
-          </p>
-          {!hasBrandColorChanges && (
-            <p className="text-mydarkgrey">
-              Note: this triggers a 0-2 second "reload" of your website. Active
-              users are unlikely to be impacted.
-            </p>
-          )}
-          <div className="flex justify-end space-x-2 mt-6">
-            <a
-              className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
-              href="/storykeep"
+    <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">
+      <p className="text-myblue font-bold">
+        {hasBrandColorChanges
+          ? "Brand colors have changed. This requires regenerating design previews."
+          : "UNSAVED CHANGES! Be very careful adjusting any technical settings. When ready hit publish to push these changes to your site."}
+      </p>
+      {!hasBrandColorChanges && (
+        <p className="text-mydarkgrey">
+          Note: this triggers a 0-2 second "reload" of your website. Active
+          users are unlikely to be impacted.
+        </p>
+      )}
+      <div className="flex justify-end space-x-2 mt-6">
+        <a
+          className="px-4 py-2 text-white bg-mydarkgrey rounded hover:bg-myblue"
+          href="/storykeep"
+        >
+          Cancel
+        </a>
+        {hasBrandColorChanges ? (
+          <button
+            onClick={handleSavePublish}
+            className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
+          >
+            Save and Rebuild Design Previews
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
+              disabled={hasUncleanData}
             >
-              Cancel
-            </a>
-            {hasBrandColorChanges ? (
-              <button
-                onClick={handleSavePublish}
-                className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
-              >
-                Save and Rebuild Design Previews
-              </button>
-            ) : (
-              <>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 text-white bg-myorange rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
-                  disabled={hasUncleanData}
-                >
-                  Save Changes Only
-                </button>
-                <button
-                  onClick={handleSavePublish}
-                  className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
-                >
-                  Save and Re-Publish Website
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-  )
+              Save Changes Only
+            </button>
+            <button
+              onClick={handleSavePublish}
+              className="px-4 py-2 text-black bg-myorange/50 rounded hover:bg-myblue hover:text-white"
+            >
+              Save and Re-Publish Website
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-8">
@@ -1090,7 +1157,7 @@ const EnvironmentSettings = ({
         </div>
       )}
       {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
-       <MustSaveContainer /> 
+        <MustSaveContainer />
       )}
       {groupOrder.map(group => {
         // Skip groups that don't match showOnlyGroup if it's set
@@ -1123,7 +1190,7 @@ const EnvironmentSettings = ({
         );
       })}
       {!showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
-       <MustSaveContainer /> 
+        <MustSaveContainer />
       )}
       {showOnlyGroup && hasUnsavedChanges && !hasUncleanData && (
         <div className="bg-myblue/5 p-4 rounded-md mb-4 space-y-4">

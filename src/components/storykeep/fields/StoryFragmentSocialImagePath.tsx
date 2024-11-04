@@ -2,7 +2,7 @@ import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
-import ContentEditableField from "../ContentEditableField";
+import ContentEditableField from "../components/ContentEditableField";
 import { useStore } from "@nanostores/react";
 import {
   storyFragmentSocialImagePath,
@@ -16,7 +16,7 @@ interface StoryFragmentSocialImagePathProps {
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const StoryFragmentSocialImagePath = ({
@@ -26,13 +26,15 @@ const StoryFragmentSocialImagePath = ({
   updateStoreField,
   handleUndo,
 }: StoryFragmentSocialImagePathProps) => {
-  const $storyFragmentSocialImagePath = useStore(storyFragmentSocialImagePath);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $temporaryErrors = useStore(temporaryErrorsStore);
+  const $storyFragmentSocialImagePath = useStore(storyFragmentSocialImagePath, {
+    keys: [id],
+  });
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
 
   return (
     <>
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-4 max-w-80">
         <span
           id="storyFragmentSocialImagePath-label"
           className="flex items-center text-md text-mydarkgrey flex-shrink-0"
@@ -50,7 +52,7 @@ const StoryFragmentSocialImagePath = ({
               handleEditingChange("storyFragmentSocialImagePath", editing)
             }
             placeholder="Enter slug here"
-            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
           />
           {($uncleanData[id]?.storyFragmentSocialImagePath ||
             $temporaryErrors[id]?.storyFragmentSocialImagePath) && (
@@ -63,7 +65,7 @@ const StoryFragmentSocialImagePath = ({
           )}
         </div>
         <button
-          onClick={() => handleUndo("storyFragmentSocialImagePath")}
+          onClick={() => handleUndo("storyFragmentSocialImagePath", id)}
           className="disabled:hidden ml-2"
           disabled={$storyFragmentSocialImagePath[id]?.history.length === 0}
         >

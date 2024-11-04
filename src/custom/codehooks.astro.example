@@ -10,7 +10,7 @@ interface Props {
   options: any | null;
 }
 
-const { target, options, /* resources */ } = Astro.props;
+//const { target, options, /* resources,slug,isContext */ } = Astro.props;
 
 /* copy below fences:
 {

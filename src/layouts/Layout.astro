@@ -2,30 +2,23 @@
 import { LOCALE, SITE } from "@config";
 import { ViewTransitions } from "astro:transitions";
 import SetContentMap from "../components/SetContentMap";
-import { getContentMap } from "../api/turso";
+import { getContentMap, isTursoReady } from "../api/turso";
+import { getSetupChecks } from "../utils/setupChecks";
 import type { ContentMap } from "../types";
 
 export interface Props {
   title?: string;
-  author?: string;
-  description?: string;
-  ogImage?: string | null;
-  ogLogo?: string;
-  website?: string;
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
   stylesUrl?: string;
+  ogImage?: string;
 }
 
 const {
-  title = SITE.title,
-  author = SITE.author,
-  description = SITE.desc,
-  ogImage = SITE.ogImage,
-  ogLogo = SITE.ogLogo,
-  website = SITE.website,
+  title = ``,
+  ogImage,
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
   pubDatetime,
   modDatetime,
@@ -33,17 +26,52 @@ const {
   stylesUrl = ``,
 } = Astro.props;
 
-const socialImageURL = `${website}/${ogImage ?? SITE.ogImage ?? `og.png`}`;
-const socialLogoURL = `${website}/${ogLogo ?? SITE.ogLogo ?? `logo.png`}`;
+const defaultFavIcon =
+  typeof import.meta.env.PUBLIC_FAVICON === `string` &&
+  import.meta.env.PUBLIC_FAVICON
+    ? import.meta.env.PUBLIC_FAVICON
+    : `favicon.ico`;
+const defaultSocialImageURL =
+  typeof ogImage === `string` && ogImage
+    ? ogImage
+    : typeof import.meta.env.PUBLIC_OG === `string` && import.meta.env.PUBLIC_OG
+      ? import.meta.env.PUBLIC_OG
+      : `og.png`;
+const defaultSocialLogoURL =
+  typeof import.meta.env.PUBLIC_OGLOGO === `string` &&
+  import.meta.env.PUBLIC_OGLOGO
+    ? import.meta.env.PUBLIC_OGLOGO
+    : `oglogo.png`;
+const defaultSocialTitle =
+  typeof title === `string` && title
+    ? title
+    : typeof import.meta.env.PUBLIC_OGTITLE === `string` &&
+        import.meta.env.PUBLIC_OGTITLE
+      ? import.meta.env.PUBLIC_OGTITLE
+      : SITE.title;
+const defaultSocialAuthor =
+  typeof import.meta.env.PUBLIC_OGAUTHOR === `string` &&
+  import.meta.env.PUBLIC_OGAUTHOR
+    ? import.meta.env.PUBLIC_OGAUTHOR
+    : SITE.author;
+const defaultSocialDesc =
+  typeof import.meta.env.PUBLIC_OGDESC === `string` &&
+  import.meta.env.PUBLIC_OGDESC
+    ? import.meta.env.PUBLIC_OGDESC
+    : SITE.desc;
+const socialImageURL = `/${defaultSocialImageURL}`;
+const socialLogoURL = `/${defaultSocialLogoURL}`;
 
-const useCustomFonts = import.meta.env.PUBLIC_USE_CUSTOM_FONTS || false;
 const googleSiteVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION;
 const gtagUrl =
   typeof googleSiteVerification === `string`
     ? `https://www.googletagmanager.com/gtag/js?id=${googleSiteVerification}`
     : null;
 
-const contentMap: ContentMap[] = await getContentMap();
+const { hasTurso } = getSetupChecks();
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const contentMap: ContentMap[] =
+  hasTurso && hasTursoReady ? await getContentMap() : [];
 ---
 
 <!doctype html>
@@ -54,7 +82,7 @@ const contentMap: ContentMap[] = await getContentMap();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={defaultFavIcon} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
@@ -63,65 +91,53 @@ const contentMap: ContentMap[] = await getContentMap();
     <link rel="stylesheet" href={stylesUrl} />
 
     <!-- General Meta Tags -->
-    <title>{title}</title>
-    <meta name="title" content={title} />
-    <meta name="description" content={description} />
-    <meta name="author" content={author} />
+    <title>{defaultSocialTitle}</title>
+    <meta name="title" content={defaultSocialTitle} />
+    <meta name="description" content={defaultSocialDesc} />
+    <meta name="author" content={defaultSocialAuthor} />
     <link rel="sitemap" href="/sitemap.xml" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={defaultSocialTitle} />
     <meta property="og:type" content="website" />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={defaultSocialDesc} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
     <meta property="og:logo" content={socialLogoURL} />
 
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={defaultSocialTitle} />
+    <meta property="twitter:description" content={defaultSocialDesc} />
+    <meta property="twitter:image" content={socialImageURL} />
+
     <!-- Article Published/Modified time -->
     {
       pubDatetime && (
-        <meta
-          property="article:published_time"
-          content={pubDatetime.toISOString()}
-        />
+        <>
+          <meta
+            property="article:published_time"
+            content={pubDatetime.toISOString()}
+          />
+        </>
       )
     }
     {
       modDatetime && (
-        <meta
-          property="article:modified_time"
-          content={modDatetime.toISOString()}
-        />
-      )
-    }
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={socialImageURL} />
-
-    {
-      !useCustomFonts && (
         <>
-          <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-          <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
-            rel="stylesheet"
+          <meta
+            property="article:modified_time"
+            content={modDatetime.toISOString()}
           />
         </>
       )
     }
 
     <!-- Google Analytics -->
-    <script async is:inline define:vars={{ gtagUrl }} src={gtagUrl}></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
+    {gtagUrl && <script async is:inline src={gtagUrl} />}
+    <script>
+      import "../utils/gtag";
     </script>
 
     <!-- Tract Stack Concierge -->
@@ -139,11 +155,7 @@ const contentMap: ContentMap[] = await getContentMap();
       import { eventProcessQueue } from "../utils/events/eventProcessQueue";
       import { init } from "../utils/init";
       import type { EventStreamController } from "../types";
-
-      const debouncedHandleScroll = debounce(handleScroll, 250);
-
-      // always run first load
-      //handleResize();
+      const debouncedHandleScroll = debounce(handleScroll, 50);
 
       let eventStreamController: EventStreamController | null = null;
 

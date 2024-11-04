@@ -12,7 +12,16 @@ export const StorySteps = () => {
     if ($sync && $auth.neo4jEnabled) setHidden(false);
     else setHidden(true);
   }, [$sync]);
-  if (hidden) return <div />;
 
-  return <MapIcon className="h-6 w-6 mx-2" />;
+  if (hidden) return null;
+
+  return (
+    <a
+      href="/concierge/graph"
+      className="text-myblue/80 hover:text-myblue hover:rotate-6"
+      title="Your Content Journey"
+    >
+      <MapIcon className="h-6 w-6" />
+    </a>
+  );
 };

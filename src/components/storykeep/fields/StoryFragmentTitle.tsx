@@ -2,7 +2,7 @@ import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
-import ContentEditableField from "../ContentEditableField";
+import ContentEditableField from "../components/ContentEditableField";
 import { useStore } from "@nanostores/react";
 import {
   storyFragmentTitle,
@@ -16,7 +16,7 @@ interface StoryFragmentTitleProps {
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const StoryFragmentTitle = ({
@@ -26,9 +26,9 @@ const StoryFragmentTitle = ({
   updateStoreField,
   handleUndo,
 }: StoryFragmentTitleProps) => {
-  const $storyFragmentTitle = useStore(storyFragmentTitle);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $temporaryErrors = useStore(temporaryErrorsStore);
+  const $storyFragmentTitle = useStore(storyFragmentTitle, { keys: [id] });
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
 
   return (
     <>
@@ -51,7 +51,7 @@ const StoryFragmentTitle = ({
               handleEditingChange("storyFragmentTitle", editing)
             }
             placeholder="Enter title here"
-            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
           />
           {($uncleanData[id]?.storyFragmentTitle ||
             $temporaryErrors[id]?.storyFragmentTitle) && (
@@ -64,7 +64,7 @@ const StoryFragmentTitle = ({
           )}
         </div>
         <button
-          onClick={() => handleUndo("storyFragmentTitle")}
+          onClick={() => handleUndo("storyFragmentTitle", id)}
           className="disabled:hidden ml-2"
           disabled={$storyFragmentTitle[id]?.history.length === 0}
         >

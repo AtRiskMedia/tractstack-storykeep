@@ -1,18 +1,13 @@
-import {
-  tailwindSpecial,
-  tailwindModifier,
-  isShorty,
-  truncateShorty,
-} from "./allowedTailwindValues";
+import { tailwindClasses } from "../../assets/tailwindClasses";
 import type {
   TupleValue,
   ClassNamesPayloadDatum,
-  ClassNamesPayloadDatumWrapper,
   ClassNamesPayloadDatumValue,
-  ClassNamesPayloadValue,
   OptionsPayloadDatum,
   Tuple,
 } from "../../types";
+
+const tailwindModifier = [``, `md:`, `xl:`];
 
 const processParentClasses = (
   parentClasses: ClassNamesPayloadDatum["parent"]["classes"]
@@ -20,45 +15,20 @@ const processParentClasses = (
   if (!parentClasses) {
     return [[], [], [], []];
   }
-
-  const processClassObject = (
-    classObj: ClassNamesPayloadDatumValue | ClassNamesPayloadValue
-  ) => {
+  const processClassObject = (classObj: ClassNamesPayloadDatumValue) => {
     return processClassesForViewports(classObj, undefined);
   };
-
   let all: string[] = [];
   let mobile: string[] = [];
   let tablet: string[] = [];
   let desktop: string[] = [];
-
   if (Array.isArray(parentClasses)) {
-    // Handle array of objects
     const result = parentClasses.map(classObj => processClassObject(classObj));
     all = result.map(r => r[0]).flat();
     mobile = result.map(r => r[1]).flat();
     tablet = result.map(r => r[2]).flat();
     desktop = result.map(r => r[3]).flat();
-  } else if (typeof parentClasses === "object") {
-    // Handle object with numbered keys
-    const processedClasses = Object.values(parentClasses).map(classObj => {
-      return processClassObject(
-        classObj as ClassNamesPayloadDatumValue | ClassNamesPayloadValue
-      );
-    });
-
-    all = processedClasses.map(([allClasses]) => allClasses?.[0] || "");
-    mobile = processedClasses.map(
-      ([, mobileClasses]) => mobileClasses?.[0] || ""
-    );
-    tablet = processedClasses.map(
-      ([, , tabletClasses]) => tabletClasses?.[0] || ""
-    );
-    desktop = processedClasses.map(
-      ([, , , desktopClasses]) => desktopClasses?.[0] || ""
-    );
   }
-
   return [all, mobile, tablet, desktop];
 };
 
@@ -70,30 +40,35 @@ const reduceClassName = (
   if (!selector) return "";
 
   const modifier = viewportIndex === -1 ? "" : tailwindModifier[viewportIndex];
-  const truncated =
-    isShorty.includes(selector) && typeof truncateShorty[selector] === "string";
-  const thisSelector = truncated ? truncateShorty[selector] : selector;
+  const { className, prefix, useKeyAsClass } = getTailwindClassInfo(selector);
+  const thisSelector = useKeyAsClass ? selector : className;
 
+  const applyPrefix = (value: string) => {
+    // If the value already starts with the prefix, don't add it again
+    return value.startsWith(prefix) ? value : `${prefix}${value}`;
+  };
+
+  if (typeof v === "boolean")
+    console.log(`DOES THIS ACTUALLY EXIST NOW?`, selector, v, viewportIndex);
   if (v === false || v === null || v === undefined) return "";
-  if (typeof v === "boolean") return `${modifier}${thisSelector}`;
-  if (v === "true") return `${modifier}${thisSelector}`;
+  if (typeof v === "boolean")
+    return `${modifier}${applyPrefix(v ? thisSelector : "")}`;
+  if (v === "true") return `${modifier}${applyPrefix(thisSelector)}`;
   if (typeof v === "string" && v[0] === "!")
-    return `${modifier}-${thisSelector}-${v.substring(1)}`;
+    return `${modifier}-${applyPrefix(`${thisSelector}-${v.substring(1)}`)}`;
   if (
     (typeof v === "string" || typeof v === "number") &&
     selector === "animate"
   )
-    return `motion-safe:${modifier}${thisSelector}-${v}`;
-  if (truncated && typeof v === "string")
-    return `${modifier}${thisSelector}-${v}`;
-  if (isShorty.includes(selector) && typeof v === "string")
-    return `${modifier}${v}`;
+    return `motion-safe:${modifier}${applyPrefix(`${thisSelector}-${v}`)}`;
+  if (useKeyAsClass && typeof v === "string")
+    return `${modifier}${applyPrefix(v)}`;
   if (typeof v === "string" || typeof v === "number") {
     // Handle negative values
     if (typeof v === "string" && v.startsWith("-")) {
-      return `${modifier}-${thisSelector}${v}`;
+      return `${modifier}-${applyPrefix(`${thisSelector}${v}`)}`;
     }
-    return `${modifier}${thisSelector}-${v}`;
+    return `${modifier}${applyPrefix(`${thisSelector}-${v}`)}`;
   }
 
   return "";
@@ -109,10 +84,8 @@ const processTupleForViewport = (
 };
 
 const processClassesForViewports = (
-  classes:
-    | ClassNamesPayloadDatumValue
-    | ClassNamesPayloadValue
-    | ClassNamesPayloadDatumWrapper,
+  classes: ClassNamesPayloadDatumValue,
+  // | ClassNamesPayloadValue,
   override: Record<string, Tuple[]> | undefined,
   count: number = 1
 ): [string[], string[], string[], string[]] => {
@@ -122,15 +95,11 @@ const processClassesForViewports = (
       .map((_, i) =>
         Object.entries(classes)
           .map(([selector, tuple]) => {
-            const isSpecial = selector in tailwindSpecial;
-            const thisSelector = isSpecial
-              ? tailwindSpecial[selector]
-              : selector;
             const overrideTuple = override?.[selector]?.[i];
             const value = overrideTuple
               ? processTupleForViewport(overrideTuple, viewportIndex)
               : processTupleForViewport(tuple, viewportIndex);
-            return reduceClassName(thisSelector, value, -1); // Change viewportIndex to -1
+            return reduceClassName(selector, value, -1); // Change viewportIndex to -1
           })
           .filter(Boolean)
           .join(" ")
@@ -175,31 +144,33 @@ export const reduceClassNamesPayload = (
 
     const { classes: allSelectors, count = 1, override } = elementClasses;
     if (!allSelectors) return;
-
-    const [all, mobile, tablet, desktop] = processClassesForViewports(
-      allSelectors,
-      override,
-      count
-    );
-    optionsPayload.classNames = {
-      ...optionsPayload?.classNames,
-      all: {
-        ...optionsPayload?.classNames?.all,
-        [elementName]: all,
-      },
-      desktop: {
-        ...optionsPayload?.classNames?.desktop,
-        [elementName]: desktop,
-      },
-      tablet: {
-        ...optionsPayload?.classNames?.tablet,
-        [elementName]: tablet,
-      },
-      mobile: {
-        ...optionsPayload?.classNames?.mobile,
-        [elementName]: mobile,
-      },
-    };
+    // this should never be []; that's only in modal or parent
+    if (!Array.isArray(allSelectors)) {
+      const [all, mobile, tablet, desktop] = processClassesForViewports(
+        allSelectors,
+        override,
+        count
+      );
+      optionsPayload.classNames = {
+        ...optionsPayload?.classNames,
+        all: {
+          ...optionsPayload?.classNames?.all,
+          [elementName]: all,
+        },
+        desktop: {
+          ...optionsPayload?.classNames?.desktop,
+          [elementName]: desktop,
+        },
+        tablet: {
+          ...optionsPayload?.classNames?.tablet,
+          [elementName]: tablet,
+        },
+        mobile: {
+          ...optionsPayload?.classNames?.mobile,
+          [elementName]: mobile,
+        },
+      };
+    }
   });
 
   // Process parent classes
@@ -207,59 +178,40 @@ export const reduceClassNamesPayload = (
     const parentClasses = classes.parent.classes;
     const [all, mobile, tablet, desktop] = processParentClasses(parentClasses);
     optionsPayload.classNamesParent = {
-      all: Array.isArray(all) ? all.join(" ") : all || "",
-      mobile: Array.isArray(mobile) ? mobile.join(" ") : mobile || "",
-      tablet: Array.isArray(tablet) ? tablet.join(" ") : tablet || "",
-      desktop: Array.isArray(desktop) ? desktop.join(" ") : desktop || "",
+      all,
+      mobile,
+      tablet,
+      desktop,
     };
   } else {
     optionsPayload.classNamesParent = {
-      all: "",
-      mobile: "",
-      tablet: "",
-      desktop: "",
+      all: [""],
+      mobile: [""],
+      tablet: [""],
+      desktop: [""],
     };
   }
 
   // Process modal classes
   if (classes.modal && classes.modal.classes) {
     const modalClasses = classes.modal.classes;
-    // Check if modalClasses is an object with numbered keys
-    if (
-      typeof modalClasses === "object" &&
-      Object.keys(modalClasses).every(key => !isNaN(Number(key)))
-    ) {
-      // If so, use the first (and likely only) numbered key
-      const firstKey = Object.keys(modalClasses)[0];
-      const [all, mobile, tablet, desktop] = processClassesForViewports(
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        (modalClasses as any)[firstKey] as ClassNamesPayloadValue,
-        undefined
-      );
-      optionsPayload.classNamesModal = {
-        all: all[0] || "",
-        mobile: mobile[0] || "",
-        tablet: tablet[0] || "",
-        desktop: desktop[0] || "",
-      };
-    } else {
-      // If it's already in the expected format, process it directly
-      const [all, mobile, tablet, desktop] = processClassesForViewports(
-        modalClasses as ClassNamesPayloadValue,
-        undefined
-      );
-      optionsPayload.classNamesModal = {
-        all: all[0] || "",
-        mobile: mobile[0] || "",
-        tablet: tablet[0] || "",
-        desktop: desktop[0] || "",
-      };
-    }
+    const [all, mobile, tablet, desktop] = processClassesForViewports(
+      modalClasses as ClassNamesPayloadDatumValue,
+      undefined
+    );
+    // we direct inline these classes to the modal, so no []
+    optionsPayload.classNamesModal = {
+      all: all[0] || "",
+      mobile: mobile[0] || "",
+      tablet: tablet[0] || "",
+      desktop: desktop[0] || "",
+    };
   }
 
   // Process button classes
   if (optionsPayload.buttons) {
     for (const buttonKey in optionsPayload.buttons) {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       const buttonData = (optionsPayload.buttons as any)[buttonKey];
       const buttonClasses = buttonData.classNamesPayload?.button?.classes;
       const buttonHoverClasses = buttonData.classNamesPayload?.hover?.classes;
@@ -310,3 +262,22 @@ export const reduceClassNamesPayload = (
 
   return optionsPayload;
 };
+
+function getTailwindClassInfo(selector: string): {
+  className: string;
+  prefix: string;
+  values: string[] | "number";
+  useKeyAsClass?: boolean;
+} {
+  const classInfo = tailwindClasses[selector];
+  if (!classInfo) {
+    return { className: selector, prefix: "", values: [] };
+  }
+
+  return {
+    className: classInfo.className,
+    prefix: classInfo.prefix,
+    values: classInfo.values,
+    useKeyAsClass: classInfo.useKeyAsClass,
+  };
+}

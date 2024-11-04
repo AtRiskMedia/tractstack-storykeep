@@ -27,7 +27,7 @@ const { pane, current, resources, codeHookOptions } = Astro.props;
             />
           </div>
         ) : (
-          <Pane payload={pane} slug={current.slug} />
+          <Pane payload={pane} slug={current.slug} isContext={true} />
         )
       }
     </div>

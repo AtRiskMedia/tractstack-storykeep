@@ -1,66 +1,103 @@
-import { useState, useEffect, memo, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useStore } from "@nanostores/react";
+import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import {
   paneInit,
+  paneTitle,
   paneCodeHook,
-  toolModeStore,
+  lastInteractedPaneStore,
+  visiblePanesStore,
   editModeStore,
+  showAnalytics,
+  storedAnalytics,
 } from "../../store/storykeep";
+import AnalyticsWrapper from "./nivo/AnalyticsWrapper";
 import Pane from "./Pane";
 import CodeHook from "./CodeHook";
-import {
-  isFullScreenEditModal,
-  handleToggleOn,
-  handleToggleOff,
-} from "../../utils/storykeep";
+import { isFullScreenEditModal } from "../../utils/storykeep";
+import { classNames } from "../../utils/helpers";
 import type { ReactNode } from "react";
+import type { ViewportAuto, ToolMode, ToolAddMode } from "../../types";
 
-const InsertTopBottomWrapper = ({
+const InsertAboveBelowWrapper = ({
   children,
   onInsertClick,
 }: {
   children: ReactNode;
-  onInsertClick: (position: "top" | "bottom") => void;
+  onInsertClick: (position: "above" | "below") => void;
 }) => {
   return (
-    <div className="relative group">
+    <div className="relative">
       {children}
-      <div className="absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top">
-        <div
-          onClick={() => onInsertClick(`top`)}
-          className="absolute inset-0 w-full h-full
-                     hover:bg-mylightgrey hover:bg-opacity-40
-                     mix-blend-exclusion
-                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-0.5
-                     before:bg-mylightgrey/85 hover:before:bg-mylightgrey before:mix-blend-exclusion"
-        />
+      <div className="group absolute inset-x-0 top-0 h-1/2 z-10 cursor-pointer group/top  hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
+        <>
+          <div
+            className="absolute top-1/2 left-0 transform -translate-y-1/2
+             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
+             text-md font-action ml-6 group-hover:bg-black group-hover:text-white"
+          >
+            <ArrowUpIcon className="h-4 w-4" />
+          </div>
+          <div
+            onClick={() => onInsertClick("above")}
+            title="Insert new Pane above this one"
+            className="absolute inset-0 w-full h-full
+                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-4
+                     before:border-t-4 before:border-dashed before:border-white/25 hover:before:border-white"
+          />
+        </>
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom">
-        <div
-          onClick={() => onInsertClick(`bottom`)}
-          className="absolute inset-0 w-full h-full
-                     hover:bg-mylightgrey hover:bg-opacity-40
-                     mix-blend-exclusion
-                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5
-                     after:bg-white/85 hover:after:bg-white after:mix-blend-exclusion"
-        />
+      <div className="group absolute inset-x-0 bottom-0 h-1/2 z-10 cursor-pointer group/bottom  hover:backdrop-blur-sm hover:bg-white/10 hover:dark:bg-black/10">
+        <>
+          <div
+            className="absolute top-1/2 right-0 transform -translate-y-1/2
+             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
+             text-md font-action mr-6 group-hover:bg-black group-hover:text-white"
+          >
+            <ArrowDownIcon className="h-4 w-4" />
+          </div>
+          <div
+            onClick={() => onInsertClick("below")}
+            title="Insert new Pane below this one"
+            className="absolute inset-0 w-full h-full
+                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-4
+                     after:border-b-4 after:border-dashed after:border-white/25 hover:after:border-white"
+          />
+        </>
       </div>
     </div>
   );
 };
 
-const PaneWrapper = (props: { id: string }) => {
-  const { id } = props;
+const PaneWrapper = (props: {
+  id: string;
+  slug: string;
+  isContext: boolean;
+  viewportKey: ViewportAuto;
+  insertPane: (paneId: string, position: `above` | `below`) => void;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
+  isDesigningNew: boolean;
+}) => {
+  const {
+    id,
+    slug,
+    isContext,
+    toolMode,
+    toolAddMode,
+    viewportKey,
+    insertPane,
+    isDesigningNew,
+  } = props;
   const [isClient, setIsClient] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const $paneInit = useStore(paneInit);
-  const $paneCodeHook = useStore(paneCodeHook);
-  const $toolMode = useStore(toolModeStore);
+  const $showAnalytics = useStore(showAnalytics);
+  const $storedAnalytics = useStore(storedAnalytics);
+  const $paneInit = useStore(paneInit, { keys: [id] });
+  const $paneTitle = useStore(paneTitle, { keys: [id] });
+  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const $editMode = useStore(editModeStore);
-  const toolMode = $toolMode.value || ``;
-  const isCodeHook = typeof $paneCodeHook[id] === `object`;
+  const isCodeHook = $paneCodeHook?.[id]?.current;
   const [paneElement, setPaneElement] = useState<HTMLDivElement | null>(null);
-
   const paneRef = useCallback(
     (node: HTMLDivElement) => {
       if (node !== null) {
@@ -85,18 +122,20 @@ const PaneWrapper = (props: { id: string }) => {
         $editMode.id === id
       ) {
         toggleOffEditModal();
+        /* eslint-disable @typescript-eslint/no-explicit-any */
+        (event as any).handledByComponent = true;
       }
     };
-    document.addEventListener("keydown", handleKeyDown);
+    // Use capture phase to ensure this runs before global handler
+    paneElement?.addEventListener("keydown", handleKeyDown, true);
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      paneElement?.removeEventListener("keydown", handleKeyDown, true);
     };
-  }, [$editMode, id]);
+  }, [$editMode, id, paneElement]);
 
-  const toggleOffEditModal = () => {
+  const toggleOffEditModal = useCallback(() => {
     editModeStore.set(null);
-    handleToggleOff();
-  };
+  }, []);
 
   const handleEditModeToggle = () => {
     if (
@@ -111,17 +150,19 @@ const PaneWrapper = (props: { id: string }) => {
         mode: "settings",
         type: "pane",
       });
-      handleToggleOn();
     }
   };
 
   const handleClick = () => {
-    handleEditModeToggle();
+    lastInteractedPaneStore.set(id);
+    if (toolMode === `settings`) {
+      handleEditModeToggle();
+    }
   };
 
-  const handleInsertClick = (position: "top" | "bottom") => {
+  const handleInsertClick = (position: "above" | "below") => {
     if (toolMode === "pane") {
-      console.log(`Insert pane ${position}`);
+      insertPane(id, position);
     }
   };
 
@@ -132,18 +173,21 @@ const PaneWrapper = (props: { id: string }) => {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        visiblePanesStore.setKey(id, entry.isIntersecting);
         if (!entry.isIntersecting) {
           const currentEditMode = editModeStore.get();
           if (
             currentEditMode?.type === "pane" &&
-            currentEditMode.mode === "settings" &&
+            (currentEditMode.mode === "settings" ||
+              currentEditMode.mode === "break" ||
+              currentEditMode.mode === "styles") &&
             currentEditMode.id === id
           ) {
             toggleOffEditModal();
           }
         }
       },
-      { threshold: 0 }
+      { threshold: 0.1 }
     );
 
     observer.observe(paneElement);
@@ -153,48 +197,60 @@ const PaneWrapper = (props: { id: string }) => {
     };
   }, [paneElement, id, $editMode]);
 
-  if (!isClient) return <div>Loading...</div>;
+  const Content = useMemo(() => {
+    return isCodeHook ? (
+      <CodeHook id={id} toolMode={toolMode} viewportKey={viewportKey} />
+    ) : (
+      <Pane
+        id={id}
+        slug={slug}
+        isContext={isContext}
+        toolMode={toolMode}
+        toolAddMode={toolAddMode}
+        viewportKey={viewportKey}
+      />
+    );
+  }, [id, isCodeHook, toolMode, toolAddMode, viewportKey]);
 
-  const Content = isCodeHook ? <CodeHook id={id} /> : <Pane id={id} />;
+  if (!isClient) return null;
 
   return (
-    <div
-      ref={paneRef}
-      onClick={handleClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="relative"
-    >
-      {toolMode === `pane` ? (
-        <InsertTopBottomWrapper onInsertClick={handleInsertClick}>
-          {Content}
-        </InsertTopBottomWrapper>
-      ) : (
-        Content
-      )}
-      {toolMode === `settings` && (
-        <div
-          className={`absolute inset-0 cursor-pointer transition-colors duration-300 ease-in-out ${
-            isHovered ? "bg-[rgba(167,177,183,0.85)]" : "bg-transparent"
-          }`}
-        >
-          {isHovered && (
-            <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-               bg-white p-2.5 rounded-md shadow-md
-               text-xl md:text-3xl font-action mx-6"
-            >
-              {$editMode?.id === id ? (
-                <span>Close settings pane</span>
-              ) : (
-                <span>Edit settings on this pane</span>
-              )}
+    <div ref={paneRef} className="relative">
+      <div
+        onClick={handleClick}
+        className={classNames(
+          "w-full",
+          toolMode === `settings` ? "pointer-events-auto cursor-pointer" : ""
+        )}
+      >
+        {toolMode === `pane` && !isDesigningNew ? (
+          <InsertAboveBelowWrapper onInsertClick={handleInsertClick}>
+            {Content}
+          </InsertAboveBelowWrapper>
+        ) : (
+          Content
+        )}
+        {toolMode === "settings" && (
+          <div className="absolute inset-0 backdrop-blur-sm bg-white/50 dark:bg-black/50 flex items-center justify-center group z-104 cursor-pointer pointer-events-auto">
+            <div className="relative">
+              <div className="bg-yellow-300 p-4 rounded-md group-hover:bg-black">
+                <h2 className="text-xl text-black font-bold mb-2 group-hover:text-white">
+                  Configure this Pane
+                </h2>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
+      {$showAnalytics && $storedAnalytics[id] && (
+        <AnalyticsWrapper
+          data={$storedAnalytics[id]}
+          title={$paneTitle[id].current}
+          isPane={true}
+        />
       )}
     </div>
   );
 };
 
-export default memo(PaneWrapper);
+export default PaneWrapper;

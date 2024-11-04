@@ -1,7 +1,7 @@
 ---
 import SvgModal from "@components/panes/SvgModal.astro";
 import { classNames } from "../../utils/helpers";
-import type { MarkdownPaneDatum } from "../../types";
+import type { MarkdownPaneDatum, ClassNamesPayloadResult } from "../../types";
 
 interface ModalOptionsDatum {
   id: string;
@@ -38,7 +38,7 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
         ? payload.textShapeOutsideTablet
         : viewportKey === `mobile`
           ? payload.textShapeOutsideMobile
-          : payload.textShapeOutside;
+          : null;
   const thisId = `${viewportKey}-${payload.id}-modal`;
 
   // check for tailwind classes
@@ -48,8 +48,12 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     typeof optionsPayload?.classNamesParent?.all !== `undefined`
       ? optionsPayload.classNamesParent.all
       : typeof optionsPayload?.classNamesParent !== `undefined` &&
-          typeof optionsPayload?.classNamesParent[viewportKey] !== `undefined`
-        ? optionsPayload.classNamesParent[viewportKey]
+          typeof optionsPayload?.classNamesParent[
+            viewportKey as keyof ClassNamesPayloadResult
+          ] !== `undefined`
+        ? optionsPayload.classNamesParent[
+            viewportKey as keyof ClassNamesPayloadResult
+          ]
         : ``;
   const hasClassNamesModal = optionsPayload?.classNamesModal;
   const classNamesModal =
@@ -57,8 +61,12 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     typeof optionsPayload?.classNamesModal?.all !== `undefined`
       ? optionsPayload.classNamesModal.all
       : typeof optionsPayload?.classNamesModal !== `undefined` &&
-          typeof optionsPayload?.classNamesModal[viewportKey] !== `undefined`
-        ? optionsPayload.classNamesModal[viewportKey]
+          typeof optionsPayload?.classNamesModal[
+            viewportKey as keyof ClassNamesPayloadResult
+          ] !== `undefined`
+        ? optionsPayload.classNamesModal[
+            viewportKey as keyof ClassNamesPayloadResult
+          ]
         : ``;
 
   return {

@@ -1,44 +1,91 @@
-import { useStore } from "@nanostores/react";
 import { useCallback, useState, useRef } from "react";
 import {
   unsavedChangesStore,
   uncleanDataStore,
   temporaryErrorsStore,
-  viewportStore,
-  toolModeStore,
-  toolAddModeStore,
   storyFragmentTitle,
   storyFragmentSlug,
   storyFragmentTailwindBgColour,
   storyFragmentMenuId,
   storyFragmentSocialImagePath,
+  storyFragmentPaneIds,
+  paneTitle,
+  paneSlug,
+  paneFragmentMarkdown,
+  paneFragmentBgPane,
+  paneIsHiddenPane,
+  paneHasOverflowHidden,
+  paneHasMaxHScreen,
+  paneHeightOffsetDesktop,
+  paneHeightOffsetMobile,
+  paneHeightOffsetTablet,
+  paneHeightRatioDesktop,
+  paneHeightRatioMobile,
+  paneHeightRatioTablet,
+  paneHeldBeliefs,
+  paneWithheldBeliefs,
+  paneCodeHook,
+  paneImpression,
+  paneFiles,
+  paneFragmentIds,
+  paneFragmentBgColour,
 } from "../store/storykeep";
-import { debounce } from "./helpers";
-import { MAX_HISTORY_LENGTH } from "../constants";
+import { isDeepEqual } from "./helpers";
+import {
+  MS_BETWEEN_UNDO,
+  MAX_HISTORY_LENGTH,
+  SHORT_SCREEN_THRESHOLD,
+  reservedSlugs,
+} from "../constants";
 import type {
   StoreKey,
   StoreMapType,
   FieldWithHistory,
   ValidationFunction,
-  ToolAddMode,
-  ToolMode,
   HistoryEntry,
 } from "../types";
 
-const SHORT_SCREEN_THRESHOLD = 600;
-const STICKY_HEADER_THRESHOLD = 1200;
 const BREAKPOINTS = {
   xl: 1367,
 };
 
 const storeMap: StoreMapType = {
-  storyFragmentTitle: storyFragmentTitle,
-  storyFragmentSlug: storyFragmentSlug,
-  storyFragmentTailwindBgColour: storyFragmentTailwindBgColour,
-  storyFragmentSocialImagePath: storyFragmentSocialImagePath,
-  storyFragmentMenuId: storyFragmentMenuId,
+  storyFragmentTitle,
+  storyFragmentSlug,
+  storyFragmentTailwindBgColour,
+  storyFragmentSocialImagePath,
+  storyFragmentMenuId,
+  storyFragmentPaneIds,
+  paneFragmentMarkdown,
+  paneFragmentBgPane,
+  paneTitle,
+  paneSlug,
+  paneIsHiddenPane,
+  paneHasOverflowHidden,
+  paneHasMaxHScreen,
+  paneHeightOffsetDesktop,
+  paneHeightOffsetMobile,
+  paneHeightOffsetTablet,
+  paneHeightRatioDesktop,
+  paneHeightRatioMobile,
+  paneHeightRatioTablet,
+  paneHeldBeliefs,
+  paneWithheldBeliefs,
+  paneCodeHook,
+  paneImpression,
+  paneFiles,
+  paneFragmentIds,
+  paneFragmentBgColour,
   // Add other stores here
 };
+
+export function createFieldWithHistory<T>(value: T): FieldWithHistory<T> {
+  return {
+    current: value,
+    original: value,
+    history: [],
+  };
+}
 
 const preValidationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
   storyFragmentTailwindBgColour: (value: string) => value.length <= 20,
@@ -49,6 +96,9 @@ const preValidationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
     value.length <= 80 &&
     /^\/?([\w-.]+(?:\/[\w-.]+)*\/?)?[\w-]*\.?(?:png|jpg)?$/.test(value),
   storyFragmentMenuId: (value: string) => value.length <= 32,
+  paneTitle: (value: string) => value.length <= 80,
+  paneSlug: (value: string) =>
+    value.length === 0 || (value.length <= 50 && /^[a-z0-9-]*$/.test(value)),
   // Add more pre-validation functions for other fields as needed
 };
 
@@ -67,6 +117,11 @@ const validationFunctions: Partial<Record<StoreKey, ValidationFunction>> = {
       /^\/?([\w-.]+(?:\/[\w-.]+)*\/)?[\w-]+\.(?:png|jpg)$/.test(value)),
   storyFragmentMenuId: (value: string) =>
     value.length > 0 && value.length <= 32,
+  paneTitle: (value: string) => value.length > 0 && value.length <= 80,
+  paneSlug: (value: string) =>
+    value.length > 0 &&
+    value.length <= 50 &&
+    /^[a-z](?:[a-z0-9-]*[a-z0-9])?$/.test(value),
   // Add more validation functions for other fields as needed
 };
 
@@ -82,31 +137,13 @@ const initializeLastUpdateTime = (
   );
 };
 
-export const useStoryKeepUtils = (id: string) => {
+export const useStoryKeepUtils = (id: string, usedSlugs?: string[]) => {
   const [isEditing, setIsEditing] = useState<
     Partial<Record<StoreKey, boolean>>
   >({});
   const lastUpdateTimeRef = useRef<Record<StoreKey, number>>(
     initializeLastUpdateTime(storeMap)
   );
-
-  const { value: viewport } = useStore(viewportStore);
-  const { value: toolMode } = useStore(toolModeStore);
-  const { value: toolAddMode } = useStore(toolAddModeStore);
-
-  const setViewport = (
-    newViewport: "auto" | "mobile" | "tablet" | "desktop"
-  ) => {
-    viewportStore.set({ value: newViewport });
-  };
-
-  const setToolMode = (newToolMode: ToolMode) => {
-    toolModeStore.set({ value: newToolMode });
-  };
-
-  const setToolAddMode = (newToolAddMode: ToolAddMode) => {
-    toolAddModeStore.set({ value: newToolAddMode });
-  };
 
   const setTemporaryError = useCallback(
     (storeKey: StoreKey) => {
@@ -124,11 +161,27 @@ export const useStoryKeepUtils = (id: string) => {
     [id]
   );
 
-  const updateStoreField = (storeKey: StoreKey, newValue: string): boolean => {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const updateStoreField = (
+    storeKey: StoreKey,
+    newValue: any,
+    otherId?: string
+  ): boolean => {
+    const thisId = otherId || id;
     const store = storeMap[storeKey];
-    if (!store) return false;
+    if (!store) {
+      console.log(`${storeKey} not found in allowed stores`);
+      return false;
+    }
 
-    const isValid = isValidValue(storeKey, newValue);
+    const isValid =
+      isValidValue(storeKey, newValue) &&
+      ([`paneSlug`, `storyFragmentSlug`].includes(storeKey)
+        ? !(
+            reservedSlugs.includes(newValue) ||
+            (usedSlugs && usedSlugs.includes(newValue))
+          )
+        : true);
     const isPreValid = isPreValidValue(storeKey, newValue);
     if (!isPreValid) {
       // don't save to undo if preValid fails
@@ -137,32 +190,34 @@ export const useStoryKeepUtils = (id: string) => {
       return false;
     }
     if (!isValid || !isPreValidValue) {
-      uncleanDataStore.setKey(id, {
-        ...(uncleanDataStore.get()[id] || {}),
+      uncleanDataStore.setKey(thisId, {
+        ...(uncleanDataStore.get()[thisId] || {}),
         [storeKey]: true,
       });
     } else {
-      uncleanDataStore.setKey(id, {
-        ...(uncleanDataStore.get()[id] || {}),
+      uncleanDataStore.setKey(thisId, {
+        ...(uncleanDataStore.get()[thisId] || {}),
         [storeKey]: false,
       });
     }
 
     const currentStoreValue = store.get();
-    const currentField = currentStoreValue[id];
-    if (currentField && newValue !== currentField.current && isPreValid) {
+    const currentField = currentStoreValue[thisId];
+    if (
+      currentField &&
+      isPreValid &&
+      !isDeepEqual(newValue, currentField.current)
+    ) {
       const now = Date.now();
       const newHistory = updateHistory(storeKey, currentField, now);
       const newField = createNewField(currentField, newValue, newHistory);
-
       store.set({
         ...currentStoreValue,
-        [id]: newField,
+        [thisId]: newField,
       });
-
-      const isUnsaved = newValue !== newField.original;
-      unsavedChangesStore.setKey(id, {
-        ...(unsavedChangesStore.get()[id] || {}),
+      const isUnsaved = !isDeepEqual(newValue, newField.original);
+      unsavedChangesStore.setKey(thisId, {
+        ...(unsavedChangesStore.get()[thisId] || {}),
         [storeKey]: isUnsaved,
       });
     }
@@ -186,7 +241,7 @@ export const useStoryKeepUtils = (id: string) => {
     const timeSinceLastUpdate =
       now - (lastUpdateTimeRef.current[storeKey] || 0);
     const newHistory = [...currentField.history];
-    if (timeSinceLastUpdate > 4000) {
+    if (timeSinceLastUpdate > MS_BETWEEN_UNDO) {
       newHistory.unshift({ value: currentField.current, timestamp: now });
       if (newHistory.length > MAX_HISTORY_LENGTH) {
         // Remove the second oldest entry, not the first one
@@ -208,27 +263,31 @@ export const useStoryKeepUtils = (id: string) => {
   });
 
   const handleUndo = useCallback(
-    (storeKey: StoreKey) => {
+    (storeKey: StoreKey, id: string) => {
       const store = storeMap[storeKey];
       if (!store) return;
-
       const currentStoreValue = store.get();
       const currentField = currentStoreValue[id];
-      if (currentField && currentField.history.length > 0) {
-        const [lastEntry, ...newHistory] = currentField.history;
-        store.set({
-          ...currentStoreValue,
-          [id]: {
-            current: lastEntry.value,
-            original: currentField.original,
-            history: newHistory,
-          },
+      if (currentField && currentField.history.length > 1) {
+        store.setKey(id, {
+          current: currentField.history[0].value,
+          original: currentField.original,
+          history: currentField.history.slice(1),
         });
-        lastUpdateTimeRef.current[storeKey] = Date.now();
-        updateStoreField(storeKey, lastEntry.value);
       }
+      if (currentField && currentField.history.length === 1) {
+        store.setKey(id, {
+          current: currentField.original,
+          original: currentField.original,
+          history: [], // Clear the history
+        });
+      }
+      unsavedChangesStore.setKey(id, {
+        ...(unsavedChangesStore.get()[id] || {}),
+        [storeKey]: false,
+      });
     },
-    [id, storeMap, validationFunctions, setTemporaryError, updateStoreField]
+    [storeMap]
   );
 
   const handleEditingChange = useCallback(
@@ -249,169 +308,7 @@ export const useStoryKeepUtils = (id: string) => {
     updateStoreField,
     handleUndo,
     handleEditingChange,
-    viewport,
-    setViewport,
-    toolMode,
-    setToolMode,
-    toolAddMode,
-    setToolAddMode,
   };
-};
-
-export function initStoryKeep() {
-  const websiteContent = document.getElementById(
-    "website-content"
-  ) as HTMLElement;
-  const editPane = document.getElementById("edit-pane") as HTMLElement;
-  const editModalMobile = document.getElementById(
-    "edit-modal-mobile"
-  ) as HTMLElement;
-  const header = document.getElementById("main-header") as HTMLElement;
-
-  let isEditMode = false;
-  let activeElement: HTMLElement | null = null;
-
-  function handleHeaderBehavior(): void {
-    const viewportHeight = window.innerHeight;
-    header.classList.toggle("sticky", viewportHeight > STICKY_HEADER_THRESHOLD);
-    header.classList.toggle("top-0", viewportHeight > STICKY_HEADER_THRESHOLD);
-    header.style.zIndex = "9000";
-  }
-
-  function adjustEditPanePosition(): void {
-    const headerHeight = header.offsetHeight;
-    const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const isHeaderVisible = scrollTop < headerHeight;
-
-    if (isHeaderVisible) {
-      editPane.style.top = `${headerHeight - scrollTop}px`;
-    } else {
-      editPane.style.top = "0";
-    }
-  }
-
-  function handleEditModeLayout(preventHeaderScroll = false): void {
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    const isShortScreen = window.innerHeight <= SHORT_SCREEN_THRESHOLD;
-
-    editPane.style.zIndex = isEditMode ? "9001" : "8000";
-    editModalMobile.style.zIndex = isEditMode ? "9001" : "8000";
-
-    if (isDesktop) {
-      editPane.style.transform = isEditMode
-        ? "translateX(0)"
-        : "translateX(100%)";
-      editModalMobile.style.transform = "translateY(100%)";
-      adjustEditPanePosition();
-    } else {
-      editPane.style.transform = "translateX(100%)";
-      if (isEditMode) {
-        if (isShortScreen) {
-          editModalMobile.style.top = "0";
-          editModalMobile.style.height = "100%";
-          websiteContent.classList.add("hidden");
-        } else {
-          editModalMobile.style.top = "auto";
-          editModalMobile.style.height = `${window.innerHeight / 3}px`;
-          websiteContent.classList.remove("hidden");
-          websiteContent.style.paddingBottom = `${window.innerHeight / 3}px`;
-        }
-        editModalMobile.style.transform = "translateY(0)";
-      } else {
-        editModalMobile.style.transform = "translateY(100%)";
-        websiteContent.style.paddingBottom = "0";
-        websiteContent.classList.remove("hidden");
-      }
-    }
-
-    if (isEditMode && !preventHeaderScroll) {
-      scrollHeaderOutOfView();
-    }
-
-    if (isEditMode && activeElement) {
-      scrollElementIntoView();
-    }
-  }
-
-  function scrollElementIntoView(): void {
-    if (!activeElement) return;
-    const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
-    if (isDesktop) return;
-
-    const elementRect = activeElement.getBoundingClientRect();
-    const editModalHeight = window.innerHeight / 3;
-    const viewportHeight = window.innerHeight;
-    const scrollY = window.scrollY;
-
-    if (elementRect.bottom > viewportHeight - editModalHeight) {
-      const targetScroll =
-        scrollY + elementRect.bottom - (viewportHeight - editModalHeight) + 20;
-      window.scrollTo({ top: targetScroll, behavior: "smooth" });
-    }
-  }
-
-  function scrollHeaderOutOfView(): void {
-    const headerHeight = header.offsetHeight;
-    const currentScrollTop =
-      window.scrollY || document.documentElement.scrollTop;
-    window.scrollTo({
-      top: Math.max(currentScrollTop, headerHeight),
-      behavior: "smooth",
-    });
-  }
-
-  function handleResize(): void {
-    handleHeaderBehavior();
-    handleEditModeLayout();
-  }
-
-  function handleScroll(): void {
-    if (window.innerWidth >= BREAKPOINTS.xl) {
-      adjustEditPanePosition();
-    }
-  }
-  const debouncedHandleScroll = debounce(handleScroll, 50);
-
-  // Event listeners for React components
-  document.addEventListener("toggle-on-edit-modal", ((event: CustomEvent) => {
-    const preventHeaderScroll = event.detail?.preventHeaderScroll || false;
-    const targetElementId = event.detail?.targetElementId;
-    isEditMode = true;
-    if (targetElementId) {
-      activeElement = document.getElementById(targetElementId);
-    }
-    handleEditModeLayout(preventHeaderScroll);
-  }) as EventListener);
-
-  document.addEventListener("toggle-off-edit-modal", ((event: CustomEvent) => {
-    const preventHeaderScroll = event.detail?.preventHeaderScroll || false;
-    isEditMode = false;
-    activeElement = null;
-    handleEditModeLayout(preventHeaderScroll);
-  }) as EventListener);
-
-  // Initialize
-  handleHeaderBehavior();
-  window.addEventListener("resize", handleResize);
-  window.addEventListener("scroll", debouncedHandleScroll);
-}
-
-// Global functions to toggle layout (updated to include targetElementId)
-export const handleToggleOn = (
-  preventHeaderScroll = false,
-  targetElementId?: string
-) => {
-  const event = new CustomEvent("toggle-on-edit-modal", {
-    detail: { preventHeaderScroll, targetElementId },
-  });
-  document.dispatchEvent(event);
-};
-
-export const handleToggleOff = (preventHeaderScroll = false) => {
-  const event = new CustomEvent("toggle-off-edit-modal", {
-    detail: { preventHeaderScroll },
-  });
-  document.dispatchEvent(event);
 };
 
 export const isFullScreenEditModal = (mode: string) => {

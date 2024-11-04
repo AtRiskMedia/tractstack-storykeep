@@ -8,13 +8,25 @@ export interface Props {
   created?: Date;
   menu?: MenuDatum | null;
   backToTop?: boolean;
+  slug: string;
+  isContext: boolean;
 }
 
 const footer = import.meta.env.PUBLIC_FOOTER || ``;
-const { created = new Date(), backToTop = false, menu } = Astro.props;
+const {
+  created = new Date(),
+  backToTop = false,
+  menu,
+  slug,
+  isContext,
+} = Astro.props;
 ---
 
-<footer class="w-full z-99 bg-white relative mt-16 md:mt-20 xl:mt-24">
+<div
+  class="relative w-full h-6 md:h-8 bg-gradient-to-b from-transparent to-white z-99"
+>
+</div>
+<footer class="w-full z-99 bg-white relative">
   <div class="flex justify-end px-6">
     {
       backToTop ? (
@@ -29,7 +41,11 @@ const { created = new Date(), backToTop = false, menu } = Astro.props;
     }
   </div>
   <div class="pb-6">
-    {menu ? <FooterMenu payload={menu} /> : null}
+    {
+      menu ? (
+        <FooterMenu payload={menu} slug={slug} isContext={isContext} />
+      ) : null
+    }
     <Socials />
     <div
       class="my-2 flex flex-col items-center justify-center xs:flex-row text-myblue"
@@ -44,7 +60,7 @@ const { created = new Date(), backToTop = false, menu } = Astro.props;
       class="my-2 flex flex-col items-center justify-center xs:flex-row text-myblue"
     >
       <div class="px-12 text-center text-lg">
-        This website is pressed with
+        This website has been pressed with
         <Link
           href="https://tractstack.com/?utm_source=tractstack&utm_medium=www&utm_campaign=community"
           className="underline font-bold hover:text-black"
@@ -53,12 +69,13 @@ const { created = new Date(), backToTop = false, menu } = Astro.props;
         >
           Tract Stack</Link
         >
-        and powered by <Link
+        by <Link
           href="https://atriskmedia.com/?utm_source=tractstack&utm_medium=www&utm_campaign=community"
           className="underline font-bold hover:text-black"
           target="_blank"
           title="At Risk Media">At Risk Media</Link
-        > next chapter in digital analytics
+        >
+        | no-code advocacy + evangelism
       </div>
       <br /><br /><br />
     </div>

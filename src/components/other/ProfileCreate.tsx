@@ -19,7 +19,7 @@ import {
   success,
   loading,
 } from "../../store/auth";
-import { loadProfile, saveProfile } from "../../api/services";
+import { fetchWithAuth } from "../../api/fetchClient";
 import { contactPersona } from "../../assets/contactPersona";
 import { goUnlockProfile } from "./ProfileUnlock";
 
@@ -32,7 +32,10 @@ async function goSaveProfile(payload: {
   init: boolean;
 }) {
   try {
-    await saveProfile({ profile: payload });
+    await fetchWithAuth("/auth/profile", {
+      method: "POST",
+      body: JSON.stringify({ ...payload }),
+    });
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -64,14 +67,13 @@ async function goSaveProfile(payload: {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
     return false;
   }
 }
 
 async function goLoadProfile() {
   try {
-    const response = await loadProfile();
+    const response = await fetchWithAuth("/auth/profile");
     profile.set({
       firstname: response?.data?.firstname || undefined,
       contactPersona: response?.data?.contactPersona || undefined,
@@ -82,8 +84,9 @@ async function goLoadProfile() {
       auth.setKey(`hasProfile`, `1`);
       auth.setKey(`consent`, `1`);
     }
-    if (typeof response?.data?.auth !== `undefined` && response.data.auth)
+    if (typeof response?.data?.auth !== `undefined` && response.data.auth) {
       auth.setKey(`unlockedProfile`, `1`);
+    }
     success.set(true);
     loading.set(false);
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -99,7 +102,6 @@ async function goLoadProfile() {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
   }
 }
 
@@ -111,7 +113,6 @@ export const ProfileCreate = () => {
   const [codeword, setCodeword] = useState(``);
   const [badSave, setBadSave] = useState(false);
   const [personaSelected, setPersonaSelected] = useState(contactPersona[0]);
-  const $authPayload = useStore(auth);
   const $profile = useStore(profile);
   const $error = useStore(error);
   const $loading = useStore(loading);
@@ -190,8 +191,7 @@ export const ProfileCreate = () => {
       typeof $error === `undefined` &&
       typeof $loading === `undefined` &&
       typeof submitted === `undefined` &&
-      import.meta.env.PROD &&
-      $authPayload?.token
+      import.meta.env.PROD
     ) {
       error.set(false);
       loading.set(true);
@@ -221,7 +221,7 @@ export const ProfileCreate = () => {
       success.set(undefined);
       if (!$sync) window.location.reload();
     }
-  }, [$sync, $success, $authPayload?.token, $error, submitted, $loading]);
+  }, [$sync, $success, $error, submitted, $loading]);
 
   if (typeof submitted === `undefined`) return <div />;
   return (

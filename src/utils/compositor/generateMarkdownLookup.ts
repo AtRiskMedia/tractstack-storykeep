@@ -1,5 +1,5 @@
 import type { Root, Element, Text, RootContent, ElementContent } from "hast";
-import type { MarkdownLookup } from "../../types";
+import type { Tag, MarkdownLookup } from "../../types";
 
 export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
   const markdownLookup: MarkdownLookup = {
@@ -11,18 +11,49 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
     codeItemsLookup: {},
     listItemsLookup: {},
     linksLookup: {},
+    linksByTarget: {}, // New property for storing link information by target
+    nthTag: {},
+    nthTagLookup: {},
   };
+
   let imagesIndex = 0;
   let codeItemsIndex = 0;
   let listItemsIndex = 0;
   let linksIndex = 0;
+  let globalTagIndex = 0;
+
+  function processRootNode(node: Element | Text, parentNth: number) {
+    if ("tagName" in node) {
+      // Add to nthTag and nthTagLookup
+      markdownLookup.nthTag[globalTagIndex] = node.tagName as string as Tag;
+      if (!markdownLookup.nthTagLookup[node.tagName]) {
+        markdownLookup.nthTagLookup[node.tagName] = {};
+      }
+      const nthForTag = Object.keys(
+        markdownLookup.nthTagLookup[node.tagName]
+      ).length;
+      markdownLookup.nthTagLookup[node.tagName][globalTagIndex] = {
+        nth: nthForTag,
+      };
+      globalTagIndex++;
+
+      // Process children
+      if ("children" in node && Array.isArray(node.children)) {
+        node.children.forEach((childNode, childNth) => {
+          if (isProcessableNode(childNode)) {
+            processNode(childNode, parentNth, childNth);
+          }
+        });
+      }
+    }
+  }
 
   function processNode(
     node: Element | Text,
     parentNth: number,
-    childNth: number | null
+    childNth: number
   ) {
-    if ("tagName" in node && typeof childNth === `number`) {
+    if ("tagName" in node) {
       switch (node.tagName) {
         case "img":
           addToLookup("images", imagesIndex, parentNth, childNth);
@@ -38,19 +69,23 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
           break;
         case "a":
           addToLookup("links", linksIndex, parentNth, childNth);
+          if (node.properties && typeof node.properties.href === "string") {
+            markdownLookup.linksByTarget[node.properties.href] = {
+              globalNth: linksIndex,
+              parentNth,
+              childNth,
+            };
+          }
           linksIndex++;
           break;
+        default:
       }
     }
 
     if ("children" in node && Array.isArray(node.children)) {
-      node.children.forEach((childNode, index) => {
+      node.children.forEach(childNode => {
         if (isProcessableNode(childNode)) {
-          processNode(
-            childNode,
-            parentNth,
-            childNth !== null ? childNth : index
-          );
+          processNode(childNode, parentNth, childNth);
         }
       });
     }
@@ -76,11 +111,10 @@ export function generateMarkdownLookup(htmlAst: Root): MarkdownLookup {
     return "tagName" in node || "value" in node;
   }
 
-  htmlAst.children.forEach((node, parentNth) => {
+  htmlAst?.children?.forEach((node, parentNth) => {
     if (isProcessableNode(node)) {
-      processNode(node, parentNth, null);
+      processRootNode(node, parentNth);
     }
   });
-
   return markdownLookup;
 }

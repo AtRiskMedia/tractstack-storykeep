@@ -10,7 +10,7 @@ import {
   loading,
   referrer,
 } from "../../store/auth";
-import { getTokens } from "../../api/axiosClient";
+import { getTokens } from "../../api/fetchClient";
 
 export async function goUnlockProfile(payload: {
   email: string;
@@ -44,12 +44,6 @@ export async function goUnlockProfile(payload: {
       auth.setKey(`encryptedCode`, conciergeSync.encryptedCode);
     }
     auth.setKey(`active`, Date.now().toString());
-    if (conciergeSync?.jwt) {
-      auth.setKey(`token`, conciergeSync.jwt);
-    }
-    if (conciergeSync?.refreshToken) {
-      auth.setKey(`refreshToken`, conciergeSync.refreshToken);
-    }
     if (conciergeSync?.fingerprint) {
       auth.setKey(`key`, conciergeSync.fingerprint);
     }
@@ -107,6 +101,16 @@ export const ProfileUnlock = () => {
       <h3 className="font-action text-xl py-6 text-myblue">
         Welcome Back. Unlock your profile &gt;
       </h3>
+      <p className="text-md pb-6">
+        Don't have a profile?
+        <button
+          className="text-myblue hover:text-black underline ml-3"
+          onClick={() => auth.setKey(`hasProfile`, undefined)}
+        >
+          Create one
+        </button>
+        .
+      </p>
 
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-3 gap-4">
@@ -118,7 +122,8 @@ export const ProfileUnlock = () => {
               type="email"
               name="email"
               id="email"
-              autoComplete="email"
+              autoComplete="new-password"
+              aria-autocomplete="none"
               defaultValue={email}
               onChange={e => setEmail(e.target.value)}
               className={classNames(
@@ -141,7 +146,8 @@ export const ProfileUnlock = () => {
               type="password"
               name="codeword"
               id="codeword"
-              autoComplete="off"
+              autoComplete="new-password"
+              aria-autocomplete="none"
               defaultValue={codeword}
               onChange={e => setCodeword(e.target.value)}
               className={classNames(

@@ -7,6 +7,7 @@ import type {
   BreakOptionsDatum,
   MaskOptionsDatum,
   ShapeOptionsDatum,
+  ClassNamesPayloadResult,
 } from "../../types";
 
 interface Props {
@@ -62,8 +63,12 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     typeof optionsPayload?.classNamesParent?.all !== `undefined`
       ? optionsPayload.classNamesParent.all
       : typeof optionsPayload?.classNamesParent !== `undefined` &&
-          typeof optionsPayload?.classNamesParent[viewportKey] !== `undefined`
-        ? optionsPayload.classNamesParent[viewportKey]
+          typeof optionsPayload?.classNamesParent[
+            viewportKey as keyof ClassNamesPayloadResult
+          ] !== `undefined`
+        ? optionsPayload.classNamesParent[
+            viewportKey as keyof ClassNamesPayloadResult
+          ]
         : ``;
 
   // based on artpack mode
@@ -74,7 +79,7 @@ const options = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
   switch (artpackMode) {
     case `break`: {
       return {
-        id: `${viewportKey}-${payload.id}`,
+        id: `${viewportKey}-${artpackCollection}${artpackImage}`,
         artpackMode,
         styles: { fill: (artpack && artpack?.svgFill) || `none` },
         shapeName: `${artpackCollection}${artpackImage}`,

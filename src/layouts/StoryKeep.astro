@@ -2,39 +2,69 @@
 import { LOCALE, SITE } from "@config";
 import { ViewTransitions } from "astro:transitions";
 import SetContentMap from "../components/SetContentMap";
-import { getContentMap } from "../api/turso";
+import { getContentMap, isTursoReady } from "../api/turso";
+import { getSetupChecks } from "../utils/setupChecks";
 import type { ContentMap } from "../types";
 
 export interface Props {
   canonicalURL: string;
   title?: string;
-  author?: string;
-  description?: string;
-  ogImage?: string | null;
-  ogLogo?: string;
-  website?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
+  ogImage?: string;
 }
 
 const {
-  title = SITE.title,
-  author = SITE.author,
-  description = SITE.desc,
-  ogImage = SITE.ogImage,
-  ogLogo = SITE.ogLogo,
-  website = SITE.website,
+  title,
+  ogImage,
   canonicalURL,
   pubDatetime,
   modDatetime,
   scrollSmooth = true,
 } = Astro.props;
 
-const socialImageURL = `${website}/${ogImage ?? SITE.ogImage ?? `og.png`}`;
-const socialLogoURL = `${website}/${ogLogo ?? SITE.ogLogo ?? `logo.png`}`;
-const storykeepCss = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/storykeep.css`;
-const contentMap: ContentMap[] = await getContentMap();
+const defaultFavIcon =
+  typeof import.meta.env.PUBLIC_FAVICON === `string` &&
+  import.meta.env.PUBLIC_FAVICON
+    ? import.meta.env.PUBLIC_FAVICON
+    : `favicon.ico`;
+const defaultSocialImageURL =
+  typeof ogImage === `string` && ogImage
+    ? ogImage
+    : typeof import.meta.env.PUBLIC_OG === `string` && import.meta.env.PUBLIC_OG
+      ? import.meta.env.PUBLIC_OG
+      : `og.png`;
+const defaultSocialLogoURL =
+  typeof import.meta.env.PUBLIC_OGLOGO === `string` &&
+  import.meta.env.PUBLIC_OGLOGO
+    ? import.meta.env.PUBLIC_OGLOGO
+    : `oglogo.png`;
+const defaultSocialTitle =
+  typeof title === `string` && title
+    ? title
+    : typeof import.meta.env.PUBLIC_OGTITLE === `string` &&
+        import.meta.env.PUBLIC_OGTITLE
+      ? import.meta.env.PUBLIC_OGTITLE
+      : SITE.title;
+const defaultSocialAuthor =
+  typeof import.meta.env.PUBLIC_OGAUTHOR === `string` &&
+  import.meta.env.PUBLIC_OGAUTHOR
+    ? import.meta.env.PUBLIC_OGAUTHOR
+    : SITE.author;
+const defaultSocialDesc =
+  typeof import.meta.env.PUBLIC_OGDESC === `string` &&
+  import.meta.env.PUBLIC_OGDESC
+    ? import.meta.env.PUBLIC_OGDESC
+    : SITE.desc;
+const socialImageURL = `/${defaultSocialImageURL}`;
+const socialLogoURL = `/${defaultSocialLogoURL}`;
+const storykeepCss = `/styles/storykeep.css`;
+
+const { hasTurso } = getSetupChecks();
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const contentMap: ContentMap[] =
+  hasTurso && hasTursoReady ? await getContentMap() : [];
 ---
 
 <!doctype html>
@@ -45,7 +75,7 @@ const contentMap: ContentMap[] = await getContentMap();
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={defaultFavIcon} />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
@@ -54,50 +84,57 @@ const contentMap: ContentMap[] = await getContentMap();
     <link rel="stylesheet" href={storykeepCss} />
 
     <!-- General Meta Tags -->
-    <title>{title}</title>
-    <meta name="title" content={title} />
-    <meta name="description" content={description} />
-    <meta name="author" content={author} />
+    <title>{defaultSocialTitle}</title>
+    <meta name="title" content={defaultSocialTitle} />
+    <meta name="description" content={defaultSocialDesc} />
+    <meta name="author" content={defaultSocialAuthor} />
     <link rel="sitemap" href="/sitemap.xml" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={defaultSocialTitle} />
     <meta property="og:type" content="website" />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={defaultSocialDesc} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
     <meta property="og:logo" content={socialLogoURL} />
 
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={defaultSocialTitle} />
+    <meta property="twitter:description" content={defaultSocialDesc} />
+    <meta property="twitter:image" content={socialImageURL} />
+
     <!-- Article Published/Modified time -->
     {
       pubDatetime && (
-        <meta
-          property="article:published_time"
-          content={pubDatetime.toISOString()}
-        />
+        <>
+          <meta
+            property="article:published_time"
+            content={pubDatetime.toISOString()}
+          />
+        </>
       )
     }
     {
       modDatetime && (
-        <meta
-          property="article:modified_time"
-          content={modDatetime.toISOString()}
-        />
+        <>
+          <meta
+            property="article:modified_time"
+            content={modDatetime.toISOString()}
+          />
+        </>
       )
     }
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content={canonicalURL} />
-    <meta property="twitter:title" content={title} />
-    <meta property="twitter:description" content={description} />
-    <meta property="twitter:image" content={socialImageURL} />
 
     <!-- Tract Stack Concierge -->
     <script>
       import {
         startLoadingAnimation,
         stopLoadingAnimation,
+        handleScroll,
+        scrollToTop,
+        debounce,
       } from "../utils/helpers";
       import { init } from "../utils/init";
 
@@ -113,9 +150,15 @@ const contentMap: ContentMap[] = await getContentMap();
       // Initial setup
       setupEventHandlers();
 
+      // controls scrollToTop button visibility
+      const debouncedHandleScroll = debounce(handleScroll, 50);
+
       document.addEventListener("astro:page-load", () => {
         setupEventHandlers();
+        handleScroll();
         init();
+        scrollToTop();
+        document.addEventListener("scroll", debouncedHandleScroll);
       });
     </script>
 

@@ -1,31 +1,17 @@
 import { cleanTursoPane } from "../../utils/compositor/tursoPane";
-import { getImage } from "astro:assets";
 import { getResourcesByCategorySlug } from "../../api/turso";
+import { getOptimizedImages } from "../../utils/helpers";
 import type { Row } from "@libsql/client";
 import type {
   TursoPane,
   PaneDatum,
   ResourceDatum,
   StoryFragmentDatum,
-  TursoFileNode,
   ImpressionDatum,
   CodeHookDatum,
   PaneFileNode,
   FileNode,
 } from "../../types";
-
-export async function getOptimizedImage(src: string) {
-  try {
-    const img = await getImage({
-      src,
-      inferSize: true,
-    });
-    return img.src;
-  } catch {
-    console.log(`error generating images -- are you offline?`);
-    return null;
-  }
-}
 
 export async function cleanTursoStoryFragment(rows: Row[]) {
   if (!rows.length) return [];
@@ -44,52 +30,21 @@ export async function cleanTursoStoryFragment(rows: Row[]) {
         ) {
           const panesPayloadRaw =
             typeof r?.panes === `string` && JSON.parse(r.panes);
-
-          // optimize images
-          const optimizedImagesPre: TursoFileNode[] = [];
-          panesPayloadRaw.forEach((p: TursoPane) => {
-            p?.files.forEach((f: TursoFileNode) => {
-              if (
-                !optimizedImagesPre.filter(
-                  (i: TursoFileNode) => i.filename === f.filename
-                ).length
-              )
-                optimizedImagesPre.push({
-                  id: f.id,
-                  filename: f.filename,
-                  url: f.url,
-                });
-            });
-          });
-          const optimizedImages: FileNode[] = await Promise.all(
-            optimizedImagesPre.map(async (i: TursoFileNode) => {
-              const src = `${import.meta.env.PUBLIC_IMAGE_URL}${i.url}`;
-              const optimizedSrc = await getOptimizedImage(src);
-              return {
-                id: i.id,
-                filename: i.filename,
-                optimizedSrc: optimizedSrc || undefined,
-                src,
-              };
-            })
-          );
+          const allFiles = panesPayloadRaw.map((p: TursoPane) => p.files);
+          const thisFilesPayload: FileNode[] =
+            await getOptimizedImages(allFiles);
           const paneFileNodes: PaneFileNode[] = [];
           panesPayloadRaw.forEach((p: TursoPane) => {
-            const thisFilesPayload: FileNode[] = [];
-            p?.files?.forEach((f: TursoFileNode) => {
-              const optimizedSrc = optimizedImages.find(
-                (o: FileNode) => o.filename === f.filename
-              );
-              if (optimizedSrc) thisFilesPayload.push(optimizedSrc);
-            });
-            if (thisFilesPayload.length)
+            const paneFiles = thisFilesPayload.filter(f => f.paneId === p.id);
+            if (paneFiles.length) {
               paneFileNodes.push({
                 id: p.id,
-                files: thisFilesPayload,
+                files: paneFiles,
               });
+            }
           });
 
-          // now prepare panes payload
+          // prepare panes payload
           const panesPayload = panesPayloadRaw.map((payload: Row) => {
             const thisFilesArray = paneFileNodes
               .filter((f: PaneFileNode) => f.id === payload.id)

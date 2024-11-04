@@ -11,7 +11,6 @@ export interface Props {
   current: Current;
   resourcesPayload: ResourcePayloadDatum;
 }
-
 const { tailwindBgColour, panesPayload, current, resourcesPayload } =
   Astro.props;
 
@@ -74,8 +73,8 @@ const maxHScreen: { [key: string]: boolean } = panesPayload.reduce(function (
             <Filter
               client:load
               id={pane.id}
-              heldBeliefsFilter={pane.optionsPayload?.heldBeliefs || []}
-              withheldBeliefsFilter={pane.optionsPayload?.withheldBeliefs || []}
+              heldBeliefsFilter={pane.optionsPayload?.heldBeliefs || {}}
+              withheldBeliefsFilter={pane.optionsPayload?.withheldBeliefs || {}}
             />
           ) : null}
           {resourcesPayload?.perCodeHookPayload[idx] ? (
@@ -98,6 +97,7 @@ const maxHScreen: { [key: string]: boolean } = panesPayload.reduce(function (
                 panesPayload.filter((p: PaneDatum) => p.id === pane.id).at(0)!
               }
               slug={current.slug}
+              isContext={false}
             />
           )}
         </div>

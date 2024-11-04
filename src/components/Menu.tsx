@@ -5,15 +5,19 @@ import { preParseAction } from "../utils/concierge/preParseAction";
 import { lispLexer } from "../utils/concierge/lispLexer";
 import type { MenuDatum, MenuLink } from "../types";
 
-const Menu = (props: { payload: MenuDatum }) => {
-  const { payload } = props;
+const Menu = (props: {
+  slug: string;
+  isContext: boolean;
+  payload: MenuDatum;
+}) => {
+  const { payload, slug, isContext } = props;
   const thisPayload = payload.optionsPayload;
   const additionalLinks = thisPayload
     .filter((e: MenuLink) => !e.featured)
     .map((e: MenuLink) => {
       const item = { ...e };
       const thisPayload = lispLexer(e.actionLisp);
-      const to = preParseAction(thisPayload);
+      const to = preParseAction(thisPayload, slug, isContext);
       if (typeof to === `string`) {
         item.to = to;
         item.internal = true;
@@ -25,7 +29,7 @@ const Menu = (props: { payload: MenuDatum }) => {
     .map((e: MenuLink) => {
       const item = { ...e };
       const thisPayload = lispLexer(e.actionLisp);
-      const to = preParseAction(thisPayload);
+      const to = preParseAction(thisPayload, slug, isContext);
       if (typeof to === `string`) {
         item.to = to;
         item.internal = true;
@@ -88,23 +92,13 @@ const Menu = (props: { payload: MenuDatum }) => {
                       </div>
                     ))}
                   </div>
-                  <div className="bg-slate-50 p-8">
-                    <div className="flex justify-between">
-                      {additionalLinks.length ? (
+                  {additionalLinks.length ? (
+                    <div className="bg-slate-50 p-8">
+                      <div className="flex justify-between">
                         <h3 className="mt-4 text-sm leading-6 text-myblue">
                           Additional Links
                         </h3>
-                      ) : (
-                        <div />
-                      )}
-                      <a
-                        href="/concierge/graph"
-                        className="text-sm leading-6 text-myblue"
-                      >
-                        Breadcrumbs <span aria-hidden="true">&rarr;</span>
-                      </a>
-                    </div>
-                    {additionalLinks.length ? (
+                      </div>
                       <ul role="list" className="mt-6 space-y-6">
                         {additionalLinks.map((item: MenuLink) => (
                           <li key={item.name} className="relative">
@@ -119,8 +113,8 @@ const Menu = (props: { payload: MenuDatum }) => {
                           </li>
                         ))}
                       </ul>
-                    ) : null}
-                  </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </Popover.Panel>

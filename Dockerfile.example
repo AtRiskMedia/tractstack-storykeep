@@ -1,23 +1,50 @@
-FROM node:lts AS runtime
+# Stage 1: Build stage
+FROM node:lts-slim AS build
 WORKDIR /app
 
+# Install necessary dependencies for building the application
+RUN apt-get update && \
+  apt-get install -y openssl python3 make g++ && \
+  rm -rf /var/lib/apt/lists/*
+
+# Copy only the package.json and yarn.lock to leverage caching
+COPY package.json yarn.lock ./
+
+# Install dependencies
+RUN corepack enable
+RUN yarn set version stable
+RUN yarn install
+
+# Copy the rest of the application files
 COPY . .
 
-RUN apt-get update && \
-  apt-get install -y openssl && \
-  openssl genrsa -des3 -passout pass:x -out server.pass.key 2048 && \
+# Generate SSL certificates
+RUN openssl genrsa -des3 -passout pass:x -out server.pass.key 2048 && \
   openssl rsa -passin pass:x -in server.pass.key -out server.key && \
   rm server.pass.key && \
   openssl req -new -key server.key -out server.csr \
       -subj "/C=UK/ST=Ontario/L=Toronto/O=AtRiskMedia/OU=TractStack/CN=tractstack.com" && \
   openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
 
-RUN corepack enable
-RUN yarn set version stable
-RUN yarn install
+# Build the application
 RUN yarn run build
 
+# Stage 2: Runtime stage
+FROM node:lts-slim AS runtime
+WORKDIR /app
+
+# Copy the build artifacts from the build stage
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/server.key ./server.key
+COPY --from=build /app/server.crt ./server.crt
+
+# Copy the node_modules folder from the build stage
+COPY --from=build /app/node_modules ./node_modules
+
+# Set environment variables and expose port
 ENV HOST=0.0.0.0
 ENV PORT=4321
 EXPOSE 4321
+
+# Command to run the application
 CMD ["node", "./dist/server/entry.mjs"]

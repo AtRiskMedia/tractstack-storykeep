@@ -1,26 +1,31 @@
-import { useEffect, useState } from "react";
 import {
   DevicePhoneMobileIcon,
   DeviceTabletIcon,
   ComputerDesktopIcon,
-  ArrowsPointingOutIcon,
+  ViewfinderCircleIcon,
 } from "@heroicons/react/24/outline";
-import { debounce } from "../../../utils/helpers";
+import type { ViewportAuto, ViewportKey } from "../../../types";
 
 interface ViewportSelectorProps {
-  viewport: "auto" | "mobile" | "tablet" | "desktop";
+  viewportKey: ViewportAuto;
+  viewport: ViewportKey;
+  auto: boolean;
   setViewport: (viewport: "auto" | "mobile" | "tablet" | "desktop") => void;
 }
 
-const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
-  const [width, setWidth] = useState(0);
+const ViewportSelector = ({
+  viewport,
+  viewportKey,
+  auto,
+  setViewport,
+}: ViewportSelectorProps) => {
   const classNames = (...classes: string[]) =>
     classes.filter(Boolean).join(" ");
   const viewportButtons = [
     {
       key: "auto",
-      Icon: ArrowsPointingOutIcon,
-      title: "Auto or responsive view",
+      Icon: ViewfinderCircleIcon,
+      title: "Responsive view (default)",
     },
     {
       key: "mobile",
@@ -39,31 +44,12 @@ const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
     },
   ] as const;
 
-  useEffect(() => {
-    const handleResize = debounce(() => {
-      const mainContent = document.getElementById(`storykeep`) as HTMLElement;
-      setWidth(mainContent.offsetWidth);
-    }, 100);
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
-    <div>
+    <div className="hidden md:block">
       <div className="flex items-center">
-        <span className="mr-2 text-sm text-mydarkgrey">Designing for:</span>
-        <span className="font-bold text-xl text-myblue pr-4">
-          {viewport !== `auto`
-            ? viewport
-            : width < 800
-              ? `mobile`
-              : width <= 1367
-                ? `tablet`
-                : `desktop`}
+        <span className={`mr-1 text-sm text-mydarkgrey`}>Designing for:</span>
+        <span className={`font-bold text-xl text-myblue pr-2.5`}>
+          {!auto ? viewport : viewportKey}
         </span>
         <span className="isolate inline-flex -space-x-px rounded-md shadow-sm">
           {viewportButtons.map(({ key, Icon, title }, index) => (
@@ -73,7 +59,7 @@ const ViewportSelector = ({ viewport, setViewport }: ViewportSelectorProps) => {
               title={title}
               className={classNames(
                 "hover:bg-myorange/50 hover:text-black",
-                viewport === key
+                (key === `auto` && auto) || (viewport === key && !auto)
                   ? "bg-myblue text-white"
                   : "bg-mylightgrey/20 text-mydarkgrey ring-1 ring-inset ring-slate-200 focus:z-10",
                 "relative inline-flex items-center px-3 py-2",

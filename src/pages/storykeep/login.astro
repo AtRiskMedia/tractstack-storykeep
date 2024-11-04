@@ -1,15 +1,26 @@
 ---
-import { setAuthenticated, isAuthenticated } from "../../utils/session";
+import {
+  setAuthenticated,
+  isAuthenticated,
+  //  isOpenDemoMode,
+} from "../../utils/session";
 
 let loginError = false;
 let redirectPath = "/";
 
 const url = new URL(Astro.request.url);
 redirectPath = url.searchParams.get("redirect") || "/";
+const forceLogin = url.searchParams.get("force") === "true";
 
 const authenticated = await isAuthenticated(Astro);
+const isOpenDemo = import.meta.env.PRIVATE_OPEN_DEMO === "true";
 
-if (authenticated) {
+if (authenticated && !forceLogin) {
+  return Astro.redirect(redirectPath);
+}
+
+if (isOpenDemo && !forceLogin) {
+  setAuthenticated(Astro, true, true);
   return Astro.redirect(redirectPath);
 }
 
@@ -17,12 +28,14 @@ if (Astro.request.method === "POST") {
   const data = await Astro.request.formData();
   const password = data.get("password");
   if (password === import.meta.env.PRIVATE_AUTH_SECRET) {
-    setAuthenticated(Astro, true);
+    setAuthenticated(Astro, true, false);
     return Astro.redirect(redirectPath);
   } else {
     loginError = true;
   }
 }
+
+const showLoginForm = forceLogin || !isOpenDemo;
 ---
 
 <html lang="en">
@@ -38,11 +51,23 @@ if (Astro.request.method === "POST") {
         <p style="color: red;">Invalid password. Please try again.</p>
       )
     }
-    <form method="POST">
-      <label for="password">Password:</label>
-      <input type="password" id="password" name="password" required />
-      <input type="hidden" name="redirect" value={redirectPath} />
-      <button type="submit">Submit</button>
-    </form>
+    {
+      showLoginForm ? (
+        <form method="POST">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required />
+          <input type="hidden" name="redirect" value={redirectPath} />
+          <button type="submit">Submit</button>
+        </form>
+      ) : (
+        <p>
+          Open demo mode is active.{" "}
+          <a href={`/storykeep/login?redirect=${redirectPath}&force=true`}>
+            Click here to log in for full access
+          </a>
+          .
+        </p>
+      )
+    }
   </body>
 </html>

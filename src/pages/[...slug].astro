@@ -5,9 +5,32 @@ import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import HeaderWidget from "../custom/HeaderWidget.astro";
 import Footer from "@components/Footer.astro";
-import { getStoryFragmentBySlug } from "../api/turso";
+import { getSetupChecks } from "../utils/setupChecks";
+import {
+  getStoryFragmentBySlug,
+  isTursoReady,
+  isContentReady,
+} from "../api/turso";
 import { ENABLE_HEADER_WIDGET } from "../constants";
-import type { Current, StylesVersion } from "../types";
+import type { AuthStatus, Current, StylesVersion } from "../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
+
+// confirm set-up
+const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
+const hasTursoReady = hasTurso ? await isTursoReady() : false;
+const hasContentReady = hasTurso && hasContent ? await isContentReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasTursoReady ||
+  !hasBranding ||
+  !hasContent ||
+  !hasContentReady
+) {
+  return Astro.redirect("/storykeep");
+}
 
 // get styles offset
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
@@ -43,21 +66,29 @@ const current: Current = {
   title={storyfragment.title}
   pubDatetime={storyfragment.created}
   modDatetime={storyfragment.changed}
-  ogImage={storyfragment.socialImagePath}
+  ogImage={typeof storyfragment?.socialImagePath === `string`
+    ? storyfragment.socialImagePath
+    : undefined}
   stylesUrl={stylesUrl}
 >
   {
     ENABLE_HEADER_WIDGET ? (
-      <HeaderWidget resources={storyfragment.resourcesPayload.headerWidget} />
+      <HeaderWidget
+        slug={lookup}
+        resources={storyfragment.resourcesPayload.headerWidget}
+      />
     ) : null
   }
   <Header
     title={storyfragment.title}
     menu={storyfragment.menuPayload}
     slug={lookup}
+    isContext={false}
+    isEditable={true}
     impressions={storyfragment.impressions}
+    user={user}
   />
-  <main id="main-content">
+  <main id="main-content" class="min-h-screen">
     <StoryFragmentWrapper
       tailwindBgColour={storyfragment.tailwindBgColour}
       panesPayload={storyfragment.panesPayload}
@@ -67,12 +98,19 @@ const current: Current = {
   </main>
   {
     storyfragment.impressions?.length ? (
-      <ImpressionWrapper payload={storyfragment.impressions} client:idle />
+      <ImpressionWrapper
+        slug={storyfragment.slug}
+        isContext={true}
+        payload={storyfragment.impressions}
+        client:idle
+      />
     ) : null
   }
   <Footer
     created={storyfragment.created}
     menu={storyfragment.menuPayload}
     backToTop={true}
+    slug={lookup}
+    isContext={false}
   />
 </Layout>

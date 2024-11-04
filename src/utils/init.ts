@@ -1,4 +1,4 @@
-import { getTokens } from "../api/axiosClient";
+import { getTokens } from "../api/fetchClient";
 import { events, current } from "../store/events";
 import {
   auth,
@@ -21,8 +21,7 @@ export async function init() {
   let reset = false;
   const authPayload = auth.get();
   const lastActive = authPayload?.active ? parseInt(authPayload.active) : 0;
-  const mustSync =
-    !authPayload?.token || Date.now() > lastActive + JWT_LIFETIME;
+  const mustSync = Date.now() > lastActive + JWT_LIFETIME;
 
   // delete any session storage after > 1 hr if no consent provided
   if (
@@ -36,10 +35,54 @@ export async function init() {
     auth.setKey(`encryptedEmail`, undefined);
     auth.setKey(`hasProfile`, undefined);
     auth.setKey(`unlockedProfile`, undefined);
-    auth.setKey(`token`, undefined);
     auth.setKey(`key`, undefined);
     reset = true;
     //window.location.reload();
+  } else if (Date.now() > lastActive + JWT_LIFETIME * 5) {
+    // if consent provided; lock profile after > 1 hr
+    auth.setKey(`unlockedProfile`, undefined);
+  }
+
+  // register page view
+  const cur = current.get();
+  if (cur.id && cur.slug && cur.title) {
+    const pageViewEvent = cur.parentId
+      ? {
+          id: cur.id,
+          parentId: cur.parentId,
+          type: `StoryFragment`,
+          verb: `PAGEVIEWED`,
+        }
+      : {
+          id: cur.id,
+          type: `Pane`,
+          verb: `PAGEVIEWED`,
+        };
+    events.set([...events.get(), pageViewEvent]);
+  }
+
+  // flag on first visit from external
+  if (!entered.get()) {
+    entered.set(true);
+    const ref = document.referrer;
+    const internal =
+      ref !== `` && ref.indexOf(location.protocol + "//" + location.host) === 0;
+    if (!internal && ref && cur?.id && cur?.parentId) {
+      const enteredEvent = {
+        id: cur.id,
+        parentId: cur.parentId,
+        type: `StoryFragment`,
+        verb: `ENTERED`,
+      };
+      events.set([...events.get(), enteredEvent]);
+    } else if (!internal && ref && cur?.id) {
+      const event = {
+        id: cur.id,
+        type: `Pane`,
+        verb: `ENTERED`,
+      };
+      events.set([...events.get(), event]);
+    }
   }
 
   // sync once; unless soon inactive
@@ -86,12 +129,6 @@ export async function init() {
         }
       : { referrer: ref };
   const conciergeSync = await getTokens(settings);
-  if (conciergeSync?.jwt) {
-    auth.setKey(`token`, conciergeSync.jwt);
-  }
-  if (conciergeSync?.refreshToken) {
-    auth.setKey(`refreshToken`, conciergeSync.refreshToken);
-  }
   if (conciergeSync?.fingerprint) {
     auth.setKey(`key`, conciergeSync.fingerprint);
   }
@@ -106,11 +143,13 @@ export async function init() {
   }
   if (conciergeSync?.knownLead) {
     auth.setKey(`consent`, `1`);
-    auth.setKey(`hasProfile`, `1`);
-  } else auth.setKey(`hasProfile`, undefined);
+  }
   if (conciergeSync?.auth) {
-    auth.setKey(`unlockedProfile`, `1`);
-  } else auth.setKey(`unlockedProfile`, undefined);
+    auth.setKey(`hasProfile`, `1`);
+  } else {
+    auth.setKey(`hasProfile`, undefined);
+    auth.setKey("unlockedProfile", undefined);
+  }
   auth.setKey(`active`, Date.now().toString());
 
   // unlock; set sync
@@ -119,29 +158,4 @@ export async function init() {
   error.set(undefined);
   success.set(undefined);
   loading.set(undefined);
-
-  // flag on first visit from external
-  if (!entered.get()) {
-    entered.set(true);
-    const ref = document.referrer;
-    const internal =
-      ref !== `` && ref.indexOf(location.protocol + "//" + location.host) === 0;
-    const cur = current.get();
-    if (!internal && ref && cur?.id && cur?.parentId) {
-      const event = {
-        id: cur.id,
-        parentId: cur.parentId,
-        type: `StoryFragment`,
-        verb: `ENTERED`,
-      };
-      events.set([...events.get(), event]);
-    } else if (!internal && ref && cur?.id) {
-      const event = {
-        id: cur.id,
-        type: `Pane`,
-        verb: `ENTERED`,
-      };
-      events.set([...events.get(), event]);
-    }
-  }
 }

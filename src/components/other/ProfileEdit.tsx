@@ -19,7 +19,7 @@ import {
   success,
   loading,
 } from "../../store/auth";
-import { loadProfile, saveProfile } from "../../api/services";
+import { fetchWithAuth } from "../../api/fetchClient";
 import { contactPersona } from "../../assets/contactPersona";
 import type { ContactPersona } from "../../types";
 
@@ -32,7 +32,10 @@ async function goSaveProfile(payload: {
   init: boolean;
 }) {
   try {
-    const response = await saveProfile({ profile: payload });
+    const response = await fetchWithAuth("/auth/profile", {
+      method: "POST",
+      body: JSON.stringify({ ...payload }),
+    });
     profile.set({
       firstname: payload.firstname,
       contactPersona: payload.persona,
@@ -59,25 +62,24 @@ async function goSaveProfile(payload: {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
     return false;
   }
 }
 
 async function goLoadProfile() {
   try {
-    const response = await loadProfile();
+    const response = await fetchWithAuth("/auth/profile");
     profile.set({
-      firstname: response?.data?.firstname || undefined,
-      contactPersona: response?.data?.contactPersona || undefined,
-      email: response?.data?.email || undefined,
-      shortBio: response?.data?.shortBio || undefined,
+      firstname: response?.firstname || undefined,
+      contactPersona: response?.contactPersona || undefined,
+      email: response?.email || undefined,
+      shortBio: response?.shortBio || undefined,
     });
-    if (response?.data?.knownLead) {
+    if (response?.knownLead) {
       auth.setKey(`hasProfile`, `1`);
       auth.setKey(`consent`, `1`);
     }
-    if (typeof response?.data?.auth !== `undefined` && response.data.auth)
+    if (typeof response?.auth !== `undefined` && response.auth)
       auth.setKey(`unlockedProfile`, `1`);
     success.set(true);
     loading.set(false);
@@ -94,7 +96,6 @@ async function goLoadProfile() {
     });
     auth.setKey(`unlockedProfile`, undefined);
     auth.setKey(`hasProfile`, undefined);
-    console.log(`error`, e);
   }
 }
 
@@ -108,7 +109,6 @@ export const ProfileEdit = () => {
   const [personaSelected, setPersonaSelected] = useState<ContactPersona>(
     contactPersona[0]
   );
-  const $authPayload = useStore(auth);
   const $profile = useStore(profile);
   const $error = useStore(error);
   const $loading = useStore(loading);
@@ -188,8 +188,7 @@ export const ProfileEdit = () => {
       typeof $error === `undefined` &&
       typeof $loading === `undefined` &&
       typeof submitted === `undefined` &&
-      import.meta.env.PROD &&
-      $authPayload?.token
+      import.meta.env.PROD
     ) {
       const checkProfile = profile.get();
       if (
@@ -238,7 +237,7 @@ export const ProfileEdit = () => {
       success.set(undefined);
       if (!$sync) window.location.reload();
     }
-  }, [$sync, $success, $authPayload?.token, $error, submitted, $loading]);
+  }, [$sync, $success, $error, submitted, $loading]);
 
   if (typeof submitted === `undefined`) return <div />;
   return (
@@ -262,7 +261,7 @@ export const ProfileEdit = () => {
                   type="text"
                   name="firstname"
                   id="firstname"
-                  autoComplete="given-name"
+                  autoComplete="off"
                   defaultValue={$profile.firstname || ``}
                   onChange={e => setFirstname(e.target.value)}
                   className={classNames(
@@ -290,7 +289,7 @@ export const ProfileEdit = () => {
                   type="email"
                   name="email"
                   id="email"
-                  autoComplete="email"
+                  autoComplete="off"
                   defaultValue={$profile.email || ``}
                   onChange={e => setEmail(e.target.value)}
                   className={classNames(

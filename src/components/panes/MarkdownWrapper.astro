@@ -19,9 +19,11 @@ interface Props {
   paneHeight: [number, number, number];
   paneId: string;
   slug: string;
+  isContext: boolean;
 }
 
-const { payload, markdown, files, paneHeight, paneId, slug } = Astro.props;
+const { payload, markdown, files, paneHeight, paneId, slug, isContext } =
+  Astro.props;
 
 // this is either MarkdownPane, Modal+MarkdownInsideModal, or MarkdownInsidePane
 
@@ -86,6 +88,7 @@ const markdownLookup =
           modalPayload={thisModalPayload}
           paneId={paneId}
           slug={slug}
+          isContext={isContext}
           markdownLookup={markdownLookup}
         />
       </div>
@@ -102,6 +105,7 @@ const markdownLookup =
       paneHeight={paneHeight}
       paneId={paneId}
       slug={slug}
+      isContext={isContext}
       markdownLookup={markdownLookup}
     />
   ) : null
@@ -115,6 +119,7 @@ const markdownLookup =
       files={files}
       paneId={paneId}
       slug={slug}
+      isContext={isContext}
       markdownLookup={markdownLookup}
     />
   ) : null

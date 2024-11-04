@@ -2,7 +2,7 @@ import {
   ExclamationCircleIcon,
   ChevronDoubleLeftIcon,
 } from "@heroicons/react/24/outline";
-import ContentEditableField from "../ContentEditableField";
+import ContentEditableField from "../components/ContentEditableField";
 import { useStore } from "@nanostores/react";
 import {
   storyFragmentSlug,
@@ -16,7 +16,7 @@ interface StoryFragmentSlugProps {
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
 }
 
 const StoryFragmentSlug = ({
@@ -26,10 +26,9 @@ const StoryFragmentSlug = ({
   updateStoreField,
   handleUndo,
 }: StoryFragmentSlugProps) => {
-  const $storyFragmentSlug = useStore(storyFragmentSlug);
-  const $uncleanData = useStore(uncleanDataStore);
-  const $temporaryErrors = useStore(temporaryErrorsStore);
-
+  const $storyFragmentSlug = useStore(storyFragmentSlug, { keys: [id] });
+  const $uncleanData = useStore(uncleanDataStore, { keys: [id] });
+  const $temporaryErrors = useStore(temporaryErrorsStore, { keys: [id] });
   return (
     <>
       <div className="flex items-center space-x-4 py-1.5">
@@ -42,7 +41,11 @@ const StoryFragmentSlug = ({
         <div className="flex-grow relative">
           <ContentEditableField
             id="storyFragmentSlug"
-            value={$storyFragmentSlug[id]?.current || ""}
+            value={
+              $storyFragmentSlug[id]?.current === `create`
+                ? ``
+                : $storyFragmentSlug[id]?.current || ""
+            }
             onChange={newValue =>
               updateStoreField("storyFragmentSlug", newValue)
             }
@@ -50,7 +53,8 @@ const StoryFragmentSlug = ({
               handleEditingChange("storyFragmentSlug", editing)
             }
             placeholder="Enter slug here"
-            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+            className="block w-full rounded-md border-0 px-2.5 py-1.5 pr-12 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
+            hyphenate={true}
           />
           {($uncleanData[id]?.storyFragmentSlug ||
             $temporaryErrors[id]?.storyFragmentSlug) && (
@@ -63,7 +67,7 @@ const StoryFragmentSlug = ({
           )}
         </div>
         <button
-          onClick={() => handleUndo("storyFragmentSlug")}
+          onClick={() => handleUndo("storyFragmentSlug", id)}
           className="disabled:hidden ml-2"
           disabled={$storyFragmentSlug[id]?.history.length === 0}
         >
@@ -83,6 +87,7 @@ const StoryFragmentSlug = ({
           <li className="pr-6 py-2">
             Avoid numbers and dates unless necessary.
           </li>
+          <li className="pr-6 py-2 font-bold">No Duplicates!</li>
         </ul>
       )}
     </>

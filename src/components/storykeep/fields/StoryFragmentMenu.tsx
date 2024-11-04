@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useDropdownDirection } from "../../../hooks/useDropdownDirection";
 import { Combobox } from "@headlessui/react";
 import {
   CheckIcon,
@@ -14,7 +15,7 @@ interface StoryFragmentMenuIdProps {
   isEditing: Partial<Record<StoreKey, boolean>>;
   handleEditingChange: (storeKey: StoreKey, editing: boolean) => void;
   updateStoreField: (storeKey: StoreKey, newValue: string) => boolean;
-  handleUndo: (storeKey: StoreKey) => void;
+  handleUndo: (storeKey: StoreKey, id: string) => void;
   payload: MenuDatum[];
 }
 
@@ -26,7 +27,9 @@ const StoryFragmentMenuId = ({
   payload,
 }: StoryFragmentMenuIdProps) => {
   const menus = payload;
-  const $storyFragmentMenuId = useStore(storyFragmentMenuId);
+  const $storyFragmentMenuId = useStore(storyFragmentMenuId, { keys: [id] });
+  const comboboxRef = useRef<HTMLDivElement>(null);
+  const { openAbove, maxHeight } = useDropdownDirection(comboboxRef);
 
   const [query, setQuery] = useState("");
 
@@ -51,7 +54,7 @@ const StoryFragmentMenuId = ({
   };
 
   const handleUndoClick = () => {
-    handleUndo("storyFragmentMenuId");
+    handleUndo("storyFragmentMenuId", id);
   };
 
   return (
@@ -62,11 +65,11 @@ const StoryFragmentMenuId = ({
       >
         Use menu?
       </span>
-      <div className="flex-grow relative">
+      <div className="flex-grow relative" ref={comboboxRef}>
         <Combobox value={selectedMenu} onChange={handleMenuChange}>
           <div className="relative">
             <Combobox.Input
-              className="w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen sm:text-sm sm:leading-6"
+              className="w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-myblack ring-1 ring-inset ring-mygreen placeholder:text-mydarkgrey focus:ring-2 focus:ring-inset focus:ring-mygreen xs:text-sm xs:leading-6"
               onChange={event => setQuery(event.target.value)}
               onFocus={() => handleEditingChange("storyFragmentMenuId", true)}
               displayValue={(menu: MenuDatum | null) => menu?.title || ""}
@@ -80,7 +83,12 @@ const StoryFragmentMenuId = ({
             </Combobox.Button>
           </div>
 
-          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+          <Combobox.Options
+            className={`absolute z-10 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none xs:text-sm ${
+              openAbove ? "bottom-full mb-1" : "top-full mt-1"
+            }`}
+            style={{ maxHeight: `${maxHeight}px` }}
+          >
             <Combobox.Option
               value={null}
               className={({ active }) =>
@@ -93,7 +101,7 @@ const StoryFragmentMenuId = ({
                 <>
                   <span
                     className={`block truncate ${
-                      selected ? "font-medium" : "font-normal"
+                      selected ? "font-bold" : "font-normal"
                     }`}
                   >
                     No menu
@@ -124,7 +132,7 @@ const StoryFragmentMenuId = ({
                   <>
                     <span
                       className={`block truncate ${
-                        selected ? "font-medium" : "font-normal"
+                        selected ? "font-bold" : "font-normal"
                       }`}
                     >
                       {menu.title}

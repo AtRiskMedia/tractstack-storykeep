@@ -2,7 +2,7 @@
 import PaneFromAst from "./PaneFromAst.astro";
 import { SvgInsideLeftModal } from "@components/panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "@components/panes/SvgInsideRightModal";
-import { classNames, getClassNames } from "../../utils/helpers";
+import { classNames } from "../../utils/helpers";
 import type {
   MarkdownLookup,
   FileNode,
@@ -24,6 +24,7 @@ interface Props {
   };
   paneId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
 }
 
@@ -35,6 +36,7 @@ const {
   modalPayload,
   paneId,
   slug,
+  isContext,
   markdownLookup,
 } = Astro.props;
 
@@ -58,7 +60,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
         ? payload.textShapeOutsideTablet
         : viewportKey === `mobile`
           ? payload.textShapeOutsideMobile
-          : payload.textShapeOutside;
+          : null;
   const astPayload = {
     ast: markdown.htmlAst.children,
     buttonData: optionsPayload?.buttons || {},
@@ -68,18 +70,11 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
     typeof optionsPayload?.classNames?.all === `object`
       ? optionsPayload.classNames.all
       : {};
-  const classNamesParentRaw = optionsPayload?.classNamesParent?.all
-    ? getClassNames(optionsPayload.classNamesParent.all)
-    : ``;
-  const classNamesParent =
-    typeof classNamesParentRaw === `string`
-      ? [classNamesParentRaw]
-      : classNamesParentRaw;
   return {
     shapeName,
     astPayload,
     injectClassNames,
-    classNamesParent,
+    classNamesParent: [``],
     viewportKey,
   };
 });
@@ -150,6 +145,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
                 thisClassNames={thisPayload?.injectClassNames || ``}
                 paneId={paneId}
                 slug={slug}
+                isContext={isContext}
                 idx={null}
                 outerIdx={idx}
                 markdownLookup={markdownLookup}

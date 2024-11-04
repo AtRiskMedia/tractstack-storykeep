@@ -1,12 +1,26 @@
 //import { storySteps } from "../store/events";
-import { tailwindColors } from "../assets/tailwindColors";
+import { getImage } from "astro:assets";
 import type {
   GraphNodes,
   GraphNode,
   GraphNodeDatum,
   GraphRelationshipDatum,
   ClassNamesPayloadValue,
+  TursoFileNode,
+  FileNode,
 } from "../types";
+
+export const getComputedColor = (color: string): string => {
+  if (color.startsWith("#var(--")) {
+    color = color.slice(1);
+  }
+  if (color.startsWith("var(--")) {
+    const varName = color.slice(4, -1);
+    const computedStyle = getComputedStyle(document.documentElement);
+    return computedStyle.getPropertyValue(varName).trim() || color;
+  }
+  return color;
+};
 
 export function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(` `);
@@ -25,17 +39,41 @@ export function getClassNames(
   }
 }
 
+function getScrollBarWidth() {
+  // Create a temporary element to measure the scrollbar width
+  const div = document.createElement("div");
+  div.style.overflow = "scroll";
+  div.style.width = "100px";
+  div.style.height = "100px";
+  div.style.position = "absolute";
+  div.style.top = "-9999px"; // Move it out of the viewport
+  document.body.appendChild(div);
+
+  // Create an inner element to measure the difference
+  const innerDiv = document.createElement("div");
+  innerDiv.style.width = "100%";
+  innerDiv.style.height = "100%";
+  div.appendChild(innerDiv);
+
+  // Calculate the scrollbar width
+  const scrollBarWidth = div.offsetWidth - innerDiv.offsetWidth;
+
+  // Clean up
+  document.body.removeChild(div);
+
+  return scrollBarWidth;
+}
+
 export function handleResize() {
-  const scrollBarOffset =
-    window.innerWidth - document.documentElement.clientWidth;
-  const thisWidth = document.documentElement.clientWidth - scrollBarOffset;
+  const scrollBarWidth = getScrollBarWidth();
   const innerWidth = window.innerWidth;
+  //console.log(`innerWidth`, innerWidth);
   const thisScale =
     innerWidth < 801
-      ? thisWidth / 600
+      ? (innerWidth - scrollBarWidth) / 600
       : innerWidth < 1367
-        ? thisWidth / 1080
-        : thisWidth / 1920;
+        ? (innerWidth - scrollBarWidth) / 1080
+        : (innerWidth - scrollBarWidth) / 1920;
   document.documentElement.style.setProperty(`--scale`, thisScale.toString());
 }
 
@@ -47,15 +85,14 @@ export function handleEditorResize() {
     // Calculate scrollbar width
     const scrollBarOffset =
       window.innerWidth - document.documentElement.clientWidth;
-
     // Get the actual width of the preview element
     const previewWidth = previewElement.clientWidth;
-
     // Adjust the width to account for the scrollbar
-    const adjustedWidth = previewWidth + scrollBarOffset;
-
+    const adjustedWidth =
+      previewWidth +
+      scrollBarOffset *
+        (window.innerWidth > previewWidth + scrollBarOffset ? 0 : 1);
     let baseWidth;
-
     // Use adjustedWidth for breakpoint checks
     if (adjustedWidth <= 800) {
       baseWidth = 600;
@@ -64,15 +101,11 @@ export function handleEditorResize() {
     } else {
       baseWidth = 1920;
     }
-
     // Use the actual previewWidth for scale calculation
     const thisScale = previewWidth / baseWidth;
-
     previewElement.style.setProperty(`--scale`, thisScale.toString());
   });
-
   resizeObserver.observe(previewElement);
-
   // Clean up function
   return () => {
     resizeObserver.disconnect();
@@ -89,7 +122,6 @@ export function scrollToTop() {
   });
 }
 
-// scroll to top functionality
 export function handleScroll() {
   const rootElement = document.documentElement;
   const button = document.querySelector("button#top");
@@ -324,15 +356,249 @@ export function debounce<T extends (...args: any[]) => void>(
   };
 }
 
-export const tailwindToHex = (tailwindColor: string): string => {
-  const [colorName, shade] = tailwindColor.replace("bg-", "").split("-");
+export function cloneDeep<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export function isDeepEqual(obj1: any, obj2: any): boolean {
+  if (obj1 === obj2) return true;
   if (
-    colorName in tailwindColors &&
-    shade &&
-    Number(shade) / 100 - 1 >= 0 &&
-    Number(shade) / 100 - 1 < (tailwindColors as any)[colorName].length
+    typeof obj1 !== "object" ||
+    obj1 === null ||
+    typeof obj2 !== "object" ||
+    obj2 === null
   ) {
-    return (tailwindColors as any)[colorName][Number(shade) / 100 - 1];
+    return obj1 === obj2;
   }
-  return "#FFFFFF"; // Default to white if color not found
-};
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  if (keys1.length !== keys2.length) return false;
+  for (const key of keys1) {
+    if (!keys2.includes(key) || !isDeepEqual(obj1[key], obj2[key]))
+      return false;
+  }
+  return true;
+}
+
+const stopWords = new Set([
+  "a",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "be",
+  "by",
+  "for",
+  "from",
+  "has",
+  "he",
+  "in",
+  "is",
+  "it",
+  "its",
+  "of",
+  "on",
+  "that",
+  "the",
+  "to",
+  "was",
+  "were",
+  "will",
+  "with",
+  "i",
+  "me",
+  "my",
+  "myself",
+  "we",
+  "our",
+  "ours",
+  "ourselves",
+  "you",
+  "your",
+  "yours",
+  "yourself",
+  "yourselves",
+  "he",
+  "him",
+  "his",
+  "himself",
+  "she",
+  "her",
+  "hers",
+  "herself",
+  "it",
+  "its",
+  "itself",
+  "they",
+  "them",
+  "their",
+  "theirs",
+  "themselves",
+  "what",
+  "which",
+  "who",
+  "whom",
+  "this",
+  "that",
+  "these",
+  "those",
+  "am",
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "being",
+  "have",
+  "has",
+  "had",
+  "having",
+  "do",
+  "does",
+  "did",
+  "doing",
+  "but",
+  "if",
+  "or",
+  "because",
+  "as",
+  "until",
+  "while",
+  "of",
+  "at",
+  "by",
+  "for",
+  "with",
+  "about",
+  "against",
+  "between",
+  "into",
+  "through",
+  "during",
+  "before",
+  "after",
+  "above",
+  "below",
+  "to",
+  "from",
+  "up",
+  "down",
+  "in",
+  "out",
+  "on",
+  "off",
+  "over",
+  "under",
+  "again",
+  "further",
+  "then",
+  "once",
+]);
+
+export function cleanString(s: string): string {
+  if (!s) return s;
+  s = s.toLowerCase();
+  s = s.replace(/[^a-z0-9\s-_]/g, "");
+  s = s.replace(/\s+/g, "-");
+  const words = s.split(/[-_]/);
+  if (words.length > 1) {
+    s = words.filter(word => !stopWords.has(word)).join("-");
+  }
+  s = s.replace(/^[^a-z]+/, "");
+  s = s.replace(/[-_]{2,}/g, "-");
+  s = s.replace(/^[-_]+|[-_]+$/g, "");
+  if (!s.match(/^[a-z][a-z0-9-_]*[a-z0-9]$/)) {
+    s = s.replace(/[^a-z0-9]/g, "");
+  }
+  return s;
+}
+
+export function cleanStringUpper(s: string): string {
+  if (!s) return s;
+  return s
+    .toUpperCase()
+    .replace(/[\d\-_]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "");
+}
+
+export function sortULIDs(ulids: string[]) {
+  return ulids.sort((a, b) => {
+    const toBinary = (ulid: string) => {
+      return Array.from(ulid, char =>
+        char.charCodeAt(0).toString(2).padStart(8, "0")
+      ).join("");
+    };
+
+    const binaryA = toBinary(a);
+    const binaryB = toBinary(b);
+
+    return binaryA.localeCompare(binaryB);
+  });
+}
+
+export async function getOptimizedImage(src: string) {
+  try {
+    const img = await getImage({
+      src,
+      inferSize: true,
+    });
+    return img.src;
+  } catch {
+    console.log(`error generating images -- are you offline?`);
+    return null;
+  }
+}
+
+async function getOptimizedImageSet(baseUrl: string): Promise<string[]> {
+  const sizes = [600, 1080, 1920];
+  const optimizedUrls = await Promise.all(
+    sizes.map(async size => {
+      const sizeUrl = baseUrl.replace(/(\.[^.]+)$/, `_${size}px$1`);
+      const optimizedSrc = await getOptimizedImage(sizeUrl);
+      return optimizedSrc ? `${optimizedSrc} ${size}w` : "";
+    })
+  );
+  return optimizedUrls.filter(Boolean);
+}
+
+export async function getOptimizedImages(
+  filesInput: TursoFileNode[] | TursoFileNode[][],
+  paneId?: string
+): Promise<FileNode[]> {
+  const allFiles = Array.isArray(filesInput[0])
+    ? (filesInput as TursoFileNode[][]).flat()
+    : (filesInput as TursoFileNode[]);
+
+  const optimizedImages: FileNode[] = await Promise.all(
+    allFiles.map(async (f: TursoFileNode) => {
+      const baseUrl = `${import.meta.env.PUBLIC_IMAGE_URL}${f.url}`;
+      let src: string = baseUrl;
+      let optimizedSrc: string | undefined;
+
+      if (f.src_set) {
+        const optimizedUrls = await getOptimizedImageSet(baseUrl);
+        optimizedSrc = optimizedUrls.join(", "); // Full srcSet string
+        src = optimizedUrls[0].split(" ")[0]; // Mobile (600px) optimized src
+      } else {
+        optimizedSrc = (await getOptimizedImage(src)) || undefined;
+      }
+
+      return {
+        id: f.id,
+        filename: f.filename,
+        altDescription: f.alt_description,
+        src,
+        srcSet: f.src_set,
+        paneId: paneId || f.paneId,
+        markdown: f.markdown,
+        optimizedSrc,
+      };
+    })
+  );
+
+  return optimizedImages;
+}

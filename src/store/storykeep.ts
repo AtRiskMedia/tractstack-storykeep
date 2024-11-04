@@ -3,7 +3,7 @@ import type {
   BeliefDatum,
   BgPaneDatum,
   BgColourDatum,
-  MarkdownPaneDatum,
+  MarkdownEditDatum,
   FieldWithHistory,
   FileDatum,
   MenuDatum,
@@ -17,11 +17,43 @@ import type {
   ToolMode,
   ToolAddMode,
   EditModeValue,
+  StylesMemory,
+  EnvSetting,
+  Analytics,
+  DashboardAnalytics,
+  CreationState,
+  Theme,
 } from "../types";
-import { toolAddModes } from "../constants";
+import { knownEnvSettings, toolAddModes, PUBLIC_THEME } from "../constants";
+
+export const themeStore = atom<Theme>(PUBLIC_THEME as Theme);
+
+export const lastInteractedPaneStore = atom<string | null>(null);
+export const visiblePanesStore = map<Record<string, boolean>>({});
+export const lastInteractedTypeStore = atom<"markdown" | "bgpane" | null>(null);
+
+export const envSettings = map<{
+  current: EnvSetting[];
+  original: EnvSetting[];
+  history: { value: EnvSetting[]; timestamp: number }[];
+}>({
+  current: knownEnvSettings,
+  original: knownEnvSettings,
+  history: [],
+});
+
+export const creationStateStore = atom<CreationState>({
+  id: null,
+  isInitialized: false,
+});
 
 // all look-ups by ulid
 //
+
+export const showAnalytics = atom<boolean>(false);
+export const storedAnalytics = map<Analytics>();
+export const storedDashboardAnalytics = map<DashboardAnalytics>();
+export const analyticsDuration = atom<`daily` | `weekly` | `monthly`>(`weekly`);
 
 // storykeep state
 export const unsavedChangesStore = map<
@@ -33,12 +65,17 @@ export const uncleanDataStore = map<Record<string, Record<StoreKey, boolean>>>(
 export const temporaryErrorsStore = map<
   Record<string, Record<StoreKey, boolean>>
 >({});
-export const activeEditModalStore = atom<"desktop" | "mobile" | null>(null);
+export const viewportKeyStore = map<{
+  value: "mobile" | "tablet" | "desktop";
+}>({
+  value: "mobile",
+});
 export const viewportStore = map<{
   value: "auto" | "mobile" | "tablet" | "desktop";
 }>({
   value: "auto",
 });
+export const viewportSetStore = atom<boolean>(false);
 export const toolModeStore = map<{ value: ToolMode }>({
   value: "text",
 });
@@ -47,6 +84,9 @@ export const toolAddModeStore = map<{ value: ToolAddMode }>({
 });
 
 export const editModeStore = atom<EditModeValue | null>(null);
+
+// styles memory
+export const stylesMemoryStore = map<StylesMemory>({});
 
 // datums from turso
 export const menu = map<Record<string, FieldWithHistory<MenuDatum>>>();
@@ -77,7 +117,8 @@ export const storyFragmentTailwindBgColour =
 
 export const paneTitle = map<Record<string, FieldWithHistory<string>>>();
 export const paneSlug = map<Record<string, FieldWithHistory<string>>>();
-export const paneMarkdownBody = map<Record<string, FieldWithHistory<string>>>();
+export const paneMarkdownFragmentId =
+  map<Record<string, FieldWithHistory<string>>>();
 export const paneIsContextPane =
   map<Record<string, FieldWithHistory<boolean>>>();
 export const paneIsHiddenPane =
@@ -100,13 +141,13 @@ export const paneHeightRatioMobile =
   map<Record<string, FieldWithHistory<string>>>();
 export const paneFiles = map<Record<string, FieldWithHistory<FileDatum[]>>>();
 export const paneCodeHook =
-  map<Record<string, FieldWithHistory<CodeHookDatum>>>();
+  map<Record<string, FieldWithHistory<CodeHookDatum | null>>>();
 export const paneImpression =
-  map<Record<string, FieldWithHistory<ImpressionDatum>>>();
+  map<Record<string, FieldWithHistory<ImpressionDatum | null>>>();
 export const paneHeldBeliefs =
-  map<Record<string, FieldWithHistory<BeliefDatum[]>>>();
+  map<Record<string, FieldWithHistory<BeliefDatum>>>();
 export const paneWithheldBeliefs =
-  map<Record<string, FieldWithHistory<BeliefDatum[]>>>();
+  map<Record<string, FieldWithHistory<BeliefDatum>>>();
 
 // pane fragments have no ids ...
 // PaneDatum has an array of BgPaneDatum, BgColourDatum, MarkdownPaneDatum
@@ -120,4 +161,4 @@ export const paneFragmentBgPane =
 export const paneFragmentBgColour =
   map<Record<string, FieldWithHistory<BgColourDatum>>>();
 export const paneFragmentMarkdown =
-  map<Record<string, FieldWithHistory<MarkdownPaneDatum>>>();
+  map<Record<string, FieldWithHistory<MarkdownEditDatum>>>();

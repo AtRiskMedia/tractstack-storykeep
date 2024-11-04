@@ -20,7 +20,7 @@ const socials = import.meta.env.PUBLIC_SOCIALS.split(`,`).map((s: string) =>
           target="_blank"
           title={typeof social[2] === `string` ? social[2] : social[1]}
         >
-          <span class="inline-block h-6 w-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110">
+          <span class="inline-block h-6 w-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent xs:scale-110">
             <Fragment
               set:html={socialIcons[social[0] as keyof typeof socialIcons]}
             />

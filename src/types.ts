@@ -1,8 +1,126 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toolAddModes } from "./constants";
 import type { Root } from "hast";
 import type { MapStore } from "nanostores";
 
+export type Theme =
+  | "light"
+  | "light-bw"
+  | "light-bold"
+  | "dark"
+  | "dark-bw"
+  | "dark-bold";
+
+export interface CreationState {
+  id: string | null;
+  isInitialized: boolean;
+}
+
+export type EnvSettingType = "string" | "boolean" | "number" | "string[]";
+
+export interface EnvSetting {
+  name: string;
+  defaultValue: string;
+  type: EnvSettingType;
+  description: string;
+  group: string;
+  priority: boolean;
+  required: boolean;
+}
+export interface EnvSettingDatum extends EnvSetting {
+  value: string;
+}
+
+export interface AuthStatus {
+  isAuthenticated: boolean;
+  isOpenDemo: boolean;
+}
+
+export type TursoOperation =
+  | "test"
+  | "paneDesigns"
+  | "uniqueTailwindClasses"
+  | "execute";
+
+export interface TursoClientError extends Error {
+  name: string;
+  message: string;
+}
+
+export class NetworkError extends Error implements TursoClientError {
+  constructor(message: string) {
+    super(message);
+    this.name = "NetworkError";
+  }
+}
+
+export class UnauthorizedError extends Error implements TursoClientError {
+  constructor(message: string) {
+    super(message);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class TursoOperationError extends Error implements TursoClientError {
+  constructor(
+    message: string,
+    public operation: TursoOperation
+  ) {
+    super(message);
+    this.name = "TursoOperationError";
+  }
+}
+
+export function isTursoClientError(error: unknown): error is TursoClientError {
+  return error instanceof Error && "name" in error && "message" in error;
+}
+
 interface IndexedItem {
+  parentNth: number;
+  childNth: number;
+}
+
+export const tagNames = {
+  button: `button`,
+  hover: `button hover`,
+  modal: `modal`,
+  parent: `pane outer`,
+  p: `paragraph`,
+  h2: `heading 2`,
+  h3: `heading 3`,
+  h4: `heading 4`,
+  img: `image`,
+  li: `list item`,
+  ol: `aside text container`,
+  ul: `container`,
+  code: `widget`,
+};
+
+export type Tag =
+  | "modal"
+  | "parent"
+  | "p"
+  | "h2"
+  | "h3"
+  | "h4"
+  | "img"
+  | "li"
+  | "ol"
+  | "ul"
+  | "code";
+
+export type AllTag = Tag | "button" | "hover";
+
+export type StylesMemory = {
+  [key in AllTag]?: ClassNamesPayloadDatumValue;
+};
+
+export type ButtonStyleClass = {
+  [key: string]: string[];
+}[];
+
+export interface LinkInfo {
+  globalNth: number;
   parentNth: number;
   childNth: number;
 }
@@ -16,6 +134,12 @@ export interface MarkdownLookup {
   codeItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   listItemsLookup: { [parentNth: number]: { [childNth: number]: number } };
   linksLookup: { [parentNth: number]: { [childNth: number]: number } };
+  linksByTarget: { [target: string]: LinkInfo };
+  nthTag: { [key: number]: Tag };
+  nthTagLookup: { [key: string]: { [key: number]: { nth: number } } };
+}
+export interface MarkdownLookupObj {
+  [key: string | number]: { nth: number };
 }
 
 export type ToolMode =
@@ -26,6 +150,7 @@ export type ToolMode =
   | "pane"
   | "eraser";
 export type StoreKey =
+  | "envSettings"
   | "storyFragmentTitle"
   | "storyFragmentSlug"
   | "storyFragmentTractStackId"
@@ -50,7 +175,11 @@ export type StoreKey =
   | "paneCodeHook"
   | "paneImpression"
   | "paneHeldBeliefs"
-  | "paneWithheldBeliefs";
+  | "paneWithheldBeliefs"
+  | "paneFragmentIds"
+  | "paneFragmentBgColour"
+  | "paneFragmentBgPane"
+  | "paneFragmentMarkdown";
 
 export type ToolAddMode = (typeof toolAddModes)[number];
 
@@ -59,6 +188,133 @@ export interface ToggleEditModalEvent extends Event {
     preventHeaderScroll: boolean;
   };
 }
+
+export interface PaneDesignMarkdown {
+  id?: string;
+  type: "markdown";
+  markdownBody: string;
+  textShapeOutsideDesktop: string;
+  textShapeOutsideTablet: string;
+  textShapeOutsideMobile: string;
+  imageMaskShapeDesktop: string;
+  imageMaskShapeTablet: string;
+  imageMaskShapeMobile: string;
+  isModal: boolean;
+  hiddenViewports: string;
+  optionsPayload: OptionsPayloadDatum;
+}
+export interface PaneDesignBgPane {
+  type: "bgPane";
+  shape?: string;
+  shapeMobile: string;
+  shapeTablet: string;
+  shapeDesktop: string;
+  hiddenViewports: string;
+  optionsPayload: OptionsPayloadDatum;
+}
+export interface PaneDesign {
+  id: string;
+  slug: string;
+  name: string;
+  variants: string[];
+  img: string;
+  priority: number;
+  type: `starter` | `break` | `reuse`;
+  panePayload: {
+    heightOffsetDesktop: number;
+    heightOffsetTablet: number;
+    heightOffsetMobile: number;
+    heightRatioDesktop: string;
+    heightRatioTablet: string;
+    heightRatioMobile: string;
+    bgColour: string | boolean;
+    codeHook: string | null;
+  };
+  files: FileDatum[];
+  fragments: (PaneDesignBgPane | PaneDesignMarkdown | BgColourDatum)[];
+  orientation?: `above` | `below`;
+}
+export interface PageDesign {
+  name: string;
+  isContext: boolean;
+  tailwindBgColour: string | null;
+  paneDesigns: PaneDesign[];
+  paneDesignsMap: string[];
+  paneDesignsOdd?: { [key: string]: PaneDesign };
+  pageTitle?: string;
+}
+
+export type GeneratedCopy = {
+  pageTitle: string;
+  paragraphs: string[];
+  title?: string;
+};
+
+export type GenerateStage =
+  | "GENERATING_COPY"
+  | "PREPARING_DESIGN"
+  | "LOADING_DESIGN"
+  | "COMPLETED"
+  | "ERROR";
+
+export type Variant = `default` | `center` | `onecolumn` | `square` | `16x9`;
+
+export type ReconciledData = {
+  storyFragment?: {
+    data: StoryFragmentDatum;
+    queries: StoryFragmentQueries;
+  };
+  contextPane?: {
+    data: ContextPaneDatum;
+    queries: ContextPaneQueries;
+  };
+};
+
+export type StoryFragmentQueries = {
+  storyfragment: TursoQuery;
+  panes: TursoQuery[];
+  markdowns: TursoQuery[];
+  storyfragment_pane: TursoQuery[];
+  file_pane: TursoQuery[];
+  file_markdown: TursoQuery[];
+  files: TursoQuery[];
+};
+
+export type ContextPaneQueries = {
+  pane: TursoQuery;
+  markdowns: TursoQuery[];
+  file_pane: TursoQuery[];
+  file_markdown: TursoQuery[];
+  files: TursoQuery[];
+};
+
+export type TursoQuery = {
+  sql: string;
+  args: (string | number | boolean | null)[];
+};
+
+export type PaneAstTargetId = {
+  outerIdx: number;
+  idx: number | null;
+  globalNth: number | null;
+  tag:
+    | "p"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "li"
+    | "a"
+    | "code"
+    | "img"
+    | "yt"
+    | "bunny"
+    | "belief"
+    | "toggle"
+    | "identify";
+  paneId: string;
+  buttonTarget?: string;
+  mustConfig?: boolean;
+};
 
 export type EditModeValue = {
   id: string;
@@ -71,10 +327,77 @@ export type EditModeValue = {
     | "resource"
     | "menu"
     | "file";
+  targetId?: PaneAstTargetId;
+  payload?: any;
+};
+
+export type PieDataItem = {
+  id: string;
+  value: number;
+};
+
+export type LineDataPoint = {
+  x: string | number;
+  y: number;
+};
+
+export type LineDataSeries = {
+  id: string;
+  data: LineDataPoint[];
+};
+
+export type AnalyticsItem = {
+  id: number;
+  object_id: string;
+  object_name: string;
+  object_type: "StoryFragment" | "Pane";
+  total_actions: number;
+  verbs: PieDataItem[] | LineDataSeries[];
+};
+
+export type RawAnalytics = {
+  pie: AnalyticsItem[];
+  line: AnalyticsItem[];
+};
+
+export type ProcessedAnalytics = {
+  pie: PieDataItem[];
+  line: LineDataSeries[];
+};
+
+export type Analytics = {
+  [key: string]: ProcessedAnalytics;
+};
+
+export type DashboardAnalytics = {
+  stats: {
+    daily: number;
+    weekly: number;
+    monthly: number;
+  };
+  line: LineDataSeries[];
+  hot_story_fragments: HotItem[];
+};
+
+export type HotItem = {
+  id: string;
+  total_events: number;
 };
 
 export type StoreMapType = {
-  [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<string>>>;
+  [K in StoreKey]?: MapStore<Record<string, FieldWithHistory<any>>>;
+};
+
+export type StoreValueType = {
+  storyFragmentTitle: string;
+  storyFragmentSlug: string;
+  storyFragmentTailwindBgColour: string;
+  storyFragmentSocialImagePath: string;
+  storyFragmentMenuId: string;
+  paneFragmentMarkdown: MarkdownEditDatum;
+  paneTitle: string;
+  paneSlug: string;
+  // Add other store types here
 };
 
 export interface EventStreamController {
@@ -175,7 +498,8 @@ export interface BgPaneDatum extends PaneFragmentDatum {
   optionsPayload: OptionsPayloadDatum;
 }
 
-export type ViewportKey = "mobile" | "tablet" | "desktop" | "auto" | null;
+export type ViewportKey = "mobile" | "tablet" | "desktop" | "auto";
+export type ViewportAuto = "mobile" | "tablet" | "desktop";
 
 export type TupleValue = string | number | boolean;
 export type Tuple =
@@ -190,49 +514,53 @@ export interface ClassNamesPayloadValue {
 export interface ClassNamesPayloadDatumValue {
   [key: string]: Tuple;
 }
-export interface ClassNamesPayloadDatumWrapper {
-  [key: number]: ClassNamesPayloadDatumValue;
-}
+// this should no longer be required!!!
+//export interface ClassNamesPayloadDatumWrapper {
+//  [key: number]: ClassNamesPayloadDatumValue;
+//}
+//
 
 export interface ClassNamesPayload {
-  [key: string]:
-    | {
-        classes: ClassNamesPayloadValue;
-      }
-    | string;
+  [key: string]: {
+    classes: ClassNamesPayloadDatumValue;
+  };
+  //    | string;
 }
 export interface ClassNamesPrePayload {
   [key: string]: TupleValue | TupleValue[];
 }
 
-export interface ClassNamesPayloadDatum {
-  [key: string]: {
-    classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumWrapper;
-    count?: number;
-    override: {
-      [key: string]: Tuple[];
-    };
+export interface ClassNamesPayloadInnerDatum {
+  classes: ClassNamesPayloadDatumValue | ClassNamesPayloadDatumValue[];
+  count?: number;
+  override?: {
+    [key: string]: Tuple[];
   };
+}
+export interface ClassNamesPayloadDatum {
+  [key: string]: ClassNamesPayloadInnerDatum;
 }
 
 export interface ClassNamesPayloadResult {
-  all: string;
-  mobile: string;
-  tablet: string;
-  desktop: string;
+  all: string | string[];
+  mobile: string | string[];
+  tablet: string | string[];
+  desktop: string | string[];
 }
 
 export interface OptionsPayloadDatum {
   classNamesPayload: ClassNamesPayloadDatum;
-  classNamesParent?: ClassNamesPayload;
-  classNamesModal?: ClassNamesPayload;
+  classNamesParent?: ClassNamesPayloadResult;
+  classNamesModal?: ClassNamesPayloadResult;
   classNames?: {
     all: ClassNamesPayloadValue;
     desktop?: ClassNamesPayloadValue;
     tablet?: ClassNamesPayloadValue;
     mobile?: ClassNamesPayloadValue;
   };
-  buttons?: ButtonData;
+  buttons?: {
+    [key: string]: ButtonData;
+  };
   modal?: {
     [key: string]: {
       zoomFactor: number;
@@ -252,32 +580,43 @@ export interface OptionsPayloadDatum {
   };
 }
 
+export interface MarkdownEditDatum {
+  markdown: MarkdownDatum;
+  payload: MarkdownPaneDatum;
+  type: `markdown`;
+}
+
 export interface MarkdownPaneDatum extends PaneFragmentDatum {
   type: `markdown`;
-  imageMaskShape: string;
   imageMaskShapeDesktop?: string;
   imageMaskShapeTablet?: string;
   imageMaskShapeMobile?: string;
-  textShapeOutside: string;
   textShapeOutsideDesktop?: string;
   textShapeOutsideTablet?: string;
   textShapeOutsideMobile?: string;
   optionsPayload: OptionsPayloadDatum;
   isModal: boolean;
-  markdownId?: string;
-  markdownBody?: string;
+  //markdownBody: string;
+  //markdownId: string;
 }
 
 export interface PaneOptionsPayload {
-  id: string;
-  paneFragmentsPayload?: BgPaneDatum[] | BgColourDatum[] | MarkdownPaneDatum[];
+  paneFragmentsPayload?: (BgPaneDatum | BgColourDatum | MarkdownPaneDatum)[];
   impressions?: ImpressionDatum[];
   codeHook?: CodeHookDatum;
   hiddenPane?: boolean;
   overflowHidden?: boolean;
   maxHScreen?: boolean;
-  heldBeliefs?: BeliefDatum[];
-  withheldBeliefs?: BeliefDatum[];
+  heldBeliefs?: BeliefDatum;
+  withheldBeliefs?: BeliefDatum;
+}
+export interface PaneDesignOptionsPayload extends PaneOptionsPayload {
+  bgColour: string | null;
+}
+
+export interface PaneOptionsDatum {
+  id: string;
+  classes: string[];
 }
 
 export interface PaneDatum {
@@ -286,7 +625,7 @@ export interface PaneDatum {
   slug: string;
   created: Date;
   changed: Date | null;
-  markdown: MarkdownDatum;
+  markdown: MarkdownDatum | false | null;
   optionsPayload: PaneOptionsPayload;
   isContextPane: boolean;
   heightOffsetDesktop: number;
@@ -334,6 +673,43 @@ export type ContentMap = {
   isContextPane?: boolean;
 };
 
+export type ContentMapBase = {
+  id: string;
+  title: string;
+  slug: string;
+  type: "Menu" | "Pane" | "Resource" | "StoryFragment" | "TractStack";
+};
+
+export type MenuContentMap = ContentMapBase & {
+  type: "Menu";
+  theme: string;
+};
+
+export type ResourceContentMap = ContentMapBase & {
+  type: "Resource";
+  categorySlug: string | null;
+};
+
+export type PaneContentMap = ContentMapBase & {
+  type: "Pane";
+  isContext: boolean;
+};
+
+export type StoryFragmentContentMap = ContentMapBase & {
+  type: "StoryFragment";
+};
+
+export type TractStackContentMap = ContentMapBase & {
+  type: "TractStack";
+};
+
+export type FullContentMap =
+  | MenuContentMap
+  | ResourceContentMap
+  | PaneContentMap
+  | StoryFragmentContentMap
+  | TractStackContentMap;
+
 export interface TursoStoryFragmentMap {
   id: string;
   title: string;
@@ -352,12 +728,12 @@ export interface TursoPaneMap {
 }
 
 export interface ResourceDatum {
+  id: string;
   title: string;
   slug: string;
   category: string | null;
   actionLisp: string;
   oneliner: string;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   optionsPayload: any;
   timeString?: string;
   dateString?: string;
@@ -366,6 +742,7 @@ export interface ResourceDatum {
 
 export interface MarkdownDatum {
   body: string;
+  id: string;
   slug: string;
   title: string;
   htmlAst: Root;
@@ -580,8 +957,6 @@ export type Site = {
   author: string;
   desc: string;
   title: string;
-  ogImage?: string;
-  ogLogo?: string;
 };
 
 export interface Current {
@@ -601,12 +976,21 @@ export interface TursoFileNode {
   id: string;
   filename: string;
   url: string;
+  alt_description: string;
+  src_set: boolean;
+  paneId: string;
+  markdown: boolean;
 }
 
 export interface FileNode {
   id: string;
   filename: string;
+  altDescription: string;
+  url?: string;
   src: string;
+  srcSet: boolean;
+  paneId: string;
+  markdown: boolean;
   optimizedSrc?: string;
 }
 
@@ -618,14 +1002,17 @@ export interface PaneFileNode {
 export interface FileDatum {
   id: string;
   filename: string;
-  altText: string;
+  altDescription: string;
+  paneId: string;
+  markdown: boolean;
   src: string;
+  srcSet: boolean;
   optimizedSrc?: string;
 }
 
 export interface StoryKeepFileDatum {
   filename: string;
-  altText: string;
+  altDescription: string;
   b64: string;
 }
 
@@ -657,10 +1044,10 @@ export interface StylesVersion {
 
 export interface CodeHookDatum {
   target: string;
-  url: string | undefined;
+  url?: string | undefined;
   options: string | undefined;
-  height: string | undefined;
-  width: string | undefined;
+  height?: string | undefined;
+  width?: string | undefined;
 }
 
 export interface ButtonData {
@@ -679,9 +1066,15 @@ export interface ResourceDatumEventProps {
   category: string | null;
   actionLisp: string;
   oneliner: string;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   optionsPayload: any;
   timeString: string;
   dateString: string;
   venue: string;
+}
+
+export interface ResourceSetting {
+  [key: string]: {
+    type: "string" | "boolean" | "number" | "date";
+    defaultValue?: any;
+  };
 }

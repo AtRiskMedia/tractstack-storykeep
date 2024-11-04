@@ -1,21 +1,21 @@
-import { useStore } from "@nanostores/react";
 import PaneFromAst from "./PaneFromAst";
 import { SvgInsideLeftModal } from "../../panes/SvgInsideLeftModal";
 import { SvgInsideRightModal } from "../../panes/SvgInsideRightModal";
 import { classNames } from "../../../utils/helpers";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
-import { viewportStore } from "../../../store/storykeep";
-import type { ReactNode } from "react";
 import type {
   FileNode,
   MarkdownDatum,
   MarkdownPaneDatum,
   MarkdownLookup,
   OptionsPayloadDatum,
-  ViewportKey,
+  ViewportAuto,
+  ToolMode,
+  ToolAddMode,
 } from "../../../types";
 
 interface Props {
+  readonly: boolean;
   payload: MarkdownPaneDatum;
   markdown: MarkdownDatum;
   files: FileNode[];
@@ -28,185 +28,140 @@ interface Props {
     };
   };
   paneId: string;
+  paneFragmentIds: string[];
+  markdownFragmentId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
-  toolMode: string;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
+  viewportKey: ViewportAuto;
+  queueUpdate: (id: string, updateFn: () => void) => void;
 }
 
 const MarkdownInsideModal = ({
+  readonly,
   payload,
   markdown,
   files,
   paneHeight,
   modalPayload,
   paneId,
+  paneFragmentIds,
+  markdownFragmentId,
   slug,
+  isContext,
   markdownLookup,
   toolMode,
+  toolAddMode,
+  viewportKey,
+  queueUpdate,
 }: Props) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
+  if (!markdownFragmentId) return null;
   const optionsPayload = payload.optionsPayload;
   const optionsPayloadDatum: OptionsPayloadDatum =
     optionsPayload && reduceClassNamesPayload(optionsPayload);
-  const baseClasses: { [key: string]: string } = {
-    mobile:
-      viewportKey === "mobile" ? "grid" : viewportKey ? "hidden" : "md:hidden",
-    tablet:
-      viewportKey === "tablet"
-        ? "grid"
-        : viewportKey
-          ? "hidden"
-          : "hidden md:grid xl:hidden",
-    desktop:
-      viewportKey === "desktop"
-        ? "grid"
-        : viewportKey
-          ? "hidden"
-          : "hidden xl:grid",
-  };
-  const paneFragmentStyle = {
-    gridArea: "1/1/1/1",
+
+  if (payload.hiddenViewports.includes(viewportKey)) return null;
+
+  const shapeName =
+    viewportKey === `desktop`
+      ? payload.textShapeOutsideDesktop
+      : viewportKey === `tablet`
+        ? payload.textShapeOutsideTablet
+        : viewportKey === `mobile`
+          ? payload.textShapeOutsideMobile
+          : null;
+
+  const astPayload = {
+    ast: markdown.htmlAst.children,
+    buttonData: optionsPayload?.buttons || {},
+    imageData: files,
   };
 
-  const viewportLookup =
-    viewportKey && [`mobile`, `tablet`, `desktop`].includes(viewportKey)
-      ? [viewportKey]
-      : ["mobile", "tablet", "desktop"];
-  const payloads = viewportLookup.map((_viewportKey: string) => {
-    if (payload.hiddenViewports.includes(_viewportKey)) return null;
+  const injectClassNames =
+    (optionsPayloadDatum?.classNames &&
+      optionsPayloadDatum?.classNames[viewportKey]) ||
+    optionsPayloadDatum?.classNames?.all ||
+    optionsPayload?.classNames?.all ||
+    {};
 
-    const shapeName =
-      _viewportKey === `desktop`
-        ? payload.textShapeOutsideDesktop
-        : _viewportKey === `tablet`
-          ? payload.textShapeOutsideTablet
-          : _viewportKey === `mobile`
-            ? payload.textShapeOutsideMobile
-            : payload.textShapeOutside;
-    const astPayload = {
-      ast: markdown.htmlAst.children,
-      buttonData: optionsPayload?.buttons || {},
-      imageData: files,
-    };
-    const injectClassNames =
-      (viewportKey &&
-        optionsPayloadDatum?.classNames &&
-        optionsPayloadDatum?.classNames[viewportKey]) ||
-      optionsPayloadDatum?.classNames?.all ||
-      optionsPayload?.classNames?.all ||
-      {};
-    const classNamesParentRaw =
-      (viewportKey &&
-        optionsPayloadDatum?.classNamesParent &&
-        optionsPayloadDatum?.classNamesParent[viewportKey]) ||
-      optionsPayloadDatum?.classNamesParent?.all ||
-      optionsPayload?.classNamesParent?.all ||
-      ``;
-    const classNamesParent = Array.isArray(classNamesParentRaw)
-      ? classNamesParentRaw
-      : [classNamesParentRaw];
+  const classNamesParentRaw =
+    (optionsPayloadDatum?.classNamesParent &&
+      optionsPayloadDatum?.classNamesParent[viewportKey]) ||
+    optionsPayloadDatum?.classNamesParent?.all ||
+    optionsPayload?.classNamesParent?.all ||
+    ``;
 
-    return {
-      shapeName,
-      astPayload,
-      injectClassNames,
-      classNamesParent,
-      viewportKey: _viewportKey,
-    };
-  });
+  const classNamesParent = Array.isArray(classNamesParentRaw)
+    ? classNamesParentRaw
+    : [classNamesParentRaw];
 
   return (
-    <>
-      {payloads.map((thisPayload, index) =>
-        thisPayload ? (
-          <div key={index}>
-            {(thisPayload.classNamesParent as string[])
-              .slice()
-              .reverse()
-              .reduce(
-                (content: ReactNode, cssClass: string) => (
-                  <div className={cssClass}>{content}</div>
-                ),
-                <div
-                  className={classNames(
-                    Array.isArray(thisPayload.classNamesParent)
-                      ? thisPayload.classNamesParent.join(` `)
-                      : ``,
-                    (thisPayload.viewportKey &&
-                      baseClasses[thisPayload.viewportKey]) ||
-                      ``,
-                    `h-fit-contents`
-                  )}
-                >
-                  <div
-                    className="relative w-full h-full justify-self-start"
-                    style={paneFragmentStyle}
-                  >
-                    <SvgInsideLeftModal
-                      shapeName={thisPayload.shapeName || ``}
-                      viewportKey={thisPayload.viewportKey}
-                      id={`markdown-${paneId}`}
-                      paneHeight={
-                        paneHeight[
-                          thisPayload.viewportKey === `desktop`
-                            ? 2
-                            : thisPayload.viewportKey === `tablet`
-                              ? 1
-                              : 0
-                        ]
-                      }
-                      modalPayload={modalPayload[thisPayload.viewportKey]}
-                    />
-                    <SvgInsideRightModal
-                      shapeName={thisPayload.shapeName || ``}
-                      viewportKey={thisPayload.viewportKey}
-                      id={`markdown-${paneId}`}
-                      paneHeight={
-                        paneHeight[
-                          thisPayload.viewportKey === `desktop`
-                            ? 2
-                            : thisPayload.viewportKey === `tablet`
-                              ? 1
-                              : 0
-                        ]
-                      }
-                      modalPayload={modalPayload[thisPayload.viewportKey]}
-                    />
-                    {thisPayload.astPayload.ast
-                      .filter(
-                        /* eslint-disable @typescript-eslint/no-explicit-any */
-                        (e: any) => !(e?.type === `text` && e?.value === `\n`)
-                      )
-                      /* eslint-disable @typescript-eslint/no-explicit-any */
-                      .map((thisAstPayload: any, idx: number) => (
-                        <PaneFromAst
-                          key={idx}
-                          payload={{
-                            ...thisPayload.astPayload,
-                            ast: [thisAstPayload],
-                          }}
-                          thisClassNames={
-                            thisPayload.injectClassNames as {
-                              [key: string]: string | string[];
-                            }
-                          }
-                          paneId={paneId}
-                          slug={slug}
-                          idx={null}
-                          outerIdx={idx}
-                          markdownLookup={markdownLookup}
-                          toolMode={toolMode}
-                        />
-                      ))}
-                  </div>
-                </div>
-              )}
-          </div>
-        ) : null
+    <div
+      className={classNames(
+        Array.isArray(classNamesParent) ? classNamesParent.join(` `) : ``,
+        `h-fit-contents`
       )}
-    </>
+    >
+      <div
+        className="relative w-full h-full justify-self-start"
+        style={{ gridArea: "1/1/1/1" }}
+      >
+        <SvgInsideLeftModal
+          shapeName={shapeName || ``}
+          viewportKey={viewportKey}
+          id={`markdown-${paneId}`}
+          paneHeight={
+            paneHeight[
+              viewportKey === `desktop` ? 2 : viewportKey === `tablet` ? 1 : 0
+            ]
+          }
+          modalPayload={modalPayload[viewportKey]}
+        />
+        <SvgInsideRightModal
+          shapeName={shapeName || ``}
+          viewportKey={viewportKey}
+          id={`markdown-${paneId}`}
+          paneHeight={
+            paneHeight[
+              viewportKey === `desktop` ? 2 : viewportKey === `tablet` ? 1 : 0
+            ]
+          }
+          modalPayload={modalPayload[viewportKey]}
+        />
+        {astPayload.ast
+          /* eslint-disable @typescript-eslint/no-explicit-any */
+          .filter((e: any) => !(e?.type === `text` && e?.value === `\n`))
+          .map((thisAstPayload: any, idx: number) => (
+            <PaneFromAst
+              readonly={readonly}
+              key={idx}
+              markdown={markdown}
+              payload={{
+                ...astPayload,
+                ast: [thisAstPayload],
+              }}
+              thisClassNames={
+                injectClassNames as {
+                  [key: string]: string | string[];
+                }
+              }
+              paneId={paneId}
+              paneFragmentIds={paneFragmentIds}
+              markdownFragmentId={markdownFragmentId}
+              slug={slug}
+              isContext={isContext}
+              idx={null}
+              outerIdx={idx}
+              markdownLookup={markdownLookup}
+              toolMode={toolMode}
+              toolAddMode={toolAddMode}
+              queueUpdate={queueUpdate}
+            />
+          ))}
+      </div>
+    </div>
   );
 };
 

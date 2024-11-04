@@ -12,21 +12,22 @@ import type {
 interface Props {
   payload: PaneDatum;
   slug: string;
+  isContext: boolean;
 }
 
-const { payload, slug } = Astro.props;
+const { payload, slug, isContext } = Astro.props;
 
 // - if paneHeightRatio[Desktop|Tablet|Mobile], calculate height and inject
 const paneHeightRatioDesktop =
-  Number(payload.heightRatioDesktop) == 0
+  Number(payload.heightRatioDesktop) === 0
     ? null
     : Math.floor((1920 * Number(payload.heightRatioDesktop)) / 100);
 const paneHeightRatioTablet =
-  Number(payload.heightRatioTablet) == 0
+  Number(payload.heightRatioTablet) === 0
     ? null
     : Math.floor((1080 * Number(payload.heightRatioTablet)) / 100);
 const paneHeightRatioMobile =
-  Number(payload.heightRatioMobile) == 0
+  Number(payload.heightRatioMobile) === 0
     ? null
     : Math.floor((600 * Number(payload.heightRatioMobile)) / 100);
 const paneHeightRatio = classNames(
@@ -107,7 +108,7 @@ const paneFragments =
             style={paneFragmentStyle}
           >
             {f.type === `bgPane` ? <BgPane payload={f as BgPaneDatum} /> : null}
-            {f.type === `markdown` ? (
+            {f.type === `markdown` && payload.markdown ? (
               <MarkdownWrapper
                 payload={f}
                 markdown={payload.markdown}
@@ -115,6 +116,7 @@ const paneFragments =
                 paneHeight={paneHeight}
                 paneId={payload.id}
                 slug={slug}
+                isContext={isContext}
               />
             ) : null}
           </div>

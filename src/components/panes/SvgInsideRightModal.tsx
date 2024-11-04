@@ -31,6 +31,7 @@ export const SvgInsideRightModal = ({
       id="svg__${id}--shape-outside-right-mask"
       data-name="svg-shape-outside-mask__${shapeName}-right--${viewportKey}"
       xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
       viewBox="${cut} ${-paddingTop} ${thisWidth - (width - cut + paddingLeft)} ${paneHeight}"
     >
       <desc id="desc">decorative background</desc>
@@ -60,6 +61,8 @@ export const SvgInsideRightModal = ({
     width: `calc(var(--scale)*${thisWidth - (cut + paddingLeft)}px)`,
     height: `calc(var(--scale)*${paneHeight}px)`,
     shapeOutside: `url(${rightMask})`,
+    WebkitShapeOutside: `url(${rightMask})`,
+    MozShapeOutside: `url(${rightMask})`,
   };
 
   return (
@@ -67,6 +70,7 @@ export const SvgInsideRightModal = ({
       id={`svg__${id}--shape-outside-right`}
       data-name={`svg-shape-outside__${shapeName}--${viewportKey}`}
       xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
       viewBox={`${cut} ${-paddingTop} ${thisWidth - (width - cut + paddingLeft)} ${paneHeight}`}
       style={style}
       className="float-right fill-none"

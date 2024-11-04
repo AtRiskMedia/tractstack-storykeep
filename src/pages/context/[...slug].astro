@@ -4,8 +4,25 @@ import ImpressionWrapper from "@components/ImpressionWrapper";
 import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
-import { getContextPaneBySlug } from "../../api/turso";
-import type { StylesVersion, Current } from "../../types";
+import { getSetupChecks } from "../../utils/setupChecks";
+import { getContextPaneBySlug, isContentReady } from "../../api/turso";
+import type { StylesVersion, Current, AuthStatus } from "../../types";
+
+// user authenticated?
+const user = Astro.locals.user as AuthStatus;
+
+// confirm set-up
+const { hasConcierge, hasTurso, hasBranding, hasContent } = getSetupChecks();
+const hasContentReady = hasTurso && hasContent ? await isContentReady() : false;
+if (
+  !hasConcierge ||
+  !hasTurso ||
+  !hasBranding ||
+  !hasContent ||
+  !hasContentReady
+) {
+  return Astro.redirect("/storykeep");
+}
 
 const stylesVerUrl = `${import.meta.env.PUBLIC_CONCIERGE_STYLES_URL}/v.json`;
 const requestStyles = await fetch(stylesVerUrl);
@@ -32,8 +49,15 @@ const current: Current = {
   modDatetime={pane.changed}
   stylesUrl={stylesUrl}
 >
-  <Header title={pane.title} slug="context" impressions={pane.impressions} />
-  <main id="main-content">
+  <Header
+    title={pane.title}
+    slug={pane.slug}
+    isContext={true}
+    isEditable={true}
+    impressions={pane.impressions}
+    user={user}
+  />
+  <main id="main-content" class="min-h-screen">
     <ContextPaneWrapper
       pane={pane.panePayload}
       resources={pane.resourcesPayload}
@@ -43,8 +67,13 @@ const current: Current = {
   </main>
   {
     pane.impressions?.length ? (
-      <ImpressionWrapper payload={pane.impressions} client:load />
+      <ImpressionWrapper
+        payload={pane.impressions}
+        slug={pane.slug}
+        isContext={true}
+        client:load
+      />
     ) : null
   }
-  <Footer created={pane.created} />
+  <Footer created={pane.created} slug={pane.slug} isContext={true} />
 </Layout>

@@ -1,12 +1,17 @@
-import { memo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useStore } from "@nanostores/react";
 import { paneInit, paneCodeHook } from "../../store/storykeep";
+import type { ToolMode, ViewportKey } from "../../types";
 
-const CodeHook = (props: { id: string }) => {
-  const { id } = props;
+const CodeHook = (props: {
+  id: string;
+  toolMode: ToolMode;
+  viewportKey: ViewportKey;
+}) => {
+  const { id, toolMode /* viewportKey */ } = props;
   const [isClient, setIsClient] = useState(false);
-  const $paneInit = useStore(paneInit);
-  const $paneCodeHook = useStore(paneCodeHook);
+  const $paneInit = useStore(paneInit, { keys: [id] });
+  const $paneCodeHook = useStore(paneCodeHook, { keys: [id] });
   const slug = $paneCodeHook[id].current?.target || id;
 
   useEffect(() => {
@@ -15,16 +20,18 @@ const CodeHook = (props: { id: string }) => {
     }
   }, [id, $paneInit]);
 
-  if (!isClient) return <div>Loading...</div>;
+  if (!isClient) return null;
 
   return (
     <div style={{ position: "relative" }}>
       <div className="w-full text-center text-xl font-myblue font-bold bg-mygreen/20">
         Code Hook: {slug}
       </div>
-      <div className="absolute inset-0 w-full h-full z-50" />
+      {toolMode !== "text" && (
+        <div className="absolute inset-0 w-full h-full z-50" />
+      )}
     </div>
   );
 };
 
-export default memo(CodeHook);
+export default CodeHook;

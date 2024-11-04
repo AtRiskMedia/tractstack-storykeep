@@ -8,8 +8,10 @@ import type { BeliefDatum, EventStream } from "../../types";
 
 export const IdentifyAs = ({
   value,
+  readonly = false,
 }: {
   value: { slug: string; target: string; extra: string };
+  readonly?: boolean;
 }) => {
   const $heldBeliefsAll = useStore(heldBeliefs);
   const thisTitle = `Tell me more!`;
@@ -19,15 +21,18 @@ export const IdentifyAs = ({
   const [selected, setSelected] = useState(start);
 
   useEffect(() => {
-    const hasMatchingBelief = $heldBeliefsAll
-      .filter((e: BeliefDatum) => e.slug === value.slug)
-      .at(0);
-    if (hasMatchingBelief && hasMatchingBelief.object === value.target)
-      setSelected(thisScale[0]);
-    else setSelected(start);
-  }, [$heldBeliefsAll]);
+    if (!readonly) {
+      const hasMatchingBelief = $heldBeliefsAll
+        .filter((e: BeliefDatum) => e.slug === value.slug)
+        .at(0);
+      if (hasMatchingBelief && hasMatchingBelief.object === value.target)
+        setSelected(thisScale[0]);
+      else setSelected(start);
+    }
+  }, [$heldBeliefsAll, readonly]);
 
   const handleClick = () => {
+    if (readonly) return false;
     // toggle ON
     if (selected.id === 0) {
       const newScale = thisScale.at(0)!;

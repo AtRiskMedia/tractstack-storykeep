@@ -1,40 +1,52 @@
-import { useStore } from "@nanostores/react";
+import { useMemo } from "react";
 import PaneFromAst from "./PaneFromAst";
 import { classNames } from "../../../utils/helpers";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
-import { viewportStore } from "../../../store/storykeep";
 import type {
   FileNode,
   MarkdownPaneDatum,
   MarkdownDatum,
   MarkdownLookup,
   OptionsPayloadDatum,
-  ViewportKey,
+  ViewportAuto,
+  ToolMode,
+  ToolAddMode,
 } from "../../../types";
 import type { Nodes } from "hast";
 
 interface Props {
+  readonly: boolean;
   payload: MarkdownPaneDatum;
   markdown: MarkdownDatum;
   files: FileNode[];
   paneId: string;
+  paneFragmentIds: string[];
+  markdownFragmentId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
-  toolMode: string;
+  toolMode: ToolMode;
+  toolAddMode: ToolAddMode;
+  viewportKey: ViewportAuto;
+  queueUpdate: (id: string, updateFn: () => void) => void;
 }
 
 const MarkdownPane = ({
+  readonly,
   payload,
   markdown,
   files,
   paneId,
+  paneFragmentIds,
+  markdownFragmentId,
   slug,
+  isContext,
   markdownLookup,
   toolMode,
+  toolAddMode,
+  viewportKey,
+  queueUpdate,
 }: Props) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
   const hasHidden =
     payload.hiddenViewports.includes(`desktop`) ||
     payload.hiddenViewports.includes(`tablet`) ||
@@ -59,8 +71,10 @@ const MarkdownPane = ({
     buttonData: optionsPayload?.buttons || {},
     imageData: files,
   };
-  const optionsPayloadDatum: OptionsPayloadDatum =
-    optionsPayload && reduceClassNamesPayload(optionsPayload);
+  const optionsPayloadDatum: OptionsPayloadDatum = useMemo(
+    () => optionsPayload && reduceClassNamesPayload(optionsPayload),
+    [optionsPayload]
+  );
   const injectClassNames: { [key: string]: string | string[] } =
     ((viewportKey &&
       optionsPayloadDatum?.classNames &&
@@ -87,18 +101,25 @@ const MarkdownPane = ({
     .filter((e: Nodes) => !(e?.type === `text` && e?.value === `\n`))
     .map((thisAstPayload: Nodes, idx: number) => (
       <PaneFromAst
+        readonly={readonly}
         key={idx}
         payload={{
           ...astPayload,
           ast: [thisAstPayload],
         }}
+        markdown={markdown}
         thisClassNames={injectClassNames}
         paneId={paneId}
+        paneFragmentIds={paneFragmentIds}
+        markdownFragmentId={markdownFragmentId}
         slug={slug}
+        isContext={isContext}
         idx={null}
         outerIdx={idx}
         markdownLookup={markdownLookup}
         toolMode={toolMode}
+        toolAddMode={toolAddMode}
+        queueUpdate={queueUpdate}
       />
     ));
 

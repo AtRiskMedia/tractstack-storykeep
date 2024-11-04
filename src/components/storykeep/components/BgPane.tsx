@@ -1,10 +1,7 @@
-import { memo } from "react";
-import { useStore } from "@nanostores/react";
 import { Svg } from "../../../components/panes/Svg";
 import { classNames } from "../../../utils/helpers";
 import { svgImageMask } from "../../../utils/compositor/svgImageMask";
 import { cleanShapeOptionsDatum } from "../../../utils/compositor/shapeOptionsDatum";
-import { viewportStore } from "../../../store/storykeep";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
 import type {
   BgPaneDatum,
@@ -12,13 +9,17 @@ import type {
   MaskOptionsDatum,
   ShapeOptionsDatum,
   OptionsPayloadDatum,
-  ViewportKey,
+  ClassNamesPayloadResult,
+  ViewportAuto,
 } from "../../../types";
 
-const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
-  const $viewport = useStore(viewportStore) as { value: ViewportKey };
-  const viewportKey: ViewportKey =
-    $viewport?.value && $viewport.value !== "auto" ? $viewport.value : null;
+const BgPane = ({
+  payload,
+  viewportKey,
+}: {
+  payload: BgPaneDatum;
+  viewportKey: ViewportAuto;
+}) => {
   const optionsPayload = payload.optionsPayload;
   const optionsPayloadDatum: OptionsPayloadDatum | undefined =
     optionsPayload &&
@@ -79,7 +80,7 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
     const thisId = `${_viewportKey}-${thisShapeSelector}-pane`;
 
     // check for tailwind classes
-    const classNamesParent =
+    const classNamesParentRaw =
       optionsPayloadDatum?.classNamesParent &&
       viewportKey &&
       typeof optionsPayloadDatum?.classNamesParent[viewportKey] !== `undefined`
@@ -88,16 +89,23 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
             typeof optionsPayload?.classNamesParent?.all !== `undefined`
           ? optionsPayload.classNamesParent.all
           : typeof optionsPayload?.classNamesParent !== `undefined` &&
-              typeof optionsPayload?.classNamesParent[_viewportKey] !==
-                `undefined`
-            ? optionsPayload.classNamesParent[_viewportKey]
+              typeof optionsPayload?.classNamesParent[
+                _viewportKey as keyof ClassNamesPayloadResult
+              ] !== `undefined`
+            ? optionsPayload.classNamesParent[
+                _viewportKey as keyof ClassNamesPayloadResult
+              ]
             : ``;
+    const classNamesParent =
+      typeof classNamesParentRaw === `string`
+        ? classNamesParentRaw
+        : classNamesParentRaw.at(0);
 
     // based on artpack mode
     switch (artpackMode) {
       case `break`: {
         return {
-          id: `${_viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${thisId}`,
           artpackMode,
           styles: { fill: (artpack && artpack?.svgFill) || `none` },
           shapeName: `${artpackCollection}${artpackImage}`,
@@ -108,7 +116,7 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
           shapeName && svgImageMask(shapeName, thisId, _viewportKey);
         if (!maskSvg) return null;
         return {
-          id: `${_viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${thisId}`,
           artpackMode,
           classNamesParent,
           styles: {
@@ -125,7 +133,7 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
 
       default:
         return {
-          id: `${_viewportKey}-${payload.id}`,
+          id: `${_viewportKey}-${thisId}`,
           shapeName,
           classNamesParent,
         };
@@ -196,4 +204,4 @@ const BgPane = ({ payload }: { payload: BgPaneDatum }) => {
   );
 };
 
-export default memo(BgPane);
+export default BgPane;

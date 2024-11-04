@@ -18,11 +18,20 @@ interface Props {
   paneHeight: [number, number, number];
   paneId: string;
   slug: string;
+  isContext: boolean;
   markdownLookup: MarkdownLookup;
 }
 
-const { payload, markdown, files, paneHeight, paneId, slug, markdownLookup } =
-  Astro.props;
+const {
+  payload,
+  markdown,
+  files,
+  paneHeight,
+  paneId,
+  slug,
+  isContext,
+  markdownLookup,
+} = Astro.props;
 
 const optionsPayload = payload.optionsPayload;
 const baseClasses: { [key: string]: string } = {
@@ -44,7 +53,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
         ? payload.textShapeOutsideTablet
         : viewportKey === `mobile`
           ? payload.textShapeOutsideMobile
-          : payload.textShapeOutside;
+          : `none`;
   const astPayload = {
     ast: markdown.htmlAst.children,
     buttonData: optionsPayload?.buttons || {},
@@ -138,6 +147,7 @@ const payloads = [`mobile`, `tablet`, `desktop`].map((viewportKey: string) => {
                       thisClassNames={thisPayload.injectClassNames}
                       paneId={paneId}
                       slug={slug}
+                      isContext={isContext}
                       idx={null}
                       outerIdx={idx}
                       markdownLookup={markdownLookup}

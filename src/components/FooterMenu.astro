@@ -5,16 +5,18 @@ import type { MenuDatum, MenuLink } from "../types";
 
 interface Props {
   payload: MenuDatum;
+  slug: string;
+  isContext: boolean;
 }
 
-const { payload } = Astro.props;
+const { payload, slug, isContext } = Astro.props;
 const thisPayload = payload.optionsPayload;
 const additionalLinks = thisPayload
   .filter((e: MenuLink) => !e.featured)
   .map((e: MenuLink) => {
     const item = { ...e };
     const thisPayload = lispLexer(e.actionLisp);
-    const to = preParseAction(thisPayload);
+    const to = preParseAction(thisPayload, slug, isContext);
     if (typeof to === `string`) {
       item.to = to;
       item.internal = true;
@@ -26,7 +28,7 @@ const featuredLinks = thisPayload
   .map((e: MenuLink) => {
     const item = { ...e };
     const thisPayload = lispLexer(e.actionLisp);
-    const to = preParseAction(thisPayload);
+    const to = preParseAction(thisPayload, slug, isContext);
     if (typeof to === `string`) {
       item.to = to;
       item.internal = true;

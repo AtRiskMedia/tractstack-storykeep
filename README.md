@@ -1,8 +1,8 @@
 # Tract Stack
 
-the website builder that converts
+no-code website builder and content marketing platform
 
-by [At Risk Media](https://atriskmedia.com)
+made by [At Risk Media](https://atriskmedia.com)
 
 ## Documentation
 

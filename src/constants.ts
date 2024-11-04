@@ -194,6 +194,15 @@ export const knownBrand: Record<string, string> = {
 
 export const knownEnvSettings: EnvSetting[] = [
   {
+    name: "PRIVATE_ASSEMBLYAI_API_KEY",
+    defaultValue: "",
+    type: "string",
+    description: "Private access token for Assembly AI",
+    group: "Integrations",
+    priority: false,
+    required: false,
+  },
+  {
     name: "PRIVATE_SHOPIFY_STOREFRONT_ACCESS_TOKEN",
     defaultValue: "shpat_1234567890abcdefghijklmnopqrstuv",
     type: "string",

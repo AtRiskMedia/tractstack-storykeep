@@ -4,8 +4,6 @@
 import type { ResourceDatum } from "../types";
 
 interface Props {
-  slug: string;
-  isContext: boolean;
   target: string;
   resources: ResourceDatum[] | null;
   /* eslint-disable @typescript-eslint/no-explicit-any */

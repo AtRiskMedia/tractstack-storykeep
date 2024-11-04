@@ -21,8 +21,6 @@ const { pane, current, resources, codeHookOptions } = Astro.props;
         pane.optionsPayload?.codeHook ? (
           <div id={pane.slug}>
             <CodeHook
-              slug={current.slug}
-              isContext={true}
               target={pane.optionsPayload.codeHook.target}
               resources={resources}
               options={codeHookOptions}

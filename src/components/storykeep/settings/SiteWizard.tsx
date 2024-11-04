@@ -53,7 +53,7 @@ const NeedsContent = ({ hasAssemblyAI }: { hasAssemblyAI: boolean }) => (
     {hasAssemblyAI && (
       <a
         className="px-4 py-2 text-white bg-black rounded hover:bg-myblue disabled:bg-mydarkgrey disabled:cursor-not-allowed"
-        href="/storykeep/create/ai/storykeep"
+        href="/storykeep/create/ai/storyfragment"
       >
         Create New Web Page with AI!
       </a>

@@ -13,13 +13,15 @@ export function getTailwindWhitelist(rows: any[]) {
     if (
       typeof r?.options_payload === `string` ||
       // allows already processed optionsPayload to be fed through
-      typeof r?.options_payload === `object`
+      typeof r?.optionsPayload === `object`
     ) {
       const optionsPayload =
         typeof r?.options_payload === `string`
           ? JSON.parse(r.options_payload)
-          : r.options_payload;
-      const paneFragmentsPayload = optionsPayload.paneFragmentsPayload;
+          : typeof r?.optionsPayload === `object`
+            ? r.optionsPayload
+            : null;
+      const paneFragmentsPayload = optionsPayload?.paneFragmentsPayload;
       const markdown = paneFragmentsPayload
         ?.filter(
           (p: BgPaneDatum | BgColourDatum | MarkdownPaneDatum) =>

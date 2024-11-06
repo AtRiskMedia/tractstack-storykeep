@@ -48,7 +48,7 @@ tailwind.whitelist
 src/custom/*
 !src/custom/codehooks.astro.example
 !src/custom/HeaderWidget.astro.example
-!src/custom/brandColours.example
+!src/custom/brandColours.ts.example
 
 # custom assets
 public/custom

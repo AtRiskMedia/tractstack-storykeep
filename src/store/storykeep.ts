@@ -25,6 +25,7 @@ import type {
   Theme,
 } from "../types";
 import { knownEnvSettings, toolAddModes, PUBLIC_THEME } from "../constants";
+import type { ControlPosition } from "react-draggable";
 
 export const themeStore = atom<Theme>(PUBLIC_THEME as Theme);
 
@@ -84,6 +85,62 @@ export const toolAddModeStore = map<{ value: ToolAddMode }>({
 });
 
 export const editModeStore = atom<EditModeValue | null>(null);
+
+export type HoverElement = {
+  fragmentId: string;
+  paneId: string;
+  location: "before"|"after";
+}
+
+// drag n drop
+export type DragHandle = {
+  pos: ControlPosition;
+  ghostHeight: number;
+  ghostWidth: number;
+  hoverElement: HoverElement|null;
+}
+
+const EMPTY_DRAG_HANDLE: DragHandle = {
+  pos: {x: 0, y: 0},
+  ghostHeight: 0,
+  ghostWidth: 0,
+  hoverElement: null,
+}
+
+export const resetDragStore = () => dragHandleStore.set(EMPTY_DRAG_HANDLE);
+
+export const setDragHoverInfo = (el: HoverElement|null) => {
+  const existingEl = dragHandleStore.get().hoverElement;
+  if(existingEl) {
+    if(existingEl.paneId === el?.paneId
+      && existingEl.fragmentId === el?.fragmentId
+      && existingEl.location === el.location)
+      return;
+  }
+
+  dragHandleStore.set({
+    ...dragHandleStore.get(),
+    hoverElement: el
+  })
+}
+
+export const setDragPosition = (pos: ControlPosition) => {
+  dragHandleStore.set({
+    ...dragHandleStore.get(),
+    pos
+  });
+  //console.log("drag pos: " + JSON.stringify(pos));
+}
+
+export const setGhostSize = (w: number, h: number) => {
+  dragHandleStore.set({
+    ...dragHandleStore.get(),
+    ghostWidth: w,
+    ghostHeight: h
+  });
+}
+
+export const dragHandleStore = atom<DragHandle>(EMPTY_DRAG_HANDLE);
 
 // styles memory
 export const stylesMemoryStore = map<StylesMemory>({});

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useStore } from "@nanostores/react";
 import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
 import {
@@ -7,7 +7,7 @@ import {
   lastInteractedTypeStore,
   lastInteractedPaneStore,
   editModeStore,
-  toolModeStore,
+  toolModeStore, dragHandleStore, setDragHoverInfo,
 } from "../../../store/storykeep";
 import {
   insertElementIntoMarkdown,
@@ -23,6 +23,7 @@ import {
 import { cloneDeep, classNames } from "../../../utils/helpers";
 import type { ReactNode } from "react";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
+import { isPosInsideRect } from "@utils/math.ts";
 
 interface InsertWrapperProps {
   fragmentId: string;
@@ -55,6 +56,27 @@ const InsertWrapper = ({
   const allowTag = isEmpty
     ? { before: true, after: true }
     : allowTagInsert(toolAddMode, outerIdx, idx, markdownLookup);
+
+  const dragState = useStore(dragHandleStore);
+  const beforeArea = useRef<HTMLDivElement>(null);
+  const afterArea = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if(beforeArea.current) {
+      const rect = beforeArea.current.getBoundingClientRect();
+      if(isPosInsideRect(rect, dragState.pos)) {
+        console.log("inside beforeArea");
+        setDragHoverInfo({fragmentId, paneId, location: "before"});
+      }
+    }
+    if(afterArea.current) {
+      const rect = afterArea.current.getBoundingClientRect();
+      if(isPosInsideRect(rect, dragState.pos)) {
+        console.log("inside afterArea");
+        setDragHoverInfo({fragmentId, paneId, location: "after"});
+      }
+    }
+  }, [dragState])
 
   const handleInsert = useCallback(
     (position: "before" | "after") => {
@@ -196,7 +218,7 @@ const InsertWrapper = ({
   return (
     <div className="relative">
       {children}
-      <div
+      <div ref={beforeArea}
         className={classNames(
           "group absolute inset-x-0 top-0 h-1/2 z-100 group/top ",
           allowTag.before ? `cursor-pointer` : ``
@@ -222,7 +244,7 @@ const InsertWrapper = ({
           </>
         )}
       </div>
-      <div
+      <div ref={afterArea}
         className={classNames(
           "group absolute inset-x-0 bottom-0 h-1/2 z-100 group/bottom ",
           allowTag.after ? `cursor-pointer` : ``

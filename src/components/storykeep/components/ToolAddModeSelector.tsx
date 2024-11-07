@@ -1,6 +1,8 @@
-import { forwardRef } from "react";
+import { forwardRef, type MouseEvent, useEffect, useRef, useState } from "react";
 import { toolAddModeTitles, toolAddModes } from "../../../constants";
 import type { ToolAddMode } from "../../../types";
+import Draggable, { type ControlPosition } from "react-draggable";
+import { resetDragStore, setDragPosition, setGhostSize } from "../../../store/storykeep.ts";
 
 interface ToolAddModeSelectorProps {
   toolAddMode: ToolAddMode;
@@ -11,9 +13,29 @@ const ToolAddModeSelector = forwardRef<
   HTMLSelectElement,
   ToolAddModeSelectorProps
 >(({ toolAddMode, setToolAddMode }, ref) => {
+  const [dragPos, setDragPos] = useState<ControlPosition>({x: 0, y: 0})
+  const dragging = useRef<boolean>(false);
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setToolAddMode(event.target.value as ToolAddMode);
   };
+
+  useEffect(() => {
+    const handleMouseMove: EventListener = (event) => {
+      const mouseEvent = event as unknown as MouseEvent; // Type assertion to MouseEvent
+      const x = mouseEvent.clientX + window.scrollX;
+      const y = mouseEvent.clientY + window.scrollY;
+      if(dragging.current) {
+        setDragPosition({x, y});
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      // reset drag here again because some modes can not trigger draggable onStop
+      resetDragStore();
+    }
+  }, []);
 
   return (
     <div className="flex items-center">
@@ -29,7 +51,7 @@ const ToolAddModeSelector = forwardRef<
         name="toolAddMode"
         value={toolAddMode}
         onChange={handleChange}
-        className="block w-fit-contents rounded-md border-0 py-1.5 pl-3 pr-10 text-mydarkgrey ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-myorange xs:text-sm xs:leading-6"
+        className="w-fit-contents block rounded-md border-0 py-1.5 pl-3 pr-10 text-mydarkgrey ring-1 ring-inset ring-mylightgrey focus:ring-2 focus:ring-myorange xs:text-sm xs:leading-6"
       >
         {toolAddModes.map(mode => (
           <option key={mode} value={mode}>
@@ -37,6 +59,19 @@ const ToolAddModeSelector = forwardRef<
           </option>
         ))}
       </select>
+      <Draggable defaultPosition={{x: dragPos.x, y: dragPos.y}}
+                 position={dragPos}
+                 onStart={() => {
+                   dragging.current = true;
+                   setGhostSize(100, 50);
+                 }}
+                 onStop={() => {
+                   dragging.current = false;
+                   resetDragStore();
+                   setDragPos({x: 0, y: 0});
+                 }}>
+        <button className="border-2 ml-4 bg-amber-500">DRAG</button>
+      </Draggable>
     </div>
   );
 });

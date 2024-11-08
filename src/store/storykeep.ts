@@ -1,30 +1,30 @@
-import { map, atom } from "nanostores";
+import { atom, map } from "nanostores";
 import type {
+  Analytics,
   BeliefDatum,
-  BgPaneDatum,
   BgColourDatum,
-  MarkdownEditDatum,
+  BgPaneDatum,
+  CodeHookDatum,
+  CreationState,
+  DashboardAnalytics,
+  EditModeValue,
+  EnvSetting,
   FieldWithHistory,
   FileDatum,
-  MenuDatum,
-  ResourceDatum,
-  StoryKeepFileDatum,
-  TractStackDatum,
-  CodeHookDatum,
   ImpressionDatum,
   IsInit,
+  MarkdownEditDatum,
+  MenuDatum,
+  ResourceDatum,
   StoreKey,
-  ToolMode,
-  ToolAddMode,
-  EditModeValue,
+  StoryKeepFileDatum,
   StylesMemory,
-  EnvSetting,
-  Analytics,
-  DashboardAnalytics,
-  CreationState,
   Theme,
+  ToolAddMode,
+  ToolMode,
+  TractStackDatum,
 } from "../types";
-import { knownEnvSettings, toolAddModes, PUBLIC_THEME } from "../constants";
+import { knownEnvSettings, PUBLIC_THEME, toolAddModes } from "../constants";
 import type { ControlPosition } from "react-draggable";
 import { createNodeId } from "@utils/helpers.ts";
 
@@ -90,36 +90,42 @@ export const editModeStore = atom<EditModeValue | null>(null);
 // ==========================
 // Drag n Drop
 // ==========================
+export enum Location {
+  NOWHERE = -1,
+  BEFORE = 0,
+  AFTER = 1,
+}
+
 export interface DragNode {
   fragmentId: string;
   paneId: string;
-  idx: number|null;
+  idx: number | null;
   outerIdx: number;
 }
 
 export interface DragState extends DragNode {
-  location: "before"|"after";
+  location: "before" | "after";
 }
 
 export type DragHandle = {
   pos: ControlPosition;
   ghostHeight: number;
   ghostWidth: number;
-  hoverElement: DragState|null;
+  hoverElement: DragState | null;
   affectedFragments: Set<string>;
   affectedPanes: Set<string>;
-  dropState: DragState|null;
-}
+  dropState: DragState | null;
+};
 
 const EMPTY_DRAG_HANDLE: DragHandle = {
-  pos: {x: 0, y: 0},
+  pos: { x: 0, y: 0 },
   ghostHeight: 0,
   ghostWidth: 0,
   hoverElement: null,
   dropState: null,
   affectedFragments: new Set<string>(),
   affectedPanes: new Set<string>(),
-}
+};
 
 export const resetDragStore = () => dragHandleStore.set(EMPTY_DRAG_HANDLE);
 
@@ -133,35 +139,37 @@ export const dropDraggingElement = () => {
 };
 
 export const recordExitPane = (paneId: string) => {
-  if(!dragHandleStore.get().affectedPanes.has(paneId)) return;
+  if (!dragHandleStore.get().affectedPanes.has(paneId)) return;
 
   const panes = new Set<string>(dragHandleStore.get().affectedPanes);
   panes.delete(paneId);
-  if(panes.size === 0) {
+  if (panes.size === 0) {
     console.log("no panes recorded, clear all affected fragments");
     resetDragStore();
   } else {
-    dragHandleStore.set({...dragHandleStore.get(), affectedPanes: panes});
+    dragHandleStore.set({ ...dragHandleStore.get(), affectedPanes: panes });
   }
-}
+};
 
-export const setDragHoverInfo = (el: DragState|null) => {
+export const setDragHoverInfo = (el: DragState | null) => {
   const existingEl = dragHandleStore.get().hoverElement;
-  if(existingEl) {
-    if(existingEl.paneId === el?.paneId
-      && existingEl.fragmentId === el?.fragmentId
-      && existingEl.location === el.location
-      && existingEl.idx === el.idx
-      && existingEl.outerIdx === el.outerIdx)
+  if (existingEl) {
+    if (
+      existingEl.paneId === el?.paneId &&
+      existingEl.fragmentId === el?.fragmentId &&
+      existingEl.location === el.location &&
+      existingEl.idx === el.idx &&
+      existingEl.outerIdx === el.outerIdx
+    )
       return;
   }
 
   const nodes = new Set<string>(dragHandleStore.get().affectedFragments);
-  if(el) {
+  if (el) {
     nodes.add(createNodeId(el));
   }
   const panes = new Set<string>(dragHandleStore.get().affectedPanes);
-  if(el) {
+  if (el) {
     panes.add(el.paneId);
   }
   dragHandleStore.set({
@@ -170,23 +178,23 @@ export const setDragHoverInfo = (el: DragState|null) => {
     affectedPanes: panes,
     affectedFragments: nodes,
   });
-}
+};
 
 export const setDragPosition = (pos: ControlPosition) => {
   dragHandleStore.set({
     ...dragHandleStore.get(),
-    pos
+    pos,
   });
-  //console.log("drag pos: " + JSON.stringify(pos));
-}
+  console.log("drag pos: " + JSON.stringify(pos));
+};
 
 export const setGhostSize = (w: number, h: number) => {
   dragHandleStore.set({
     ...dragHandleStore.get(),
     ghostWidth: w,
-    ghostHeight: h
+    ghostHeight: h,
   });
-}
+};
 
 export const dragHandleStore = atom<DragHandle>(EMPTY_DRAG_HANDLE);
 

@@ -15,7 +15,7 @@ import type {
 import type { Nodes } from "hast";
 import { useStore } from "@nanostores/react";
 import { dragHandleStore, recordExitPane } from "../../../store/storykeep.ts";
-import { isPosInsideRect } from "@utils/math.ts";
+import { isNonZeroMagnitude, isPosInsideRect } from "@utils/math.ts";
 
 interface Props {
   readonly: boolean;
@@ -54,7 +54,7 @@ const MarkdownPane = ({
   const self = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if(self.current && !dragState.dropState) {
+    if(self.current && !dragState.dropState && isNonZeroMagnitude(dragState.pos)) {
       const rect = self.current.getBoundingClientRect();
       if (!isPosInsideRect(rect, dragState.pos)) {
         recordExitPane(paneId);

@@ -1,8 +1,17 @@
-import { useCallback } from "react";
+import type { MouseEvent, ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  dragHandleStore,
+  type DragNode,
+  dropDraggingElement,
+  editModeStore,
   lastInteractedPaneStore,
   lastInteractedTypeStore,
-  editModeStore, dragHandleStore,
+  Location,
+  resetDragStore,
+  setDragHoverInfo,
+  setDragPosition,
+  setGhostSize,
 } from "../../../store/storykeep";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
@@ -17,17 +26,11 @@ import { classNames } from "../../../utils/helpers";
 import { Belief } from "@components/widgets/Belief";
 import { IdentifyAs } from "@components/widgets/IdentifyAs";
 import { ToggleBelief } from "@components/widgets/ToggleBelief";
-import type { MouseEvent, ReactNode } from "react";
-import type {
-  ButtonData,
-  FileNode,
-  MarkdownLookup,
-  MarkdownDatum,
-  ToolAddMode,
-  ToolMode,
-} from "../../../types";
+import type { ButtonData, FileNode, MarkdownDatum, MarkdownLookup, ToolAddMode, ToolMode } from "../../../types";
 import type { Element as HastElement } from "hast";
 import { useStore } from "@nanostores/react";
+import Draggable, { type ControlPosition } from "react-draggable";
+import { isPosInsideRect } from "@utils/math.ts";
 
 interface PaneFromAstProps {
   readonly: boolean;
@@ -57,26 +60,108 @@ const EditableOuterWrapper = ({
   onClick,
   id,
   children,
+  fragmentId,
+  paneId,
+  idx,
+  outerIdx,
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
   id: string;
   children: ReactNode;
+  fragmentId: string;
+  paneId: string;
+  idx: number | null;
+  outerIdx: number;
 }) => {
+  const [dragPos, setDragPos] = useState<ControlPosition>({ x: 0, y: 0 });
+  const dragging = useRef<boolean>(false);
+  const dragState = useStore(dragHandleStore);
+
+  const self = useRef<HTMLDivElement>(null);
+  const activeHoverArea = useRef<Location>(Location.NOWHERE);
+
+  const getNodeData = (): DragNode => {
+    return { fragmentId, paneId, idx, outerIdx } as DragNode;
+  };
+
+  useEffect(() => {
+    if(dragging.current) return;
+
+    if (!dragState.dropState) {
+      if (self.current) {
+        const rect = self.current.getBoundingClientRect();
+        if (isPosInsideRect(rect, dragState.pos)) {
+          const loc = dragState.pos.y > rect.y + rect.height/2 ? Location.AFTER : Location.BEFORE;
+          activeHoverArea.current = loc;
+          console.log(`inside afterArea: ${id} | location: ${loc}`);
+          setDragHoverInfo({ ...getNodeData(), location: loc === Location.AFTER ? "after" : "before" });
+        }
+      }
+    } else if (dragState.affectedFragments.size > 0) {
+      if (
+        dragState.dropState.fragmentId === fragmentId &&
+        dragState.dropState.paneId === paneId &&
+        dragState.dropState.idx === idx &&
+        dragState.dropState.outerIdx === outerIdx
+      ) {
+        console.log(`Drop active element: ${JSON.stringify(dragState.dropState)}`);
+      }
+    }
+  }, [dragState]);
+
+  useEffect(() => {
+    const handleMouseMove: EventListener = event => {
+      const mouseEvent = event as unknown as MouseEvent; // Type assertion to MouseEvent
+      const x = mouseEvent.clientX + window.scrollX;
+      const y = mouseEvent.clientY + window.scrollY;
+      if (dragging.current) {
+        setDragPosition({ x, y });
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      // reset drag here again because some modes can not trigger draggable onStop
+      resetDragStore();
+    };
+  }, []);
+
   return (
-    <div
-      id={id}
-      className="relative cursor-pointer pointer-events-auto"
-      title={tooltip}
+    <Draggable
+      defaultPosition={{ x: dragPos.x, y: dragPos.y }}
+      position={dragPos}
+      onStart={() => {
+        dragging.current = true;
+        resetDragStore();
+        setGhostSize(100, 50);
+      }}
+      onStop={() => {
+        dragging.current = false;
+        if(dragHandleStore.get().affectedFragments.size === 0) {
+          resetDragStore();
+        } else {
+          dropDraggingElement();
+        }
+        setDragPos({ x: 0, y: 0 });
+      }}
     >
-      {children}
       <div
-        onClick={onClick}
-        className="absolute inset-0 w-full h-full z-101 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white/20
-                   outline outline-2 outline-dotted outline-white/20 outline-offset-[-2px]
-                   mix-blend-exclusion"
-      />
-    </div>
+        ref={self}
+        id={id}
+        className="pointer-events-auto relative cursor-pointer"
+        title={tooltip}
+      >
+        {children}
+        <div
+          onClick={onClick}
+          className="absolute inset-0 z-101 h-full w-full mix-blend-exclusion outline outline-dotted
+                   outline-2 outline-offset-[-2px] outline-white/20 hover:bg-mylightgrey hover:bg-opacity-10
+                   hover:outline-white/20"
+        />
+      </div>
+    </Draggable>
   );
 };
 const EditableInnerWrapper = ({
@@ -95,9 +180,9 @@ const EditableInnerWrapper = ({
       {children}
       <span
         onClick={onClick}
-        className="absolute inset-0 w-full h-full z-102 hover:bg-mylightgrey hover:bg-opacity-20 hover:outline-white
-                   outline outline-2 outline-dashed outline-white/85 outline-offset-[-2px]
-                   mix-blend-exclusion"
+        className="absolute inset-0 z-102 h-full w-full mix-blend-exclusion outline outline-dashed
+                   outline-2 outline-offset-[-2px] outline-white/85 hover:bg-mylightgrey hover:bg-opacity-20
+                   hover:outline-white"
       />
     </span>
   );
@@ -461,6 +546,10 @@ function buildComponentFromAst(
           <EditableOuterWrapper
             id={thisId}
             tooltip={tip}
+            fragmentId={markdownFragmentId}
+            paneId={paneId}
+            outerIdx={outerIdx}
+            idx={idx}
             onClick={handleToolModeClick}
           >
             {child}

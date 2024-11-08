@@ -1,27 +1,31 @@
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef } from "react";
 import { useStore } from "@nanostores/react";
-import { ArrowUpIcon, ArrowDownIcon } from "@heroicons/react/24/outline";
+import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import {
-  paneFragmentMarkdown,
-  unsavedChangesStore,
-  lastInteractedTypeStore,
-  lastInteractedPaneStore,
+  dragHandleStore,
+  type DragNode,
   editModeStore,
-  toolModeStore, dragHandleStore, setDragHoverInfo, type DragNode,
+  lastInteractedPaneStore,
+  lastInteractedTypeStore,
+  Location,
+  paneFragmentMarkdown,
+  setDragHoverInfo,
+  toolModeStore,
+  unsavedChangesStore,
 } from "../../../store/storykeep";
 import {
-  insertElementIntoMarkdown,
-  updateHistory,
   allowTagInsert,
   getGlobalNth,
+  insertElementIntoMarkdown,
+  updateHistory,
 } from "../../../utils/compositor/markdownUtils";
 import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
 import {
-  toolAddModeTitles,
   toolAddModeInsertDefault,
+  toolAddModeTitles,
 } from "../../../constants";
-import { cloneDeep, classNames } from "../../../utils/helpers";
-import type { ReactNode } from "react";
+import { classNames, cloneDeep } from "../../../utils/helpers";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
 import { isPosInsideRect } from "@utils/math.ts";
 
@@ -35,12 +39,6 @@ interface InsertWrapperProps {
   children?: ReactNode;
   markdownLookup: MarkdownLookup;
   isEmpty: boolean;
-}
-
-enum Location {
-  NOWHERE = -1,
-  BEFORE = 0,
-  AFTER = 1
 }
 
 const InsertWrapper = ({
@@ -64,40 +62,38 @@ const InsertWrapper = ({
     : allowTagInsert(toolAddMode, outerIdx, idx, markdownLookup);
 
   const dragState = useStore(dragHandleStore);
-  const beforeArea = useRef<HTMLDivElement>(null);
-  const afterArea = useRef<HTMLDivElement>(null);
+  const self = useRef<HTMLDivElement>(null);
   const activeHoverArea = useRef<Location>(Location.NOWHERE);
 
-  const getNodeData = (): DragNode => { return {fragmentId, paneId, idx, outerIdx} as DragNode; }
+  const getNodeData = (): DragNode => {
+    return { fragmentId, paneId, idx, outerIdx } as DragNode;
+  };
 
   useEffect(() => {
-    if(!dragState.dropState) {
-      if (beforeArea.current) {
-        const rect = beforeArea.current.getBoundingClientRect();
+    if (!dragState.dropState) {
+      if (self.current) {
+        const rect = self.current.getBoundingClientRect();
         if (isPosInsideRect(rect, dragState.pos)) {
-          console.log("inside beforeArea: " + fragmentId);
-          activeHoverArea.current = Location.BEFORE;
-          setDragHoverInfo({ ...getNodeData(), location: "before" });
+          const loc = dragState.pos.y > rect.y + rect.height/2 ? Location.AFTER : Location.BEFORE;
+          activeHoverArea.current = loc;
+          console.log(`inside afterArea: ${fragmentId} | location: ${loc}`);
+          setDragHoverInfo({ ...getNodeData(), location: loc === Location.AFTER ? "after" : "before" });
         }
       }
-      if (afterArea.current) {
-        const rect = afterArea.current.getBoundingClientRect();
-        if (isPosInsideRect(rect, dragState.pos)) {
-          console.log("inside afterArea: " + fragmentId);
-          activeHoverArea.current = Location.AFTER;
-          setDragHoverInfo({ ...getNodeData(), location: "after" });
-        }
-      }
-    } else if(dragState.affectedFragments.size > 0) {
-      if(dragState.dropState.fragmentId === fragmentId
-        && dragState.dropState.paneId === paneId
-        && dragState.dropState.idx === idx
-        && dragState.dropState.outerIdx === outerIdx) {
-        console.log(`Drop active element: ${JSON.stringify(dragState.dropState)}`);
+    } else if (dragState.affectedFragments.size > 0) {
+      if (
+        dragState.dropState.fragmentId === fragmentId &&
+        dragState.dropState.paneId === paneId &&
+        dragState.dropState.idx === idx &&
+        dragState.dropState.outerIdx === outerIdx
+      ) {
+        console.log(
+          `Drop active element: ${JSON.stringify(dragState.dropState)}`
+        );
         handleInsert(dragState.dropState.location);
       }
     }
-  }, [dragState])
+  }, [dragState]);
 
   const handleInsert = useCallback(
     (position: "before" | "after") => {
@@ -237,56 +233,56 @@ const InsertWrapper = ({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={self}>
       {children}
-      <div ref={beforeArea}
+      <div
         className={classNames(
-          "group absolute inset-x-0 top-0 h-1/2 z-100 group/top ",
+          "z-100 group/top group absolute inset-x-0 top-0 h-1/2 ",
           allowTag.before ? `cursor-pointer` : ``
         )}
       >
         {allowTag.before && (
           <>
             <div
-              className="absolute top-1/2 left-0 transform -translate-y-1/2
-             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
-             text-md font-action ml-6 group-hover:bg-black group-hover:text-white"
+              className="text-md absolute left-0 top-1/2 ml-6
+             -translate-y-1/2 transform rounded-sm bg-yellow-300 p-1.5
+             font-action text-black shadow-md group-hover:bg-black group-hover:text-white"
             >
               <ArrowUpIcon className="h-4 w-4" />
             </div>
             <div
               onClick={() => handleInsert("before")}
               title={`Insert new ${toolAddModeTitles[toolAddMode]} above`}
-              className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-b hover:from-mylightgrey/25 hover:via-mylightgrey/25 hover:to-transparent
-                     before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-1
-                     before:border-t-4 before:border-dotted before:border-mylightgrey/25 hover:before:border-mylightgrey"
+              className="absolute inset-0 h-full w-full
+                     before:absolute before:left-0 before:right-0 before:top-0
+                     before:h-1 before:border-t-4 before:border-dotted before:border-mylightgrey/25 before:content-[''] hover:bg-gradient-to-b
+                     hover:from-mylightgrey/25 hover:via-mylightgrey/25 hover:to-transparent hover:before:border-mylightgrey"
             />
           </>
         )}
       </div>
-      <div ref={afterArea}
+      <div
         className={classNames(
-          "group absolute inset-x-0 bottom-0 h-1/2 z-100 group/bottom ",
+          "z-100 group/bottom group absolute inset-x-0 bottom-0 h-1/2 ",
           allowTag.after ? `cursor-pointer` : ``
         )}
       >
         {allowTag.after && (
           <>
             <div
-              className="absolute top-1/2 right-0 transform -translate-y-1/2
-             text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
-             text-md font-action mr-6 group-hover:bg-black group-hover:text-white"
+              className="text-md absolute right-0 top-1/2 mr-6
+             -translate-y-1/2 transform rounded-sm bg-yellow-300 p-1.5
+             font-action text-black shadow-md group-hover:bg-black group-hover:text-white"
             >
               <ArrowDownIcon className="h-4 w-4" />
             </div>
             <div
               onClick={() => handleInsert("after")}
               title={`Insert new ${toolAddModeTitles[toolAddMode]} below`}
-              className="absolute inset-0 w-full h-full
-                     hover:bg-gradient-to-t hover:from-mylightgrey/25 hover:via-mylightgrey/25 hover:to-transparent
-                     after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-1
-                     after:border-b-4 after:border-dotted after:border-mylightgrey/25 hover:after:border-mylightgrey"
+              className="absolute inset-0 h-full w-full
+                     after:absolute after:bottom-0 after:left-0 after:right-0
+                     after:h-1 after:border-b-4 after:border-dotted after:border-mylightgrey/25 after:content-[''] hover:bg-gradient-to-t
+                     hover:from-mylightgrey/25 hover:via-mylightgrey/25 hover:to-transparent hover:after:border-mylightgrey"
             />
           </>
         )}

@@ -26,6 +26,7 @@ import type {
 } from "../types";
 import { knownEnvSettings, toolAddModes, PUBLIC_THEME } from "../constants";
 import type { ControlPosition } from "react-draggable";
+import { createNodeId } from "@utils/helpers.ts";
 
 export const themeStore = atom<Theme>(PUBLIC_THEME as Theme);
 
@@ -89,12 +90,15 @@ export const editModeStore = atom<EditModeValue | null>(null);
 // ==========================
 // Drag n Drop
 // ==========================
-export type DragState = {
+export interface DragNode {
   fragmentId: string;
   paneId: string;
-  location: "before"|"after";
   idx: number|null;
   outerIdx: number;
+}
+
+export interface DragState extends DragNode {
+  location: "before"|"after";
 }
 
 export type DragHandle = {
@@ -102,7 +106,8 @@ export type DragHandle = {
   ghostHeight: number;
   ghostWidth: number;
   hoverElement: DragState|null;
-  affectedNodes: Set<HTMLElement>;
+  affectedFragments: Set<string>;
+  affectedPanes: Set<string>;
   dropState: DragState|null;
 }
 
@@ -112,7 +117,8 @@ const EMPTY_DRAG_HANDLE: DragHandle = {
   ghostWidth: 0,
   hoverElement: null,
   dropState: null,
-  affectedNodes: new Set<HTMLElement>(),
+  affectedFragments: new Set<string>(),
+  affectedPanes: new Set<string>(),
 }
 
 export const resetDragStore = () => dragHandleStore.set(EMPTY_DRAG_HANDLE);
@@ -126,17 +132,20 @@ export const dropDraggingElement = () => {
   });
 };
 
-export const removeHoverNode = (node: HTMLElement|null) => {
-  if(!node) return;
+export const recordExitPane = (paneId: string) => {
+  if(!dragHandleStore.get().affectedPanes.has(paneId)) return;
 
-  const nodes = new Set<HTMLElement>(dragHandleStore.get().affectedNodes);
-  if(!nodes.has(node)) return;
-
-  nodes.delete(node);
-  dragHandleStore.set({...dragHandleStore.get(), affectedNodes: nodes});
+  const panes = new Set<string>(dragHandleStore.get().affectedPanes);
+  panes.delete(paneId);
+  if(panes.size === 0) {
+    console.log("no panes recorded, clear all affected fragments");
+    resetDragStore();
+  } else {
+    dragHandleStore.set({...dragHandleStore.get(), affectedPanes: panes});
+  }
 }
 
-export const setDragHoverInfo = (node: HTMLElement|null, el: DragState|null) => {
+export const setDragHoverInfo = (el: DragState|null) => {
   const existingEl = dragHandleStore.get().hoverElement;
   if(existingEl) {
     if(existingEl.paneId === el?.paneId
@@ -147,15 +156,20 @@ export const setDragHoverInfo = (node: HTMLElement|null, el: DragState|null) => 
       return;
   }
 
-  const nodes = new Set<HTMLElement>(dragHandleStore.get().affectedNodes);
-  if(node) {
-    nodes.add(node);
+  const nodes = new Set<string>(dragHandleStore.get().affectedFragments);
+  if(el) {
+    nodes.add(createNodeId(el));
+  }
+  const panes = new Set<string>(dragHandleStore.get().affectedPanes);
+  if(el) {
+    panes.add(el.paneId);
   }
   dragHandleStore.set({
     ...dragHandleStore.get(),
     hoverElement: el,
-    affectedNodes: nodes,
-  })
+    affectedPanes: panes,
+    affectedFragments: nodes,
+  });
 }
 
 export const setDragPosition = (pos: ControlPosition) => {

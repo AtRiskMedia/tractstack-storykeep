@@ -7,7 +7,7 @@ import {
   lastInteractedTypeStore,
   lastInteractedPaneStore,
   editModeStore,
-  toolModeStore, dragHandleStore, setDragHoverInfo, removeHoverNode,
+  toolModeStore, dragHandleStore, setDragHoverInfo, type DragNode,
 } from "../../../store/storykeep";
 import {
   insertElementIntoMarkdown,
@@ -67,35 +67,28 @@ const InsertWrapper = ({
   const beforeArea = useRef<HTMLDivElement>(null);
   const afterArea = useRef<HTMLDivElement>(null);
   const activeHoverArea = useRef<Location>(Location.NOWHERE);
-  const self = useRef<HTMLDivElement>(null);
+
+  const getNodeData = (): DragNode => { return {fragmentId, paneId, idx, outerIdx} as DragNode; }
 
   useEffect(() => {
     if(!dragState.dropState) {
-      let hitAnyArea = false;
       if (beforeArea.current) {
         const rect = beforeArea.current.getBoundingClientRect();
         if (isPosInsideRect(rect, dragState.pos)) {
-          console.log("inside beforeArea");
-          hitAnyArea = true;
+          console.log("inside beforeArea: " + fragmentId);
           activeHoverArea.current = Location.BEFORE;
-          setDragHoverInfo(self.current as HTMLElement, { fragmentId, paneId, idx, outerIdx, location: "before" });
+          setDragHoverInfo({ ...getNodeData(), location: "before" });
         }
       }
       if (afterArea.current) {
         const rect = afterArea.current.getBoundingClientRect();
         if (isPosInsideRect(rect, dragState.pos)) {
-          console.log("inside afterArea");
-          hitAnyArea = true;
+          console.log("inside afterArea: " + fragmentId);
           activeHoverArea.current = Location.AFTER;
-          setDragHoverInfo(self.current as HTMLElement, { fragmentId, paneId, idx, outerIdx, location: "after" });
+          setDragHoverInfo({ ...getNodeData(), location: "after" });
         }
       }
-
-      if(!hitAnyArea) {
-        activeHoverArea.current = Location.NOWHERE;
-        removeHoverNode(self.current as HTMLElement);
-      }
-    } else {
+    } else if(dragState.affectedFragments.size > 0) {
       if(dragState.dropState.fragmentId === fragmentId
         && dragState.dropState.paneId === paneId
         && dragState.dropState.idx === idx
@@ -243,25 +236,8 @@ const InsertWrapper = ({
     );
   }
 
-  const canDrawGhostBlock = (location: Location): boolean => {
-    return activeHoverArea.current === location;
-  };
-
-  const drawGhostBlock = (location: Location) => {
-    const getOffsetClass = (): string => {
-      switch (location) {
-        case Location.AFTER: return "top-[30px]";
-        case Location.BEFORE: return "bottom-[30px]";
-        default: return "";
-      }
-    }
-    return (
-      <div className={`absolute w-full bg-blue-200 h-20 ${getOffsetClass()}`}/>
-    );
-  }
-
   return (
-    <div className="relative" ref={self}>
+    <div className="relative">
       {children}
       <div ref={beforeArea}
         className={classNames(
@@ -271,7 +247,6 @@ const InsertWrapper = ({
       >
         {allowTag.before && (
           <>
-            {canDrawGhostBlock(Location.BEFORE) && drawGhostBlock(Location.BEFORE)}
             <div
               className="absolute top-1/2 left-0 transform -translate-y-1/2
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md
@@ -298,7 +273,6 @@ const InsertWrapper = ({
       >
         {allowTag.after && (
           <>
-            {canDrawGhostBlock(Location.AFTER) && drawGhostBlock(Location.AFTER)}
             <div
               className="absolute top-1/2 right-0 transform -translate-y-1/2
              text-black bg-yellow-300 p-1.5 rounded-sm shadow-md

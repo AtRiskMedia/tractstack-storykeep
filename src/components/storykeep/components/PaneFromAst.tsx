@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import {
   lastInteractedPaneStore,
   lastInteractedTypeStore,
-  editModeStore,
+  editModeStore, dragHandleStore,
 } from "../../../store/storykeep";
 import { lispLexer } from "../../../utils/concierge/lispLexer";
 import { preParseAction } from "../../../utils/concierge/preParseAction";
@@ -27,6 +27,7 @@ import type {
   ToolMode,
 } from "../../../types";
 import type { Element as HastElement } from "hast";
+import { useStore } from "@nanostores/react";
 
 interface PaneFromAstProps {
   readonly: boolean;
@@ -154,23 +155,29 @@ const ImageWrapper = ({
   return children;
 };
 
-const PaneFromAst = ({
-  readonly,
-  payload,
-  markdown,
-  thisClassNames,
-  paneId,
-  paneFragmentIds,
-  markdownFragmentId,
-  slug,
-  isContext,
-  idx = null,
-  outerIdx,
-  markdownLookup,
-  toolMode,
-  toolAddMode,
-  queueUpdate,
-}: PaneFromAstProps) => {
+function buildComponentFromAst(
+  payload: {
+    ast: any[];
+    imageData: FileNode[];
+    buttonData: { [p: string]: ButtonData };
+  },
+  markdownLookup: MarkdownLookup,
+  outerIdx: number,
+  toolMode: "insert" | "text" | "styles" | "settings" | "pane" | "eraser",
+  readonly: boolean,
+  idx: number | null,
+  paneId: string,
+  thisClassNames: {
+    [p: string]: string | string[];
+  },
+  slug: string,
+  isContext: boolean,
+  markdown: MarkdownDatum,
+  markdownFragmentId: string,
+  queueUpdate: (id: string, updateFn: () => void) => void,
+  paneFragmentIds: string[],
+  toolAddMode: ToolAddMode
+) {
   const thisAst = payload.ast[0];
   const Tag = thisAst?.tagName || thisAst?.type;
   const outerGlobalNth =
@@ -673,6 +680,70 @@ const PaneFromAst = ({
 
   console.log(`missed on Tag:${Tag}`, thisAst);
   return <div className="bg-myorange text-black">{`missed on Tag:${Tag}`}</div>;
+}
+
+const PaneFromAst = ({
+  readonly,
+  payload,
+  markdown,
+  thisClassNames,
+  paneId,
+  paneFragmentIds,
+  markdownFragmentId,
+  slug,
+  isContext,
+  idx = null,
+  outerIdx,
+  markdownLookup,
+  toolMode,
+  toolAddMode,
+  queueUpdate,
+}: PaneFromAstProps) => {
+  const dragState = useStore(dragHandleStore);
+
+  const component = buildComponentFromAst(
+    payload,
+    markdownLookup,
+    outerIdx,
+    toolMode,
+    readonly,
+    idx,
+    paneId,
+    thisClassNames,
+    slug,
+    isContext,
+    markdown,
+    markdownFragmentId,
+    queueUpdate,
+    paneFragmentIds,
+    toolAddMode
+  );
+
+  const canDrawGhostBlock = (): boolean => {
+    const el = dragState.hoverElement;
+    if(!el) return false;
+
+    return el.fragmentId === markdownFragmentId
+      && el.paneId === paneId
+      && el.idx === idx
+      && el.outerIdx === outerIdx;
+  };
+
+  const drawGhostBlock = () => {
+    return (<div className={`w-full bg-blue-200 h-20`}/>);
+  }
+
+  if(canDrawGhostBlock()) {
+    return (
+      <div>
+        {dragState.hoverElement?.location === "before" && drawGhostBlock()}
+        {component}
+        {dragState.hoverElement?.location === "after" && drawGhostBlock()}
+      </div>
+    );
+  } else {
+    return component;
+  }
 };
 
 export default PaneFromAst;

@@ -9,6 +9,7 @@ import type {
   TursoFileNode,
   FileNode,
 } from "../types";
+import type { DragNode } from "../store/storykeep.ts";
 
 export const getComputedColor = (color: string): string => {
   if (color.startsWith("#var(--")) {
@@ -601,4 +602,9 @@ export async function getOptimizedImages(
   );
 
   return optimizedImages;
+}
+
+export const createNodeId = (node: DragNode): string => {
+  if(!node) return "";
+  return node.fragmentId + node.paneId + node.outerIdx + (node.idx || 0);
 }

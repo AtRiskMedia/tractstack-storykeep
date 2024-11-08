@@ -74,7 +74,7 @@ const ToolAddModeSelector = forwardRef<
                  }}
                  onStop={() => {
                    dragging.current = false;
-                   if(dragHandleStore.get().affectedNodes.size === 0) {
+                   if(dragHandleStore.get().affectedFragments.size === 0) {
                      resetDragStore();
                    } else {
                      dropDraggingElement();

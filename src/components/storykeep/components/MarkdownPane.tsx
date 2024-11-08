@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import PaneFromAst from "./PaneFromAst";
 import { classNames } from "../../../utils/helpers";
 import { reduceClassNamesPayload } from "../../../utils/compositor/reduceClassNamesPayload";
@@ -13,6 +13,9 @@ import type {
   ToolAddMode,
 } from "../../../types";
 import type { Nodes } from "hast";
+import { useStore } from "@nanostores/react";
+import { dragHandleStore, recordExitPane } from "../../../store/storykeep.ts";
+import { isPosInsideRect } from "@utils/math.ts";
 
 interface Props {
   readonly: boolean;
@@ -47,6 +50,18 @@ const MarkdownPane = ({
   viewportKey,
   queueUpdate,
 }: Props) => {
+  const dragState = useStore(dragHandleStore);
+  const self = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if(self.current && !dragState.dropState) {
+      const rect = self.current.getBoundingClientRect();
+      if (!isPosInsideRect(rect, dragState.pos)) {
+        recordExitPane(paneId);
+      }
+    }
+  }, [dragState]);
+
   const hasHidden =
     payload.hiddenViewports.includes(`desktop`) ||
     payload.hiddenViewports.includes(`tablet`) ||
@@ -124,7 +139,7 @@ const MarkdownPane = ({
     ));
 
   return (
-    <>
+    <div ref={self}>
       {(parentClasses as string[])
         .slice()
         .reverse()
@@ -134,7 +149,7 @@ const MarkdownPane = ({
           ),
           <>{content}</>
         )}
-    </>
+    </div>
   );
 };
 

@@ -2,7 +2,13 @@ import { forwardRef, type MouseEvent, useEffect, useRef, useState } from "react"
 import { toolAddModeTitles, toolAddModes } from "../../../constants";
 import type { ToolAddMode } from "../../../types";
 import Draggable, { type ControlPosition } from "react-draggable";
-import { resetDragStore, setDragPosition, setGhostSize } from "../../../store/storykeep.ts";
+import {
+  dragHandleStore,
+  dropDraggingElement,
+  resetDragStore,
+  setDragPosition,
+  setGhostSize,
+} from "../../../store/storykeep.ts";
 
 interface ToolAddModeSelectorProps {
   toolAddMode: ToolAddMode;
@@ -63,11 +69,16 @@ const ToolAddModeSelector = forwardRef<
                  position={dragPos}
                  onStart={() => {
                    dragging.current = true;
+                   resetDragStore();
                    setGhostSize(100, 50);
                  }}
                  onStop={() => {
                    dragging.current = false;
-                   resetDragStore();
+                   if(dragHandleStore.get().affectedNodes.size === 0) {
+                     resetDragStore();
+                   } else {
+                     dropDraggingElement();
+                   }
                    setDragPos({x: 0, y: 0});
                  }}>
         <button className="border-2 ml-4 bg-amber-500">DRAG</button>

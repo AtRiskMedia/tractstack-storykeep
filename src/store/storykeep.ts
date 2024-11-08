@@ -86,18 +86,24 @@ export const toolAddModeStore = map<{ value: ToolAddMode }>({
 
 export const editModeStore = atom<EditModeValue | null>(null);
 
-export type HoverElement = {
+// ==========================
+// Drag n Drop
+// ==========================
+export type DragState = {
   fragmentId: string;
   paneId: string;
   location: "before"|"after";
+  idx: number|null;
+  outerIdx: number;
 }
 
-// drag n drop
 export type DragHandle = {
   pos: ControlPosition;
   ghostHeight: number;
   ghostWidth: number;
-  hoverElement: HoverElement|null;
+  hoverElement: DragState|null;
+  affectedNodes: Set<HTMLElement>;
+  dropState: DragState|null;
 }
 
 const EMPTY_DRAG_HANDLE: DragHandle = {
@@ -105,22 +111,50 @@ const EMPTY_DRAG_HANDLE: DragHandle = {
   ghostHeight: 0,
   ghostWidth: 0,
   hoverElement: null,
+  dropState: null,
+  affectedNodes: new Set<HTMLElement>(),
 }
 
 export const resetDragStore = () => dragHandleStore.set(EMPTY_DRAG_HANDLE);
 
-export const setDragHoverInfo = (el: HoverElement|null) => {
+export const dropDraggingElement = () => {
+  const existingEl = dragHandleStore.get()?.hoverElement || null;
+  dragHandleStore.set({
+    ...dragHandleStore.get(),
+    hoverElement: null,
+    dropState: existingEl,
+  });
+};
+
+export const removeHoverNode = (node: HTMLElement|null) => {
+  if(!node) return;
+
+  const nodes = new Set<HTMLElement>(dragHandleStore.get().affectedNodes);
+  if(!nodes.has(node)) return;
+
+  nodes.delete(node);
+  dragHandleStore.set({...dragHandleStore.get(), affectedNodes: nodes});
+}
+
+export const setDragHoverInfo = (node: HTMLElement|null, el: DragState|null) => {
   const existingEl = dragHandleStore.get().hoverElement;
   if(existingEl) {
     if(existingEl.paneId === el?.paneId
       && existingEl.fragmentId === el?.fragmentId
-      && existingEl.location === el.location)
+      && existingEl.location === el.location
+      && existingEl.idx === el.idx
+      && existingEl.outerIdx === el.outerIdx)
       return;
   }
 
+  const nodes = new Set<HTMLElement>(dragHandleStore.get().affectedNodes);
+  if(node) {
+    nodes.add(node);
+  }
   dragHandleStore.set({
     ...dragHandleStore.get(),
-    hoverElement: el
+    hoverElement: el,
+    affectedNodes: nodes,
   })
 }
 

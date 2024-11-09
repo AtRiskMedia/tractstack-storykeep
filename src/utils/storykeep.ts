@@ -335,8 +335,6 @@ export const isFullScreenEditModal = (mode: string) => {
   return mode === "settings" && isShortScreen && !isDesktop;
 };
 
-// todo: add pane IDs and handle inter-pane moves
-// todo: fix moving upwards does not work
 export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: string, el1OuterIdx: number, el1PaneId: string, el1Idx: number|null, el2FragmentId: string, el2OuterIdx: number, el2PaneId: string, el2Idx: number|null) {
   const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
   const newHistory = updateHistory(field, Date.now());

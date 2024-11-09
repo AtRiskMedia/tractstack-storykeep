@@ -213,13 +213,111 @@ const EditableInnerElementWrapper = ({
   onClick,
   id,
   children,
+  fragmentId,
+  paneId,
+  idx,
+  outerIdx,
+  markdownLookup
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
   id: string;
   children: ReactNode;
+  fragmentId: string;
+  paneId: string;
+  idx: number | null;
+  outerIdx: number;
+  markdownLookup: MarkdownLookup,
 }) => {
+  const [dragPos, setDragPos] = useState<ControlPosition>({ x: 0, y: 0 });
+  const dragging = useRef<boolean>(false);
+  const dragState = useStore(dragHandleStore);
+
+  const self = useRef<HTMLDivElement>(null);
+  const activeHoverArea = useRef<Location>(Location.NOWHERE);
+
+  const getNodeData = (): DragNode => {
+    return { fragmentId, paneId, idx, outerIdx } as DragNode;
+  };
+
+  useEffect(() => {
+    if(dragging.current) return;
+
+    if (!dragState.dropState) {
+      if (self.current) {
+        const rect = self.current.getBoundingClientRect();
+        if (isPosInsideRect(rect, dragState.pos)) {
+          const loc = dragState.pos.y > rect.y + rect.height/2 ? Location.AFTER : Location.BEFORE;
+          activeHoverArea.current = loc;
+          console.log(`inside afterArea: ${id} | location: ${loc}`);
+          setDragHoverInfo({ ...getNodeData(), location: loc === Location.AFTER ? "after" : "before" });
+        }
+      }
+    } else if (dragState.affectedFragments.size > 0) {
+      if (
+        dragState.dropState.fragmentId === fragmentId &&
+        dragState.dropState.paneId === paneId &&
+        dragState.dropState.idx === idx &&
+        dragState.dropState.outerIdx === outerIdx
+      ) {
+        console.log(`Drop active element: ${JSON.stringify(dragState.dropState)}`);
+      }
+    }
+  }, [dragState]);
+
+  useEffect(() => {
+    const handleMouseMove: EventListener = event => {
+      const mouseEvent = event as unknown as MouseEvent; // Type assertion to MouseEvent
+      const x = mouseEvent.clientX + window.scrollX;
+      const y = mouseEvent.clientY + window.scrollY;
+      if (dragging.current) {
+        setDragPosition({ x, y });
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, []);
+
   return (
+    <Draggable
+      defaultPosition={{ x: dragPos.x, y: dragPos.y }}
+      position={dragPos}
+      onStart={() => {
+        dragging.current = true;
+        resetDragStore();
+        const root = paneFragmentMarkdown.get()[fragmentId].current.markdown.htmlAst;
+        setDragShape({root, fragmentId, paneId, idx, outerIdx});
+        setGhostSize(100, 50);
+      }}
+      onStop={() => {
+        dragging.current = false;
+        if(dragHandleStore.get().affectedFragments.size > 0) {
+          const dragEl = dragHandleStore.get().dragShape;
+          if(dragEl) {
+            const hoverEl = dragHandleStore.get().hoverElement;
+            if(hoverEl) {
+              moveElements(
+                markdownLookup,
+                dragEl.fragmentId,
+                dragEl.outerIdx,
+                dragEl.paneId,
+                dragEl.idx,
+                hoverEl.fragmentId,
+                hoverEl.outerIdx,
+                hoverEl.paneId,
+                hoverEl.idx,
+              );
+            }
+          }
+          dropDraggingElement();
+        }
+        setDragPos({ x: 0, y: 0 });
+        resetDragStore();
+      }}
+    >
     <div id={id} className="relative" title={tooltip}>
       {children}
       <div
@@ -229,6 +327,7 @@ const EditableInnerElementWrapper = ({
                    mix-blend-exclusion"
       />
     </div>
+    </Draggable>
   );
 };
 
@@ -238,12 +337,22 @@ const ImageWrapper = ({
   toolMode,
   thisId,
   handleToolModeClick,
+  fragmentId,
+  paneId,
+  idx,
+  outerIdx,
+  markdownLookup
 }: {
   children: ReactNode;
   showOverlay: boolean;
   toolMode: ToolMode;
   thisId: string;
   handleToolModeClick: () => void;
+  fragmentId: string;
+  paneId: string;
+  idx: number | null;
+  outerIdx: number;
+  markdownLookup: MarkdownLookup,
 }) => {
   if (!showOverlay) return children;
   if (toolMode === "eraser") return children;
@@ -253,6 +362,11 @@ const ImageWrapper = ({
         id={thisId}
         tooltip="Manage this image"
         onClick={handleToolModeClick}
+        fragmentId={fragmentId}
+        paneId={paneId}
+        outerIdx={outerIdx}
+        idx={idx}
+        markdownLookup={markdownLookup}
       >
         {children}
       </EditableInnerElementWrapper>
@@ -540,6 +654,11 @@ function buildComponentFromAst(
             id={thisId}
             tooltip={tip}
             onClick={handleToolModeClick}
+            fragmentId={markdownFragmentId}
+            paneId={paneId}
+            idx={idx}
+            outerIdx={outerIdx}
+            markdownLookup={markdownLookup}
           >
             {child}
           </EditableInnerElementWrapper>
@@ -672,6 +791,11 @@ function buildComponentFromAst(
         toolMode={toolMode}
         thisId={thisId}
         handleToolModeClick={handleToolModeClick}
+        fragmentId={markdownFragmentId}
+        paneId={paneId}
+        idx={idx}
+        outerIdx={outerIdx}
+        markdownLookup={markdownLookup}
       >
         <img
           className={injectClassNames}
@@ -688,6 +812,11 @@ function buildComponentFromAst(
         toolMode={toolMode}
         thisId={thisId}
         handleToolModeClick={handleToolModeClick}
+        fragmentId={markdownFragmentId}
+        paneId={paneId}
+        idx={idx}
+        outerIdx={outerIdx}
+        markdownLookup={markdownLookup}
       >
         <img className={injectClassNames} src={imageSrc} alt={altText} />
       </ImageWrapper>
@@ -780,6 +909,11 @@ function buildComponentFromAst(
             id={thisId}
             tooltip={`Manage this Widget`}
             onClick={handleToolModeClick}
+            fragmentId={markdownFragmentId}
+            paneId={paneId}
+            idx={idx}
+            outerIdx={outerIdx}
+            markdownLookup={markdownLookup}
           >
             {widgetContent}
           </EditableInnerElementWrapper>,

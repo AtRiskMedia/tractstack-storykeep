@@ -44,7 +44,6 @@ import {
 import type {
   FieldWithHistory,
   HistoryEntry,
-  MarkdownEditDatum,
   MarkdownLookup,
   StoreKey,
   StoreMapType,
@@ -58,6 +57,7 @@ import {
   updateHistory,
 } from "@utils/compositor/markdownUtils.ts";
 import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup.ts";
+import type { Root } from "mdast";
 
 const BREAKPOINTS = {
   xl: 1367,
@@ -330,6 +330,14 @@ export const isFullScreenEditModal = (mode: string) => {
   const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
   return mode === "settings" && isShortScreen && !isDesktop;
 };
+
+export function reorderElements(ast: Root, el1Idx: number, el2Idx: number) {
+  if(ast.children.length >= el1Idx && ast.children.length >= el2Idx) {
+    for(let i = el1Idx; i < el2Idx; i++) {
+      [ast.children[i], ast.children[i+1]] = [ast.children[i+1], ast.children[i]];
+    }
+  }
+}
 
 export function insertElement(
   paneId: string,

@@ -27,6 +27,7 @@ import type {
 import { knownEnvSettings, PUBLIC_THEME, toolAddModes } from "../constants";
 import type { ControlPosition } from "react-draggable";
 import { createNodeId } from "@utils/helpers.ts";
+import type { Root } from "hast";
 
 export const themeStore = atom<Theme>(PUBLIC_THEME as Theme);
 
@@ -107,6 +108,10 @@ export interface DragState extends DragNode {
   location: "before" | "after";
 }
 
+export interface DragShape extends DragNode {
+  root: Root;
+}
+
 export type DragHandle = {
   pos: ControlPosition;
   ghostHeight: number;
@@ -115,6 +120,7 @@ export type DragHandle = {
   affectedFragments: Set<string>;
   affectedPanes: Set<string>;
   dropState: DragState | null;
+  dragShape: DragShape | null;
 };
 
 const EMPTY_DRAG_HANDLE: DragHandle = {
@@ -125,9 +131,17 @@ const EMPTY_DRAG_HANDLE: DragHandle = {
   dropState: null,
   affectedFragments: new Set<string>(),
   affectedPanes: new Set<string>(),
+  dragShape: null,
 };
 
 export const resetDragStore = () => dragHandleStore.set(EMPTY_DRAG_HANDLE);
+
+export const setDragShape = (shape: DragShape|null) => {
+  dragHandleStore.set({
+    ...dragHandleStore.get(),
+    dragShape: shape
+  });
+}
 
 export const dropDraggingElement = () => {
   const existingEl = dragHandleStore.get()?.hoverElement || null;

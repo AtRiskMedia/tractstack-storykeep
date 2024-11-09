@@ -345,8 +345,16 @@ export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: stri
   if(el1PaneId === el2PaneId) {
     const ast = mdast;
     if (ast.children.length >= el1OuterIdx && ast.children.length >= el2OuterIdx) {
-      for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
-        [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i]];
+      if(el1OuterIdx < el2OuterIdx) {
+        // swap elements top to bottom
+        for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
+          [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i]];
+        }
+      } else {
+        // swap elements bottom to top
+        for (let i = el1OuterIdx; i > el2OuterIdx; i--) {
+          [ast.children[i], ast.children[i - 1]] = [ast.children[i - 1], ast.children[i]];
+        }
       }
     }
     field.current.markdown.body = toMarkdown(mdast);

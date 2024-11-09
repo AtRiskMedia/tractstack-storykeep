@@ -5,29 +5,18 @@ import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import {
   dragHandleStore,
   type DragNode,
-  editModeStore,
-  lastInteractedPaneStore,
-  lastInteractedTypeStore,
   Location,
   paneFragmentMarkdown,
   setDragHoverInfo,
   toolModeStore,
   unsavedChangesStore,
 } from "../../../store/storykeep";
-import {
-  allowTagInsert,
-  getGlobalNth,
-  insertElementIntoMarkdown,
-  updateHistory,
-} from "../../../utils/compositor/markdownUtils";
-import { generateMarkdownLookup } from "../../../utils/compositor/generateMarkdownLookup";
-import {
-  toolAddModeInsertDefault,
-  toolAddModeTitles,
-} from "../../../constants";
-import { classNames, cloneDeep } from "../../../utils/helpers";
+import { allowTagInsert } from "../../../utils/compositor/markdownUtils";
+import { toolAddModeTitles } from "../../../constants";
+import { classNames } from "../../../utils/helpers";
 import type { MarkdownLookup, ToolAddMode } from "../../../types";
 import { isPosInsideRect } from "@utils/math.ts";
+import { insertElement } from "@utils/storykeep.ts";
 
 interface InsertWrapperProps {
   fragmentId: string;
@@ -74,10 +63,16 @@ const InsertWrapper = ({
       if (self.current) {
         const rect = self.current.getBoundingClientRect();
         if (isPosInsideRect(rect, dragState.pos)) {
-          const loc = dragState.pos.y > rect.y + rect.height/2 ? Location.AFTER : Location.BEFORE;
+          const loc =
+            dragState.pos.y > rect.y + rect.height / 2
+              ? Location.AFTER
+              : Location.BEFORE;
           activeHoverArea.current = loc;
           console.log(`inside afterArea: ${fragmentId} | location: ${loc}`);
-          setDragHoverInfo({ ...getNodeData(), location: loc === Location.AFTER ? "after" : "before" });
+          setDragHoverInfo({
+            ...getNodeData(),
+            location: loc === Location.AFTER ? "after" : "before",
+          });
         }
       }
     } else if (dragState.affectedFragments.size > 0) {
@@ -98,102 +93,17 @@ const InsertWrapper = ({
   const handleInsert = useCallback(
     (position: "before" | "after") => {
       queueUpdate(contentId, () => {
-        lastInteractedTypeStore.set(`markdown`);
-        lastInteractedPaneStore.set(paneId);
-        const currentField = cloneDeep($paneFragmentMarkdown[fragmentId]);
-        const now = Date.now();
-        const newHistory = updateHistory(currentField, now);
-        const newContent = toolAddModeInsertDefault[toolAddMode];
-        const parentTag = isEmpty ? null : markdownLookup.nthTag[outerIdx];
-        const newImgContainer = toolAddMode === `img` && parentTag !== `ul`;
-        const newAsideContainer = toolAddMode === `aside` && parentTag !== `ol`;
-        const thisNewContent = newImgContainer
-          ? `* ${newContent}`
-          : newAsideContainer
-            ? `1. ${newContent}`
-            : newContent;
-        const thisIdx = newAsideContainer ? null : idx;
-        const thisOuterIdx = isEmpty ? 0 : outerIdx;
-        const thisPosition = isEmpty ? "before" : position;
-        const newValue = insertElementIntoMarkdown(
-          currentField.current,
-          thisNewContent,
+        insertElement(
+          paneId,
+          $paneFragmentMarkdown[fragmentId],
+          fragmentId,
           toolAddMode,
-          thisOuterIdx,
-          thisIdx,
-          thisPosition,
-          markdownLookup
+          isEmpty,
+          markdownLookup,
+          outerIdx,
+          idx,
+          position
         );
-        const newMarkdownLookup = generateMarkdownLookup(
-          newValue.markdown.htmlAst
-        );
-        let newOuterIdx = thisOuterIdx;
-        let newIdx = thisIdx || 0;
-        if (position === "after" && !isEmpty) {
-          if (
-            Object.keys(markdownLookup.nthTag).length <
-            Object.keys(newMarkdownLookup.nthTag).length
-          ) {
-            newOuterIdx = outerIdx + 1;
-            newIdx = 0;
-          } else if (typeof idx === `number`) {
-            newIdx = idx + 1;
-          }
-        }
-        const newTag =
-          toolAddMode === "img"
-            ? `img`
-            : [
-                  `code`,
-                  `img`,
-                  `yt`,
-                  `bunny`,
-                  `belief`,
-                  `toggle`,
-                  `identify`,
-                ].includes(toolAddMode)
-              ? `code`
-              : toolAddMode === `aside`
-                ? `li`
-                : toolAddMode;
-        const newGlobalNth =
-          getGlobalNth(newTag, newIdx, newOuterIdx, newMarkdownLookup) || 0;
-
-        if (
-          [
-            `img`,
-            `code`,
-            `img`,
-            `yt`,
-            `bunny`,
-            `belief`,
-            `toggle`,
-            `identify`,
-          ].includes(toolAddMode)
-        ) {
-          editModeStore.set({
-            id: paneId,
-            mode: "styles",
-            type: "pane",
-            targetId: {
-              paneId,
-              outerIdx: newOuterIdx,
-              idx: newIdx,
-              globalNth: newGlobalNth,
-              tag: newTag,
-              mustConfig: true,
-            },
-          });
-        }
-        paneFragmentMarkdown.setKey(fragmentId, {
-          ...currentField,
-          current: newValue,
-          history: newHistory,
-        });
-        unsavedChangesStore.setKey(paneId, {
-          ...$unsavedChanges[paneId],
-          paneFragmentMarkdown: true,
-        });
         toolModeStore.set({ value: `text` });
       });
     },

@@ -1,21 +1,16 @@
-import { useCallback, useState, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
-  unsavedChangesStore,
-  uncleanDataStore,
-  temporaryErrorsStore,
-  storyFragmentTitle,
-  storyFragmentSlug,
-  storyFragmentTailwindBgColour,
-  storyFragmentMenuId,
-  storyFragmentSocialImagePath,
-  storyFragmentPaneIds,
-  paneTitle,
-  paneSlug,
-  paneFragmentMarkdown,
+  editModeStore,
+  lastInteractedPaneStore,
+  lastInteractedTypeStore,
+  paneCodeHook,
+  paneFiles,
+  paneFragmentBgColour,
   paneFragmentBgPane,
-  paneIsHiddenPane,
-  paneHasOverflowHidden,
+  paneFragmentIds,
+  paneFragmentMarkdown,
   paneHasMaxHScreen,
+  paneHasOverflowHidden,
   paneHeightOffsetDesktop,
   paneHeightOffsetMobile,
   paneHeightOffsetTablet,
@@ -23,27 +18,45 @@ import {
   paneHeightRatioMobile,
   paneHeightRatioTablet,
   paneHeldBeliefs,
-  paneWithheldBeliefs,
-  paneCodeHook,
   paneImpression,
-  paneFiles,
-  paneFragmentIds,
-  paneFragmentBgColour,
+  paneIsHiddenPane,
+  paneSlug,
+  paneTitle,
+  paneWithheldBeliefs,
+  storyFragmentMenuId,
+  storyFragmentPaneIds,
+  storyFragmentSlug,
+  storyFragmentSocialImagePath,
+  storyFragmentTailwindBgColour,
+  storyFragmentTitle,
+  temporaryErrorsStore,
+  uncleanDataStore,
+  unsavedChangesStore,
 } from "../store/storykeep";
-import { isDeepEqual } from "./helpers";
+import { cloneDeep, isDeepEqual } from "./helpers";
 import {
-  MS_BETWEEN_UNDO,
   MAX_HISTORY_LENGTH,
-  SHORT_SCREEN_THRESHOLD,
+  MS_BETWEEN_UNDO,
   reservedSlugs,
+  SHORT_SCREEN_THRESHOLD,
+  toolAddModeInsertDefault,
 } from "../constants";
 import type {
+  FieldWithHistory,
+  HistoryEntry,
+  MarkdownEditDatum,
+  MarkdownLookup,
   StoreKey,
   StoreMapType,
-  FieldWithHistory,
+  ToolAddMode,
   ValidationFunction,
-  HistoryEntry,
 } from "../types";
+import {
+  getGlobalNth,
+  insertElementIntoMarkdown,
+  updateHistory,
+} from "@utils/compositor/markdownUtils.ts";
+import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup.ts";
 
 const BREAKPOINTS = {
   xl: 1367,
@@ -316,3 +329,104 @@ export const isFullScreenEditModal = (mode: string) => {
   const isDesktop = window.innerWidth >= BREAKPOINTS.xl;
   return mode === "settings" && isShortScreen && !isDesktop;
 };
+
+export function insertElement(
+  paneId: string,
+  obj: FieldWithHistory<MarkdownEditDatum>,
+  fragmentId: string,
+  toolAddMode: ToolAddMode,
+  isEmpty: boolean,
+  markdownLookup: MarkdownLookup,
+  outerIdx: number,
+  idx: number | null,
+  position: "before" | "after"
+) {
+  lastInteractedTypeStore.set(`markdown`);
+  lastInteractedPaneStore.set(paneId);
+  const currentField = cloneDeep(obj);
+  const now = Date.now();
+  const newHistory = updateHistory(currentField, now);
+  const newContent = toolAddModeInsertDefault[toolAddMode];
+  const parentTag = isEmpty ? null : markdownLookup.nthTag[outerIdx];
+  const newImgContainer = toolAddMode === `img` && parentTag !== `ul`;
+  const newAsideContainer = toolAddMode === `aside` && parentTag !== `ol`;
+  const thisNewContent = newImgContainer
+    ? `* ${newContent}`
+    : newAsideContainer
+      ? `1. ${newContent}`
+      : newContent;
+  const thisIdx = newAsideContainer ? null : idx;
+  const thisOuterIdx = isEmpty ? 0 : outerIdx;
+  const thisPosition = isEmpty ? "before" : position;
+  const newValue = insertElementIntoMarkdown(
+    currentField.current,
+    thisNewContent,
+    toolAddMode,
+    thisOuterIdx,
+    thisIdx,
+    thisPosition,
+    markdownLookup
+  );
+  const newMarkdownLookup = generateMarkdownLookup(newValue.markdown.htmlAst);
+  let newOuterIdx = thisOuterIdx;
+  let newIdx = thisIdx || 0;
+  if (position === "after" && !isEmpty) {
+    if (
+      Object.keys(markdownLookup.nthTag).length <
+      Object.keys(newMarkdownLookup.nthTag).length
+    ) {
+      newOuterIdx = outerIdx + 1;
+      newIdx = 0;
+    } else if (typeof idx === `number`) {
+      newIdx = idx + 1;
+    }
+  }
+  const newTag =
+    toolAddMode === "img"
+      ? `img`
+      : [`code`, `img`, `yt`, `bunny`, `belief`, `toggle`, `identify`].includes(
+            toolAddMode
+          )
+        ? `code`
+        : toolAddMode === `aside`
+          ? `li`
+          : toolAddMode;
+  const newGlobalNth =
+    getGlobalNth(newTag, newIdx, newOuterIdx, newMarkdownLookup) || 0;
+
+  if (
+    [
+      `img`,
+      `code`,
+      `img`,
+      `yt`,
+      `bunny`,
+      `belief`,
+      `toggle`,
+      `identify`,
+    ].includes(toolAddMode)
+  ) {
+    editModeStore.set({
+      id: paneId,
+      mode: "styles",
+      type: "pane",
+      targetId: {
+        paneId,
+        outerIdx: newOuterIdx,
+        idx: newIdx,
+        globalNth: newGlobalNth,
+        tag: newTag,
+        mustConfig: true,
+      },
+    });
+  }
+  paneFragmentMarkdown.setKey(fragmentId, {
+    ...currentField,
+    current: newValue,
+    history: newHistory,
+  });
+  unsavedChangesStore.setKey(paneId, {
+    ...unsavedChangesStore.get()[paneId],
+    paneFragmentMarkdown: true,
+  });
+}

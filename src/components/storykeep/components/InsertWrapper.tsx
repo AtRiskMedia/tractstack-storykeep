@@ -95,7 +95,6 @@ const InsertWrapper = ({
       queueUpdate(contentId, () => {
         insertElement(
           paneId,
-          $paneFragmentMarkdown[fragmentId],
           fragmentId,
           toolAddMode,
           isEmpty,

@@ -54,6 +54,7 @@ import type {
 import {
   getGlobalNth,
   insertElementIntoMarkdown,
+  removeElementFromMarkdown,
   updateHistory,
 } from "@utils/compositor/markdownUtils.ts";
 import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup.ts";
@@ -332,7 +333,6 @@ export const isFullScreenEditModal = (mode: string) => {
 
 export function insertElement(
   paneId: string,
-  obj: FieldWithHistory<MarkdownEditDatum>,
   fragmentId: string,
   toolAddMode: ToolAddMode,
   isEmpty: boolean,
@@ -343,7 +343,7 @@ export function insertElement(
 ) {
   lastInteractedTypeStore.set(`markdown`);
   lastInteractedPaneStore.set(paneId);
-  const currentField = cloneDeep(obj);
+  const currentField = cloneDeep(paneFragmentMarkdown.get()[fragmentId]);
   const now = Date.now();
   const newHistory = updateHistory(currentField, now);
   const newContent = toolAddModeInsertDefault[toolAddMode];
@@ -430,3 +430,33 @@ export function insertElement(
     paneFragmentMarkdown: true,
   });
 }
+
+export const eraseElement = (
+  paneId: string,
+  fragmentId: string,
+  outerIdx: number,
+  idx: number | null,
+  markdownLookup: MarkdownLookup
+) => {
+  lastInteractedTypeStore.set(`markdown`);
+  lastInteractedPaneStore.set(paneId);
+  const currentField = cloneDeep(paneFragmentMarkdown.get()[fragmentId]);
+  const now = Date.now();
+  const newHistory = updateHistory(currentField, now);
+  const newValue = removeElementFromMarkdown(
+    currentField.current,
+    outerIdx,
+    idx,
+    markdownLookup
+  );
+  paneFragmentMarkdown.setKey(fragmentId, {
+    ...currentField,
+    current: newValue,
+    history: newHistory,
+  });
+  const isUnsaved = !isDeepEqual(newValue, currentField.original);
+  unsavedChangesStore.setKey(paneId, {
+    ...unsavedChangesStore.get()[paneId],
+    paneFragmentMarkdown: isUnsaved,
+  });
+};

@@ -19,27 +19,21 @@ import { AstToButton } from "../../../components/panes/AstToButton";
 import EditableContent from "./EditableContent";
 import { toHtml } from "hast-util-to-html";
 import {
-  cleanHtmlAst,
   getGlobalNth,
-  parseMarkdownSections,
-  updateHistory,
 } from "../../../utils/compositor/markdownUtils";
 import EraserWrapper from "./EraserWrapper";
 import InsertWrapper from "./InsertWrapper";
 import { wrapWithStylesIndicator } from "./StylesWrapper";
-import { classNames, cloneDeep } from "../../../utils/helpers";
+import { classNames } from "../../../utils/helpers";
 import { Belief } from "@components/widgets/Belief";
 import { IdentifyAs } from "@components/widgets/IdentifyAs";
 import { ToggleBelief } from "@components/widgets/ToggleBelief";
 import type { ButtonData, FileNode, MarkdownDatum, MarkdownLookup, ToolAddMode, ToolMode } from "../../../types";
-import type { Element as HastElement, Root as HastRoot } from "hast";
+import type { Element as HastElement } from "hast";
 import { useStore } from "@nanostores/react";
 import Draggable, { type ControlPosition } from "react-draggable";
 import { isPosInsideRect } from "@utils/math.ts";
-import { fromMarkdown } from "mdast-util-from-markdown";
-import { reorderElements } from "@utils/storykeep.ts";
-import { toMarkdown } from "mdast-util-to-markdown";
-import { toHast } from "mdast-util-to-hast";
+import { moveElements } from "@utils/storykeep.ts";
 
 interface PaneFromAstProps {
   readonly: boolean;
@@ -73,6 +67,7 @@ const EditableOuterWrapper = ({
   paneId,
   idx,
   outerIdx,
+  markdownLookup,
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
@@ -82,6 +77,7 @@ const EditableOuterWrapper = ({
   paneId: string;
   idx: number | null;
   outerIdx: number;
+  markdownLookup: MarkdownLookup,
 }) => {
   const [dragPos, setDragPos] = useState<ControlPosition>({ x: 0, y: 0 });
   const dragging = useRef<boolean>(false);
@@ -148,33 +144,28 @@ const EditableOuterWrapper = ({
       }}
       onStop={() => {
         dragging.current = false;
-        if(dragHandleStore.get().affectedFragments.size === 0) {
-          resetDragStore();
-        } else {
+        if(dragHandleStore.get().affectedFragments.size > 0) {
           const dragEl = dragHandleStore.get().dragShape;
           if(dragEl) {
-            const pane = cloneDeep(paneFragmentMarkdown.get()[dragEl.fragmentId]);
-            const hoverElIdx = dragHandleStore.get().hoverElement?.outerIdx || -1;
-            if(hoverElIdx !== -1) {
-              const mdast = fromMarkdown(pane.current.markdown.body);
-              const newHistory = updateHistory(pane, Date.now());
-
-              reorderElements(mdast, dragEl.outerIdx, hoverElIdx);
-              pane.current.markdown.body = toMarkdown(mdast);
-              pane.current.markdown.htmlAst = cleanHtmlAst(
-                toHast(mdast) as HastRoot
-              ) as HastRoot;
-              console.log(mdast);
-              paneFragmentMarkdown.setKey(fragmentId, {
-                ...pane,
-                current: pane.current,
-                history: newHistory
-              });
+            const hoverEl = dragHandleStore.get().hoverElement;
+            if(hoverEl) {
+              moveElements(
+                markdownLookup,
+                dragEl.fragmentId,
+                dragEl.outerIdx,
+                dragEl.paneId,
+                dragEl.idx,
+                hoverEl.fragmentId,
+                hoverEl.outerIdx,
+                hoverEl.paneId,
+                hoverEl.idx,
+              );
             }
           }
           dropDraggingElement();
         }
         setDragPos({ x: 0, y: 0 });
+        resetDragStore();
       }}
     >
       <div
@@ -581,6 +572,7 @@ function buildComponentFromAst(
             outerIdx={outerIdx}
             idx={idx}
             onClick={handleToolModeClick}
+            markdownLookup={markdownLookup}
           >
             {child}
           </EditableOuterWrapper>,

@@ -51,13 +51,17 @@ import type {
   ValidationFunction,
 } from "../types";
 import {
+  cleanHtmlAst,
   getGlobalNth,
   insertElementIntoMarkdown,
   removeElementFromMarkdown,
   updateHistory,
 } from "@utils/compositor/markdownUtils.ts";
 import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup.ts";
-import type { Root } from "mdast";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { toMarkdown } from "mdast-util-to-markdown";
+import { toHast } from "mdast-util-to-hast";
+import type { Root as HastRoot } from "hast";
 
 const BREAKPOINTS = {
   xl: 1367,
@@ -331,11 +335,48 @@ export const isFullScreenEditModal = (mode: string) => {
   return mode === "settings" && isShortScreen && !isDesktop;
 };
 
-export function reorderElements(ast: Root, el1Idx: number, el2Idx: number) {
-  if(ast.children.length >= el1Idx && ast.children.length >= el2Idx) {
-    for(let i = el1Idx; i < el2Idx; i++) {
-      [ast.children[i], ast.children[i+1]] = [ast.children[i+1], ast.children[i]];
+// todo: add pane IDs and handle inter-pane moves
+// todo: fix moving upwards does not work
+export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: string, el1OuterIdx: number, el1PaneId: string, el1Idx: number|null, el2FragmentId: string, el2OuterIdx: number, el2PaneId: string, el2Idx: number|null) {
+  const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
+  const newHistory = updateHistory(field, Date.now());
+  const mdast = fromMarkdown(field.current.markdown.body);
+
+  if(el1PaneId === el2PaneId) {
+    const ast = mdast;
+    if (ast.children.length >= el1OuterIdx && ast.children.length >= el2OuterIdx) {
+      for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
+        [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i]];
+      }
     }
+    field.current.markdown.body = toMarkdown(mdast);
+    field.current.markdown.htmlAst = cleanHtmlAst(
+      toHast(mdast) as HastRoot
+    ) as HastRoot;
+
+    paneFragmentMarkdown.setKey(el1fragmentId, {
+      ...field,
+      current: field.current,
+      history: newHistory
+    });
+  } else {
+    const erasedEl = mdast.children.splice(el1OuterIdx, 1);
+    eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
+
+    const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
+    const secondMdast = fromMarkdown(hoverElField.current.markdown.body);
+    secondMdast.children.unshift(erasedEl[0]);
+    for(let i = 0; i < el2OuterIdx; ++i) {
+      [secondMdast.children[i], secondMdast.children[i+1]] = [secondMdast.children[i+1], secondMdast.children[i]];
+    }
+
+    hoverElField.current.markdown.body = toMarkdown(secondMdast);
+    hoverElField.current.markdown.htmlAst = cleanHtmlAst(toHast(secondMdast) as HastRoot) as HastRoot;
+    paneFragmentMarkdown.setKey(el2FragmentId, {
+      ...hoverElField,
+      current: hoverElField.current,
+      history: newHistory
+    });
   }
 }
 

@@ -43,7 +43,7 @@ import {
 } from "../constants";
 import type {
   FieldWithHistory,
-  HistoryEntry,
+  HistoryEntry, MarkdownEditDatum,
   MarkdownLookup,
   StoreKey,
   StoreMapType,
@@ -61,7 +61,7 @@ import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
-import type { Root as HastRoot } from "hast";
+import type { Root as HastRoot, RootContent } from "hast";
 
 const BREAKPOINTS = {
   xl: 1367,
@@ -335,7 +335,41 @@ export const isFullScreenEditModal = (mode: string) => {
   return mode === "settings" && isShortScreen && !isDesktop;
 };
 
-export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: string, el1OuterIdx: number, el1PaneId: string, el1Idx: number|null, el2FragmentId: string, el2OuterIdx: number, el2PaneId: string, el2Idx: number|null) {
+const copyHrefDataBetweenAsts = (
+  originalField: FieldWithHistory<MarkdownEditDatum>,
+  foundLink: string,
+  newField: FieldWithHistory<MarkdownEditDatum>
+) => {
+  const btns = originalField?.current?.payload?.optionsPayload?.buttons;
+  if (!btns) return;
+
+  const payload = btns[foundLink];
+  if (!payload) return;
+
+  let optionsPayload = newField?.current?.payload?.optionsPayload?.buttons;
+  if (!optionsPayload) {
+    optionsPayload = {};
+    newField.current.payload.optionsPayload.buttons = optionsPayload;
+  }
+  optionsPayload[foundLink] = payload;
+  delete btns[foundLink];
+};
+
+const copyMarkdownIfFound = (el: RootContent, originalField: FieldWithHistory<MarkdownEditDatum>, newField: FieldWithHistory<MarkdownEditDatum>) => {
+  if("properties" in el) {
+    const foundLink = el.properties.href?.toString();
+    if(foundLink) {
+      copyHrefDataBetweenAsts(originalField, foundLink, newField);
+    }
+  }
+  if("children" in el) {
+    for(let i = 0; i < el.children.length; i++) {
+      copyMarkdownIfFound(el.children[i], originalField, newField);
+    }
+  }
+}
+
+export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: string, el1OuterIdx: number, el1PaneId: string, el1Idx: number|null, el2FragmentId: string, el2OuterIdx: number, el2PaneId: string) {
   const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
   const newHistory = updateHistory(field, Date.now());
   const mdast = fromMarkdown(field.current.markdown.body);
@@ -370,6 +404,10 @@ export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: stri
     eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
     const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
+    // grab original child because mdast loses some properties when it runs "toMarkdown"
+    const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
+    copyMarkdownIfFound(originalChild, field, hoverElField);
+
     const secondMdast = fromMarkdown(hoverElField.current.markdown.body);
     secondMdast.children.unshift(erasedEl[0]);
     for(let i = 0; i < el2OuterIdx; ++i) {

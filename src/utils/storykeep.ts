@@ -375,7 +375,7 @@ const copyMarkdownIfFound = (
   }
 };
 
-const isDragWithinContainerAsListElement = (
+const isDragInitiatedFromListElement = (
   field: MdastRoot,
   outerIdx: number,
   idx: number | null
@@ -467,6 +467,43 @@ function handleBlockMovementWithinTheSamePanel(
   });
 }
 
+function handleListElementMovementWithinTheSamePanel(
+  mdast: MdastRoot,
+  el1OuterIdx: number,
+  el1Index: number|null,
+  el2Index: number|null,
+  field: FieldWithHistory<MarkdownEditDatum>,
+  el1fragmentId: string,
+  newHistory: HistoryEntry<MarkdownEditDatum>[]
+) {
+  if(el1Index === null || el2Index === null) return;
+
+  const parent = mdast.children[el1OuterIdx];
+  if(!parent || !("children" in parent)) return;
+
+  if (parent.children.length >= el1Index && parent.children.length >= el2Index) {
+    if (el1Index < el2Index) {
+      // swap elements top to bottom
+      for (let i = el1OuterIdx; i < el2Index; i++) {
+        [parent.children[i], parent.children[i + 1]] = [parent.children[i + 1], parent.children[i],];
+      }
+    } else {
+      // swap elements bottom to top
+      for (let i = el1Index; i > el2Index; i--) {
+        [parent.children[i], parent.children[i - 1]] = [parent.children[i - 1], parent.children[i],];
+      }
+    }
+  }
+  field.current.markdown.body = toMarkdown(mdast);
+  field.current.markdown.htmlAst = cleanHtmlAst(toHast(mdast) as HastRoot) as HastRoot;
+
+  paneFragmentMarkdown.setKey(el1fragmentId, {
+    ...field,
+    current: field.current,
+    history: newHistory,
+  });
+}
+
 export function moveElements(
   markdownLookup: MarkdownLookup,
   el1fragmentId: string,
@@ -475,18 +512,21 @@ export function moveElements(
   el1Idx: number | null,
   el2FragmentId: string,
   el2OuterIdx: number,
-  el2PaneId: string
+  el2PaneId: string,
+  el2Idx: number | null,
 ) {
   const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
   const mdast = fromMarkdown(field.current.markdown.body);
   const newHistory = updateHistory(field, Date.now());
 
-  if (isDragWithinContainerAsListElement(mdast, el1OuterIdx, el1Idx)) {
-    console.log("handle list element movement within container");
-  } else if (el1PaneId !== el2PaneId) {
+  if (el1PaneId !== el2PaneId) {
     handleBlockMovementBetweenDifferentPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, el2FragmentId, field, el2OuterIdx, newHistory);
   } else {
-    handleBlockMovementWithinTheSamePanel(mdast, el1OuterIdx, el2OuterIdx, field, el1fragmentId, newHistory);
+    if(isDragInitiatedFromListElement(mdast, el1OuterIdx, el1Idx)) {
+      handleListElementMovementWithinTheSamePanel(mdast, el1OuterIdx, el1Idx, el2Idx, field, el1fragmentId, newHistory);
+    } else {
+      handleBlockMovementWithinTheSamePanel(mdast, el1OuterIdx, el2OuterIdx, field, el1fragmentId, newHistory);
+    }
   }
 }
 

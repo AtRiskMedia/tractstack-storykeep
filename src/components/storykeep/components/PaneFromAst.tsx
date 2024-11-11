@@ -158,6 +158,7 @@ const EditableOuterWrapper = ({
                 hoverEl.fragmentId,
                 hoverEl.outerIdx,
                 hoverEl.paneId,
+                hoverEl.idx,
               );
             }
           }
@@ -315,7 +316,8 @@ const EditableInnerElementWrapper = ({
                 dragEl.idx,
                 hoverEl.fragmentId,
                 hoverEl.outerIdx,
-                hoverEl.paneId
+                hoverEl.paneId,
+                hoverEl.idx
               );
             }
           }

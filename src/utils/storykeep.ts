@@ -43,7 +43,8 @@ import {
 } from "../constants";
 import type {
   FieldWithHistory,
-  HistoryEntry, MarkdownEditDatum,
+  HistoryEntry,
+  MarkdownEditDatum,
   MarkdownLookup,
   StoreKey,
   StoreMapType,
@@ -62,6 +63,7 @@ import { fromMarkdown } from "mdast-util-from-markdown";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
 import type { Root as HastRoot, RootContent } from "hast";
+import type { Root as MdastRoot } from "mdast";
 
 const BREAKPOINTS = {
   xl: 1367,
@@ -355,72 +357,136 @@ const copyHrefDataBetweenAsts = (
   delete btns[foundLink];
 };
 
-const copyMarkdownIfFound = (el: RootContent, originalField: FieldWithHistory<MarkdownEditDatum>, newField: FieldWithHistory<MarkdownEditDatum>) => {
-  if("properties" in el) {
+const copyMarkdownIfFound = (
+  el: RootContent,
+  originalField: FieldWithHistory<MarkdownEditDatum>,
+  newField: FieldWithHistory<MarkdownEditDatum>
+) => {
+  if ("properties" in el) {
     const foundLink = el.properties.href?.toString();
-    if(foundLink) {
+    if (foundLink) {
       copyHrefDataBetweenAsts(originalField, foundLink, newField);
     }
   }
-  if("children" in el) {
-    for(let i = 0; i < el.children.length; i++) {
+  if ("children" in el) {
+    for (let i = 0; i < el.children.length; i++) {
       copyMarkdownIfFound(el.children[i], originalField, newField);
     }
   }
-}
+};
 
-export function moveElements(markdownLookup: MarkdownLookup, el1fragmentId: string, el1OuterIdx: number, el1PaneId: string, el1Idx: number|null, el2FragmentId: string, el2OuterIdx: number, el2PaneId: string) {
-  const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
-  const newHistory = updateHistory(field, Date.now());
-  const mdast = fromMarkdown(field.current.markdown.body);
+const isDragWithinContainerAsListElement = (
+  field: MdastRoot,
+  outerIdx: number,
+  idx: number | null
+): boolean => {
+  if (!field.children[outerIdx]) return false;
 
-  if(el1PaneId === el2PaneId) {
-    const ast = mdast;
-    if (ast.children.length >= el1OuterIdx && ast.children.length >= el2OuterIdx) {
-      if(el1OuterIdx < el2OuterIdx) {
-        // swap elements top to bottom
-        for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
-          [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i]];
-        }
-      } else {
-        // swap elements bottom to top
-        for (let i = el1OuterIdx; i > el2OuterIdx; i--) {
-          [ast.children[i], ast.children[i - 1]] = [ast.children[i - 1], ast.children[i]];
-        }
+  const parent = field.children[outerIdx];
+  if (parent) {
+    if (idx && "children" in parent) {
+      const nestedChildren = parent.children[idx];
+      if (nestedChildren) {
+        return (
+          nestedChildren.type === "list" || nestedChildren.type === "listItem"
+        );
       }
     }
-    field.current.markdown.body = toMarkdown(mdast);
-    field.current.markdown.htmlAst = cleanHtmlAst(
-      toHast(mdast) as HastRoot
-    ) as HastRoot;
+    return parent.type === "list";
+  }
+  return false;
+};
 
-    paneFragmentMarkdown.setKey(el1fragmentId, {
-      ...field,
-      current: field.current,
-      history: newHistory
-    });
-  } else {
-    const erasedEl = mdast.children.splice(el1OuterIdx, 1);
-    eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
+function handleBlockMovementBetweenDifferentPanels(
+  mdast: MdastRoot,
+  el1OuterIdx: number,
+  el1PaneId: string,
+  el1fragmentId: string,
+  el1Idx: number | null,
+  markdownLookup: MarkdownLookup,
+  el2FragmentId: string,
+  field: FieldWithHistory<MarkdownEditDatum>,
+  el2OuterIdx: number,
+  newHistory: HistoryEntry<MarkdownEditDatum>[]
+) {
+  const erasedEl = mdast.children.splice(el1OuterIdx, 1);
+  eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
-    const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
-    // grab original child because mdast loses some properties when it runs "toMarkdown"
-    const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
-    copyMarkdownIfFound(originalChild, field, hoverElField);
+  const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
+  // grab original child because mdast loses some properties when it runs "toMarkdown"
+  const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
+  copyMarkdownIfFound(originalChild, field, hoverElField);
 
-    const secondMdast = fromMarkdown(hoverElField.current.markdown.body);
-    secondMdast.children.unshift(erasedEl[0]);
-    for(let i = 0; i < el2OuterIdx; ++i) {
-      [secondMdast.children[i], secondMdast.children[i+1]] = [secondMdast.children[i+1], secondMdast.children[i]];
+  const secondMdast = fromMarkdown(hoverElField.current.markdown.body);
+  secondMdast.children.unshift(erasedEl[0]);
+  for (let i = 0; i < el2OuterIdx; ++i) {
+    [secondMdast.children[i], secondMdast.children[i + 1]] = [
+      secondMdast.children[i + 1],
+      secondMdast.children[i],
+    ];
+  }
+
+  hoverElField.current.markdown.body = toMarkdown(secondMdast);
+  hoverElField.current.markdown.htmlAst = cleanHtmlAst(toHast(secondMdast) as HastRoot) as HastRoot;
+  paneFragmentMarkdown.setKey(el2FragmentId, {
+    ...hoverElField,
+    current: hoverElField.current,
+    history: newHistory,
+  });
+}
+
+function handleBlockMovementWithinTheSamePanel(
+  mdast: MdastRoot,
+  el1OuterIdx: number,
+  el2OuterIdx: number,
+  field: FieldWithHistory<MarkdownEditDatum>,
+  el1fragmentId: string,
+  newHistory: HistoryEntry<MarkdownEditDatum>[]
+) {
+  const ast = mdast;
+  if (ast.children.length >= el1OuterIdx && ast.children.length >= el2OuterIdx) {
+    if (el1OuterIdx < el2OuterIdx) {
+      // swap elements top to bottom
+      for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
+        [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i],];
+      }
+    } else {
+      // swap elements bottom to top
+      for (let i = el1OuterIdx; i > el2OuterIdx; i--) {
+        [ast.children[i], ast.children[i - 1]] = [ast.children[i - 1], ast.children[i],];
+      }
     }
+  }
+  field.current.markdown.body = toMarkdown(mdast);
+  field.current.markdown.htmlAst = cleanHtmlAst(toHast(mdast) as HastRoot) as HastRoot;
 
-    hoverElField.current.markdown.body = toMarkdown(secondMdast);
-    hoverElField.current.markdown.htmlAst = cleanHtmlAst(toHast(secondMdast) as HastRoot) as HastRoot;
-    paneFragmentMarkdown.setKey(el2FragmentId, {
-      ...hoverElField,
-      current: hoverElField.current,
-      history: newHistory
-    });
+  paneFragmentMarkdown.setKey(el1fragmentId, {
+    ...field,
+    current: field.current,
+    history: newHistory,
+  });
+}
+
+export function moveElements(
+  markdownLookup: MarkdownLookup,
+  el1fragmentId: string,
+  el1OuterIdx: number,
+  el1PaneId: string,
+  el1Idx: number | null,
+  el2FragmentId: string,
+  el2OuterIdx: number,
+  el2PaneId: string
+) {
+  const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
+  const mdast = fromMarkdown(field.current.markdown.body);
+  const newHistory = updateHistory(field, Date.now());
+
+  if (isDragWithinContainerAsListElement(mdast, el1OuterIdx, el1Idx)) {
+    console.log("handle list element movement within container");
+  } else if (el1PaneId !== el2PaneId) {
+    handleBlockMovementBetweenDifferentPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, el2FragmentId, field, el2OuterIdx, newHistory);
+  } else {
+    handleBlockMovementWithinTheSamePanel(mdast, el1OuterIdx, el2OuterIdx, field, el1fragmentId, newHistory);
   }
 }
 

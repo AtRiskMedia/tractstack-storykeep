@@ -216,7 +216,7 @@ const EditableInnerElementWrapper = ({
   paneId,
   idx,
   outerIdx,
-  markdownLookup
+  markdownLookup,
 }: {
   tooltip: string;
   onClick: (event: MouseEvent<HTMLDivElement>) => void;
@@ -226,7 +226,7 @@ const EditableInnerElementWrapper = ({
   paneId: string;
   idx: number | null;
   outerIdx: number;
-  markdownLookup: MarkdownLookup,
+  markdownLookup: MarkdownLookup;
 }) => {
   const [dragPos, setDragPos] = useState<ControlPosition>({ x: 0, y: 0 });
   const dragging = useRef<boolean>(false);
@@ -240,16 +240,22 @@ const EditableInnerElementWrapper = ({
   };
 
   useEffect(() => {
-    if(dragging.current) return;
+    if (dragging.current) return;
 
     if (!dragState.dropState) {
       if (self.current) {
         const rect = self.current.getBoundingClientRect();
         if (isPosInsideRect(rect, dragState.pos)) {
-          const loc = dragState.pos.y > rect.y + rect.height/2 ? Location.AFTER : Location.BEFORE;
+          const loc =
+            dragState.pos.y > rect.y + rect.height / 2
+              ? Location.AFTER
+              : Location.BEFORE;
           activeHoverArea.current = loc;
           console.log(`inside afterArea: ${id} | location: ${loc}`);
-          setDragHoverInfo({ ...getNodeData(), location: loc === Location.AFTER ? "after" : "before" });
+          setDragHoverInfo({
+            ...getNodeData(),
+            location: loc === Location.AFTER ? "after" : "before",
+          });
         }
       }
     } else if (dragState.affectedFragments.size > 0) {
@@ -259,7 +265,9 @@ const EditableInnerElementWrapper = ({
         dragState.dropState.idx === idx &&
         dragState.dropState.outerIdx === outerIdx
       ) {
-        console.log(`Drop active element: ${JSON.stringify(dragState.dropState)}`);
+        console.log(
+          `Drop active element: ${JSON.stringify(dragState.dropState)}`
+        );
       }
     }
   }, [dragState]);
@@ -287,17 +295,18 @@ const EditableInnerElementWrapper = ({
       onStart={() => {
         dragging.current = true;
         resetDragStore();
-        const root = paneFragmentMarkdown.get()[fragmentId].current.markdown.htmlAst;
-        setDragShape({root, fragmentId, paneId, idx, outerIdx});
+        const root =
+          paneFragmentMarkdown.get()[fragmentId].current.markdown.htmlAst;
+        setDragShape({ root, fragmentId, paneId, idx, outerIdx });
         setGhostSize(100, 50);
       }}
       onStop={() => {
         dragging.current = false;
-        if(dragHandleStore.get().affectedFragments.size > 0) {
+        if (dragHandleStore.get().affectedFragments.size > 0) {
           const dragEl = dragHandleStore.get().dragShape;
-          if(dragEl) {
+          if (dragEl) {
             const hoverEl = dragHandleStore.get().hoverElement;
-            if(hoverEl) {
+            if (hoverEl) {
               moveElements(
                 markdownLookup,
                 dragEl.fragmentId,
@@ -306,7 +315,7 @@ const EditableInnerElementWrapper = ({
                 dragEl.idx,
                 hoverEl.fragmentId,
                 hoverEl.outerIdx,
-                hoverEl.paneId,
+                hoverEl.paneId
               );
             }
           }
@@ -316,15 +325,15 @@ const EditableInnerElementWrapper = ({
         resetDragStore();
       }}
     >
-    <div id={id} className="relative" title={tooltip}>
-      {children}
-      <div
-        onClick={onClick}
-        className="absolute inset-0 w-full h-full z-103 hover:bg-mylightgrey hover:bg-opacity-10 hover:outline-white
-                   outline outline-2 outline-solid outline-white/10 outline-offset-[-2px]
-                   mix-blend-exclusion"
-      />
-    </div>
+      <div id={id} className="relative" title={tooltip} ref={self}>
+        {children}
+        <div
+          onClick={onClick}
+          className="outline-solid absolute inset-0 z-103 h-full w-full mix-blend-exclusion outline
+                   outline-2 outline-offset-[-2px] outline-white/10 hover:bg-mylightgrey hover:bg-opacity-10
+                   hover:outline-white"
+        />
+      </div>
     </Draggable>
   );
 };

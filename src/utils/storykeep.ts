@@ -397,7 +397,7 @@ const isDragInitiatedFromListElement = (
   return false;
 };
 
-function handleBlockMovementBetweenDifferentPanels(
+function handleBlockMovementBetweenPanels(
   mdast: MdastRoot,
   el1OuterIdx: number,
   el1PaneId: string,
@@ -424,6 +424,54 @@ function handleBlockMovementBetweenDifferentPanels(
       secondMdast.children[i + 1],
       secondMdast.children[i],
     ];
+  }
+
+  hoverElField.current.markdown.body = toMarkdown(secondMdast);
+  hoverElField.current.markdown.htmlAst = cleanHtmlAst(toHast(secondMdast) as HastRoot) as HastRoot;
+  paneFragmentMarkdown.setKey(el2FragmentId, {
+    ...hoverElField,
+    current: hoverElField.current,
+    history: newHistory,
+  });
+}
+
+function handleListElementsMovementBetweenPanels(
+  mdast: MdastRoot,
+  el1OuterIdx: number,
+  el1PaneId: string,
+  el1fragmentId: string,
+  el1Idx: number | null,
+  markdownLookup: MarkdownLookup,
+  el2FragmentId: string,
+  field: FieldWithHistory<MarkdownEditDatum>,
+  el2OuterIdx: number,
+  el2Index: number|null,
+  newHistory: HistoryEntry<MarkdownEditDatum>[]
+) {
+  if (el1Idx === null) return;
+  const parent = mdast.children[el1OuterIdx];
+
+  if(!parent || !("children" in parent)) return;
+
+  const erasedEl = parent.children.splice(el1Idx, 1);
+  eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
+
+  const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
+  // grab original child because mdast loses some properties when it runs "toMarkdown"
+  const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
+  copyMarkdownIfFound(originalChild, field, hoverElField);
+
+  const secondMdast = fromMarkdown(hoverElField.current.markdown.body);
+  let secondMdastParent = secondMdast.children;
+  if(el2Index !== null && secondMdast.children[el2OuterIdx]) {
+    const innerChildren = secondMdast.children[el2OuterIdx];
+    if("children" in innerChildren) {
+      secondMdastParent = innerChildren.children;
+    }
+  }
+  secondMdastParent.unshift(erasedEl[0]);
+  for (let i = 0; i < el2OuterIdx; ++i) {
+    [secondMdastParent[i], secondMdastParent[i + 1]] = [secondMdastParent[i + 1], secondMdastParent[i],];
   }
 
   hoverElField.current.markdown.body = toMarkdown(secondMdast);
@@ -520,7 +568,11 @@ export function moveElements(
   const newHistory = updateHistory(field, Date.now());
 
   if (el1PaneId !== el2PaneId) {
-    handleBlockMovementBetweenDifferentPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, el2FragmentId, field, el2OuterIdx, newHistory);
+    if(isDragInitiatedFromListElement(mdast, el1OuterIdx, el1Idx)) {
+      handleListElementsMovementBetweenPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, el2FragmentId, field, el2OuterIdx, el2Idx, newHistory);
+    } else {
+      handleBlockMovementBetweenPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, el2FragmentId, field, el2OuterIdx, newHistory);
+    }
   } else {
     if(isDragInitiatedFromListElement(mdast, el1OuterIdx, el1Idx)) {
       handleListElementMovementWithinTheSamePanel(mdast, el1OuterIdx, el1Idx, el2Idx, field, el1fragmentId, newHistory);

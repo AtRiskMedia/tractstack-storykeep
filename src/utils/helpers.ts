@@ -1,13 +1,13 @@
 //import { storySteps } from "../store/events";
 import { getImage } from "astro:assets";
 import type {
-  GraphNodes,
+  ClassNamesPayloadValue,
+  FileNode,
   GraphNode,
   GraphNodeDatum,
+  GraphNodes,
   GraphRelationshipDatum,
-  ClassNamesPayloadValue,
   TursoFileNode,
-  FileNode,
 } from "../types";
 import type { DragNode } from "../store/storykeep.ts";
 
@@ -605,6 +605,17 @@ export async function getOptimizedImages(
 }
 
 export const createNodeId = (node: DragNode): string => {
-  if(!node) return "";
+  if (!node) return "";
   return node.fragmentId + node.paneId + node.outerIdx + (node.idx || 0);
+};
+
+export function swapObjectValues(obj: any, key1: string, key2: string): any {
+  if (!(key1 in obj) || !(key2 in obj)) {
+    return undefined;
+  }
+
+  const temp = obj[key1];
+  obj[key1] = obj[key2];
+  obj[key2] = temp;
+  return obj;
 }

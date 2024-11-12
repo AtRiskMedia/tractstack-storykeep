@@ -193,7 +193,7 @@ export const knownBrand: Record<string, string> = {
   monet: "0f1912,f6f4f3,cfae97,ded2c3,24423c,a8cd20,452a3d,f3f5f6",
   dali: "150c02,fffef9,e2e5d4,fef6d1,4b3703,dddcca,382c0d,fefcee",
   hiphop: "0d0d09,faf7f3,ffd201,a3bfd4,39304d,f6e5ce,3c2a25,f0e7d5",
-  grey: "101010,f0f0f0,888888,aaaaaa,333333,bbbbbb,444444,dddddd"
+  grey: "101010,f0f0f0,888888,aaaaaa,333333,bbbbbb,444444,dddddd",
 };
 
 export const knownEnvSettings: EnvSetting[] = [

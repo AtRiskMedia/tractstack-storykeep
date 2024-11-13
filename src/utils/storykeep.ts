@@ -456,7 +456,9 @@ function handleListElementsMovementBetweenPanels(
 
   if (!parent || !("children" in parent)) return;
 
-  const erasedEl = parent.children.splice(el1Idx, 1);
+  // @ts-expect-error children exists
+  // use children here because actual elements are wrapped in the listelement
+  const erasedEl = parent.children.splice(el1Idx, 1)[0].children;
   eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
   const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
@@ -474,10 +476,7 @@ function handleListElementsMovementBetweenPanels(
   }
   secondMdastParent.unshift(erasedEl[0]);
   for (let i = 0; i < el2OuterIdx; ++i) {
-    [secondMdastParent[i], secondMdastParent[i + 1]] = [
-      secondMdastParent[i + 1],
-      secondMdastParent[i],
-    ];
+    [secondMdastParent[i], secondMdastParent[i + 1]] = [secondMdastParent[i + 1], secondMdastParent[i],];
   }
 
   hoverElField.current.markdown.body = toMarkdown(secondMdast);
@@ -674,10 +673,7 @@ function handleListElementMovementWithinTheSamePanel(
     if (el1Index < el2Index) {
       // swap elements top to bottom
       for (let i = el1Index; i < el2Index; i++) {
-        [parent.children[i], parent.children[i + 1]] = [
-          parent.children[i + 1],
-          parent.children[i],
-        ];
+        [parent.children[i], parent.children[i + 1]] = [parent.children[i + 1], parent.children[i],];
         swapPayloadClasses(
           originalParent,
           i,

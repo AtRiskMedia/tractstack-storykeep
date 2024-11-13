@@ -597,10 +597,10 @@ function swapClassNamesPayload_Classes(
     };
 
     Object.keys(classesCopy).forEach((key) => {
-      // @ts-ignore
+      // @ts-expect-error TS tuples are read only but JS doesn't recognize tuples hence the error
       const swapRes = swapObjectValues(classesCopy[key], el1Nth.toString(10), el2Nth.toString(10))
       if (swapRes) {
-        // @ts-ignore
+        // @ts-expect-error same as above, TS read only, JS fine
         classesCopy[key] = swapRes;
       }
     });
@@ -624,7 +624,6 @@ function getElementTagAndNth(
     "children" in originalParent &&
     "children" in originalParent.children[curIdx]
   ) {
-    // @ts-ignore
     tagName = originalParent.children[curIdx].tagName;
     const globalNth = getGlobalNth(tagName, curIdx, el1OuterIdx, markdownLookup);
     if (globalNth !== null) {
@@ -735,7 +734,7 @@ export function moveElements(
   const mdast = fromMarkdown(field.current.markdown.body);
   const newHistory = updateHistory(field, Date.now());
 
-  // todo it's possible to get rid off method per each scenario and merge lists into 1
+  // todo add markdown generation
   if (el1PaneId !== el2PaneId) {
     if (isDragInitiatedFromListElement(mdast, el1OuterIdx, el1Idx)) {
       handleListElementsMovementBetweenPanels(

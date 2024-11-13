@@ -33,7 +33,7 @@ import {
   uncleanDataStore,
   unsavedChangesStore,
 } from "../store/storykeep";
-import { cloneDeep, isDeepEqual, swapObjectValues } from "./helpers";
+import { cloneDeep, getHtmlTagFromMdast, isDeepEqual, swapObjectValues } from "./helpers";
 import {
   MAX_HISTORY_LENGTH,
   MS_BETWEEN_UNDO,
@@ -445,6 +445,7 @@ function handleListElementsMovementBetweenPanels(
   el1fragmentId: string,
   el1Idx: number | null,
   markdownLookup: MarkdownLookup,
+  newMarkdownLookup: MarkdownLookup,
   el2FragmentId: string,
   field: FieldWithHistory<MarkdownEditDatum>,
   el2OuterIdx: number,
@@ -456,17 +457,16 @@ function handleListElementsMovementBetweenPanels(
 
   if (!parent || !("children" in parent)) return;
 
-  // @ts-expect-error children exists
   // use children here because actual elements are wrapped in the listelement
-  const erasedEl = parent.children.splice(el1Idx, 1)[0].children;
+  const erasedEl = parent.children.splice(el1Idx, 1)[0];
   eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
-  const hoverElField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
+  const newField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
   // grab original child because mdast loses some properties when it runs "toMarkdown"
   const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
-  copyMarkdownIfFound(originalChild, field, hoverElField);
+  copyMarkdownIfFound(originalChild, field, newField);
 
-  const secondMdast = fromMarkdown(hoverElField.current.markdown.body);
+  const secondMdast = fromMarkdown(newField.current.markdown.body);
   let secondMdastParent = secondMdast.children;
   if (el2Index !== null && secondMdast.children[el2OuterIdx]) {
     const innerChildren = secondMdast.children[el2OuterIdx];
@@ -474,18 +474,33 @@ function handleListElementsMovementBetweenPanels(
       secondMdastParent = innerChildren.children;
     }
   }
-  secondMdastParent.unshift(erasedEl[0]);
+
+  const newParent = newField.current.markdown.htmlAst;
+  const optionsPayload = newField.current.payload.optionsPayload;
+
+  const curTag = getHtmlTagFromMdast(erasedEl) || "";
+  // @ts-expect-error children exists
+  const newTag = getHtmlTagFromMdast(erasedEl.children[0]) || "";
+
+  // @ts-expect-error children exists but need to set up definitions
+  secondMdastParent.unshift(erasedEl.children[0]);
+  newField.current.markdown.htmlAst = cleanHtmlAst(
+    toHast(secondMdast) as HastRoot
+  ) as HastRoot;
+
+  addClassNamesPayloadOverrides(curTag, el1Idx, newTag, field, newField, newMarkdownLookup);
   for (let i = 0; i < el2OuterIdx; ++i) {
     [secondMdastParent[i], secondMdastParent[i + 1]] = [secondMdastParent[i + 1], secondMdastParent[i],];
+    swapPayloadClasses(newParent, i, i + 1, el1OuterIdx, markdownLookup, optionsPayload, field);
   }
 
-  hoverElField.current.markdown.body = toMarkdown(secondMdast);
-  hoverElField.current.markdown.htmlAst = cleanHtmlAst(
+  newField.current.markdown.body = toMarkdown(secondMdast);
+  newField.current.markdown.htmlAst = cleanHtmlAst(
     toHast(secondMdast) as HastRoot
   ) as HastRoot;
   paneFragmentMarkdown.setKey(el2FragmentId, {
-    ...hoverElField,
-    current: hoverElField.current,
+    ...newField,
+    current: newField.current,
     history: newHistory,
   });
 }
@@ -611,6 +626,47 @@ function swapClassNamesPayload_Classes(
   }
 }
 
+function addClassNamesPayloadOverrides(
+  el1TagName: string,
+  el1Idx: number|null,
+  el2TagName: string,
+  curField: FieldWithHistory<MarkdownEditDatum>,
+  newField: FieldWithHistory<MarkdownEditDatum>,
+  markdownLookup: MarkdownLookup,
+) {
+  if(el1Idx === null) return;
+
+  const originalOverrides = curField.current.payload.optionsPayload.classNamesPayload[el1TagName]?.override || {};
+  if (originalOverrides && curField.current.payload.optionsPayload.classNamesPayload[el1TagName]?.override) {
+    const overrideCopy = {
+      ...newField.current.payload.optionsPayload.classNamesPayload[el2TagName].override,
+    };
+
+    // set new field payloads, they should be at index 0 as later on they will be swapped
+    Object.keys(originalOverrides).forEach(
+      key => {
+        // key null or undefined, skip
+        if (!originalOverrides[key][el1Idx]) return;
+        if (!overrideCopy[key]) {
+          overrideCopy[key] = [];
+          const tagsAmount = Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
+          for (let i = 0; i < tagsAmount; ++i) {
+            // @ts-expect-error idk why nulls are not allowed but I see them *shrug*
+            overrideCopy[key].push(null);
+          }
+        }
+        overrideCopy[key].unshift(originalOverrides[key][el1Idx]);
+      }
+    );
+
+    // override new fields payload
+    newField.current.payload.optionsPayload.classNamesPayload[el2TagName] = {
+      ...newField.current.payload.optionsPayload.classNamesPayload[el2TagName],
+      override: overrideCopy,
+    };
+  }
+}
+
 function getElementTagAndNth(
   originalParent: any,
   curIdx: number,
@@ -619,7 +675,9 @@ function getElementTagAndNth(
 ) {
   let tagName = "";
   let nth = -1;
+  // this is a parent with nested list (i.e. new pane that has a lot of <li> components
   if (
+    originalParent.tagName === "ol" &&
     "children" in originalParent &&
     "children" in originalParent.children[curIdx]
   ) {
@@ -628,6 +686,11 @@ function getElementTagAndNth(
     if (globalNth !== null) {
       nth = globalNth;
     }
+  }
+  // this is a parent block, no nested lists, all regular elements
+  else if( "children" in originalParent ) {
+    tagName = originalParent.children[curIdx].tagName;
+    nth = el1OuterIdx;
   }
   return { tagName, nth };
 }
@@ -674,32 +737,13 @@ function handleListElementMovementWithinTheSamePanel(
       // swap elements top to bottom
       for (let i = el1Index; i < el2Index; i++) {
         [parent.children[i], parent.children[i + 1]] = [parent.children[i + 1], parent.children[i],];
-        swapPayloadClasses(
-          originalParent,
-          i,
-          i + 1,
-          el1OuterIdx,
-          markdownLookup,
-          optionsPayload,
-          field
-        );
+        swapPayloadClasses(originalParent, i, i + 1, el1OuterIdx, markdownLookup, optionsPayload, field);
       }
     } else {
       // swap elements bottom to top
       for (let i = el1Index; i > el2Index; i--) {
-        [parent.children[i], parent.children[i - 1]] = [
-          parent.children[i - 1],
-          parent.children[i],
-        ];
-        swapPayloadClasses(
-          originalParent,
-          i,
-          i - 1,
-          el1OuterIdx,
-          markdownLookup,
-          optionsPayload,
-          field
-        );
+        [parent.children[i], parent.children[i - 1]] = [parent.children[i - 1], parent.children[i],];
+        swapPayloadClasses(originalParent, i, i - 1, el1OuterIdx, markdownLookup, optionsPayload, field);
       }
     }
   }
@@ -717,6 +761,7 @@ function handleListElementMovementWithinTheSamePanel(
 
 export function moveElements(
   markdownLookup: MarkdownLookup,
+  newMarkdownLookup: MarkdownLookup,
   el1fragmentId: string,
   el1OuterIdx: number,
   el1PaneId: string,
@@ -733,54 +778,15 @@ export function moveElements(
   // todo add markdown generation
   if (el1PaneId !== el2PaneId) {
     if (isDragInitiatedFromListElement(mdast, el1OuterIdx, el1Idx)) {
-      handleListElementsMovementBetweenPanels(
-        mdast,
-        el1OuterIdx,
-        el1PaneId,
-        el1fragmentId,
-        el1Idx,
-        markdownLookup,
-        el2FragmentId,
-        field,
-        el2OuterIdx,
-        el2Idx,
-        newHistory
-      );
+      handleListElementsMovementBetweenPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, newMarkdownLookup, el2FragmentId, field, el2OuterIdx, el2Idx, newHistory);
     } else {
-      handleBlockMovementBetweenPanels(
-        mdast,
-        el1OuterIdx,
-        el1PaneId,
-        el1fragmentId,
-        el1Idx,
-        markdownLookup,
-        el2FragmentId,
-        field,
-        el2OuterIdx,
-        newHistory
-      );
+      handleBlockMovementBetweenPanels(mdast, el1OuterIdx, el1PaneId, el1fragmentId, el1Idx, markdownLookup, el2FragmentId, field, el2OuterIdx, newHistory);
     }
   } else {
     if (isDragInitiatedFromListElement(mdast, el1OuterIdx, el1Idx)) {
-      handleListElementMovementWithinTheSamePanel(
-        mdast,
-        el1OuterIdx,
-        el1Idx,
-        el2Idx,
-        field,
-        el1fragmentId,
-        newHistory,
-        markdownLookup
-      );
+      handleListElementMovementWithinTheSamePanel(mdast, el1OuterIdx, el1Idx, el2Idx, field, el1fragmentId, newHistory, markdownLookup);
     } else {
-      handleBlockMovementWithinTheSamePanel(
-        mdast,
-        el1OuterIdx,
-        el2OuterIdx,
-        field,
-        el1fragmentId,
-        newHistory
-      );
+      handleBlockMovementWithinTheSamePanel(mdast, el1OuterIdx, el2OuterIdx, field, el1fragmentId, newHistory);
     }
   }
 }

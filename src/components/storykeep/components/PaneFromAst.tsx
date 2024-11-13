@@ -100,7 +100,11 @@ const EditableOuterWrapper = ({
           const loc = dragState.pos.y > rect.y + rect.height/2 ? Location.AFTER : Location.BEFORE;
           activeHoverArea.current = loc;
           console.log(`inside afterArea: ${id} | location: ${loc}`);
-          setDragHoverInfo({ ...getNodeData(), location: loc === Location.AFTER ? "after" : "before" });
+          setDragHoverInfo({
+            ...getNodeData(),
+            markdownLookup,
+            location: loc === Location.AFTER ? "after" : "before"
+          });
         }
       }
     } else if (dragState.affectedFragments.size > 0) {
@@ -151,6 +155,7 @@ const EditableOuterWrapper = ({
             if(hoverEl) {
               moveElements(
                 markdownLookup,
+                hoverEl.markdownLookup,
                 dragEl.fragmentId,
                 dragEl.outerIdx,
                 dragEl.paneId,
@@ -255,6 +260,7 @@ const EditableInnerElementWrapper = ({
           console.log(`inside afterArea: ${id} | location: ${loc}`);
           setDragHoverInfo({
             ...getNodeData(),
+            markdownLookup,
             location: loc === Location.AFTER ? "after" : "before",
           });
         }
@@ -310,6 +316,7 @@ const EditableInnerElementWrapper = ({
             if (hoverEl) {
               moveElements(
                 markdownLookup,
+                hoverEl.markdownLookup,
                 dragEl.fragmentId,
                 dragEl.outerIdx,
                 dragEl.paneId,

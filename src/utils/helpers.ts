@@ -10,6 +10,7 @@ import type {
   TursoFileNode,
 } from "../types";
 import type { DragNode } from "../store/storykeep.ts";
+import { toHast } from "mdast-util-to-hast";
 
 export const getComputedColor = (color: string): string => {
   if (color.startsWith("#var(--")) {
@@ -619,3 +620,13 @@ export function swapObjectValues(obj: any, key1: string, key2: string): any {
   obj[key2] = temp;
   return obj;
 }
+
+export const getHtmlTagFromMdast = (mdastNode: any): string|null => {
+  // Convert MDAST node to HAST
+  const hastNode = toHast(mdastNode);
+  // Check if we have a valid HAST node and return its tagName
+  if(hastNode && "tagName" in hastNode) {
+    return hastNode.tagName ? hastNode.tagName : null;
+  }
+  return null;
+};

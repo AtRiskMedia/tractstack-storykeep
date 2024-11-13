@@ -71,6 +71,7 @@ const InsertWrapper = ({
           console.log(`inside afterArea: ${fragmentId} | location: ${loc}`);
           setDragHoverInfo({
             ...getNodeData(),
+            markdownLookup,
             location: loc === Location.AFTER ? "after" : "before",
           });
         }

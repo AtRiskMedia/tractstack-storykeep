@@ -13,7 +13,7 @@ import type {
   FileDatum,
   ImpressionDatum,
   IsInit,
-  MarkdownEditDatum,
+  MarkdownEditDatum, MarkdownLookup,
   MenuDatum,
   ResourceDatum,
   StoreKey,
@@ -106,6 +106,7 @@ export interface DragNode {
 
 export interface DragState extends DragNode {
   location: "before" | "after";
+  markdownLookup: MarkdownLookup;
 }
 
 export interface DragShape extends DragNode {
@@ -199,7 +200,7 @@ export const setDragPosition = (pos: ControlPosition) => {
     ...dragHandleStore.get(),
     pos,
   });
-  console.log("drag pos: " + JSON.stringify(pos));
+  //console.log("drag pos: " + JSON.stringify(pos));
 };
 
 export const setGhostSize = (w: number, h: number) => {

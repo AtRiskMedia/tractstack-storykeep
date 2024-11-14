@@ -642,6 +642,8 @@ function addClassNamesPayloadOverrides(
       ...newField.current.payload.optionsPayload.classNamesPayload[el2TagName].override,
     };
 
+    const tagsAmount = Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
+    console.log(`add class names payload overrides, [${el2TagName}] tags : ${tagsAmount}`);
     // set new field payloads, they should be at index 0 as later on they will be swapped
     Object.keys(originalOverrides).forEach(
       key => {
@@ -649,7 +651,6 @@ function addClassNamesPayloadOverrides(
         if (!originalOverrides[key][el1Idx]) return;
         if (!overrideCopy[key]) {
           overrideCopy[key] = [];
-          const tagsAmount = Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
           for (let i = 0; i < tagsAmount; ++i) {
             // @ts-expect-error idk why nulls are not allowed but I see them *shrug*
             overrideCopy[key].push(null);
@@ -663,6 +664,7 @@ function addClassNamesPayloadOverrides(
     newField.current.payload.optionsPayload.classNamesPayload[el2TagName] = {
       ...newField.current.payload.optionsPayload.classNamesPayload[el2TagName],
       override: overrideCopy,
+      count: tagsAmount+1 // add extra tag because we've added this element
     };
   }
 }

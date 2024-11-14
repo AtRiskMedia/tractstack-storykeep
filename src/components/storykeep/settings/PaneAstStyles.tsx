@@ -392,6 +392,8 @@ export const PaneAstStyles = (props: {
     setAddClass(false);
   }, [markdownDatum, targetId, $editMode]);
 
+  console.log($paneFragmentMarkdown[markdownFragmentId].current.payload.optionsPayload);
+
   const handleAddLayer = (start: boolean) => {
     const currentField = cloneDeep($paneFragmentMarkdown[markdownFragmentId]);
     const payloadForTag = currentField.current.payload.optionsPayload

@@ -498,8 +498,8 @@ function handleListElementsMovementBetweenPanels(
   const secondMdast = fromMarkdown(newField.current.markdown.body);
 
   let isListItem = false;
-  if(isElementInList(secondMdast, el2OuterIdx, el2Index)) {
-    console.log("target element is in list");
+  if(isElementInList(mdast, el1OuterIdx, el1Idx)) {
+    console.log("source element is in list");
     isListItem = true;
   }
 

@@ -392,6 +392,7 @@ export const PaneAstStyles = (props: {
     setAddClass(false);
   }, [markdownDatum, targetId, $editMode]);
 
+  // naz debug - pane classes here
   console.log($paneFragmentMarkdown[markdownFragmentId].current.payload.optionsPayload);
 
   const handleAddLayer = (start: boolean) => {

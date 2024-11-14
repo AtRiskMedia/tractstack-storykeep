@@ -487,6 +487,7 @@ function handleListElementsMovementBetweenPanels(
   newField.current.markdown.htmlAst = cleanHtmlAst(
     toHast(secondMdast) as HastRoot
   ) as HastRoot;
+  newMarkdownLookup = generateMarkdownLookup(newField.current.markdown.htmlAst);
 
   addClassNamesPayloadOverrides(curTag, el1Idx, newTag, field, newField, newMarkdownLookup);
   for (let i = 0; i < el2OuterIdx; ++i) {
@@ -651,7 +652,8 @@ function addClassNamesPayloadOverrides(
         if (!originalOverrides[key][el1Idx]) return;
         if (!overrideCopy[key]) {
           overrideCopy[key] = [];
-          for (let i = 0; i < tagsAmount; ++i) {
+          // add extra tag because we've added this element
+          for (let i = 0; i < tagsAmount-1; ++i) {
             // @ts-expect-error idk why nulls are not allowed but I see them *shrug*
             overrideCopy[key].push(null);
           }
@@ -664,7 +666,7 @@ function addClassNamesPayloadOverrides(
     newField.current.payload.optionsPayload.classNamesPayload[el2TagName] = {
       ...newField.current.payload.optionsPayload.classNamesPayload[el2TagName],
       override: overrideCopy,
-      count: tagsAmount+1 // add extra tag because we've added this element
+      count: tagsAmount
     };
   }
 }

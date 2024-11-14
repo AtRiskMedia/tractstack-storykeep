@@ -511,7 +511,6 @@ function handleListElementsMovementBetweenPanels(
     }
   }
 
-  const newParent = newField.current.markdown.htmlAst;
   const optionsPayload = newField.current.payload.optionsPayload;
 
   const curTag = getHtmlTagFromMdast(erasedEl) || "";
@@ -531,13 +530,17 @@ function handleListElementsMovementBetweenPanels(
   addClassNamesPayloadOverrides(curTag, el1Idx, newTag, field, newField, newMarkdownLookup);
   for (let i = 0; i < el2OuterIdx; ++i) {
     [secondMdastParent[i], secondMdastParent[i + 1]] = [secondMdastParent[i + 1], secondMdastParent[i]];
-    swapPayloadClasses(newParent, i, i + 1, el1OuterIdx, newMarkdownLookup, optionsPayload, field);
   }
 
   newField.current.markdown.body = toMarkdown(secondMdast);
   newField.current.markdown.htmlAst = cleanHtmlAst(
     toHast(secondMdast) as HastRoot
   ) as HastRoot;
+
+  //for (let i = 0; i < el2OuterIdx; ++i) {
+  //  swapPayloadClasses(newField.current.markdown.htmlAst, i, i + 1, el1OuterIdx, newMarkdownLookup, optionsPayload, field);
+  //}
+
   paneFragmentMarkdown.setKey(el2FragmentId, {
     ...newField,
     current: newField.current,
@@ -602,6 +605,7 @@ function swapClassNames_All(
       el1Nth.toString(10),
       el2Nth.toString(10)
     );
+    if(!allCopy) return;
 
     field.current.payload.optionsPayload.classNames = {
       ...field.current.payload.optionsPayload.classNames,
@@ -743,7 +747,7 @@ function getElementTagAndNth(
   // this is a parent block, no nested lists, all regular elements
   else if( "children" in originalParent ) {
     tagName = originalParent.children[curIdx].tagName;
-    nth = el1OuterIdx;
+    nth = curIdx;
   }
   return { tagName, nth };
 }
@@ -779,7 +783,6 @@ function handleListElementMovementWithinTheSamePanel(
   const parent = mdast.children[el1OuterIdx];
   if (!parent || !("children" in parent)) return;
 
-  const originalParent = field.current.markdown.htmlAst.children[el1OuterIdx];
   const optionsPayload = field.current.payload.optionsPayload;
 
   if (
@@ -790,13 +793,11 @@ function handleListElementMovementWithinTheSamePanel(
       // swap elements top to bottom
       for (let i = el1Index; i < el2Index; i++) {
         [parent.children[i], parent.children[i + 1]] = [parent.children[i + 1], parent.children[i],];
-        swapPayloadClasses(originalParent, i, i + 1, el1OuterIdx, markdownLookup, optionsPayload, field);
       }
     } else {
       // swap elements bottom to top
       for (let i = el1Index; i > el2Index; i--) {
         [parent.children[i], parent.children[i - 1]] = [parent.children[i - 1], parent.children[i],];
-        swapPayloadClasses(originalParent, i, i - 1, el1OuterIdx, markdownLookup, optionsPayload, field);
       }
     }
   }
@@ -804,6 +805,19 @@ function handleListElementMovementWithinTheSamePanel(
   field.current.markdown.htmlAst = cleanHtmlAst(
     toHast(mdast) as HastRoot
   ) as HastRoot;
+
+  // todo improve this bit later
+  if (el1Index < el2Index) {
+    // swap elements top to bottom
+    for (let i = el1Index; i < el2Index; i++) {
+      swapPayloadClasses(field.current.markdown.htmlAst.children[el1OuterIdx], i, i + 1, el1OuterIdx, markdownLookup, optionsPayload, field);
+    }
+  } else {
+    // swap elements bottom to top
+    for (let i = el1Index; i > el2Index; i--) {
+      swapPayloadClasses(field.current.markdown.htmlAst.children[el1OuterIdx], i, i - 1, el1OuterIdx, markdownLookup, optionsPayload, field);
+    }
+  }
 
   paneFragmentMarkdown.setKey(el1fragmentId, {
     ...field,

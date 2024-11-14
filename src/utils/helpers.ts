@@ -621,12 +621,36 @@ export function swapObjectValues(obj: any, key1: string, key2: string): any {
   return obj;
 }
 
-export const getHtmlTagFromMdast = (mdastNode: any): string|null => {
+export const getHtmlTagFromMdast = (mdastNode: any): string | null => {
   // Convert MDAST node to HAST
   const hastNode = toHast(mdastNode);
   // Check if we have a valid HAST node and return its tagName
-  if(hastNode && "tagName" in hastNode) {
+  if (hastNode && "tagName" in hastNode) {
     return hastNode.tagName ? hastNode.tagName : null;
   }
   return null;
 };
+
+export function localizeValuesFromLookup(
+  values: string[], // string numeric keys, like: [1, 3, 5]
+  startIdx: number,
+  targetIdx: number
+) {
+  let localStart = -1;
+  for (let i = 0; i < values.length; ++i) {
+    if (startIdx >= Number.parseInt(values[i], 10)) {
+      ++localStart;
+    } else {
+      break;
+    }
+  }
+  let localEnd = -1;
+  for (let i = 0; i < values.length; ++i) {
+    if (targetIdx >= Number.parseInt(values[i], 10)) {
+      ++localEnd;
+    } else {
+      break;
+    }
+  }
+  return { localStart, localEnd };
+}

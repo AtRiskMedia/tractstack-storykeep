@@ -470,15 +470,6 @@ function handleBlockMovementBetweenPanels(
       secondMdastParent[i + 1],
       secondMdastParent[i],
     ];
-    swapPayloadClasses(
-      newParent,
-      i,
-      i + 1,
-      el1OuterIdx,
-      newMarkdownLookup,
-      optionsPayload,
-      field
-    );
   }
 
   newField.current.markdown.body = toMarkdown(secondMdast);
@@ -584,31 +575,30 @@ function handleBlockMovementWithinTheSamePanel(
   el2OuterIdx: number,
   field: FieldWithHistory<MarkdownEditDatum>,
   el1fragmentId: string,
-  newHistory: HistoryEntry<MarkdownEditDatum>[]
+  newHistory: HistoryEntry<MarkdownEditDatum>[],
+  markdownLookup: MarkdownLookup,
 ) {
   const ast = mdast;
+  const curTag = getHtmlTagFromMdast(ast.children[el1OuterIdx]) || "";
+
   if (
     ast.children.length >= el1OuterIdx &&
     ast.children.length >= el2OuterIdx
   ) {
+    // todo: add class overrides swap based on local tag markup
     if (el1OuterIdx < el2OuterIdx) {
       // swap elements top to bottom
       for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
-        [ast.children[i], ast.children[i + 1]] = [
-          ast.children[i + 1],
-          ast.children[i],
-        ];
+        [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i],];
       }
     } else {
       // swap elements bottom to top
       for (let i = el1OuterIdx; i > el2OuterIdx; i--) {
-        [ast.children[i], ast.children[i - 1]] = [
-          ast.children[i - 1],
-          ast.children[i],
-        ];
+        [ast.children[i], ast.children[i - 1]] = [ast.children[i - 1], ast.children[i],];
       }
     }
   }
+
   field.current.markdown.body = toMarkdown(mdast);
   field.current.markdown.htmlAst = cleanHtmlAst(
     toHast(mdast) as HastRoot
@@ -685,8 +675,8 @@ function swapClassNamesPayload_Classes(
     };
 
     Object.keys(classesCopy).forEach(key => {
-      // @ts-expect-error TS tuples are read only but JS doesn't recognize tuples hence the error
       const swapRes = swapObjectValues(
+        // @ts-expect-error TS tuples are read only but JS doesn't recognize tuples hence the error
         classesCopy[key],
         el1Nth.toString(10),
         el2Nth.toString(10)
@@ -809,14 +799,8 @@ function swapTagClasses(
       startIdx,
       targetIdx
     );
-    for (let i = localStart; i < localEnd; ++i) {
-      swapClassNamesPayload_Override(
-        field.current.payload.optionsPayload,
-        tag,
-        i,
-        i + 1,
-        field
-      );
+    for (let i = localStart; i < localStart+1; ++i) {
+      swapClassNamesPayload_Override(field.current.payload.optionsPayload, tag, i, i + 1, field);
     }
   }
 }
@@ -889,18 +873,12 @@ function handleListElementMovementWithinTheSamePanel(
     if (el1Index < el2Index) {
       // swap elements top to bottom
       for (let i = el1Index; i < el2Index; i++) {
-        [parent.children[i], parent.children[i + 1]] = [
-          parent.children[i + 1],
-          parent.children[i],
-        ];
+        [parent.children[i], parent.children[i + 1]] = [parent.children[i + 1], parent.children[i],];
       }
     } else {
       // swap elements bottom to top
       for (let i = el1Index; i > el2Index; i--) {
-        [parent.children[i], parent.children[i - 1]] = [
-          parent.children[i - 1],
-          parent.children[i],
-        ];
+        [parent.children[i], parent.children[i - 1]] = [parent.children[i - 1], parent.children[i],];
       }
     }
   }
@@ -913,28 +891,12 @@ function handleListElementMovementWithinTheSamePanel(
   if (el1Index < el2Index) {
     // swap elements top to bottom
     for (let i = el1Index; i < el2Index; i++) {
-      swapPayloadClasses(
-        field.current.markdown.htmlAst.children[el1OuterIdx],
-        i,
-        i + 1,
-        el1OuterIdx,
-        markdownLookup,
-        optionsPayload,
-        field
-      );
+      swapPayloadClasses(field.current.markdown.htmlAst.children[el1OuterIdx], i, i + 1, el1OuterIdx, markdownLookup, optionsPayload, field);
     }
   } else {
     // swap elements bottom to top
     for (let i = el1Index; i > el2Index; i--) {
-      swapPayloadClasses(
-        field.current.markdown.htmlAst.children[el1OuterIdx],
-        i,
-        i - 1,
-        el1OuterIdx,
-        markdownLookup,
-        optionsPayload,
-        field
-      );
+      swapPayloadClasses(field.current.markdown.htmlAst.children[el1OuterIdx], i, i - 1, el1OuterIdx, markdownLookup, optionsPayload, field);
     }
   }
 
@@ -1013,7 +975,8 @@ export function moveElements(
         el2OuterIdx,
         field,
         el1fragmentId,
-        newHistory
+        newHistory,
+        markdownLookup
       );
     }
   }

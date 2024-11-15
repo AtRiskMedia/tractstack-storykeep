@@ -55,7 +55,7 @@ import type {
   OptionsPayloadDatum,
   StoreKey,
   StoreMapType,
-  ToolAddMode, Tuple,
+  ToolAddMode,
   ValidationFunction,
 } from "../types";
 import {
@@ -69,7 +69,7 @@ import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
-import type { Root as HastRoot, RootContent } from "hast";
+import type { Root, Root as HastRoot, RootContent } from "hast";
 import type { Root as MdastRoot } from "mdast";
 
 const BREAKPOINTS = {
@@ -369,13 +369,13 @@ const copyMarkdownIfFound = (
   originalField: FieldWithHistory<MarkdownEditDatum>,
   newField: FieldWithHistory<MarkdownEditDatum>
 ) => {
-  if ("properties" in el) {
+  if (el && "properties" in el) {
     const foundLink = el.properties.href?.toString();
     if (foundLink) {
       copyHrefDataBetweenAsts(originalField, foundLink, newField);
     }
   }
-  if ("children" in el) {
+  if (el && "children" in el) {
     for (let i = 0; i < el.children.length; i++) {
       copyMarkdownIfFound(el.children[i], originalField, newField);
     }
@@ -405,56 +405,55 @@ const isElementInList = (
 };
 
 function handleBlockMovementBetweenPanels(
-  mdast: MdastRoot,
   el1OuterIdx: number,
   el1PaneId: string,
   el1fragmentId: string,
   el1Idx: number | null,
   markdownLookup: MarkdownLookup,
   newMarkdownLookup: MarkdownLookup,
-  el2FragmentId: string,
+  el2fragmentId: string,
   field: FieldWithHistory<MarkdownEditDatum>,
   el2OuterIdx: number,
   el2Idx: number | null,
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
-  const erasedEl = mdast.children.splice(el1OuterIdx, 1)[0];
-  eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
+  const erasedEl = field.current.markdown.htmlAst.children.splice(el1OuterIdx, 1)[0];
+  //eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
-  const newField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
+  const newField = cloneDeep(paneFragmentMarkdown.get()[el2fragmentId]);
   // grab original child because mdast loses some properties when it runs "toMarkdown"
-  const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
-  copyMarkdownIfFound(originalChild, field, newField);
+  copyMarkdownIfFound(erasedEl, field, newField);
+  paneFragmentMarkdown.setKey(el1fragmentId, {
+    ...field,
+    current: field.current,
+    history: newHistory,
+  });
 
-  const secondMdast = fromMarkdown(newField.current.markdown.body);
+  const secondMdast = newField.current.markdown.htmlAst;
   console.log(secondMdast);
 
   let isListElement = false;
-  let secondMdastParent = secondMdast.children;
+  let secondAstParent = secondMdast.children;
   if (el2Idx !== null && secondMdast.children[el2OuterIdx]) {
     const innerChildren = secondMdast.children[el2OuterIdx];
     if ("children" in innerChildren) {
       isListElement = true;
-      secondMdastParent = innerChildren.children;
+      secondAstParent = innerChildren.children;
     }
   }
 
-  const newParent = newField.current.markdown.htmlAst;
-  const optionsPayload = newField.current.payload.optionsPayload;
-  const curTag = getHtmlTagFromMdast(erasedEl) || "";
+  // @ts-expect-error tagName exists
+  const curTag = erasedEl.tagName || "";
   let newTag = curTag;
   if (isListElement) {
     // @ts-expect-error children exists
     newTag = "li" || "";
   }
 
-  if (isListElement) {
-    erasedEl.type = "listItem";
-  }
-  secondMdastParent.unshift(erasedEl);
-  newField.current.markdown.htmlAst = cleanHtmlAst(
-    toHast(secondMdast) as HastRoot
-  ) as HastRoot;
+  //if (isListElement) {
+  //  erasedEl.type = "listItem";
+  //}
+  secondAstParent.unshift(erasedEl);
   newMarkdownLookup = generateMarkdownLookup(newField.current.markdown.htmlAst);
 
   addClassNamesPayloadOverrides(
@@ -465,21 +464,18 @@ function handleBlockMovementBetweenPanels(
     newField,
     newMarkdownLookup
   );
+
+  const lookup = createNodeToClassesLookup(newField);
+
   for (let i = 0; i < el2OuterIdx; ++i) {
-    [secondMdastParent[i], secondMdastParent[i + 1]] = [
-      secondMdastParent[i + 1],
-      secondMdastParent[i],
-    ];
+    [secondAstParent[i], secondAstParent[i + 1]] = [secondAstParent[i + 1], secondAstParent[i],];
   }
 
-  newField.current.markdown.body = toMarkdown(secondMdast);
-  newField.current.markdown.htmlAst = cleanHtmlAst(
-    toHast(secondMdast) as HastRoot
-  ) as HastRoot;
-  paneFragmentMarkdown.setKey(el2FragmentId, {
+  newField.current.markdown.htmlAst = cleanHtmlAst(secondMdast) as HastRoot;
+  postProcessUpdateStyles(newField, secondMdast, lookup);
+  paneFragmentMarkdown.setKey(el2fragmentId, {
     ...newField,
     current: newField.current,
-    history: newHistory,
   });
 }
 
@@ -571,12 +567,12 @@ function handleListElementsMovementBetweenPanels(
 
 type NodeToClassData = {
   tagName: string;
-  nth: number;
+  originalNth: number; // this won't be the current Nth, if you just swapped elements then use getNthFromAstUsingElement
   overrideClasses: any;
   classes: any;
 }
 
-function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>, markdownLookup: MarkdownLookup) {
+function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>) {
   console.log(field.current);
   const lookup = new Map<any, NodeToClassData>();
   const elementsCounter = new Map<string, number>();
@@ -585,16 +581,15 @@ function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>, m
   const payload = field.current.payload.optionsPayload.classNamesPayload;
 
   for(let i = 0; i < ast.children.length; i++) {
-    // @ts-ignore
+    // @ts-expect-error tagName exists
     const tagName = ast.children[i].tagName;
     const idx = elementsCounter.get(tagName) || 0;
-    const idxStr = idx.toString(10);
     lookup.set(ast.children[i], {
       tagName,
-      nth: idx,
-      // @ts-ignore
+      originalNth: idx,
+      // @ts-expect-error it's iteratable but TS swears at types.. fix eventually
       classes: extractEntriesAtIndex(payload[tagName]?.classes, idx),
-      // @ts-ignore
+      // @ts-expect-error it's iteratable but TS swears at types.. fix eventually
       overrideClasses: extractEntriesAtIndex(payload[tagName]?.override, idx),
     });
 
@@ -604,18 +599,36 @@ function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>, m
   return lookup;
 }
 
+function postProcessUpdateStyles(
+  field: FieldWithHistory<MarkdownEditDatum>,
+  ast: Root,
+  lookup: Map<any, NodeToClassData>
+) {
+  const payload = field.current.payload.optionsPayload.classNamesPayload;
+  for (const c of ast.children) {
+    const metaData = lookup.get(c);
+    if (metaData) {
+      const overrides = payload[metaData.tagName].override;
+      if (overrides) {
+        const nth = getNthFromAstUsingElement(ast, c);
+        Object.keys(metaData.overrideClasses).forEach(val => {
+          overrides[val].setAt(nth, metaData.overrideClasses[val]);
+        });
+      }
+    }
+  }
+}
+
 // todo fix adding new element breaks classes overrides
 function handleBlockMovementWithinTheSamePanel(
-  mdast: MdastRoot,
   el1OuterIdx: number,
   el2OuterIdx: number,
   field: FieldWithHistory<MarkdownEditDatum>,
   el1fragmentId: string,
   newHistory: HistoryEntry<MarkdownEditDatum>[],
-  markdownLookup: MarkdownLookup,
 ) {
   const ast = field.current.markdown.htmlAst;
-  const lookup = createNodeToClassesLookup(field, markdownLookup);
+  const lookup = createNodeToClassesLookup(field);
   if (
     ast.children.length >= el1OuterIdx &&
     ast.children.length >= el2OuterIdx
@@ -634,20 +647,7 @@ function handleBlockMovementWithinTheSamePanel(
       }
     }
     console.log(ast.children);
-
-    const payload = field.current.payload.optionsPayload.classNamesPayload;
-    for(const c of ast.children) {
-      const metaData = lookup.get(c);
-      if(metaData) {
-        const overrides = payload[metaData.tagName].override;
-        if(overrides) {
-          const nth = getNthFromAstUsingElement(ast, c);
-          Object.keys(metaData.overrideClasses).forEach((val) => {
-            overrides[val].setAt(nth, metaData.overrideClasses[val]);
-          });
-        }
-      }
-    }
+    postProcessUpdateStyles(field, ast, lookup);
 
     field.current.markdown.htmlAst = cleanHtmlAst(ast) as HastRoot;
     paneFragmentMarkdown.setKey(el1fragmentId, {
@@ -995,7 +995,6 @@ export function moveElements(
       );
     } else {
       handleBlockMovementBetweenPanels(
-        mdast,
         el1OuterIdx,
         el1PaneId,
         el1fragmentId,
@@ -1023,13 +1022,11 @@ export function moveElements(
       );
     } else {
       handleBlockMovementWithinTheSamePanel(
-        mdast,
         el1OuterIdx,
         el2OuterIdx,
         field,
         el1fragmentId,
         newHistory,
-        markdownLookup
       );
     }
   }

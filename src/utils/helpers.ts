@@ -11,8 +11,7 @@ import type {
 } from "../types";
 import type { DragNode } from "../store/storykeep.ts";
 import { toHast } from "mdast-util-to-hast";
-import type { HastRoot } from "hast-util-to-mdast/lib/handlers/root";
-import type { Element, RootContent } from "hast";
+import type { Element, RootContent, Root as HastRoot } from "hast";
 
 export const getComputedColor = (color: string): string => {
   if (color.startsWith("#var(--")) {
@@ -695,8 +694,9 @@ Array.prototype.setAt = function <T>(index: number, value: T): void {
 
 export function getNthFromAstUsingElement(ast: HastRoot, el: RootContent) {
   if ("tagName" in el) {
-    const matchingTagElements = ast.children.filter((x: { tagName: string }) => x.tagName === el.tagName);
-    const idx = matchingTagElements.findIndex((x: Element) => x === el);
+    // @ts-expect-error tagName exists..
+    const matchingTagElements = ast.children.filter((x) => x.tagName === el.tagName);
+    const idx = matchingTagElements.findIndex((x) => x === el);
     return idx;
   }
   return -1;

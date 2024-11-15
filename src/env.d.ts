@@ -14,3 +14,17 @@ declare namespace App {
     };
   }
 }
+
+interface Window {
+  dataLayer: any[];
+  gtag: (...args: any[]) => void;
+}
+
+interface ImportMetaEnv {
+  readonly PUBLIC_GOOGLE_SITE_VERIFICATION: string;
+  // ... other env vars
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}

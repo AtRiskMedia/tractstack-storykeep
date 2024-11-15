@@ -38,7 +38,7 @@ import {
   getHtmlTagFromMdast,
   isDeepEqual,
   findIndicesFromLookup,
-  swapObjectValues, extractEntriesAtIndex,
+  swapObjectValues, extractEntriesAtIndex, getNthFromAstUsingElement,
 } from "./helpers";
 import {
   MAX_HISTORY_LENGTH,
@@ -641,7 +641,7 @@ function handleBlockMovementWithinTheSamePanel(
       if(metaData) {
         const overrides = payload[metaData.tagName].override;
         if(overrides) {
-          const nth = metaData.nth;
+          const nth = getNthFromAstUsingElement(ast, c);
           Object.keys(metaData.overrideClasses).forEach((val) => {
             overrides[val].setAt(nth, metaData.overrideClasses[val]);
           });

@@ -11,6 +11,8 @@ import type {
 } from "../types";
 import type { DragNode } from "../store/storykeep.ts";
 import { toHast } from "mdast-util-to-hast";
+import type { HastRoot } from "hast-util-to-mdast/lib/handlers/root";
+import type { Element, RootContent } from "hast";
 
 export const getComputedColor = (color: string): string => {
   if (color.startsWith("#var(--")) {
@@ -659,8 +661,11 @@ export function findIndicesFromLookup(
   return { localStart, localEnd };
 }
 
-export function extractEntriesAtIndex(obj: { [key: string]: any[] }, index: number): { [key: string]: any }|null {
-  if(!obj) return null;
+export function extractEntriesAtIndex(
+  obj: { [key: string]: any[] },
+  index: number
+): { [key: string]: any } | null {
+  if (!obj) return null;
 
   const result: { [key: string]: any } = {};
 
@@ -681,9 +686,18 @@ declare global {
   }
 }
 
-Array.prototype.setAt = function<T>(index: number, value: T): void {
+Array.prototype.setAt = function <T>(index: number, value: T): void {
   if (index >= this.length) {
     this.length = index + 1; // Extend the array length
   }
   this[index] = value;
 };
+
+export function getNthFromAstUsingElement(ast: HastRoot, el: RootContent) {
+  if ("tagName" in el) {
+    const matchingTagElements = ast.children.filter((x: { tagName: string }) => x.tagName === el.tagName);
+    const idx = matchingTagElements.findIndex((x: Element) => x === el);
+    return idx;
+  }
+  return -1;
+}

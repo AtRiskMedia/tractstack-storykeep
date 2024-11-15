@@ -429,13 +429,13 @@ function handleBlockMovementBetweenPanels(
     history: newHistory,
   });
 
-  const secondMdast = newField.current.markdown.htmlAst;
-  console.log(secondMdast);
+  const secondAst = newField.current.markdown.htmlAst;
+  console.log(secondAst);
 
   let isListElement = false;
-  let secondAstParent = secondMdast.children;
-  if (el2Idx !== null && secondMdast.children[el2OuterIdx]) {
-    const innerChildren = secondMdast.children[el2OuterIdx];
+  let secondAstParent = secondAst.children;
+  if (el2Idx !== null && secondAst.children[el2OuterIdx]) {
+    const innerChildren = secondAst.children[el2OuterIdx];
     if ("children" in innerChildren) {
       isListElement = true;
       secondAstParent = innerChildren.children;
@@ -471,8 +471,8 @@ function handleBlockMovementBetweenPanels(
     [secondAstParent[i], secondAstParent[i + 1]] = [secondAstParent[i + 1], secondAstParent[i],];
   }
 
-  newField.current.markdown.htmlAst = cleanHtmlAst(secondMdast) as HastRoot;
-  postProcessUpdateStyles(newField, secondMdast, lookup);
+  newField.current.markdown.htmlAst = cleanHtmlAst(secondAst) as HastRoot;
+  postProcessUpdateStyles(newField, secondAst, lookup);
   paneFragmentMarkdown.setKey(el2fragmentId, {
     ...newField,
     current: newField.current,
@@ -494,19 +494,26 @@ function handleListElementsMovementBetweenPanels(
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
   if (el1Idx === null) return;
-  const parent = mdast.children[el1OuterIdx];
+  const parent = field.current.markdown.htmlAst.children[el1OuterIdx];
 
   if (!parent || !("children" in parent)) return;
 
   // use children here because actual elements are wrapped in the listelement
   const erasedEl = parent.children.splice(el1Idx, 1)[0];
-  eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
+  //eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
   const newField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
   // grab original child because mdast loses some properties when it runs "toMarkdown"
   const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
   copyMarkdownIfFound(originalChild, field, newField);
-  const secondMdast = fromMarkdown(newField.current.markdown.body);
+
+  paneFragmentMarkdown.setKey(el1fragmentId, {
+    ...field,
+    current: field.current,
+    history: newHistory,
+  });
+
+  const secondAst = newField.current.markdown.htmlAst;
 
   let isListItem = false;
   if (isElementInList(mdast, el1OuterIdx, el1Idx)) {
@@ -514,26 +521,28 @@ function handleListElementsMovementBetweenPanels(
     isListItem = true;
   }
 
-  let secondMdastParent = secondMdast.children;
-  if (el2Index !== null && secondMdast.children[el2OuterIdx]) {
-    const innerChildren = secondMdast.children[el2OuterIdx];
+  let secondAstParent = secondAst.children;
+  if (el2Index !== null && secondAst.children[el2OuterIdx]) {
+    const innerChildren = secondAst.children[el2OuterIdx];
     if ("children" in innerChildren) {
-      secondMdastParent = innerChildren.children;
+      secondAstParent = innerChildren.children;
     }
   }
 
-  const curTag = getHtmlTagFromMdast(erasedEl) || "";
+  // @ts-expect-error tagName exists
+  const curTag = erasedEl.tagName || "";
   let newTag = curTag;
   if (isListItem) {
-    // @ts-expect-error children exists
-    newTag = getHtmlTagFromMdast(erasedEl.children[0]) || "";
+    // use original mdast to figure out expected field type because we can't extract type from the AST
+    // @ts-expect-error children tagName exists
+    newTag = getHtmlTagFromMdast(mdast.children[el1OuterIdx].children[el1Idx].children[0]) || "";
   }
 
+  // @ts-expect-error children tagName exists
+  const hastEl = toHast(mdast.children[el1OuterIdx].children[el1Idx].children[0]);
+
   // @ts-expect-error children exists but need to set up definitions
-  secondMdastParent.unshift(erasedEl.children[0]);
-  newField.current.markdown.htmlAst = cleanHtmlAst(
-    toHast(secondMdast) as HastRoot
-  ) as HastRoot;
+  secondAstParent.unshift(hastEl);
   newMarkdownLookup = generateMarkdownLookup(newField.current.markdown.htmlAst);
 
   addClassNamesPayloadOverrides(
@@ -544,24 +553,24 @@ function handleListElementsMovementBetweenPanels(
     newField,
     newMarkdownLookup
   );
-  for (let i = 0; i < el2OuterIdx; ++i) {
-    [secondMdastParent[i], secondMdastParent[i + 1]] = [
-      secondMdastParent[i + 1],
-      secondMdastParent[i],
-    ];
+
+  const payload = field.current.payload.optionsPayload.classNamesPayload["li"]?.override;
+  if(payload) {
+    Object.keys(payload).forEach((key) => {
+      delete payload[key][el1Idx];
+    });
   }
 
-  newField.current.markdown.body = toMarkdown(secondMdast);
-  newField.current.markdown.htmlAst = cleanHtmlAst(
-    toHast(secondMdast) as HastRoot
-  ) as HastRoot;
+  const lookup = createNodeToClassesLookup(newField);
+  for (let i = 0; i < el2OuterIdx; ++i) {
+    [secondAstParent[i], secondAstParent[i + 1]] = [secondAstParent[i + 1], secondAstParent[i],];
+  }
 
-  swapTagClasses(newTag, 0, el2OuterIdx, newMarkdownLookup, newField);
-
+  newField.current.markdown.htmlAst = cleanHtmlAst(secondAst) as HastRoot;
+  postProcessUpdateStyles(newField, secondAst, lookup);
   paneFragmentMarkdown.setKey(el2FragmentId, {
     ...newField,
     current: newField.current,
-    history: newHistory,
   });
 }
 

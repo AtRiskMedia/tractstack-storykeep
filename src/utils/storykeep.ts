@@ -37,8 +37,8 @@ import {
   cloneDeep,
   getHtmlTagFromMdast,
   isDeepEqual,
-  localizeValuesFromLookup,
-  swapObjectValues,
+  findIndicesFromLookup,
+  swapObjectValues, extractEntriesAtIndex,
 } from "./helpers";
 import {
   MAX_HISTORY_LENGTH,
@@ -55,7 +55,7 @@ import type {
   OptionsPayloadDatum,
   StoreKey,
   StoreMapType,
-  ToolAddMode,
+  ToolAddMode, Tuple,
   ValidationFunction,
 } from "../types";
 import {
@@ -569,6 +569,42 @@ function handleListElementsMovementBetweenPanels(
   });
 }
 
+type NodeToClassData = {
+  tagName: string;
+  nth: number;
+  overrideClasses: any;
+  classes: any;
+}
+
+function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>, markdownLookup: MarkdownLookup) {
+  console.log(field.current);
+  const lookup = new Map<any, NodeToClassData>();
+  const elementsCounter = new Map<string, number>();
+
+  const ast = field.current.markdown.htmlAst;
+  const payload = field.current.payload.optionsPayload.classNamesPayload;
+
+  for(let i = 0; i < ast.children.length; i++) {
+    // @ts-ignore
+    const tagName = ast.children[i].tagName;
+    const idx = elementsCounter.get(tagName) || 0;
+    const idxStr = idx.toString(10);
+    lookup.set(ast.children[i], {
+      tagName,
+      nth: idx,
+      // @ts-ignore
+      classes: extractEntriesAtIndex(payload[tagName]?.classes, idx),
+      // @ts-ignore
+      overrideClasses: extractEntriesAtIndex(payload[tagName]?.override, idx),
+    });
+
+    elementsCounter.set(tagName, idx + 1);
+  }
+  //console.log(JSON.stringify(Array.from(lookup)));
+  return lookup;
+}
+
+// todo fix adding new element breaks classes overrides
 function handleBlockMovementWithinTheSamePanel(
   mdast: MdastRoot,
   el1OuterIdx: number,
@@ -578,13 +614,13 @@ function handleBlockMovementWithinTheSamePanel(
   newHistory: HistoryEntry<MarkdownEditDatum>[],
   markdownLookup: MarkdownLookup,
 ) {
-  const ast = mdast;
-  const curTag = getHtmlTagFromMdast(ast.children[el1OuterIdx]) || "";
-
+  const ast = field.current.markdown.htmlAst;
+  const lookup = createNodeToClassesLookup(field, markdownLookup);
   if (
     ast.children.length >= el1OuterIdx &&
     ast.children.length >= el2OuterIdx
   ) {
+    console.log(ast.children);
     // todo: add class overrides swap based on local tag markup
     if (el1OuterIdx < el2OuterIdx) {
       // swap elements top to bottom
@@ -597,18 +633,29 @@ function handleBlockMovementWithinTheSamePanel(
         [ast.children[i], ast.children[i - 1]] = [ast.children[i - 1], ast.children[i],];
       }
     }
+    console.log(ast.children);
+
+    const payload = field.current.payload.optionsPayload.classNamesPayload;
+    for(const c of ast.children) {
+      const metaData = lookup.get(c);
+      if(metaData) {
+        const overrides = payload[metaData.tagName].override;
+        if(overrides) {
+          const nth = metaData.nth;
+          Object.keys(metaData.overrideClasses).forEach((val) => {
+            overrides[val].setAt(nth, metaData.overrideClasses[val]);
+          });
+        }
+      }
+    }
+
+    field.current.markdown.htmlAst = cleanHtmlAst(ast) as HastRoot;
+    paneFragmentMarkdown.setKey(el1fragmentId, {
+      ...field,
+      current: field.current,
+      history: newHistory,
+    });
   }
-
-  field.current.markdown.body = toMarkdown(mdast);
-  field.current.markdown.htmlAst = cleanHtmlAst(
-    toHast(mdast) as HastRoot
-  ) as HastRoot;
-
-  paneFragmentMarkdown.setKey(el1fragmentId, {
-    ...field,
-    current: field.current,
-    history: newHistory,
-  });
 }
 
 function swapClassNames_All(
@@ -794,13 +841,19 @@ function swapTagClasses(
 ) {
   const lookup = markdownLookup?.nthTagLookup[tag];
   if (lookup && Object.values(lookup).length > 0) {
-    const { localStart, localEnd } = localizeValuesFromLookup(
+    const { localStart, localEnd } = findIndicesFromLookup(
       Object.keys(lookup),
       startIdx,
       targetIdx
     );
-    for (let i = localStart; i < localStart+1; ++i) {
-      swapClassNamesPayload_Override(field.current.payload.optionsPayload, tag, i, i + 1, field);
+    if(localEnd > localStart) {
+      for (let i = localStart; i < localEnd; ++i) {
+        swapClassNamesPayload_Override(field.current.payload.optionsPayload, tag, i, i + 1, field);
+      }
+    } else if(localEnd < localStart) {
+      for (let i = localEnd; i > localStart; --i) {
+        swapClassNamesPayload_Override(field.current.payload.optionsPayload, tag, i, i + 1, field);
+      }
     }
   }
 }

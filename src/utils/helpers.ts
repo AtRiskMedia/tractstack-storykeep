@@ -631,26 +631,59 @@ export const getHtmlTagFromMdast = (mdastNode: any): string | null => {
   return null;
 };
 
-export function localizeValuesFromLookup(
+export function findIndicesFromLookup(
   values: string[], // string numeric keys, like: [1, 3, 5]
   startIdx: number,
   targetIdx: number
 ) {
-  let localStart = -1;
-  for (let i = 0; i < values.length; ++i) {
-    if (startIdx >= Number.parseInt(values[i], 10)) {
-      ++localStart;
-    } else {
-      break;
+  const sortedValues = values.map(Number).sort((a, b) => a - b);
+  const findFloorIndex = (arr: number[], target: number): number => {
+    let left = 0;
+    let right = arr.length - 1;
+    let result = -1;
+
+    while (left <= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (arr[mid] <= target) {
+        result = mid;
+        left = mid + 1;
+      } else {
+        right = mid - 1;
+      }
     }
-  }
-  let localEnd = -1;
-  for (let i = 0; i < values.length; ++i) {
-    if (targetIdx >= Number.parseInt(values[i], 10)) {
-      ++localEnd;
-    } else {
-      break;
-    }
-  }
+    return result;
+  };
+
+  const localStart = findFloorIndex(sortedValues, startIdx);
+  const localEnd = findFloorIndex(sortedValues, targetIdx);
   return { localStart, localEnd };
 }
+
+export function extractEntriesAtIndex(obj: { [key: string]: any[] }, index: number): { [key: string]: any }|null {
+  if(!obj) return null;
+
+  const result: { [key: string]: any } = {};
+
+  for (const key in obj) {
+    if (Array.isArray(obj[key])) {
+      result[key] = obj[key][index] !== undefined ? obj[key][index] : null;
+    } else {
+      result[key] = null;
+    }
+  }
+
+  return result;
+}
+
+declare global {
+  interface Array<T> {
+    setAt(index: number, value: T): void;
+  }
+}
+
+Array.prototype.setAt = function<T>(index: number, value: T): void {
+  if (index >= this.length) {
+    this.length = index + 1; // Extend the array length
+  }
+  this[index] = value;
+};

@@ -452,6 +452,9 @@ function handleBlockMovementBetweenPanels(
   if (isListElement) {
     // @ts-expect-error children exists
     newTag = "li" || "";
+    if ("tagName" in erasedEl) {
+      erasedEl.tagName = "li";
+    }
   }
 
   //if (isListElement) {
@@ -462,8 +465,8 @@ function handleBlockMovementBetweenPanels(
 
   addClassNamesPayloadOverrides(
     curTag,
-    el1Idx || el1OuterIdx,
-    el2Idx || el2OuterIdx,
+    el1Idx !== null ? el1Idx : el1OuterIdx,
+    el2Idx !== null ? el2Idx : el2OuterIdx,
     newTag,
     originalFieldCopy,
     newField,
@@ -561,8 +564,8 @@ function handleListElementsMovementBetweenPanels(
 
   addClassNamesPayloadOverrides(
     curTag,
-    el1Idx || 0,
-    el2Idx || 0,
+    el1Idx !== null ? el1Idx : el1OuterIdx,
+    el2Idx !== null ? el2Idx : el2OuterIdx,
     newTag,
     originalFieldCopy,
     newField,
@@ -631,7 +634,7 @@ function postProcessUpdateStyles(
   const payload = field.current.payload.optionsPayload.classNamesPayload;
   for (const c of ast.children) {
     const metaData = lookup.get(c);
-    if (metaData) {
+    if (metaData && payload[metaData.tagName]) {
       const overrides = payload[metaData.tagName].override;
       if (overrides) {
         const nth = getNthFromAstUsingElement(ast, c);
@@ -906,7 +909,6 @@ function swapPayloadClasses(
 }
 
 function handleListElementMovementWithinTheSamePanel(
-  mdast: MdastRoot,
   el1OuterIdx: number,
   el1Index: number | null,
   el2Index: number | null,
@@ -917,7 +919,7 @@ function handleListElementMovementWithinTheSamePanel(
 ) {
   if (el1Index === null || el2Index === null) return;
 
-  const parent = mdast.children[el1OuterIdx];
+  const parent = field.current.markdown.htmlAst.children[el1OuterIdx];
   if (!parent || !("children" in parent)) return;
 
   const optionsPayload = field.current.payload.optionsPayload;
@@ -938,10 +940,10 @@ function handleListElementMovementWithinTheSamePanel(
       }
     }
   }
-  field.current.markdown.body = toMarkdown(mdast);
-  field.current.markdown.htmlAst = cleanHtmlAst(
-    toHast(mdast) as HastRoot
-  ) as HastRoot;
+  //field.current.markdown.body = toMarkdown(mdast);
+  //field.current.markdown.htmlAst = cleanHtmlAst(
+  //  toHast(mdast) as HastRoot
+  //) as HastRoot;
 
   // todo improve this bit later
   if (el1Index < el2Index) {
@@ -1014,7 +1016,6 @@ export function moveElements(
   } else {
     if (isElementInList(mdast, el1OuterIdx, el1Idx)) {
       handleListElementMovementWithinTheSamePanel(
-        mdast,
         el1OuterIdx,
         el1Idx,
         el2Idx,

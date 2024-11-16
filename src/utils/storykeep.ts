@@ -790,22 +790,21 @@ function addClassNamesPayloadOverrides(
     };
 
     let tagsAmount = 0;
-    let nth = el1Idx;
+    const ast = curField.current.markdown.htmlAst;
+    const nth = getNthFromAstUsingElement(ast, ast.children[el1Idx]);
     // if list element, grab list elements from markdown lookup
     if (el2TagName === "li") {
       tagsAmount = Object.values(markdownLookup?.listItems).length;
     } else {
       tagsAmount = Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
-      const ast = curField.current.markdown.htmlAst;
-      nth = getNthFromAstUsingElement(ast, ast.children[el1Idx]);
     }
     console.log(
       `add class names payload overrides, [${el2TagName}] tags : ${tagsAmount}`
     );
     // set new field payloads, they should be at index 0 as later on they will be swapped
     Object.keys(originalOverrides).forEach(key => {
-      // key null or undefined, skip
-      if (!originalOverrides[key][nth]) return;
+      // key undefined, skip
+      if (originalOverrides[key][nth] === undefined) return;
       if (!overrideCopy[key]) {
         overrideCopy[key] = [];
         // add extra tag because we've added this element

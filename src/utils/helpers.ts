@@ -692,6 +692,13 @@ Array.prototype.setAt = function <T>(index: number, value: T): void {
   this[index] = value;
 };
 
+export function removeAt<T>(arr: T[], index: number): T | undefined {
+  if (index < 0 || index >= arr.length) {
+    return undefined; // Return undefined if the index is out of bounds
+  }
+  return arr.splice(index, 1)[0]; // Remove and return the element at the index
+}
+
 export function getNthFromAstUsingElement(ast: HastRoot, el: RootContent) {
   if ("tagName" in el) {
     // @ts-expect-error tagName exists..

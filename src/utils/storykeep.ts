@@ -38,7 +38,7 @@ import {
   getHtmlTagFromMdast,
   isDeepEqual,
   findIndicesFromLookup,
-  swapObjectValues, extractEntriesAtIndex, getNthFromAstUsingElement,
+  swapObjectValues, extractEntriesAtIndex, getNthFromAstUsingElement, removeAt,
 } from "./helpers";
 import {
   MAX_HISTORY_LENGTH,
@@ -417,6 +417,9 @@ function handleBlockMovementBetweenPanels(
   el2Idx: number | null,
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
+  const elToErase = field.current.markdown.htmlAst.children[el1OuterIdx];
+
+  const originalNth = getNthFromAstUsingElement(field.current.markdown.htmlAst, elToErase);
   const erasedEl = field.current.markdown.htmlAst.children.splice(el1OuterIdx, 1)[0];
   //eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
@@ -464,6 +467,13 @@ function handleBlockMovementBetweenPanels(
     newField,
     newMarkdownLookup
   );
+
+  const payload = field.current.payload.optionsPayload.classNamesPayload[curTag]?.override;
+  if(payload) {
+    Object.keys(payload).forEach((key) => {
+      removeAt(payload[key], originalNth);
+    });
+  }
 
   const lookup = createNodeToClassesLookup(newField);
 
@@ -557,7 +567,7 @@ function handleListElementsMovementBetweenPanels(
   const payload = field.current.payload.optionsPayload.classNamesPayload["li"]?.override;
   if(payload) {
     Object.keys(payload).forEach((key) => {
-      delete payload[key][el1Idx];
+      removeAt(payload[key], el1Idx);
     });
   }
 
@@ -656,6 +666,7 @@ function handleBlockMovementWithinTheSamePanel(
       }
     }
     console.log(ast.children);
+
     postProcessUpdateStyles(field, ast, lookup);
 
     field.current.markdown.htmlAst = cleanHtmlAst(ast) as HastRoot;

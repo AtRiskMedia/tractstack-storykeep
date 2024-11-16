@@ -417,6 +417,7 @@ function handleBlockMovementBetweenPanels(
   el2Idx: number | null,
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
+  const originalFieldCopy = {...field};
   const elToErase = field.current.markdown.htmlAst.children[el1OuterIdx];
 
   const originalNth = getNthFromAstUsingElement(field.current.markdown.htmlAst, elToErase);
@@ -461,9 +462,10 @@ function handleBlockMovementBetweenPanels(
 
   addClassNamesPayloadOverrides(
     curTag,
-    el2Idx || 0,
+    el1Idx || el1OuterIdx,
+    el2Idx || el2OuterIdx,
     newTag,
-    field,
+    originalFieldCopy,
     newField,
     newMarkdownLookup
   );
@@ -500,10 +502,12 @@ function handleListElementsMovementBetweenPanels(
   el2FragmentId: string,
   field: FieldWithHistory<MarkdownEditDatum>,
   el2OuterIdx: number,
-  el2Index: number | null,
+  el2Idx: number | null,
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
   if (el1Idx === null) return;
+  const originalFieldCopy = {...field};
+
   const parent = field.current.markdown.htmlAst.children[el1OuterIdx];
 
   if (!parent || !("children" in parent)) return;
@@ -532,7 +536,7 @@ function handleListElementsMovementBetweenPanels(
   }
 
   let secondAstParent = secondAst.children;
-  if (el2Index !== null && secondAst.children[el2OuterIdx]) {
+  if (el2Idx !== null && secondAst.children[el2OuterIdx]) {
     const innerChildren = secondAst.children[el2OuterIdx];
     if ("children" in innerChildren) {
       secondAstParent = innerChildren.children;
@@ -557,9 +561,10 @@ function handleListElementsMovementBetweenPanels(
 
   addClassNamesPayloadOverrides(
     curTag,
-    el1Idx,
+    el1Idx || 0,
+    el2Idx || 0,
     newTag,
-    field,
+    originalFieldCopy,
     newField,
     newMarkdownLookup
   );
@@ -614,7 +619,7 @@ function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>) {
 
     elementsCounter.set(tagName, idx + 1);
   }
-  //console.log(JSON.stringify(Array.from(lookup)));
+  console.log(Array.from(lookup));
   return lookup;
 }
 
@@ -764,6 +769,7 @@ function swapClassNamesPayload_Classes(
 function addClassNamesPayloadOverrides(
   el1TagName: string,
   el1Idx: number | null,
+  el2Idx: number | null,
   el2TagName: string,
   curField: FieldWithHistory<MarkdownEditDatum>,
   newField: FieldWithHistory<MarkdownEditDatum>,
@@ -781,12 +787,14 @@ function addClassNamesPayloadOverrides(
     };
 
     let tagsAmount = 0;
+    let nth = el1Idx;
     // if list element, grab list elements from markdown lookup
     if (el2TagName === "li") {
       tagsAmount = Object.values(markdownLookup?.listItems).length;
     } else {
-      tagsAmount =
-        Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
+      tagsAmount = Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
+      const ast = curField.current.markdown.htmlAst;
+      nth = getNthFromAstUsingElement(ast, ast.children[el1Idx]);
     }
     console.log(
       `add class names payload overrides, [${el2TagName}] tags : ${tagsAmount}`
@@ -794,7 +802,7 @@ function addClassNamesPayloadOverrides(
     // set new field payloads, they should be at index 0 as later on they will be swapped
     Object.keys(originalOverrides).forEach(key => {
       // key null or undefined, skip
-      if (!originalOverrides[key][el1Idx]) return;
+      if (!originalOverrides[key][nth]) return;
       if (!overrideCopy[key]) {
         overrideCopy[key] = [];
         // add extra tag because we've added this element
@@ -803,7 +811,7 @@ function addClassNamesPayloadOverrides(
           overrideCopy[key].push(null);
         }
       }
-      overrideCopy[key].unshift(originalOverrides[key][el1Idx]);
+      overrideCopy[key].unshift(originalOverrides[key][nth]);
       // more keys than expected, pop last, likely just a hanging reference that wasn't removed
       if (overrideCopy[key].length > tagsAmount) {
         overrideCopy[key].pop();
@@ -852,31 +860,6 @@ function getElementTagAndNth(
   return { tagName, nth };
 }
 
-function swapTagClasses(
-  tag: string,
-  startIdx: number,
-  targetIdx: number,
-  markdownLookup: MarkdownLookup,
-  field: FieldWithHistory<MarkdownEditDatum>
-) {
-  const lookup = markdownLookup?.nthTagLookup[tag];
-  if (lookup && Object.values(lookup).length > 0) {
-    const { localStart, localEnd } = findIndicesFromLookup(
-      Object.keys(lookup),
-      startIdx,
-      targetIdx
-    );
-    if(localEnd > localStart) {
-      for (let i = localStart; i < localEnd; ++i) {
-        swapClassNamesPayload_Override(field.current.payload.optionsPayload, tag, i, i + 1, field);
-      }
-    } else if(localEnd < localStart) {
-      for (let i = localEnd; i > localStart; --i) {
-        swapClassNamesPayload_Override(field.current.payload.optionsPayload, tag, i, i + 1, field);
-      }
-    }
-  }
-}
 
 function swapPayloadClasses(
   originalParent: any,

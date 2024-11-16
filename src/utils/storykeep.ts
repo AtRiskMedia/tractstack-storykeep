@@ -958,6 +958,7 @@ function swapPayloadClasses(
 }
 
 function handleListElementMovementWithinTheSamePanel(
+  mdast: MdastRoot,
   el1OuterIdx: number,
   el1Index: number | null,
   el2Index: number | null,
@@ -969,6 +970,8 @@ function handleListElementMovementWithinTheSamePanel(
   if (el1Index === null || el2Index === null) return;
 
   const parent = field.current.markdown.htmlAst.children[el1OuterIdx];
+  // @ts-expect-error children exists
+  const parentMdast = mdast.children[el1OuterIdx].children;
   if (!parent || !("children" in parent)) return;
 
   const optionsPayload = field.current.payload.optionsPayload;
@@ -981,18 +984,16 @@ function handleListElementMovementWithinTheSamePanel(
       // swap elements top to bottom
       for (let i = el1Index; i < el2Index; i++) {
         [parent.children[i], parent.children[i + 1]] = [parent.children[i + 1], parent.children[i],];
+        [parentMdast[i], parentMdast[i + 1]] = [parentMdast[i + 1], parentMdast[i],];
       }
     } else {
       // swap elements bottom to top
       for (let i = el1Index; i > el2Index; i--) {
         [parent.children[i], parent.children[i - 1]] = [parent.children[i - 1], parent.children[i],];
+        [parentMdast[i], parentMdast[i - 1]] = [parentMdast[i - 1], parentMdast[i],];
       }
     }
   }
-  //field.current.markdown.body = toMarkdown(mdast);
-  //field.current.markdown.htmlAst = cleanHtmlAst(
-  //  toHast(mdast) as HastRoot
-  //) as HastRoot;
 
   // todo improve this bit later
   if (el1Index < el2Index) {
@@ -1007,6 +1008,8 @@ function handleListElementMovementWithinTheSamePanel(
     }
   }
 
+  field.current.markdown.body = toMarkdown(mdast);
+  field.current.markdown.htmlAst = cleanHtmlAst(toHast(mdast) as HastRoot) as HastRoot;
   paneFragmentMarkdown.setKey(el1fragmentId, {
     ...field,
     current: field.current,
@@ -1066,6 +1069,7 @@ export function moveElements(
   } else {
     if (isElementInList(curFieldMdast, el1OuterIdx, el1Idx)) {
       handleListElementMovementWithinTheSamePanel(
+        curFieldMdast,
         el1OuterIdx,
         el1Idx,
         el2Idx,

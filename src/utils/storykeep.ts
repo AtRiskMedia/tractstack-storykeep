@@ -417,7 +417,7 @@ function handleBlockMovementBetweenPanels(
   el2Idx: number | null,
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
-  const originalFieldCopy = {...field};
+  const originalFieldCopy = cloneDeep(field);
   const elToErase = field.current.markdown.htmlAst.children[el1OuterIdx];
 
   const originalNth = getNthFromAstUsingElement(field.current.markdown.htmlAst, elToErase);
@@ -466,6 +466,7 @@ function handleBlockMovementBetweenPanels(
   addClassNamesPayloadOverrides(
     curTag,
     el1Idx !== null ? el1Idx : el1OuterIdx,
+    el1OuterIdx,
     el2Idx !== null ? el2Idx : el2OuterIdx,
     newTag,
     originalFieldCopy,
@@ -509,7 +510,7 @@ function handleListElementsMovementBetweenPanels(
   newHistory: HistoryEntry<MarkdownEditDatum>[]
 ) {
   if (el1Idx === null) return;
-  const originalFieldCopy = {...field};
+  const originalFieldCopy = cloneDeep(field);
 
   const parent = field.current.markdown.htmlAst.children[el1OuterIdx];
 
@@ -565,6 +566,7 @@ function handleListElementsMovementBetweenPanels(
   addClassNamesPayloadOverrides(
     curTag,
     el1Idx !== null ? el1Idx : el1OuterIdx,
+    el1OuterIdx,
     el2Idx !== null ? el2Idx : el2OuterIdx,
     newTag,
     originalFieldCopy,
@@ -772,6 +774,7 @@ function swapClassNamesPayload_Classes(
 function addClassNamesPayloadOverrides(
   el1TagName: string,
   el1Idx: number | null,
+  el1OuterIdx: number,
   el2Idx: number | null,
   el2TagName: string,
   curField: FieldWithHistory<MarkdownEditDatum>,
@@ -790,8 +793,15 @@ function addClassNamesPayloadOverrides(
     };
 
     let tagsAmount = 0;
-    const ast = curField.current.markdown.htmlAst;
-    const nth = getNthFromAstUsingElement(ast, ast.children[el1Idx]);
+    let ast = curField.current.markdown.htmlAst;
+    let originalEl = ast.children[el1Idx];
+
+    if(el1TagName === "li") {
+      // @ts-expect-error children exists
+      ast = ast.children[el1OuterIdx];
+      originalEl = ast.children[el1Idx];
+    }
+    const nth = getNthFromAstUsingElement(ast, originalEl);
     // if list element, grab list elements from markdown lookup
     if (el2TagName === "li") {
       tagsAmount = Object.values(markdownLookup?.listItems).length;

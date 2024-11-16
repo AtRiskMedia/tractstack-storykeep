@@ -37,7 +37,6 @@ import {
   cloneDeep,
   getHtmlTagFromMdast,
   isDeepEqual,
-  findIndicesFromLookup,
   swapObjectValues, extractEntriesAtIndex, getNthFromAstUsingElement, removeAt,
 } from "./helpers";
 import {
@@ -67,10 +66,10 @@ import {
 } from "@utils/compositor/markdownUtils.ts";
 import { generateMarkdownLookup } from "@utils/compositor/generateMarkdownLookup.ts";
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { toMarkdown } from "mdast-util-to-markdown";
 import { toHast } from "mdast-util-to-hast";
 import type { Root, Root as HastRoot, RootContent } from "hast";
 import type { Root as MdastRoot } from "mdast";
+import { toMarkdown } from "mdast-util-to-markdown";
 
 const BREAKPOINTS = {
   xl: 1367,
@@ -405,6 +404,7 @@ const isElementInList = (
 };
 
 function handleBlockMovementBetweenPanels(
+  curFieldMdast: MdastRoot,
   el1OuterIdx: number,
   el1PaneId: string,
   el1fragmentId: string,
@@ -424,9 +424,14 @@ function handleBlockMovementBetweenPanels(
   const erasedEl = field.current.markdown.htmlAst.children.splice(el1OuterIdx, 1)[0];
   //eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
 
+  const fieldMdastCopy = cloneDeep(curFieldMdast);
+  fieldMdastCopy.children.splice(el1OuterIdx, 1);
+
   const newField = cloneDeep(paneFragmentMarkdown.get()[el2fragmentId]);
-  // grab original child because mdast loses some properties when it runs "toMarkdown"
   copyMarkdownIfFound(erasedEl, field, newField);
+
+  field.current.markdown.body = toMarkdown(fieldMdastCopy);
+  field.current.markdown.htmlAst = cleanHtmlAst(toHast(fieldMdastCopy) as HastRoot) as HastRoot;
   paneFragmentMarkdown.setKey(el1fragmentId, {
     ...field,
     current: field.current,
@@ -436,13 +441,22 @@ function handleBlockMovementBetweenPanels(
   const secondAst = newField.current.markdown.htmlAst;
   console.log(secondAst);
 
+  const secondMdast = fromMarkdown(newField.current.markdown.body);
+
   let isListElement = false;
   let secondAstParent = secondAst.children;
+  let secondMdastParent = secondMdast.children;
+
   if (el2Idx !== null && secondAst.children[el2OuterIdx]) {
     const innerChildren = secondAst.children[el2OuterIdx];
+    const innerMdastChildren = secondMdast.children[el2OuterIdx];
+
     if ("children" in innerChildren) {
       isListElement = true;
       secondAstParent = innerChildren.children;
+    }
+    if("children" in innerMdastChildren) {
+      secondMdastParent = innerMdastChildren.children;
     }
   }
 
@@ -460,6 +474,10 @@ function handleBlockMovementBetweenPanels(
   //if (isListElement) {
   //  erasedEl.type = "listItem";
   //}
+  const childMdast = curFieldMdast.children[el1OuterIdx];
+  childMdast.type = "listItem";
+
+  secondMdastParent.unshift(childMdast);
   secondAstParent.unshift(erasedEl);
   newMarkdownLookup = generateMarkdownLookup(newField.current.markdown.htmlAst);
 
@@ -485,9 +503,11 @@ function handleBlockMovementBetweenPanels(
 
   for (let i = 0; i < el2OuterIdx; ++i) {
     [secondAstParent[i], secondAstParent[i + 1]] = [secondAstParent[i + 1], secondAstParent[i],];
+    [secondMdastParent[i], secondMdastParent[i + 1]] = [secondMdastParent[i + 1], secondMdastParent[i],];
   }
 
-  newField.current.markdown.htmlAst = cleanHtmlAst(secondAst) as HastRoot;
+  newField.current.markdown.body = toMarkdown(secondMdast);
+  newField.current.markdown.htmlAst = cleanHtmlAst(toHast(secondMdast) as HastRoot) as HastRoot;
   postProcessUpdateStyles(newField, secondAst, lookup);
   paneFragmentMarkdown.setKey(el2fragmentId, {
     ...newField,
@@ -515,16 +535,20 @@ function handleListElementsMovementBetweenPanels(
   const parent = field.current.markdown.htmlAst.children[el1OuterIdx];
 
   if (!parent || !("children" in parent)) return;
+  const fieldMdastCopy = cloneDeep(mdast);
 
   // use children here because actual elements are wrapped in the listelement
   const erasedEl = parent.children.splice(el1Idx, 1)[0];
-  //eraseElement(el1PaneId, el1fragmentId, el1OuterIdx, el1Idx, markdownLookup);
+  // @ts-expect-error has children
+  fieldMdastCopy.children[el1OuterIdx].children.splice(el1Idx, 1);
 
   const newField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
   // grab original child because mdast loses some properties when it runs "toMarkdown"
   const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
   copyMarkdownIfFound(originalChild, field, newField);
 
+  field.current.markdown.body = toMarkdown(fieldMdastCopy);
+  field.current.markdown.htmlAst = cleanHtmlAst(toHast(fieldMdastCopy) as HastRoot) as HastRoot;
   paneFragmentMarkdown.setKey(el1fragmentId, {
     ...field,
     current: field.current,
@@ -539,11 +563,19 @@ function handleListElementsMovementBetweenPanels(
     isListItem = true;
   }
 
+  const secondMdast = fromMarkdown(newField.current.markdown.body);
+
   let secondAstParent = secondAst.children;
+  let secondMdastParent = secondMdast.children;
   if (el2Idx !== null && secondAst.children[el2OuterIdx]) {
     const innerChildren = secondAst.children[el2OuterIdx];
+    const innerMdastChildren = secondMdast.children[el2OuterIdx];
+
     if ("children" in innerChildren) {
       secondAstParent = innerChildren.children;
+    }
+    if("children" in innerMdastChildren) {
+      secondMdastParent = innerMdastChildren.children;
     }
   }
 
@@ -556,8 +588,10 @@ function handleListElementsMovementBetweenPanels(
     newTag = getHtmlTagFromMdast(mdast.children[el1OuterIdx].children[el1Idx].children[0]) || "";
   }
 
-  // @ts-expect-error children tagName exists
-  const hastEl = toHast(mdast.children[el1OuterIdx].children[el1Idx].children[0]);
+  // @ts-expect-error children exists
+  const mdastChild = mdast.children[el1OuterIdx].children[el1Idx].children[0];
+  secondMdastParent.unshift(mdastChild)
+  const hastEl = toHast(mdastChild);
 
   // @ts-expect-error children exists but need to set up definitions
   secondAstParent.unshift(hastEl);
@@ -584,9 +618,11 @@ function handleListElementsMovementBetweenPanels(
   const lookup = createNodeToClassesLookup(newField);
   for (let i = 0; i < el2OuterIdx; ++i) {
     [secondAstParent[i], secondAstParent[i + 1]] = [secondAstParent[i + 1], secondAstParent[i],];
+    [secondMdastParent[i], secondMdastParent[i + 1]] = [secondMdastParent[i + 1], secondMdastParent[i],];
   }
 
-  newField.current.markdown.htmlAst = cleanHtmlAst(secondAst) as HastRoot;
+  newField.current.markdown.body = toMarkdown(secondMdast);
+  newField.current.markdown.htmlAst = cleanHtmlAst(toHast(secondMdast) as HastRoot) as HastRoot;
   postProcessUpdateStyles(newField, secondAst, lookup);
   paneFragmentMarkdown.setKey(el2FragmentId, {
     ...newField,
@@ -650,6 +686,7 @@ function postProcessUpdateStyles(
 
 // todo fix adding new element breaks classes overrides
 function handleBlockMovementWithinTheSamePanel(
+  mdast: MdastRoot,
   el1OuterIdx: number,
   el2OuterIdx: number,
   field: FieldWithHistory<MarkdownEditDatum>,
@@ -668,18 +705,21 @@ function handleBlockMovementWithinTheSamePanel(
       // swap elements top to bottom
       for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
         [ast.children[i], ast.children[i + 1]] = [ast.children[i + 1], ast.children[i],];
+        [mdast.children[i], mdast.children[i+1]] = [mdast.children[i+1], mdast.children[i],];
       }
     } else {
       // swap elements bottom to top
       for (let i = el1OuterIdx; i > el2OuterIdx; i--) {
         [ast.children[i], ast.children[i - 1]] = [ast.children[i - 1], ast.children[i],];
+        [mdast.children[i], mdast.children[i-1]] = [mdast.children[i-1], mdast.children[i],];
       }
     }
     console.log(ast.children);
 
     postProcessUpdateStyles(field, ast, lookup);
 
-    field.current.markdown.htmlAst = cleanHtmlAst(ast) as HastRoot;
+    field.current.markdown.body = toMarkdown(mdast);
+    field.current.markdown.htmlAst = cleanHtmlAst(toHast(mdast) as HastRoot) as HastRoot;
     paneFragmentMarkdown.setKey(el1fragmentId, {
       ...field,
       current: field.current,
@@ -987,14 +1027,14 @@ export function moveElements(
   el2Idx: number | null
 ) {
   const field = cloneDeep(paneFragmentMarkdown.get()[el1fragmentId]);
-  const mdast = fromMarkdown(field.current.markdown.body);
+  const curFieldMdast = fromMarkdown(field.current.markdown.body);
   const newHistory = updateHistory(field, Date.now());
 
   // todo add markdown generation
   if (el1PaneId !== el2PaneId) {
-    if (isElementInList(mdast, el1OuterIdx, el1Idx)) {
+    if (isElementInList(curFieldMdast, el1OuterIdx, el1Idx)) {
       handleListElementsMovementBetweenPanels(
-        mdast,
+        curFieldMdast,
         el1OuterIdx,
         el1PaneId,
         el1fragmentId,
@@ -1009,6 +1049,7 @@ export function moveElements(
       );
     } else {
       handleBlockMovementBetweenPanels(
+        curFieldMdast,
         el1OuterIdx,
         el1PaneId,
         el1fragmentId,
@@ -1023,7 +1064,7 @@ export function moveElements(
       );
     }
   } else {
-    if (isElementInList(mdast, el1OuterIdx, el1Idx)) {
+    if (isElementInList(curFieldMdast, el1OuterIdx, el1Idx)) {
       handleListElementMovementWithinTheSamePanel(
         el1OuterIdx,
         el1Idx,
@@ -1035,6 +1076,7 @@ export function moveElements(
       );
     } else {
       handleBlockMovementWithinTheSamePanel(
+        curFieldMdast,
         el1OuterIdx,
         el2OuterIdx,
         field,

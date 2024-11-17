@@ -708,3 +708,17 @@ export function getNthFromAstUsingElement(ast: HastRoot, el: RootContent) {
   }
   return -1;
 }
+
+export function mergeObjectKeys(...objects: Record<string, any>[]): string[] {
+  const keysSet = new Set<string>();
+
+  for (const obj of objects) {
+    for (const key in obj) {
+      if(key) {
+        keysSet.add(key);
+      }
+    }
+  }
+
+  return Array.from(keysSet);
+}

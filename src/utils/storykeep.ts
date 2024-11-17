@@ -37,7 +37,7 @@ import {
   cloneDeep,
   getHtmlTagFromMdast,
   isDeepEqual,
-  swapObjectValues, extractEntriesAtIndex, getNthFromAstUsingElement, removeAt,
+  swapObjectValues, extractEntriesAtIndex, getNthFromAstUsingElement, removeAt, mergeObjectKeys,
 } from "./helpers";
 import {
   MAX_HISTORY_LENGTH,
@@ -830,6 +830,7 @@ function addClassNamesPayloadOverrides(
         .override || {}),
     };
 
+    const allKeys: string[] = mergeObjectKeys(overrideCopy, originalOverrides);
     let tagsAmount = 0;
     let ast = curField.current.markdown.htmlAst;
     let originalEl = ast.children[el1Idx];
@@ -850,9 +851,14 @@ function addClassNamesPayloadOverrides(
       `add class names payload overrides, [${el2TagName}] tags : ${tagsAmount}`
     );
     // set new field payloads, they should be at index 0 as later on they will be swapped
-    Object.keys(originalOverrides).forEach(key => {
-      // key undefined, skip
-      if (originalOverrides[key][nth] === undefined) return;
+    allKeys.forEach(key => {
+      // this class is not overriden in source element (the one we move to another pane)
+      // but it should occupy the array slot so styles don't break since they bind by index
+      if(!originalOverrides[key] && overrideCopy[key]) {
+        // @ts-expect-error idk why nulls are not allowed but I see them *shrug*
+        overrideCopy[key].unshift(null);
+        return;
+      }
       if (!overrideCopy[key]) {
         overrideCopy[key] = [];
         // add extra tag because we've added this element

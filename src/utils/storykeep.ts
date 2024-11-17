@@ -544,8 +544,7 @@ function handleListElementsMovementBetweenPanels(
 
   const newField = cloneDeep(paneFragmentMarkdown.get()[el2FragmentId]);
   // grab original child because mdast loses some properties when it runs "toMarkdown"
-  const originalChild = field.current.markdown.htmlAst.children[el1OuterIdx];
-  copyMarkdownIfFound(originalChild, field, newField);
+  copyMarkdownIfFound(erasedEl, field, newField);
 
   field.current.markdown.body = toMarkdown(fieldMdastCopy);
   field.current.markdown.htmlAst = cleanHtmlAst(toHast(fieldMdastCopy) as HastRoot) as HastRoot;
@@ -684,7 +683,6 @@ function postProcessUpdateStyles(
   }
 }
 
-// todo fix adding new element breaks classes overrides
 function handleBlockMovementWithinTheSamePanel(
   mdast: MdastRoot,
   el1OuterIdx: number,
@@ -700,7 +698,6 @@ function handleBlockMovementWithinTheSamePanel(
     ast.children.length >= el2OuterIdx
   ) {
     console.log(ast.children);
-    // todo: add class overrides swap based on local tag markup
     if (el1OuterIdx < el2OuterIdx) {
       // swap elements top to bottom
       for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
@@ -811,6 +808,7 @@ function swapClassNamesPayload_Classes(
   }
 }
 
+// todo add merge of the style overrides that don't exist in target pane
 function addClassNamesPayloadOverrides(
   el1TagName: string,
   el1Idx: number | null,
@@ -1033,7 +1031,6 @@ export function moveElements(
   const curFieldMdast = fromMarkdown(field.current.markdown.body);
   const newHistory = updateHistory(field, Date.now());
 
-  // todo add markdown generation
   if (el1PaneId !== el2PaneId) {
     if (isElementInList(curFieldMdast, el1OuterIdx, el1Idx)) {
       handleListElementsMovementBetweenPanels(

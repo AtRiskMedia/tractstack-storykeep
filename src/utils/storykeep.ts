@@ -460,6 +460,8 @@ function handleBlockMovementBetweenPanels(
     }
   }
 
+  const childMdast = curFieldMdast.children[el1OuterIdx];
+
   // @ts-expect-error tagName exists
   const curTag = erasedEl.tagName || "";
   let newTag = curTag;
@@ -468,20 +470,19 @@ function handleBlockMovementBetweenPanels(
     newTag = "li" || "";
     if ("tagName" in erasedEl) {
       erasedEl.tagName = "li";
+      childMdast.type = "listItem";
     }
   }
 
   //if (isListElement) {
   //  erasedEl.type = "listItem";
   //}
-  const childMdast = curFieldMdast.children[el1OuterIdx];
-  childMdast.type = "listItem";
 
   secondMdastParent.unshift(childMdast);
   secondAstParent.unshift(erasedEl);
   newMarkdownLookup = generateMarkdownLookup(newField.current.markdown.htmlAst);
 
-  addClassNamesPayloadOverrides(
+  updateClassNames(
     curTag,
     el1Idx !== null ? el1Idx : el1OuterIdx,
     el1OuterIdx,
@@ -596,7 +597,7 @@ function handleListElementsMovementBetweenPanels(
   secondAstParent.unshift(hastEl);
   newMarkdownLookup = generateMarkdownLookup(newField.current.markdown.htmlAst);
 
-  addClassNamesPayloadOverrides(
+  updateClassNames(
     curTag,
     el1Idx !== null ? el1Idx : el1OuterIdx,
     el1OuterIdx,
@@ -808,19 +809,15 @@ function swapClassNamesPayload_Classes(
   }
 }
 
-// todo add merge of the style overrides that don't exist in target pane
-function addClassNamesPayloadOverrides(
-  el1TagName: string,
-  el1Idx: number | null,
-  el1OuterIdx: number,
-  el2Idx: number | null,
-  el2TagName: string,
+function fixPayloadOverrides(
   curField: FieldWithHistory<MarkdownEditDatum>,
+  el1TagName: string,
   newField: FieldWithHistory<MarkdownEditDatum>,
+  el2TagName: string,
+  el1Idx: number,
+  el1OuterIdx: number,
   markdownLookup: MarkdownLookup
 ) {
-  if (el1Idx === null) return;
-
   const originalOverrides =
     curField.current.payload.optionsPayload.classNamesPayload[el1TagName]
       ?.override || {};
@@ -835,7 +832,7 @@ function addClassNamesPayloadOverrides(
     let ast = curField.current.markdown.htmlAst;
     let originalEl = ast.children[el1Idx];
 
-    if(el1TagName === "li") {
+    if (el1TagName === "li") {
       // @ts-expect-error children exists
       ast = ast.children[el1OuterIdx];
       originalEl = ast.children[el1Idx];
@@ -845,7 +842,8 @@ function addClassNamesPayloadOverrides(
     if (el2TagName === "li") {
       tagsAmount = Object.values(markdownLookup?.listItems).length;
     } else {
-      tagsAmount = Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
+      tagsAmount =
+        Object.values(markdownLookup?.nthTagLookup?.[el2TagName]).length ?? 0;
     }
     console.log(
       `add class names payload overrides, [${el2TagName}] tags : ${tagsAmount}`
@@ -854,7 +852,7 @@ function addClassNamesPayloadOverrides(
     allKeys.forEach(key => {
       // this class is not overriden in source element (the one we move to another pane)
       // but it should occupy the array slot so styles don't break since they bind by index
-      if(!originalOverrides[key] && overrideCopy[key]) {
+      if (!originalOverrides[key] && overrideCopy[key]) {
         // @ts-expect-error idk why nulls are not allowed but I see them *shrug*
         overrideCopy[key].unshift(null);
         return;
@@ -881,6 +879,69 @@ function addClassNamesPayloadOverrides(
       count: tagsAmount,
     };
   }
+}
+
+function fixStyleClasses(
+  curField: FieldWithHistory<MarkdownEditDatum>,
+  el1TagName: string,
+  newField: FieldWithHistory<MarkdownEditDatum>,
+  el2TagName: string,
+) {
+  const originalClasses =
+    curField.current.payload.optionsPayload.classNamesPayload[el1TagName]
+      ?.classes || {};
+  if (originalClasses) {
+    const overrideClasses = {
+      ...(newField.current.payload.optionsPayload.classNamesPayload[el2TagName]
+        .classes || {}),
+    };
+
+    const allKeys: string[] = mergeObjectKeys(overrideClasses, originalClasses);
+    allKeys.forEach(key => {
+      // @ts-expect-error fix type
+      if(!overrideClasses[key]) {
+        // @ts-expect-error fix type
+        overrideClasses[key] = [null];
+      }
+    });
+
+    // override new fields payload
+    newField.current.payload.optionsPayload.classNamesPayload[el2TagName] = {
+      ...newField.current.payload.optionsPayload.classNamesPayload[el2TagName],
+      classes: overrideClasses,
+    };
+  }
+}
+
+// todo add merge of the style overrides that don't exist in target pane
+function updateClassNames(
+  el1TagName: string,
+  el1Idx: number | null,
+  el1OuterIdx: number,
+  el2Idx: number | null,
+  el2TagName: string,
+  curField: FieldWithHistory<MarkdownEditDatum>,
+  newField: FieldWithHistory<MarkdownEditDatum>,
+  markdownLookup: MarkdownLookup
+) {
+  if (el1Idx === null) return;
+
+  fixPayloadOverrides(
+    curField,
+    el1TagName,
+    newField,
+    el2TagName,
+    el1Idx,
+    el1OuterIdx,
+    markdownLookup
+  );
+
+  fixStyleClasses(
+    curField,
+    el1TagName,
+    newField,
+    el2TagName
+  );
 }
 
 function getElementTagAndNth(

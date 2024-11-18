@@ -556,14 +556,10 @@ function handleListElementsMovementBetweenPanels(
   });
 
   const secondAst = newField.current.markdown.htmlAst;
-
-  let isListItem = false;
-  if (isElementInList(mdast, el1OuterIdx, el1Idx)) {
-    console.log("source element is in list");
-    isListItem = true;
-  }
-
   const secondMdast = fromMarkdown(newField.current.markdown.body);
+
+  const isSourceElementAListItem = isElementInList(mdast, el1OuterIdx, el1Idx);
+  const isTargetElementAListItem = isElementInList(secondMdast, el2OuterIdx, el2Idx);
 
   let secondAstParent = secondAst.children;
   let secondMdastParent = secondMdast.children;
@@ -582,16 +578,26 @@ function handleListElementsMovementBetweenPanels(
   // @ts-expect-error tagName exists
   const curTag = erasedEl.tagName || "";
   let newTag = curTag;
-  if (isListItem) {
+
+  if (isSourceElementAListItem && !isTargetElementAListItem) {
     // use original mdast to figure out expected field type because we can't extract type from the AST
     // @ts-expect-error children tagName exists
     newTag = getHtmlTagFromMdast(mdast.children[el1OuterIdx].children[el1Idx].children[0]) || "";
+  } else if(isTargetElementAListItem) {
+    newTag = "li";
   }
 
   // @ts-expect-error children exists
   const mdastChild = mdast.children[el1OuterIdx].children[el1Idx].children[0];
-  secondMdastParent.unshift(mdastChild)
   const hastEl = toHast(mdastChild);
+
+  if(newTag === "li") {
+    // @ts-expect-error tagName exists
+    hastEl.tagName = "li";
+    mdastChild.type = "listItem";
+  }
+
+  secondMdastParent.unshift(mdastChild)
 
   // @ts-expect-error children exists but need to set up definitions
   secondAstParent.unshift(hastEl);
@@ -867,7 +873,7 @@ function fixPayloadOverrides(
       }
       overrideCopy[key].unshift(originalOverrides[key][nth]);
       // more keys than expected, pop last, likely just a hanging reference that wasn't removed
-      if (overrideCopy[key].length > tagsAmount) {
+      while (overrideCopy[key].length > tagsAmount) {
         overrideCopy[key].pop();
       }
     });

@@ -272,9 +272,7 @@ const EditableInnerElementWrapper = ({
         dragState.dropState.idx === idx &&
         dragState.dropState.outerIdx === outerIdx
       ) {
-        console.log(
-          `Drop active element: ${JSON.stringify(dragState.dropState)}`
-        );
+        //console.log(`Drop active element: ${JSON.stringify(dragState.dropState)}`);
       }
     }
   }, [dragState]);

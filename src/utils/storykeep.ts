@@ -439,7 +439,7 @@ function handleBlockMovementBetweenPanels(
   });
 
   const secondAst = newField.current.markdown.htmlAst;
-  console.log(secondAst);
+  //console.log(secondAst);
 
   const secondMdast = fromMarkdown(newField.current.markdown.body);
 
@@ -644,7 +644,7 @@ type NodeToClassData = {
 }
 
 function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>) {
-  console.log(field.current);
+  //console.log(field.current);
   const lookup = new Map<any, NodeToClassData>();
   const elementsCounter = new Map<string, number>();
 
@@ -666,7 +666,7 @@ function createNodeToClassesLookup(field: FieldWithHistory<MarkdownEditDatum>) {
 
     elementsCounter.set(tagName, idx + 1);
   }
-  console.log(Array.from(lookup));
+  //console.log(Array.from(lookup));
   return lookup;
 }
 
@@ -704,7 +704,7 @@ function handleBlockMovementWithinTheSamePanel(
     ast.children.length >= el1OuterIdx &&
     ast.children.length >= el2OuterIdx
   ) {
-    console.log(ast.children);
+    //console.log(ast.children);
     if (el1OuterIdx < el2OuterIdx) {
       // swap elements top to bottom
       for (let i = el1OuterIdx; i < el2OuterIdx; i++) {
@@ -718,7 +718,7 @@ function handleBlockMovementWithinTheSamePanel(
         [mdast.children[i], mdast.children[i-1]] = [mdast.children[i-1], mdast.children[i],];
       }
     }
-    console.log(ast.children);
+    //console.log(ast.children);
 
     postProcessUpdateStyles(field, ast, lookup);
 
